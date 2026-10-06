@@ -1,0 +1,39 @@
+# Environnements
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.egg-info/
+.ipynb_checkpoints/
+node_modules/
+.env
+
+# Données (téléchargées via data/download_hdfs.py)
+data/raw/
+data/processed/
+data/splits/*
+!data/splits/README.md
+!data/splits/splits_meta.json
+
+# Modèles et artefacts lourds
+*.pt
+*.pth
+*.bin
+*.safetensors
+*.gguf
+volet_a/training/checkpoints/
+volet_b/slm/adapters/
+volet_b/slm/models/
+volet_b/rag/index/
+volet_b/rag/corpus/raw/
+eval/runs/
+
+# Le modèle servi par le site EST versionné (quelques Mo) :
+!volet_a/web/public/model/*.onnx
+
+# Divers
+.DS_Store
+Thumbs.db
+*.log
+!volet_a/web/public/examples/*.log
+~$*

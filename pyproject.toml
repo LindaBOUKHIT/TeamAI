@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "teamai"
+version = "0.1.0"
+description = "Détection et interprétation d'anomalies dans les logs HDFS (projet NLP 2)"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+# Socle commun : chargement des données, baseline, métriques
+data = ["pandas>=2.0", "numpy>=1.26", "scikit-learn>=1.4", "matplotlib>=3.8", "jupyter"]
+# Volet A : entraînement du BiLSTM et export navigateur
+volet_a = ["torch>=2.2", "onnx>=1.16", "onnxruntime>=1.18"]
+# Volet B : SLM, LoRA, RAG, interface locale (bitsandbytes : GPU NVIDIA uniquement)
+volet_b = [
+    "torch>=2.2", "transformers>=4.44", "peft>=0.12", "accelerate>=0.33", "datasets>=2.20",
+    "sentence-transformers>=3.0", "faiss-cpu>=1.8", "gradio>=4.40",
+]
+
+[tool.setuptools.packages.find]
+include = ["teamai*"]

@@ -1,0 +1,42 @@
+# Publie le site du volet A sur GitHub Pages à chaque mise à jour de main (production).
+# À activer : Settings > Pages > Source = GitHub Actions.
+name: Déploiement volet A
+
+on:
+  push:
+    branches: [main]
+    paths: ["volet_a/web/**", ".github/workflows/deploy-volet-a.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    defaults:
+      run:
+        working-directory: volet_a/web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Build
+        # Tant que le site n'a pas de package.json, publie les fichiers tels quels.
+        run: |
+          if [ -f package.json ]; then npm ci && npm run build; else mkdir -p dist && cp -r . dist/ 2>/dev/null || true; fi
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: volet_a/web/dist
+      - id: deployment
+        uses: actions/deploy-pages@v4
