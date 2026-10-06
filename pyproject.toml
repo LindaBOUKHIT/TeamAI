@@ -20,6 +20,9 @@ volet_b = [
     "sentence-transformers>=3.0", "faiss-cpu>=1.8", "gradio>=4.40",
     "pyyaml>=6.0", "psutil>=5.9",
 ]
+# Version 4 bits (GGUF) sur CPU — roue précompilée :
+# pip install llama-cpp-python --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu
+volet_b_gguf = ["llama-cpp-python>=0.3"]
 
 [tool.setuptools.packages.find]
 include = ["teamai*"]
