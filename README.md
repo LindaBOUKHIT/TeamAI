@@ -10,7 +10,7 @@ Pilotage : [board Jira SCRUM](https://lindaboukhit04.atlassian.net/jira/software
 ## Arborescence
 
 ```
-projet/
+TeamAI/
 ├── teamai/            Code Python partagé (chargement HDFS, vocabulaire, métriques) — importé par tous
 ├── data/              Téléchargement, échantillon partagé, splits (données brutes non versionnées)
 ├── volet_a/

@@ -1,6 +1,6 @@
 # Environnements de développement (SCRUM-15)
 
-Socle commun : Python 3.10+ dans un `.venv` à la racine de `projet/`, `pip install -e ".[data]"` puis l'extra de sa partie (`volet_a` ou `volet_b`). Node 20+ pour le site du volet A.
+Socle commun : Python 3.10+ dans un `.venv` à la racine du dépôt TeamAI, `pip install -e ".[data]"` puis l'extra de sa partie (`volet_a` ou `volet_b`). Node 20+ pour le site du volet A.
 
 | Personne | OS | Éditeur | Python | Node | Rôle matériel |
 |---|---|---|---|---|---|
