@@ -41,6 +41,25 @@ Pour chaque essai, consigner la date, le responsable, la version du code, les do
   2. À 0,6 token/s, évaluer 4 configurations sur 60–100 traces prendrait plusieurs dizaines d'heures en float32 sur CPU. Il faut une version quantifiée (GGUF 4 bits via llama.cpp/Ollama) pour la démo et les évaluations, ou faire tourner les évaluations sur le GPU Kaggle. À décider.
   3. Le modèle ignore les lignes `WARN` : piste pour le prompt, le RAG et les exemples d'adaptation (mettre en avant les événements rares).
 
+### 06/10/2026 — Version 4 bits du SLM : GGUF Q4_K_M contre float32 (SCRUM-57, Alain)
+
+- **Commande** : `python -m volet_b.slm.bench_gguf --backend llamacpp|transformers` · sorties dans `eval/runs/2026-10-06_bench_<backend>/` (non versionné).
+- **Modèles** : GGUF officiel `HuggingFaceTB/SmolLM2-1.7B-Instruct-GGUF` (`q4_k_m`, 0,98 Go) via llama-cpp-python 0.3.36 (roue CPU) ; float32 via Transformers comme SCRUM-28. Mêmes paramètres (glouton, pénalité 1,1 sur tout le contexte, 300 tokens max), même bloc, même machine.
+- **Prompt** : consigne **avant** les logs (voir constat ci-dessous), identique pour les deux versions.
+
+| Mesure | float32 (Transformers) | Q4_K_M (llama.cpp) |
+|---|---|---|
+| Taille sur disque | 3,4 Go | 0,98 Go |
+| Chargement | 24 s | **2,9 s** |
+| Mémoire après chargement / pic | 6,8 Go / 16,1 Go | **2,3 Go / 2,8 Go** |
+| Génération | 158 tokens en 246 s → 0,64 token/s | 192 tokens en 101 s → **1,9 token/s** |
+| Avis normal/anormal | « normal » (faux) | « anormal » (juste) |
+
+- **Constat sur l'ordre du prompt** : avec le prompt de SCRUM-28 (logs puis consigne), la version 4 bits **recopie les logs** au lieu de les résumer — reproduit même avec 5 lignes de logs ; une question courte sans logs est bien traitée. Consigne placée **avant** les logs → résumé correct. La quantification rend le modèle plus sensible à la place de la consigne. Règle retenue pour tous les prompts du volet B : consigne d'abord, données ensuite.
+- **Qualité** : aucune des deux versions ne cite les `WARN`. La 4 bits répond « anormal » mais justifie par un problème de suppression mal interprété ; la float32 conclut « normal » et affirme que le bloc « n'est pas supprimé ». Les deux restent au niveau « avant adaptation ».
+- **Débit** : 1,9 token/s ici contre 3,8 token/s mesurés avec un prompt plus court ; le coût vient surtout du traitement du prompt (~2 200 tokens) et de la pénalité appliquée sur tout le contexte.
+- **Décision** : la version Q4_K_M sert de modèle local pour la démo et les évaluations (×3 en vitesse, ÷6 en mémoire, réponse au moins aussi bonne). Reste pour le Sprint 2 : convertir le modèle adapté par LoRA en GGUF et brancher le backend llama.cpp dans `generate.py`.
+
 ## Réunions
 
 Aucune réunion renseignée à ce stade. Pour chaque réunion, noter les participants, les points examinés, les décisions, les responsables et les échéances.
