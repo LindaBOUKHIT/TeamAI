@@ -11,7 +11,7 @@ volet_a/
 │   ├── dataset.py                  Encodage des séquences (teamai.data.loader)        SCRUM-25
 │   ├── bilstm.py                   Architecture du modèle                             SCRUM-25
 │   ├── train.py                    Entraînement + choix du seuil sur val              SCRUM-25
-│   ├── export_onnx.py              Export C3 + quantification int8                    SCRUM-25 / SCRUM-39
+│   ├── export_onnx.py              Export C3 + quantification int8                    SCRUM-25 / SCRUM-40
 │   ├── check_parity.py             Python vs onnxruntime sur les mêmes entrées        SCRUM-25
 │   └── checkpoints/                — non versionné
 └── web/                            Site statique (voir web/README.md)
