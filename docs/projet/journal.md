@@ -19,7 +19,27 @@ Point de départ local à partager avec le groupe. Ce fichier ne remplace pas à
 
 ## Expériences
 
-Aucune expérience technique renseignée à ce stade. Pour chaque essai, consigner la date, le responsable, la version du code, les données, les paramètres, la machine, les résultats, les erreurs et la décision qui en découle.
+Pour chaque essai, consigner la date, le responsable, la version du code, les données, les paramètres, la machine, les résultats, les erreurs et la décision qui en découle.
+
+### 06/10/2026 — Première inférence locale du SLM (SCRUM-28, Alain)
+
+- **Commande** : `python -m volet_b.slm.first_inference` · sorties complètes dans `eval/runs/2026-10-06_first_inference/` (non versionné).
+- **Modèle** : SmolLM2-1.7B-Instruct, float32, décodage glouton, `repetition_penalty` 1,1, 300 tokens max (`volet_b/slm/configs/generation.yaml`). Transformers 4.57, PyTorch 2.12 CPU.
+- **Machine** : i5-1240P, 32 Go, sans GPU NVIDIA.
+- **Donnée** : bloc anormal `blk_8362325295506522506` (25 lignes brutes), prompt en français demandant un résumé et un avis normal/anormal.
+
+| Mesure | Valeur |
+|---|---|
+| Téléchargement du modèle | 14 min 30 (3,4 Go) — bloqué sans le paquet `hf_xet` |
+| Chargement | 37 s |
+| Mémoire après chargement / pic en génération | 6,8 Go / 16,3 Go |
+| Génération | 156 tokens en 258 s → **0,6 token/s** |
+
+- **Qualité (modèle de base, sans RAG ni adaptation)** : la trace contient deux `WARN … Got exception while serving` et un `WARN … Unexpected error trying to delete block … BlockInfo not found in volumeMap`. Le modèle n'en mentionne **aucun**, ne répond pas à la question normal/anormal et invente des éléments absents des logs (« nom de domaine », « ports spéciaux », envoi « vers l'utilisateur »). Point de référence « avant adaptation » pour le rapport.
+- **Conséquences** :
+  1. L'inférence locale fonctionne (jalon de mi-parcours, preuve pour SCRUM-17).
+  2. À 0,6 token/s, évaluer 4 configurations sur 60–100 traces prendrait plusieurs dizaines d'heures en float32 sur CPU. Il faut une version quantifiée (GGUF 4 bits via llama.cpp/Ollama) pour la démo et les évaluations, ou faire tourner les évaluations sur le GPU Kaggle. À décider.
+  3. Le modèle ignore les lignes `WARN` : piste pour le prompt, le RAG et les exemples d'adaptation (mettre en avant les événements rares).
 
 ## Réunions
 
