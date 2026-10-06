@@ -12,6 +12,8 @@ dependencies = []
 [project.optional-dependencies]
 # Socle commun : chargement des données, baseline, métriques
 data = ["pandas>=2.0", "numpy>=1.26", "scikit-learn>=1.4", "matplotlib>=3.8", "jupyter"]
+# Tests automatisés (lancés aussi par GitHub Actions à chaque PR)
+dev = ["pytest>=8.0", "pyyaml>=6.0", "pandas>=2.0"]
 # Volet A : entraînement du BiLSTM et export navigateur
 volet_a = ["torch>=2.2", "onnx>=1.16", "onnxruntime>=1.18"]
 # Volet B : SLM, LoRA, RAG, interface locale (bitsandbytes : GPU NVIDIA uniquement)
@@ -22,3 +24,8 @@ volet_b = [
 
 [tool.setuptools.packages.find]
 include = ["teamai*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+markers = ["full_data: nécessite le corpus complet data/raw/HDFS_v1 (sauté s'il est absent)"]

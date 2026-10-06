@@ -24,6 +24,7 @@ projet/
 │   └── annotations/   Exemples d'explication (adaptation) — jamais le test     (tous)
 ├── eval/              Protocoles, jeux de test réservés, résultats              (Nassim + tous)
 ├── notebooks/         Explorations personnelles (préfixées par le prénom)
+├── tests/             Tests automatisés (pytest), lancés sur chaque PR par GitHub Actions
 └── docs/              Sujet, cadrage, contrats, documentation par volet, rapport, soutenance
 ```
 
