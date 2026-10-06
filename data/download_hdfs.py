@@ -1,6 +1,6 @@
 """Télécharge et vérifie le corpus HDFS_v1 de Loghub (Zenodo, CC-BY-4.0).
 
-Usage : python data/download_hdfs.py   (depuis le dossier projet/)
+Usage : python data/download_hdfs.py   (depuis la racine du dépôt TeamAI)
 Résultat : data/raw/HDFS_v1/ (HDFS.log + preprocessed/). Les données ne sont pas versionnées.
 """
 import hashlib
