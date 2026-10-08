@@ -2,6 +2,8 @@
 
 Point de départ local à partager avec le groupe. Ce fichier ne remplace pas à lui seul le classeur partagé demandé dans le sujet.
 
+Entrée complémentaire : [08/10 — préparation de la relance du professeur, SCRUM-12](journal/2026-10-08_SCRUM-12.md).
+
 ## Décisions
 
 | Date | Décision ou proposition | Motif | État |
