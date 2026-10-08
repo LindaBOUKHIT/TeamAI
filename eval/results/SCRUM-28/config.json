@@ -1,0 +1,36 @@
+{
+  "model_id": "HuggingFaceTB/SmolLM2-1.7B-Instruct",
+  "revision": "31b70e2e869a7173562077fd711b654946d38674",
+  "dtype": "float32",
+  "max_new_tokens": 300,
+  "do_sample": false,
+  "repetition_penalty": 1.1,
+  "seed": 42,
+  "commit": "4ee4034f30196caf3242632e1a0423a228b533b4",
+  "git_dirty": false,
+  "mock": false,
+  "offline": true,
+  "backend": "transformers",
+  "device": "cpu",
+  "python": "3.12.10",
+  "packages": {
+    "torch": "2.12.0",
+    "transformers": "4.57.6",
+    "pandas": "3.0.3",
+    "PyYAML": "6.0.3",
+    "psutil": "7.2.2",
+    "hf-xet": "1.6.0"
+  },
+  "source_sha256": {
+    "volet_b\\slm\\first_inference.py": "d977c4b84794796553635c75bd81787ba7cd4e02ad79b3c231e7e8a2d0852123",
+    "volet_b\\slm\\configs\\generation.yaml": "cd61b420f8ff34d67b70ed1d366eb25b68220fd26a0797f39deff06c2b237287",
+    "volet_b\\slm\\generate.py": "af5ba166f0066c66b14d4f6b1c8496a277e634da6316e642904e7763da3e17ee"
+  },
+  "prompt_sha256": "65dada9c58f435859c363dd15eaf4e469f2bbceb637a0c3a06e79166d539aa7e",
+  "raw_log_sha256": "0783096174d7832c618337f9609e06e04abd86ddd7089b3c12b407e63bfebc52",
+  "purpose": "technical_smoke_test_not_final_evaluation",
+  "timing": "load includes imports and tokenizer/model; generation is model.generate including prompt processing",
+  "memory": "process RSS sampled at 0.2s; fields ending _gb use GiB; no GPU used, VRAM not measured",
+  "machine": "Intel64 Family 6 Model 154 Stepping 3, GenuineIntel · 31.71 GiB RAM",
+  "torch_threads": 12
+}

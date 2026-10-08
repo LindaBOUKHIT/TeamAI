@@ -1,0 +1,13 @@
+{
+  "run_directory": "eval/runs/2026-10-08_033634_958183Z_816ba8d3_first_inference",
+  "command": "python -m volet_b.slm.first_inference --offline --block-id blk_8362325295506522506 --torch-threads 12",
+  "artifacts_sha256": {
+    "config.json": "de03a2fffd5553695bbc3c69a03e0aae473c44c6a917ae9a1be24d2a2a21e0f5",
+    "metrics.json": "432bf44803dc13dad1a83d6033985fd79013da0c505289ef73f1d77f503f6b63",
+    "output.txt": "76de95f38c24338ab640afa33c0406f949a5dead66aceaf0bd27b82f7b0888c1",
+    "predictions.jsonl": "717ae93f34a3c430b2300a9306340e4f2fc71b52a2a272ea459c29080594af68",
+    "prompt.txt": "44de380a6ccd2a38e5aa50d211a7ac2108080c1140ba80c872c8b06300a79c04"
+  },
+  "prompt_hash_convention": "config.prompt_sha256: UTF-8 with LF; artifacts_sha256: physical bytes including Windows CRLF",
+  "verification": "source hashes, clean commit, pinned revision, same historical prompt and consistent prediction/metrics verified"
+}
