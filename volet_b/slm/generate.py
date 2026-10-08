@@ -32,32 +32,44 @@ def load_config() -> dict:
     return yaml.safe_load(CONFIG.read_text(encoding="utf-8"))
 
 
-@lru_cache(maxsize=2)
-def load_model(adapter: str | None = None):
+def load_model(adapter: str | None = None, local_files_only: bool = False):
+    """Normalise les arguments pour que () et (None) partagent la même instance."""
+    return _load_model(adapter, local_files_only)
+
+
+@lru_cache(maxsize=1)
+def _load_model(adapter: str | None, local_files_only: bool):
     """Charge le modèle (et l'adaptateur LoRA éventuel) une seule fois par processus."""
     import torch
     from transformers import AutoModelForCausalLM, AutoTokenizer
 
     cfg = load_config()
-    tokenizer = AutoTokenizer.from_pretrained(cfg["model_id"])
-    model = AutoModelForCausalLM.from_pretrained(cfg["model_id"], dtype=getattr(torch, cfg["dtype"]))
+    source = {"revision": cfg["revision"], "local_files_only": local_files_only}
+    tokenizer = AutoTokenizer.from_pretrained(cfg["model_id"], **source)
+    model = AutoModelForCausalLM.from_pretrained(
+        cfg["model_id"], dtype=getattr(torch, cfg["dtype"]), **source
+    )
     if adapter:
         from peft import PeftModel
 
-        model = PeftModel.from_pretrained(model, adapter)
+        model = PeftModel.from_pretrained(model, adapter, local_files_only=local_files_only)
     model.eval()
     return model, tokenizer
 
 
-def generate(messages: list[dict], adapter: str | None = None, **overrides) -> dict:
-    """Génère une réponse à partir de messages au format chat ({"role", "content"})."""
+def generate(messages: str | list[dict], adapter: str | None = None, **overrides) -> dict:
+    """Accepte un prompt texte ou des messages chat ({"role", "content"})."""
+    if isinstance(messages, str):
+        messages = [{"role": "user", "content": messages}]
+    if not messages:
+        raise ValueError("Au moins un message est nécessaire.")
     if os.environ.get("TEAMAI_SLM_MOCK") == "1":
         return {"text": json.dumps(MOCK_ANSWER, ensure_ascii=False), "new_tokens": 0, "seconds": 0.0}
 
     import torch
 
     cfg = {**load_config(), **overrides}
-    model, tokenizer = load_model(adapter)
+    model, tokenizer = load_model(adapter, local_files_only=cfg.get("local_files_only", False))
     torch.manual_seed(cfg["seed"])
 
     inputs = tokenizer.apply_chat_template(
@@ -77,5 +89,5 @@ def generate(messages: list[dict], adapter: str | None = None, **overrides) -> d
     return {
         "text": tokenizer.decode(new_tokens, skip_special_tokens=True),
         "new_tokens": int(new_tokens.shape[0]),
-        "seconds": round(seconds, 2),
+        "seconds": seconds,
     }
