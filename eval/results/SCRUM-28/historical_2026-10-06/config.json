@@ -1,0 +1,11 @@
+{
+  "model_id": "HuggingFaceTB/SmolLM2-1.7B-Instruct",
+  "dtype": "float32",
+  "max_new_tokens": 300,
+  "do_sample": false,
+  "repetition_penalty": 1.1,
+  "seed": 42,
+  "commit": "9085610",
+  "machine": "Intel64 Family 6 Model 154 Stepping 3, GenuineIntel · 31.71 Go RAM",
+  "torch_threads": 12
+}

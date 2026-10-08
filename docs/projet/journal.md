@@ -35,20 +35,34 @@ Pour chaque essai, consigner la date, le responsable, la version du code, les do
 | Mémoire après chargement / pic en génération | 6,8 Go / 16,3 Go |
 | Génération | 156 tokens en 258 s → **0,6 token/s** |
 
-- **Qualité (modèle de base, sans RAG ni adaptation)** : la trace contient deux `WARN … Got exception while serving` et un `WARN … Unexpected error trying to delete block … BlockInfo not found in volumeMap`. Le modèle n'en mentionne **aucun**, ne répond pas à la question normal/anormal et invente des éléments absents des logs (« nom de domaine », « ports spéciaux », envoi « vers l'utilisateur »). Point de référence « avant adaptation » pour le rapport.
+- **Qualité (modèle de base, sans RAG ni adaptation)** : la trace contient deux `WARN … Got exception while serving` et un `WARN … Unexpected error trying to delete block … BlockInfo not found in volumeMap`. Le modèle n'en mentionne **aucun**, ne répond pas à la question normal/anormal et invente des éléments absents des logs (« nom de domaine », « ports spéciaux », envoi « vers l'utilisateur »). Exemple de développement pour le rapport, sans évaluation générale de qualité.
 - **Conséquences** :
   1. L'inférence locale fonctionne (jalon de mi-parcours, preuve pour SCRUM-17).
   2. À 0,6 token/s, évaluer 4 configurations sur 60–100 traces prendrait plusieurs dizaines d'heures en float32 sur CPU. Il faut une version quantifiée (GGUF 4 bits via llama.cpp/Ollama) pour la démo et les évaluations, ou faire tourner les évaluations sur le GPU Kaggle. À décider.
   3. Le modèle ignore les lignes `WARN` : piste pour le prompt, le RAG et les exemples d'adaptation (mettre en avant les événements rares).
 
-## Réunions
-
 ### 08/10/2026 — Préparation de la relecture de SCRUM-28 (Alain)
 
 Lecture du ticket et de la PR #4, puis vérification des quatre artefacts locaux du 06/10 (`metrics.json`, `config.json`, `prompt.txt`, `output.txt`). Les mesures historiques sont conservées. Leur configuration indique le commit `9085610`, antérieur à l'ajout du code SLM ; sans état du code ni hash des sources, ce commit seul ne suffit pas à reconstituer l'exécution.
 
-Corrections : normalisation des arguments du cache pour éviter que `load_model()` et `load_model(None)` chargent deux copies du même modèle ; révision du modèle fixée, option hors ligne et choix explicite du bloc ; versions et hashes consignés ; dossiers distincts pour préserver les exécutions ; README et installation minimale. Sept tests de régression passent sans poids de modèle. Une nouvelle exécution sur le bloc historique est prévue pour vérifier le code corrigé ; les mesures du 06/10 ne deviennent pas rétroactivement celles de ce code.
+Corrections : normalisation des arguments du cache pour éviter que `load_model()` et `load_model(None)` chargent deux copies du même modèle ; révision du modèle fixée, option hors ligne et choix explicite du bloc ; versions et hashes consignés ; dossiers distincts pour préserver les exécutions ; README et installation minimale. Sept tests de régression passent sans poids de modèle. Le paquet a été construit et importé hors du dépôt ; les modules SLM et le YAML sont inclus.
+
+Nouvelle inférence réelle hors ligne : `python -m volet_b.slm.first_inference --offline --block-id blk_8362325295506522506 --torch-threads 12`. Le commit de mesure est `4ee4034f30196caf3242632e1a0423a228b533b4`, avec code suivi propre. Les versions exactes, hashes des sources, du prompt et du log sont enregistrés. Le prompt est identique à celui du 06/10 ; les cinq artefacts sont cohérents et conservés dans `eval/runs/2026-10-08_033634_958183Z_816ba8d3_first_inference/`.
+
+| Mesure du 08/10 | Valeur |
+|---|---|
+| Chargement | 238,0 s |
+| RSS après chargement / pic au chargement | 6,77 GiB / 9,84 GiB |
+| Pic RSS en génération | 8,00 GiB |
+| Génération | 156 tokens en 952,03 s, soit 0,16 token/s |
+| GPU / VRAM | Aucun GPU utilisé ; VRAM non mesurée |
+
+La réponse est exactement celle du 06/10 et conserve les omissions et inventions constatées. Le cas de double chargement est corrigé et testé, mais les mesures ne constituent pas une comparaison contrôlée de son effet : le contexte de cache et de charge diffère. Au contrôle de fin d'exécution, 2,2 GiB de RAM étaient disponibles sur la machine ; ce relevé ponctuel n'est pas une mesure de pic ni une explication causale de la latence. Les anciennes mesures restent distinctes. La [preuve compacte](../../eval/results/SCRUM-28/README.md) publie paramètres, mesures, réponse brute et manifeste, sans corpus ni poids.
+
+Décision : conserver SmolLM2-1.7B-Instruct pour cette première preuve, l'inférence aboutissant sur la machine. La vitesse pour la démo et la faisabilité LoRA nécessitent leurs propres essais. Le bloc déjà inspecté sert au développement et doit être exclu du futur test réservé du volet B.
 
 Usage d'assistant : Alain utilise Codex pour l'examen du code et des preuves, les corrections et les tests. Aucune validation de Linda ou fusion n'est attestée. La qualité du modèle et les composants RAG/LoRA restent hors de cette vérification technique.
+
+## Réunions
 
 Aucune réunion renseignée à ce stade. Pour chaque réunion, noter les participants, les points examinés, les décisions, les responsables et les échéances.
