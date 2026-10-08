@@ -49,7 +49,7 @@ def raw_lines(block_id: str, path: Path | None = None) -> list[str]:
     pattern = re.compile(r"(?<!\w)" + re.escape(block_id) + r"(?!\d)")
     path = path or RAW_HDFS / "HDFS.log"
     with path.open(encoding="utf-8", errors="strict") as f:
-        lines = [line.rstrip("\r\n") for line in f if pattern.search(line)]
+        lines = [line.rstrip("\r\n") for line in f if block_id in line and pattern.search(line)]
     if not lines:
         raise ValueError(f"Aucune ligne trouvée pour {block_id} dans {path}.")
     return lines
