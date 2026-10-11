@@ -14,11 +14,17 @@ dependencies = []
 data = ["pandas>=2.0", "numpy>=1.26", "scikit-learn>=1.4", "matplotlib>=3.8", "jupyter"]
 # Volet A : entraînement du BiLSTM et export navigateur
 volet_a = ["torch>=2.2", "onnx>=1.16", "onnxruntime>=1.18"]
+# Première inférence seule, sans les composants RAG/Gradio/PEFT.
+slm = ["torch>=2.2", "transformers>=4.57,<5", "pyyaml>=6.0", "psutil>=5.9", "hf-xet>=1.0"]
 # Volet B : SLM, LoRA, RAG, interface locale (bitsandbytes : GPU NVIDIA uniquement)
 volet_b = [
     "torch>=2.2", "transformers>=4.44", "peft>=0.12", "accelerate>=0.33", "datasets>=2.20",
     "sentence-transformers>=3.0", "faiss-cpu>=1.8", "gradio>=4.40",
+    "pyyaml>=6.0", "psutil>=5.9",
 ]
 
 [tool.setuptools.packages.find]
-include = ["teamai*"]
+include = ["teamai*", "volet_b*"]
+
+[tool.setuptools.package-data]
+"volet_b.slm" = ["configs/*.yaml"]
