@@ -6,7 +6,7 @@ Socle commun : Python 3.10+ dans un `.venv` à la racine de `projet/`, `pip inst
 |---|---|---|---|---|---|
 | Alain | Windows 11 Pro | VS Code 1.121 + Claude Code | 3.12.10 (PyTorch 2.12 CPU) | 24.12.0 | Machine d'inférence du SLM (volet B) |
 | Bachar | À renseigner | À renseigner | À renseigner | À renseigner | À confirmer |
-| Linda | À renseigner | À renseigner | À renseigner | À renseigner | À confirmer |
+| Linda | Windows 11 Famille Unilingue | VS Code | 3.13.7 | 24.19.0 | Poste de développement |
 | Nassim | À renseigner | À renseigner | À renseigner | À renseigner | À confirmer |
 
 Point du 08/10 : la partie d'Alain est renseignée ; les trois autres environnements n'ont pas été communiqués. Chaque membre complète sa propre ligne dans la PR [#3](https://github.com/LindaBOUKHIT/TeamAI/pull/3). Une version non installée doit être indiquée comme telle, plutôt que laissée vide.
