@@ -66,3 +66,22 @@ Usage d'assistant : Alain utilise Codex pour l'examen du code et des preuves, le
 ## Réunions
 
 Aucune réunion renseignée à ce stade. Pour chaque réunion, noter les participants, les points examinés, les décisions, les responsables et les échéances.
+
+## 2026-10-11 — SCRUM-22 — Bachar Ben Slama
+
+Création d’un BiLSTM jouet à poids aléatoires et export ONNX
+conforme au contrat C3.
+
+Comparaison Python / navigateur avec ONNX Runtime Web (WASM) :
+- Dix entrées identiques.
+- Batchs testés : 1, 3 et 10.
+- Écart maximal : 2,9802e-8, inférieur au seuil de 1e-4.
+- Taille du modèle : environ 7,9 Ko.
+- Chargement et préparation : 1436,5 ms.
+- Inférences pour les batchs 1, 3 et 10 : 33,8 / 2,1 / 2,1 ms.
+
+Usage IA : assistance de Codex pour préparer l’environnement,
+proposer le script Python et la page de comparaison, et interpréter
+les résultats. Exécution et vérification réalisées par Bachar.
+
+Relecture par Nassim à effectuer avant fusion.
