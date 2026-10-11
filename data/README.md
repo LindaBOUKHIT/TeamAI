@@ -11,6 +11,11 @@ data/
 ├── raw/               HDFS_v1 complet (1,5 Go)                         — non versionné
 ├── sample/            Event_traces.csv + HDFS_sample.log réduits       — versionné
 └── splits/            splits.csv (non versionné) + splits_meta.json    — versionné
+
+teamai/data/           Code partagé, importé par tous les volets
+├── loader.py          load_traces / load_templates / load_vocab / encode    ✅
+├── parser.py          (option) parser réutilisable par le volet B           SCRUM-19
+└── splits.py          load_split(name) — lecture commune des splits (C4)    SCRUM-20
 ```
 
 ## Utilisation
