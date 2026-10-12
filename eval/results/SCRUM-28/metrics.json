@@ -1,0 +1,13 @@
+{
+  "block_id": "blk_8362325295506522506",
+  "raw_lines": 25,
+  "load_seconds": 238.0,
+  "rss_before_gb": 0.07,
+  "rss_after_load_gb": 6.77,
+  "rss_peak_load_gb": 9.84,
+  "rss_peak_generation_gb": 8.0,
+  "vram_peak_gb": null,
+  "new_tokens": 156,
+  "generation_seconds": 952.0328825000033,
+  "tokens_per_second": 0.16
+}
