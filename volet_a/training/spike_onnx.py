@@ -18,7 +18,10 @@ torch.manual_seed(22)
 
 
 class ToyBiLSTM(nn.Module):
+    """BiLSTM minuscule non entraîné, servant seulement à valider la chaîne d'export ONNX."""
+
     def __init__(self):
+        """Plongement des 31 identifiants C2 (dim 8), BiLSTM 8+8, couche linéaire vers 1 logit."""
         super().__init__()
         # C2 : 0 = padding, 1..29 = événements, 30 = inconnu.
         self.embedding = nn.Embedding(31, 8, padding_idx=0)
@@ -31,6 +34,7 @@ class ToyBiLSTM(nn.Module):
         self.classifier = nn.Linear(16, 1)
 
     def forward(self, event_ids):
+        """Rend la probabilité d'anomalie de chaque séquence (`event_ids` : batch × 50 entiers C2)."""
         embeddings = self.embedding(event_ids)
         _, (hidden, _) = self.lstm(embeddings)
         # Derniers états des deux directions du BiLSTM.

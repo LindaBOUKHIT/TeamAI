@@ -38,6 +38,7 @@ SCRUM-25: entraîne le BiLSTM sur le split provisoire
 - Relue par le **binôme** indiqué dans le ticket avant fusion (1 approbation).
 - Le relecteur doit pouvoir lancer le code à partir du README du dossier.
 - Remplir le modèle de PR (`.github/pull_request_template.md`).
+- Chaque module, classe et fonction Python a une docstring en français : rôle, entrées utiles, valeur rendue. Vérifié par `python -m unittest tests.test_docstrings`.
 
 ## 5. Ce qui ne va jamais dans Git
 
