@@ -2,6 +2,8 @@
 
 Point de départ local à partager avec le groupe. Ce fichier ne remplace pas à lui seul le classeur partagé demandé dans le sujet.
 
+Classeur partagé : [TeamAI : Classeur de suivi](https://docs.google.com/spreadsheets/d/1W8IjMS2L9-SxDK-FGQvjVIdG9NSwmwVBR8dpT5AitLg/edit?gid=1148275204#gid=1148275204).
+
 ## Décisions
 
 | Date | Décision ou proposition | Motif | État |
