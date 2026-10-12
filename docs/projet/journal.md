@@ -76,3 +76,9 @@ Usage d'assistant : Alain utilise Codex pour l'examen du code et des preuves, le
 ## Réunions
 
 Aucune réunion renseignée à ce stade. Pour chaque réunion, noter les participants, les points examinés, les décisions, les responsables et les échéances.
+
+## Suivi du 12/10/2026 — SCRUM-15 (Alain)
+
+Vérification GitHub : la PR #4 de SCRUM-28 a été approuvée par Linda et fusionnée le 11/10. La PR #3 de SCRUM-15 reste ouverte, sans avis de relecture au contrôle du 12/10. La ligne de Linda est renseignée sur sa branche ; les environnements de Bachar et Nassim restent manquants. Aucune validation collective du choix des machines n'est attestée.
+
+La branche de SCRUM-15 intègre les changements approuvés de `dev`, puis le relevé est actualisé avec les mesures du 08/10 et le chemin de cache observé. Alain utilise Codex pour ces vérifications et corrections documentaires. Le ticket ne remplit pas encore son critère de clôture ; la mise à jour Jira est également indisponible dans cette session faute d'outils MCP TeamAI.
