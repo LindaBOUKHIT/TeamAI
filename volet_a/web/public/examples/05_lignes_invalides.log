@@ -1,0 +1,3 @@
+Ceci n'est pas une ligne HDFS valide
+ERROR unknown event without block identifier
+081109 203518 143 INFO unknown.Component: UNKNOWN_TEMPLATE blk_999999999999
