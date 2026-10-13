@@ -82,3 +82,22 @@ Aucune réunion renseignée à ce stade. Pour chaque réunion, noter les partici
 Vérification GitHub : la PR #4 de SCRUM-28 a été approuvée par Linda et fusionnée le 11/10. La PR #3 de SCRUM-15 reste ouverte, sans avis de relecture au contrôle du 12/10. La ligne de Linda est renseignée sur sa branche ; les environnements de Bachar et Nassim restent manquants. Aucune validation collective du choix des machines n'est attestée.
 
 La branche de SCRUM-15 intègre les changements approuvés de `dev`, puis le relevé est actualisé avec les mesures du 08/10 et le chemin de cache observé. Alain utilise Codex pour ces vérifications et corrections documentaires. Le ticket ne remplit pas encore son critère de clôture ; la mise à jour Jira est également indisponible dans cette session faute d'outils MCP TeamAI.
+
+## 2026-10-11 — SCRUM-22 — Bachar Ben Slama
+
+Création d’un BiLSTM jouet à poids aléatoires et export ONNX
+conforme au contrat C3.
+
+Comparaison Python / navigateur avec ONNX Runtime Web (WASM) :
+- Dix entrées identiques.
+- Batchs testés : 1, 3 et 10.
+- Écart maximal : 2,9802e-8, inférieur au seuil de 1e-4.
+- Taille du modèle : environ 7,9 Ko.
+- Chargement et préparation : 1436,5 ms.
+- Inférences pour les batchs 1, 3 et 10 : 33,8 / 2,1 / 2,1 ms.
+
+Usage IA : assistance de Codex pour préparer l’environnement,
+proposer le script Python et la page de comparaison, et interpréter
+les résultats. Exécution et vérification réalisées par Bachar.
+
+Relecture par Nassim à effectuer avant fusion.

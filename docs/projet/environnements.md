@@ -7,9 +7,22 @@ Socle commun : Python 3.10+ dans un `.venv` à la racine du dépôt TeamAI, `pip
 | Alain | Windows 11 Pro | VS Code 1.121 + Claude Code | 3.12.10 (PyTorch 2.12 CPU) | 24.12.0 | Machine d'inférence du SLM (volet B) |
 | Bachar | À renseigner | À renseigner | À renseigner | À renseigner | À confirmer |
 | Linda | Windows 11 Famille Unilingue | VS Code | 3.13.7 | 24.19.0 | Poste de développement |
-| Nassim | À renseigner | À renseigner | À renseigner | À renseigner | À confirmer |
+| Nassim | Windows 11 | À renseigner | À renseigner | À renseigner | Seul poste avec GPU NVIDIA (RTX 3050 6 Go) : candidat pour l'essai LoRA local |
 
-Point du 12/10 : les environnements d'Alain et de Linda sont renseignés. Les lignes de Bachar et Nassim restent à compléter par les intéressés dans la PR [#3](https://github.com/LindaBOUKHIT/TeamAI/pull/3). Une version non installée doit être indiquée comme telle, plutôt que laissée vide. La présence d'une ligne ne vaut pas validation collective du choix des machines.
+Point du 13/10 : les environnements d'Alain et de Linda sont renseignés ; le matériel de Nassim est relevé (versions logicielles à compléter). La ligne de Bachar reste à compléter par l'intéressé dans la PR [#3](https://github.com/LindaBOUKHIT/TeamAI/pull/3). Une version non installée doit être indiquée comme telle, plutôt que laissée vide. La présence d'une ligne ne vaut pas validation collective du choix des machines.
+
+## Machine de Nassim (relevé transmis le 13/10)
+
+| Élément | Valeur |
+|---|---|
+| Propriétaire | Nassim Mezzai (portable) |
+| Système | Windows 11 |
+| CPU | AMD Ryzen 5 8645HS — 6 cœurs / 12 threads |
+| RAM | 32 Go |
+| GPU / VRAM | NVIDIA GeForce RTX 3050 Laptop GPU — 6 Go |
+| CUDA, Python, Node, éditeur | À renseigner par Nassim |
+
+C'est la seule machine de l'équipe avec un GPU NVIDIA. 6 Go de VRAM ne permettent pas d'entraîner SmolLM2-1.7B en précision complète, mais un LoRA sur le modèle chargé en 4 bits (QLoRA, `bitsandbytes`) est plausible : **à tester** dans SCRUM-29, en alternative à Kaggle. Aucune mesure n'a encore été faite sur cette machine.
 
 ## Machine cible du SLM (volet B)
 
@@ -58,5 +71,5 @@ La PR [#4](https://github.com/LindaBOUKHIT/TeamAI/pull/4) a été approuvée pui
 - [x] Machine d'inférence proposée et premiers essais référencés.
 - [x] Solution d'entraînement proposée, avec essai de faisabilité identifié.
 - [x] Ligne de Linda renseignée dans la PR #3.
-- [ ] Lignes de Bachar et Nassim renseignées par les intéressés.
+- [ ] Ligne de Bachar renseignée ; versions Python/Node/CUDA de Nassim complétées.
 - [ ] Choix des machines confirmé avec le groupe et PR #3 relue par Linda puis fusionnée.
