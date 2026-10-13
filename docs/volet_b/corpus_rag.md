@@ -10,14 +10,52 @@ Les guides couvrent les rôles NameNode/DataNode, les blocs, la réplication, le
 
 Les fichiers HTML téléchargés vont dans `volet_b/rag/corpus/raw/`, ignoré par Git. Le fichier versionné [`chunks.jsonl`](../../volet_b/rag/corpus/chunks.jsonl) respecte C6 ; ses identifiants ont la forme `document#section#numéro`. Le champ `version` décrit la documentation consultée et ne prétend pas identifier la version du cluster ayant produit les logs.
 
+## Couverture des templates de logs
+
+Ce tableau indique si le corpus contient un passage qui apporte du contexte utile pour chaque template Loghub. Un identifiant C6 explique le mécanisme général, pas la présence de l'événement ni la cause d'une anomalie. `Aucun` signifie qu'aucun passage du corpus ne justifie actuellement une explication documentaire pour ce template ; une réponse RAG doit alors pouvoir garder `sources: []`.
+
+| Template | Passage C6 pertinent, ou aucun |
+|---|---|
+| E1 — ajout d'un bloc déjà présent | Aucun |
+| E2 — vérification réussie d'un bloc | `hdfs-architecture-1.2.1#data-integrity#1` — vérification par checksum |
+| E3 — bloc servi à un client | `hdfs-architecture-1.2.1#namenode-and-datanodes#1` — rôle de service des DataNodes |
+| E4 — exception pendant le service d'un bloc | Aucun — le guide ne précise pas la cause de cette exception |
+| E5 — réception d'un bloc avec source et destination | `hdfs-architecture-1.2.1#replication-pipelining#1` — transfert entre DataNodes |
+| E6 — réception d'un bloc avec sa taille | `hdfs-architecture-1.2.1#replication-pipelining#1` — écriture et transfert des portions du bloc |
+| E7 — exception reçue par `writeBlock` | Aucun — le pipeline est décrit, mais pas cette exception |
+| E8 — interruption de `PacketResponder` | Aucun |
+| E9 — bloc reçu depuis un DataNode | `hdfs-architecture-1.2.1#replication-pipelining#1` — réception dans le pipeline |
+| E10 — exception de `PacketResponder` | Aucun |
+| E11 — fin de `PacketResponder` | Aucun — ce détail d'implémentation n'est pas décrit |
+| E12 — exception d'écriture vers un miroir | `hdfs-architecture-1.2.1#replication-pipelining#1` — contexte du transfert vers le DataNode suivant, sans expliquer l'exception |
+| E13 — paquet vide reçu | Aucun |
+| E14 — exception dans `receiveBlock` | Aucun — le guide ne documente pas cette exception |
+| E15 — décalage du fichier de bloc modifié | Aucun |
+| E16 — bloc transmis à un autre DataNode | `hdfs-architecture-1.2.1#replication-pipelining#1` — transfert des blocs entre DataNodes |
+| E17 — échec de transfert d'un bloc | Aucun — le guide ne documente pas ce message ni sa cause |
+| E18 — démarrage d'un thread de transfert | Aucun — le détail du thread n'est pas décrit |
+| E19 — réouverture d'un bloc | Aucun |
+| E20 — erreur `volumeMap` lors de la suppression | Aucun — ce détail d'implémentation n'est pas documenté |
+| E21 — suppression du fichier d'un bloc | `hdfs-architecture-1.2.1#decrease-replication-factor#1` — suppression d'une réplique excédentaire |
+| E22 — allocation d'un bloc | `hdfs-architecture-1.2.1#staging#1` — allocation d'un bloc par le NameNode lors de l'écriture |
+| E23 — ajout à `invalidSet` après suppression | Aucun — l'ensemble interne `invalidSet` n'est pas décrit |
+| E24 — retrait de `neededReplications` car le bloc n'appartient à aucun fichier | Aucun — ce détail de gestion interne n'est pas décrit |
+| E25 — demande de réplication | `hdfs-architecture-1.2.1#data-disk-failure-heartbeats-and-re-replication#1` — suivi et lancement de la réplication nécessaire |
+| E26 — mise à jour du `blockMap` par `addStoredBlock` | Aucun — cette mise à jour interne n'est pas détaillée |
+| E27 — demande `addStoredBlock` redondante | Aucun |
+| E28 — demande `addStoredBlock` pour un bloc sans fichier | Aucun |
+| E29 — expiration du délai de réplication en attente | Aucun — le guide ne décrit pas ce délai ni ce message |
+
+Les sections de références composées de listes de liens sont exclues du corpus : `hdfs-architecture-1.2.1#references` et `hdfs-users-1.2.1#related-documentation`. Les empreintes SHA-256 des pages HTML sources sont enregistrées par identifiant de source dans [`chunking_comparison.json`](../../volet_b/rag/corpus/chunking_comparison.json), afin de repérer une modification des pages téléchargées.
+
 ## Comparaison des découpages
 
 Le script a comparé deux stratégies sur les mêmes deux pages, avec une limite de 1 600 caractères et un chevauchement de 200 caractères pour les fenêtres glissantes :
 
 | Stratégie | Passages | Longueur moyenne | Longueur médiane | Passages traversant plusieurs sections |
 |---|---:|---:|---:|---:|
-| Par section, avec subdivision des sections longues | 53 | 727 caractères | 666 caractères | 0 |
-| Fenêtre glissante | 29 | 1 551 caractères | 1 595 caractères | 26 |
+| Par section, avec subdivision des sections longues | 51 | 736 caractères | 666 caractères | 0 |
+| Fenêtre glissante | 28 | 1 562 caractères | 1 595 caractères | 26 |
 
 Le corpus retient le découpage par section : les passages gardent leur titre et leur sujet, ce qui rend les citations C6 plus faciles à relire. Les sections qui dépassent la limite sont subdivisées aux frontières de texte, sans chevauchement et sans mélanger deux sections. Les mesures reproductibles sont conservées dans [`chunking_comparison.json`](../../volet_b/rag/corpus/chunking_comparison.json).
 

@@ -1,8 +1,9 @@
-"""Build a small, source-traceable HDFS documentation corpus in C6 format."""
+"""Construit un petit corpus documentaire HDFS traçable au format C6."""
 
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import unicodedata
@@ -18,6 +19,10 @@ OUTPUT_PATH = CORPUS_DIR / "chunks.jsonl"
 COMPARISON_PATH = CORPUS_DIR / "chunking_comparison.json"
 MAX_CHARS = 1600
 OVERLAP_CHARS = 200
+EXCLUDED_SECTIONS = {
+    "hdfs-architecture-1.2.1": {"References"},
+    "hdfs-users-1.2.1": {"Related Documentation"},
+}
 
 SOURCES = (
     {
@@ -39,14 +44,14 @@ SOURCES = (
 
 @dataclass(frozen=True)
 class Section:
-    """Text and heading extracted from one documentation section."""
+    """Texte et titre extraits d'une section documentaire."""
 
     title: str
     text: str
 
 
 class _SectionParser(HTMLParser):
-    """Extract headings and body text while ignoring page navigation."""
+    """Extrait les titres et le texte en ignorant la navigation des pages."""
 
     _SKIP_TAGS = {"nav", "header", "footer", "aside", "script", "style", "noscript"}
     _VOID_TAGS = {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr"}
@@ -57,6 +62,7 @@ class _SectionParser(HTMLParser):
     }
 
     def __init__(self) -> None:
+        """Initialise l'état du parseur et ses conteneurs de sections."""
         super().__init__(convert_charrefs=True)
         self.sections: list[Section] = []
         self._title = "Introduction"
@@ -66,6 +72,7 @@ class _SectionParser(HTMLParser):
         self._started_content = False
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        """Traite une balise ouvrante et détecte les titres ou éléments à ignorer."""
         attrs_map = dict(attrs)
         classes = (attrs_map.get("class") or "").lower()
         if self._skip_depth:
@@ -94,6 +101,7 @@ class _SectionParser(HTMLParser):
             self._body.append("\n")
 
     def handle_endtag(self, tag: str) -> None:
+        """Traite une balise fermante et clôt le titre ou le bloc courant."""
         if self._skip_depth:
             self._skip_depth -= 1
             return
@@ -106,6 +114,7 @@ class _SectionParser(HTMLParser):
             self._body.append("\n")
 
     def handle_data(self, data: str) -> None:
+        """Ajoute le texte reçu au titre courant ou au corps de la section."""
         if self._skip_depth:
             return
         if self._heading is not None:
@@ -114,10 +123,12 @@ class _SectionParser(HTMLParser):
             self._body.append(data)
 
     def finish(self) -> list[Section]:
+        """Termine l'analyse HTML et renvoie les sections extraites."""
         self._finish_section()
         return self.sections
 
     def _finish_section(self) -> None:
+        """Enregistre la section courante si elle contient du texte."""
         body = _clean_text("".join(self._body))
         if body:
             self.sections.append(Section(title=self._title, text=body))
@@ -125,19 +136,19 @@ class _SectionParser(HTMLParser):
 
 
 def _clean_text(value: str) -> str:
-    """Normalize whitespace while retaining paragraph boundaries."""
+    """Normalise les espaces en conservant les limites entre paragraphes."""
     lines = [re.sub(r"\s+", " ", line).strip() for line in value.splitlines()]
     return "\n".join(line for line in lines if line)
 
 
 def _slug(value: str) -> str:
-    """Create a stable, URL-like identifier from a section title."""
+    """Crée un identifiant stable de type URL à partir d'un titre de section."""
     ascii_value = unicodedata.normalize("NFKD", value).encode("ascii", "ignore").decode()
     return re.sub(r"[^a-z0-9]+", "-", ascii_value.lower()).strip("-") or "section"
 
 
 def _download_sources(force: bool = False) -> None:
-    """Download the pinned official documentation pages into the ignored raw directory."""
+    """Télécharge les pages documentaires officielles dans le dossier brut ignoré par Git."""
     RAW_DIR.mkdir(parents=True, exist_ok=True)
     for source in SOURCES:
         destination = RAW_DIR / source["filename"]
@@ -153,7 +164,7 @@ def _download_sources(force: bool = False) -> None:
 
 
 def _load_sections(source: dict[str, str]) -> list[Section]:
-    """Parse one downloaded HTML page into titled text sections."""
+    """Analyse une page HTML téléchargée et en extrait les sections titrées."""
     page_path = RAW_DIR / source["filename"]
     if not page_path.is_file():
         raise FileNotFoundError(
@@ -161,14 +172,15 @@ def _load_sections(source: dict[str, str]) -> list[Section]:
         )
     parser = _SectionParser()
     parser.feed(page_path.read_text(encoding="utf-8", errors="replace"))
-    sections = parser.finish()
+    excluded = EXCLUDED_SECTIONS.get(source["id"], set())
+    sections = [section for section in parser.finish() if section.title not in excluded]
     if not sections:
         raise ValueError(f"Aucun texte n’a été extrait de {page_path}.")
     return sections
 
 
 def _split_at_boundary(text: str, max_chars: int) -> list[str]:
-    """Split long text at paragraph or whitespace boundaries."""
+    """Découpe un texte long aux frontières de paragraphe ou d'espace."""
     remaining = text.strip()
     pieces: list[str] = []
     while len(remaining) > max_chars:
@@ -185,7 +197,7 @@ def _split_at_boundary(text: str, max_chars: int) -> list[str]:
 
 
 def _section_chunks(source: dict[str, str], sections: list[Section], max_chars: int) -> list[dict[str, str]]:
-    """Build C6 passages without crossing documentation section boundaries."""
+    """Crée des passages C6 sans franchir les limites des sections documentaires."""
     chunks: list[dict[str, str]] = []
     section_counts: dict[str, int] = {}
     for section in sections:
@@ -209,7 +221,7 @@ def _section_chunks(source: dict[str, str], sections: list[Section], max_chars: 
 def _window_chunks(
     source: dict[str, str], sections: list[Section], max_chars: int, overlap_chars: int
 ) -> list[dict[str, str]]:
-    """Build fixed-size C6 passages across each document with overlap."""
+    """Crée des passages C6 de taille fixe avec chevauchement dans chaque document."""
     indexed: list[tuple[int, str]] = []
     offset = 0
     for section_index, section in enumerate(sections):
@@ -248,7 +260,7 @@ def _window_chunks(
 
 
 def _summarize(chunks: list[dict[str, str]]) -> dict[str, int | float]:
-    """Calculate comparable size and section-boundary statistics."""
+    """Calcule des statistiques comparables sur la taille et les limites des sections."""
     lengths = [len(chunk["text"]) for chunk in chunks]
     return {
         "chunk_count": len(chunks),
@@ -260,7 +272,7 @@ def _summarize(chunks: list[dict[str, str]]) -> dict[str, int | float]:
 
 
 def _write_jsonl(path: Path, chunks: list[dict[str, str]]) -> None:
-    """Write UTF-8 C6 records as one JSON object per line."""
+    """Écrit les enregistrements C6 en UTF-8, un objet JSON par ligne."""
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="\n") as output:
         for chunk in chunks:
@@ -268,7 +280,7 @@ def _write_jsonl(path: Path, chunks: list[dict[str, str]]) -> None:
 
 
 def build(strategy: str, download: bool, force_download: bool, max_chars: int, overlap_chars: int) -> None:
-    """Compare chunking strategies and write the requested strategy and metrics."""
+    """Compare les découpages et écrit la stratégie choisie avec ses métriques."""
     if max_chars < 200:
         raise ValueError("--max-chars doit être supérieur ou égal à 200.")
     if overlap_chars < 0 or overlap_chars >= max_chars:
@@ -290,6 +302,13 @@ def build(strategy: str, download: bool, force_download: bool, max_chars: int, o
 
     comparison = {
         "sources": [source["id"] for source in SOURCES],
+        "source_sha256": {
+            source["id"]: hashlib.sha256((RAW_DIR / source["filename"]).read_bytes()).hexdigest()
+            for source in SOURCES
+        },
+        "excluded_sections": {
+            source_id: sorted(titles) for source_id, titles in EXCLUDED_SECTIONS.items()
+        },
         "max_chars": max_chars,
         "overlap_chars": overlap_chars,
         "section": _summarize(section_chunks),
@@ -315,7 +334,7 @@ def build(strategy: str, download: bool, force_download: bool, max_chars: int, o
 
 
 def main() -> None:
-    """Parse command-line options and build the HDFS corpus."""
+    """Analyse les options de commande et construit le corpus HDFS."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--strategy",
