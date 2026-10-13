@@ -97,6 +97,22 @@ Usage d'assistant : Alain utilise Codex pour l'examen du code et des preuves, le
 
 Aucune réunion renseignée à ce stade. Pour chaque réunion, noter les participants, les points examinés, les décisions, les responsables et les échéances.
 
+### 08/10/2026 — Préparation de la relecture des formats (SCRUM-55, Alain)
+
+Réunion non attestée ; aucune approbation collective enregistrée. Alain prépare la proposition v1 de `docs/contrats.md` pour permettre le travail de chaque composant : classification binaire, troncature/padding explicites, gestion des inconnus à implémenter, formes ONNX, splits sans fuite, sortie SLM et citations vérifiées, traçabilité des évaluations.
+
+Relecture attendue : Nassim pour C1/C2/C4 et le protocole C7 ; Bachar pour C3 ; Linda pour C5/C6 et les consommateurs JavaScript ; Alain pour l'interface SLM et la traçabilité de ses mesures. Les quatre membres valident les choix et consignent leur avis dans la PR. Les différences entre format attendu et code livré sont indiquées dans les contrats.
+
+Suite : corriger selon les retours, consigner les décisions réelles et fusionner la PR vers `dev`. SCRUM-55 reste ouvert jusque-là ; les dépendances SCRUM-25/26/29 restent suivies dans Jira.
+
+### 13/10/2026 — Alignement des contrats sur le code fusionné (SCRUM-55, Alain)
+
+Un audit croisé des branches (Codex, lecture seule, vérifié par Alain) montre que la v1 de la PR #7 imposait un regroupement des séquences identiques entre splits, alors que SCRUM-20 a livré, conformément au contrat alors en vigueur sur `dev`, un tirage stratifié bloc par bloc sur lequel reposent déjà les résultats de la baseline SCRUM-24. Proposition retenue dans la v1.1 : `C4-bloc` reste le protocole de référence, avec des métriques du test toujours rapportées aussi sur les séquences inédites (`unseen_seq`) ; un regroupement éventuel devient une variante nommée `C4-groupe`. Mises à jour associées : état réel de C2 (inconnus → SCRUM-26), migration des métadonnées C3 du spike, sources vides autorisées et règles d'abstention C5, dossier d'exécution unique en C7. À valider par Nassim (C4) et le groupe avant fusion.
+
+### Usage d'assistant — 08/10/2026
+
+Alain utilise Codex pour relire SCRUM-55, examiner le chargeur de données et l'interface SLM existante sur la branche SCRUM-28, puis préciser les sept formats. Vérification : cohérence documentaire avec le code observé et contrôle syntaxique des exemples JSON. Limite : pas de validation collective, pas de modèle ONNX ou de retrieval livré par ce travail.
+
 ## Suivi du 12/10/2026 — SCRUM-15 (Alain)
 
 Vérification GitHub : la PR #4 de SCRUM-28 a été approuvée par Linda et fusionnée le 11/10. La PR #3 de SCRUM-15 reste ouverte, sans avis de relecture au contrôle du 12/10. La ligne de Linda est renseignée sur sa branche ; les environnements de Bachar et Nassim restent manquants. Aucune validation collective du choix des machines n'est attestée.
