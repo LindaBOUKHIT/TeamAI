@@ -1,3 +1,4 @@
+"""SCRUM-24 : baseline régression logistique sur les comptages d'événements E1–E29 (référence du BiLSTM)."""
 
 import json
 from pathlib import Path
@@ -91,6 +92,7 @@ def evaluate_unseen(model, train, dataset, split_name):
 
 
 def main():
+    """Entraîne la baseline sur train, l'évalue sur val et test et enregistre les résultats en JSON."""
     splits = load_dataset()
 
     train = splits["train"]
