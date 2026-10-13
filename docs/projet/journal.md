@@ -11,6 +11,12 @@ Classeur partagé : [TeamAI : Classeur de suivi](https://docs.google.com/spreads
 | 21/09/2026 | Proposition d’un sujet sur les logs HDFS en remplacement du support client | Nouveau sujet présenté dans le texte du groupe et examiné avec un assistant IA | Validation enseignant non connue |
 | 21/09/2026 | Périmètre initial proposé : HDFS_v1, classification binaire par trace et interprétation sourcée | Alignement sur les annotations décrites par Loghub | Audit des fichiers à réaliser |
 | 21/09/2026 | Répartition nominative et liste de tâches préparées | Formaliser les attendus d’organisation du jalon J2 | À confirmer par les quatre membres |
+| 06/10/2026 | Board Jira structuré : 7 epics, 5 sprints alignés sur les jalons, tâches avec responsable, relecteur et critère de fin | Jalon de mi-parcours manqué ; tickets à créer avant le travail | Fait (SCRUM-5 à SCRUM-55) |
+| 06/10/2026 | Dépôt : `main` = production, `dev` = travail en cours, une branche et une PR par ticket | Traçabilité exigée par le sujet | Fait (SCRUM-13) |
+| 06/10/2026 | Structure du dépôt d'Alain conservée sur `main` ; arborescence parallèle de Linda abandonnée (compatible) | Éviter deux structures concurrentes | Décidé avec Linda |
+| 06/10/2026 | Inférence et démo du volet B sur la machine d'Alain (i5-1240P, 32 Go, sans GPU NVIDIA) | Seule machine relevée à ce jour ; RAM suffisante pour un modèle de 1,7 B | SCRUM-15, à confirmer par SCRUM-28 |
+| 06/10/2026 | Entraînement LoRA envisagé sur GPU en ligne (Kaggle, Colab en secours) | Machine d'Alain sans GPU NVIDIA ; essai court requis | Proposition SCRUM-15 ; disponibilité et faisabilité à vérifier dans SCRUM-29 |
+| 08/10/2026 | Rattrapage de SCRUM-15 : relevé d'Alain vérifié, premiers essais SLM référencés, informations manquantes explicites | Avancer avec les éléments vérifiables | PR #3 à compléter par Bachar, Linda et Nassim puis relire par Linda ; ticket ouvert |
 
 ## Usages des assistants IA
 
@@ -18,6 +24,8 @@ Classeur partagé : [TeamAI : Classeur de suivi](https://docs.google.com/spreads
 |---|---|---|---|---|---|
 | 21/09/2026 | Alain | Codex | Aide à la rédaction du courriel et examen du dataset Loghub | Consultation du README Loghub et de la documentation HDFS ; distinction entre anomalie et cause de panne | Données non téléchargées et faisabilité non testée |
 | 21/09/2026 | Alain | Codex | Vérification des attendus du PDF et préparation de l’organisation | Lecture des pages sur le cadrage, les jalons et les livrables ; fichiers de cadrage et tâches préparés | Relecture du groupe requise ; board et classeur partagé non créés |
+| 06/10/2026 | Alain | Claude Code + connecteur MCP Atlassian | Création du board Jira (epics, sprints, tâches, dépendances), téléchargement et audit de HDFS_v1, structure du dépôt, relevé de la machine | Données vérifiées (MD5, statistiques recalculées) ; tickets relus | Répartition et contrats à valider en réunion (SCRUM-55) |
+| 08/10/2026 | Alain | Codex | Complément de SCRUM-15 | Lecture du ticket et de la PR #3, relevé CPU/RAM/GPU/disque et comparaison aux essais documentés dans les PR #4 et #6 | Environnements des camarades et accès GPU non connus ; validation du groupe requise |
 
 ## Expériences
 
@@ -42,6 +50,26 @@ Pour chaque essai, consigner la date, le responsable, la version du code, les do
   1. L'inférence locale fonctionne (jalon de mi-parcours, preuve pour SCRUM-17).
   2. À 0,6 token/s, évaluer 4 configurations sur 60–100 traces prendrait plusieurs dizaines d'heures en float32 sur CPU. Il faut une version quantifiée (GGUF 4 bits via llama.cpp/Ollama) pour la démo et les évaluations, ou faire tourner les évaluations sur le GPU Kaggle. À décider.
   3. Le modèle ignore les lignes `WARN` : piste pour le prompt, le RAG et les exemples d'adaptation (mettre en avant les événements rares).
+
+### 06/10/2026 — Version 4 bits du SLM : GGUF Q4_K_M contre float32 (SCRUM-57, Alain)
+
+- **Commande** : `python -m volet_b.slm.bench_gguf --backend llamacpp|transformers` · sorties dans `eval/runs/2026-10-06_bench_<backend>/` (non versionné).
+- **Modèles** : GGUF officiel `HuggingFaceTB/SmolLM2-1.7B-Instruct-GGUF` (`q4_k_m`, 0,98 Go) via llama-cpp-python 0.3.36 (roue CPU) ; float32 via Transformers comme SCRUM-28. Mêmes paramètres (glouton, pénalité 1,1 sur tout le contexte, 300 tokens max), même bloc, même machine.
+- **Prompt** : consigne **avant** les logs (voir constat ci-dessous), identique pour les deux versions.
+
+| Mesure | float32 (Transformers) | Q4_K_M (llama.cpp) |
+|---|---|---|
+| Taille sur disque | 3,4 Go | 0,98 Go |
+| Chargement | 24 s | **2,9 s** |
+| Mémoire après chargement / pic | 6,8 Go / 16,1 Go | **2,3 Go / 2,8 Go** |
+| Génération | 158 tokens en 246 s → 0,64 token/s | 192 tokens en 101 s → **1,9 token/s** |
+| Avis normal/anormal | « normal » (faux) | « anormal » (juste) |
+
+- **Constat sur l'ordre du prompt** : avec le prompt de SCRUM-28 (logs puis consigne), la version 4 bits **recopie les logs** au lieu de les résumer — reproduit même avec 5 lignes de logs ; une question courte sans logs est bien traitée. Consigne placée **avant** les logs → résumé correct. Cette sensibilité est observée avec Q4_K_M **sous llama.cpp** : l'expérience ne sépare pas l'effet de la quantification de celui du backend (gabarit de conversation, échantillonneur). Règle retenue pour tous les prompts du volet B : consigne d'abord, données ensuite.
+- **Qualité** : aucune des deux versions ne cite les `WARN`. La 4 bits répond « anormal » mais justifie par un problème de suppression mal interprété ; la float32 conclut « normal » et affirme que le bloc « n'est pas supprimé ». Une seule trace : aucune conclusion générale sur la qualité.
+- **Débit** : 1,9 token/s ici contre 3,8 token/s mesurés avec un prompt plus court ; le coût vient surtout du traitement du prompt (~2 200 tokens) et de la pénalité appliquée sur tout le contexte.
+- **Limites (relevées le 13/10)** : mesure faite avec l'ancienne version de `generate.py` (avant la normalisation du cache de SCRUM-28) ; une seule trace, une seule exécution par backend ; les dossiers de sortie d'un même jour s'écrasaient. Ces chiffres sont des **observations**, pas une comparaison contrôlée. Exemple : relancé le 13/10 avec le script corrigé (même bloc, même GGUF, révision figée), llama.cpp donne la même réponse de 192 tokens mais à 0,71 token/s au lieu de 1,9, la machine étant chargée par d'autres processus ; la mémoire est identique (2,28 / 2,77 GiB).
+- **Décision provisoire** : Q4_K_M est le candidat pour la démo et les évaluations, au vu de l'ordre de grandeur (environ ×3 en débit et une mémoire de pic bien plus faible sur cette trace). À confirmer par une comparaison contrôlée sur le code corrigé et plusieurs traces de **validation** (SCRUM-38). Reste pour le Sprint 2 : convertir le modèle adapté par LoRA en GGUF et brancher le backend llama.cpp derrière `generate()`.
 
 ### 08/10/2026 — Préparation de la relecture de SCRUM-28 (Alain)
 
@@ -84,6 +112,12 @@ Un audit croisé des branches (Codex, lecture seule, vérifié par Alain) montre
 ### Usage d'assistant — 08/10/2026
 
 Alain utilise Codex pour relire SCRUM-55, examiner le chargeur de données et l'interface SLM existante sur la branche SCRUM-28, puis préciser les sept formats. Vérification : cohérence documentaire avec le code observé et contrôle syntaxique des exemples JSON. Limite : pas de validation collective, pas de modèle ONNX ou de retrieval livré par ce travail.
+
+## Suivi du 12/10/2026 — SCRUM-15 (Alain)
+
+Vérification GitHub : la PR #4 de SCRUM-28 a été approuvée par Linda et fusionnée le 11/10. La PR #3 de SCRUM-15 reste ouverte, sans avis de relecture au contrôle du 12/10. La ligne de Linda est renseignée sur sa branche ; les environnements de Bachar et Nassim restent manquants. Aucune validation collective du choix des machines n'est attestée.
+
+La branche de SCRUM-15 intègre les changements approuvés de `dev`, puis le relevé est actualisé avec les mesures du 08/10 et le chemin de cache observé. Alain utilise Codex pour ces vérifications et corrections documentaires. Le ticket ne remplit pas encore son critère de clôture ; la mise à jour Jira est également indisponible dans cette session faute d'outils MCP TeamAI.
 
 ## 2026-10-11 — SCRUM-22 — Bachar Ben Slama
 

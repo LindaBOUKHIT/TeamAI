@@ -1,3 +1,4 @@
+"""SCRUM-21 : génère les fichiers d'exemple du site (volet_a/web/public/examples/) à partir des logs bruts HDFS."""
 
 import re
 from pathlib import Path
@@ -13,6 +14,10 @@ BLOCK_PATTERN = re.compile(r"blk_-?\d+")
 
 
 def main():
+    """Choisit deux blocs normaux et un anormal, extrait leurs lignes brutes et écrit cinq fichiers d'exemple.
+
+    Fichiers : bloc normal, bloc anormal, plusieurs blocs mélangés, bloc tronqué, lignes invalides.
+    """
     OUTPUT.mkdir(parents=True, exist_ok=True)
 
     test = load_split("test")
@@ -53,6 +58,7 @@ def main():
             )
 
     def save(filename, lines):
+        """Écrit `lines` dans OUTPUT/filename et affiche le nombre de lignes."""
         path = OUTPUT / filename
         with open(path, "w", encoding="utf-8") as f:
             f.writelines(lines)
