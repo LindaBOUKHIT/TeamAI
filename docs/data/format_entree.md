@@ -95,14 +95,21 @@ Les fichiers se trouvent dans :
 
 | Fichier | Description |
 |---|---|
-| `01_normal.log` | Bloc normal issu du test officiel SCRUM-20 |
-| `02_anomalie.log` | Bloc anormal issu du test officiel SCRUM-20 |
-| `03_plusieurs_blocs.log` | Plusieurs blocs issus du test officiel |
+| `01_normal.log` | Bloc normal issu de la validation SCRUM-20 |
+| `02_anomalie.log` | Bloc anormal issu de la validation SCRUM-20 |
+| `03_plusieurs_blocs.log` | Plusieurs blocs issus de la validation |
 | `04_bloc_incomplet.log` | Bloc normal volontairement tronqué |
 | `05_lignes_invalides.log` | Lignes artificielles invalides |
 
 Les exemples normaux et anormaux sont sélectionnés
-à partir des labels du jeu de test officiel.
+à partir des labels du jeu de **validation** : le test officiel
+reste réservé à l'évaluation finale (CONTRIBUTING §6, contrat C4).
+
+Correction du 13/10 : une première version tirait ces exemples du test.
+Les trois blocs alors exposés sont `blk_-1000014584150379967`,
+`blk_-100004553717737248` et `blk_-1001299764911418845`. Aucun modèle n'a été
+réglé dessus ; ils restent dans le test mais sont signalés ici, et l'évaluation
+finale du volet A peut rapporter un résultat qui les exclut.
 
 Les fichiers incomplets et invalides servent uniquement
 aux tests de robustesse de l'importation.
