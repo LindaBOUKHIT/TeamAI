@@ -77,6 +77,10 @@ Relecture attendue : Nassim pour C1/C2/C4 et le protocole C7 ; Bachar pour C3 ; 
 
 Suite : corriger selon les retours, consigner les décisions réelles et fusionner la PR vers `dev`. SCRUM-55 reste ouvert jusque-là ; les dépendances SCRUM-25/26/29 restent suivies dans Jira.
 
+### 13/10/2026 — Alignement des contrats sur le code fusionné (SCRUM-55, Alain)
+
+Un audit croisé des branches (Codex, lecture seule, vérifié par Alain) montre que la v1 de la PR #7 imposait un regroupement des séquences identiques entre splits, alors que SCRUM-20 a livré, conformément au contrat alors en vigueur sur `dev`, un tirage stratifié bloc par bloc sur lequel reposent déjà les résultats de la baseline SCRUM-24. Proposition retenue dans la v1.1 : `C4-bloc` reste le protocole de référence, avec des métriques du test toujours rapportées aussi sur les séquences inédites (`unseen_seq`) ; un regroupement éventuel devient une variante nommée `C4-groupe`. Mises à jour associées : état réel de C2 (inconnus → SCRUM-26), migration des métadonnées C3 du spike, sources vides autorisées et règles d'abstention C5, dossier d'exécution unique en C7. À valider par Nassim (C4) et le groupe avant fusion.
+
 ### Usage d'assistant — 08/10/2026
 
 Alain utilise Codex pour relire SCRUM-55, examiner le chargeur de données et l'interface SLM existante sur la branche SCRUM-28, puis préciser les sept formats. Vérification : cohérence documentaire avec le code observé et contrôle syntaxique des exemples JSON. Limite : pas de validation collective, pas de modèle ONNX ou de retrieval livré par ce travail.

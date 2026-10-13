@@ -1,6 +1,6 @@
 # Formats d'échange entre les tâches
 
-**Version proposée : v1, préparée le 08/10/2026 pour SCRUM-55. Validation du groupe en attente.** Les formats servent de base de travail avec des exemples factices. Ils seront figés après relecture des quatre membres et fusion de la PR vers `dev`. Aucune réunion de validation n'est attestée à ce jour.
+**Version proposée : v1.1 (08/10/2026, alignée le 13/10 sur le code fusionné : splits par bloc, état de C2, migration C3, règles C5 et C7). Validation du groupe en attente.** Les formats servent de base de travail avec des exemples factices. Ils seront figés après relecture des quatre membres et fusion de la PR vers `dev`. Aucune réunion de validation n'est attestée à ce jour.
 
 Périmètre proposé : classification **binaire** pour le volet A ; `anomaly_type` reste une métadonnée du corpus. Les deux applications restent indépendantes. Un label d'anomalie ne fournit pas une cause de panne.
 
@@ -46,7 +46,7 @@ Fichier : `volet_a/web/public/vocab.json`, produit par SCRUM-19.
 - Encodage : garder les **50 premiers événements**, puis compléter à droite avec `pad_id` ; ne jamais trier ni dédupliquer la séquence. Signaler le nombre d'événements tronqués et inconnus dans l'interface.
 - Une trace vide est rejetée avec un message explicite ; elle ne doit pas être classée comme un bloc normal. Les longueurs supérieures à 50 restent acceptées, avec avertissement de troncature.
 
-**État du code au 08/10 :** `teamai.data.loader.encode()` réalise déjà la troncature et le padding, mais lève une erreur sur un événement inconnu. La gestion de `unk_id`, l'export de `vocab.json` et les cas de parité restent à livrer dans SCRUM-19/26 ; ce document décrit leur interface attendue.
+**État du code au 13/10 :** `teamai.data.loader.encode()` réalise la troncature et le padding, mais lève une erreur sur un événement inconnu au lieu de rendre `unk_id`. Le parser de référence `data/parse_hdfs.py` (SCRUM-19) écarte les lignes non reconnues ou ambiguës et n'exporte pas encore `vocab.json`. La gestion de `unk_id`, l'export de `vocab.json` avec les regex réelles et les cas de parité Python/JavaScript sont à livrer dans **SCRUM-26** ; aucun test ne doit figer le comportement actuel.
 
 ## C3 — Modèle ONNX du volet A (entraînement → site)
 
@@ -75,17 +75,21 @@ Exemple de `detector.meta.json` :
 }
 ```
 
+**Migration :** le `detector.meta.json` actuel vient du spike SCRUM-22 (poids aléatoires, champs `trained_on` et `version: "spike"`). Il reste valide pour le spike ; le premier modèle entraîné (SCRUM-25) adopte le schéma ci-dessus, et le site signale clairement un modèle factice si `trained_on` vaut `none-random-weights`.
+
 Les valeurs de l'exemple ne sont pas des mesures. Avant publication, les hashes réels et la macro-F1 de validation sont renseignés. Le seuil est choisi sur la validation, jamais sur le test, puis utilisé à l'identique : `p_anomaly >= threshold` donne le label `1`.
 
 L'interface vérifie les noms, types et dimensions, la cohérence du vocabulaire et une probabilité finie comprise entre 0 et 1. Une sortie invalide devient une erreur affichée, sans prédiction de remplacement. Les scores ne sont pas présentés comme des probabilités calibrées. La parité Python/ONNX/JavaScript est vérifiée avant déploiement (SCRUM-22/26).
 
 ## C4 — Splits (données → entraînement et évaluation)
 
-`data/splits/splits.csv` (non versionné, à produire par `data/make_splits.py` dans SCRUM-20) : colonnes `BlockId,split,unseen_seq`, avec `split ∈ {train, val, test}`. `unseen_seq` est un booléen CSV `true`/`false` : pour un bloc de test, il indique que sa séquence complète n'apparaît pas dans train ; pour les autres splits, il vaut `false` par convention.
+`data/splits/splits.csv` (non versionné, produit par `data/make_splits.py`, SCRUM-20) : colonnes `BlockId,split,unseen_seq`, avec `split ∈ {train, val, test}`. `unseen_seq` est un booléen (`True`/`False`, écriture pandas) : pour un bloc de test, il indique que sa séquence complète n'apparaît pas dans train ; pour les autres splits, il vaut `False` par convention. Lecture : `teamai.data.splits.load_split()`.
 
-Un bloc appartient à un seul split. Les séquences complètes identiques sont regroupées pour éviter une fuite entre splits dans le protocole officiel ; si un split provisoire est utilisé, il est nommé et rapporté séparément. L'encodage tronqué ne sert pas à décider de ces groupes. Aucun seuil ni prompt n'est ajusté sur le test.
+**Protocole de référence (protocole `C4-bloc`, livré par SCRUM-20) :** tirage aléatoire **stratifié par label, bloc par bloc** (70/15/15, seed 42). Un bloc appartient à un seul split. Comme HDFS_v1 ne compte que 18 373 séquences uniques pour 575 061 blocs, des séquences identiques se retrouvent dans plusieurs splits : ce n'est pas une fuite d'identifiant, mais cela rend la tâche plus facile sur les séquences déjà vues. Les métriques du test sont donc **toujours rapportées deux fois** : sur tout le test et sur le sous-ensemble `unseen_seq = True` (séquences inédites), qui mesure la généralisation. Toutes les références (baseline SCRUM-24, BiLSTM, SLM) utilisent ce protocole.
 
-`data/splits/splits_meta.json` (versionné) contient la seed, la méthode de regroupement, les effectifs et proportions d'anomalies par split, les SHA-256 des fichiers source et de `splits.csv`, ainsi que le commit du script. Les proportions attendues et la seed sont fixées dans SCRUM-20. Les hashes portent sur les octets des fichiers produits, sans réécriture ultérieure.
+Un protocole regroupant les séquences identiques reste possible comme variante, sous un autre nom (`C4-groupe`), avec ses propres résultats ; il ne remplace pas `C4-bloc` sans décision d'équipe consignée dans le journal. L'encodage tronqué ne sert jamais à décider des splits. Aucun seuil, prompt, exemple de démonstration ni hyperparamètre n'est choisi sur le test.
+
+`data/splits/splits_meta.json` (versionné) contient le protocole, la seed, les proportions, les effectifs et taux d'anomalies par split, le nombre de séquences inédites du test et le SHA-256 de `splits.csv`. À ajouter lors de la prochaine régénération : SHA-256 du fichier source et commit du script.
 
 ## C5 — Exemple d'explication (volet B : annotation, LoRA, évaluation)
 
@@ -116,11 +120,12 @@ La sortie du modèle (volet B) suit exactement le schéma de `expected`.
 
 - `id` est unique ; `block_id` renvoie à C1 ; les valeurs de `split` sont `train`, `val`, `test`. Les exemples d'adaptation excluent le test.
 - `trace_lines` et `events` décrivent le même bloc. Les résumés et hypothèses sont vérifiés par l'annotateur puis par le relecteur ; leurs noms sont renseignés après leur travail réel.
-- Les six clés de `expected` sont obligatoires : une chaîne, quatre listes de chaînes et un booléen. Des listes vides sont autorisées. Une hypothèse doit rester distincte d'un fait observé ; en cas d'abstention, `hypotheses` est vide et `infos_manquantes` explique pourquoi.
+- Les six clés de `expected` sont obligatoires : une chaîne, quatre listes de chaînes et un booléen. Des listes vides sont autorisées, y compris `sources` (configurations sans RAG). Une hypothèse doit rester distincte d'un fait observé ; en cas d'abstention, `hypotheses` est vide et `infos_manquantes` explique pourquoi (au moins un élément).
+- Contrôle automatique : `teamai.contracts.validate_answer()` vérifie la structure et ces règles d'abstention ; avec la liste des IDs C6 fournis au modèle, il vérifie aussi que chaque source citée en fait partie.
 - **À l'évaluation, ni `label`, ni `expected`, ni les annotations ne sont transmis au SLM ou au retrieval.** L'entrée du modèle contient seulement les traces, la consigne et, selon la configuration, les passages C6.
 - La génération est du texte brut : du JSON invalide, une clé manquante ou une référence absente du corpus sont enregistrés comme erreurs. Aucune réparation silencieuse par les réponses attendues.
 
-Interface SLM prévue dans SCRUM-28, déjà disponible sur sa branche :
+Interface SLM livrée par SCRUM-28 (sur `dev`) :
 
 ```python
 from volet_b.slm.generate import generate
@@ -129,7 +134,7 @@ result = generate([{"role": "user", "content": "Consigne puis trace HDFS"}])
 # result : {"text": str, "new_tokens": int, "seconds": float}
 ```
 
-`text` doit être analysé et vérifié par l'orchestrateur avant d'être affiché comme réponse structurée. Le mode `TEAMAI_SLM_MOCK=1` permet de développer les consommateurs sans poids de modèle ; ses résultats sont identifiés comme factices et exclus des évaluations de qualité. Le backend GGUF de SCRUM-57 n'est pas encore intégré à cette interface au 08/10.
+`text` doit être analysé et vérifié par l'orchestrateur avant d'être affiché comme réponse structurée. Le mode `TEAMAI_SLM_MOCK=1` permet de développer les consommateurs sans poids de modèle ; ses résultats sont identifiés comme factices et exclus des évaluations de qualité. Le backend GGUF de SCRUM-57 est encore un banc de mesure séparé (`bench_gguf.py`) : il sera branché derrière `generate()` sans changer cette interface.
 
 ## C6 — Passage documentaire RAG (corpus → retrieval → agents)
 
@@ -147,7 +152,7 @@ Interface de retrieval proposée : pour une requête et un `top_k`, retourner un
 
 ## C7 — Résultat d'une exécution d'évaluation
 
-`eval/runs/<date>_<config>/` (non versionné) : `predictions.jsonl`, `metrics.json`, `config.json` (modèle, adaptateur, paramètres de génération, commit Git). Le résumé chiffré va dans `eval/results/` (versionné).
+`eval/runs/<horodatage UTC>_<suffixe aléatoire>_<config>/` (non versionné, un dossier neuf par exécution, jamais écrasé ; voir `new_run_directory()` dans `volet_b/slm/first_inference.py`) : `predictions.jsonl`, `metrics.json`, `config.json` (modèle, adaptateur, paramètres de génération, commit Git). Le résumé chiffré va dans `eval/results/` (versionné). Le volet A suit la même règle ; pour la classification, une ligne de `predictions.jsonl` contient `BlockId`, `label`, `p_anomaly` et `split`.
 
 Les IDs de `predictions.jsonl` correspondent au jeu évalué. Chaque ligne conserve la sortie brute, la réponse analysée ou `null`, les erreurs de format/citation et les mesures ; un échec ne disparaît pas du dénominateur.
 
