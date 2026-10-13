@@ -69,7 +69,7 @@ python -m unittest discover -s tests -p test_scrum28_inference.py -v
 
 Les tests utilisent des lignes factices et des dossiers temporaires : ils vérifient que le mode factice ne charge pas les poids, qu'une vraie mesure refuse ce mode, que l'extraction ne mélange pas les blocs, et qu'une relance conserve les preuves antérieures.
 
-La [preuve du 08/10](../../../eval/results/SCRUM-28/README.md) publie la synthèse, la réponse brute et les artefacts compacts pour permettre une relecture sans télécharger les poids. La PR #4 a été fusionnée dans `dev`. Le tableau complet des environnements (SCRUM-15) reste à compléter par Bachar et Nassim.
+La [preuve du 08/10](../../eval/results/SCRUM-28/README.md) publie la synthèse, la réponse brute et les artefacts compacts pour permettre une relecture sans télécharger les poids. La PR #4 a été fusionnée dans `dev`. Le tableau complet des environnements (SCRUM-15) reste à compléter par Bachar et Nassim.
 
 ## Version 4 bits (SCRUM-57, expérimental)
 
