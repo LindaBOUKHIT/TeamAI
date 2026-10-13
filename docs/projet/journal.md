@@ -51,6 +51,26 @@ Pour chaque essai, consigner la date, le responsable, la version du code, les do
   2. À 0,6 token/s, évaluer 4 configurations sur 60–100 traces prendrait plusieurs dizaines d'heures en float32 sur CPU. Il faut une version quantifiée (GGUF 4 bits via llama.cpp/Ollama) pour la démo et les évaluations, ou faire tourner les évaluations sur le GPU Kaggle. À décider.
   3. Le modèle ignore les lignes `WARN` : piste pour le prompt, le RAG et les exemples d'adaptation (mettre en avant les événements rares).
 
+### 06/10/2026 — Version 4 bits du SLM : GGUF Q4_K_M contre float32 (SCRUM-57, Alain)
+
+- **Commande** : `python -m volet_b.slm.bench_gguf --backend llamacpp|transformers` · sorties dans `eval/runs/2026-10-06_bench_<backend>/` (non versionné).
+- **Modèles** : GGUF officiel `HuggingFaceTB/SmolLM2-1.7B-Instruct-GGUF` (`q4_k_m`, 0,98 Go) via llama-cpp-python 0.3.36 (roue CPU) ; float32 via Transformers comme SCRUM-28. Mêmes paramètres (glouton, pénalité 1,1 sur tout le contexte, 300 tokens max), même bloc, même machine.
+- **Prompt** : consigne **avant** les logs (voir constat ci-dessous), identique pour les deux versions.
+
+| Mesure | float32 (Transformers) | Q4_K_M (llama.cpp) |
+|---|---|---|
+| Taille sur disque | 3,4 Go | 0,98 Go |
+| Chargement | 24 s | **2,9 s** |
+| Mémoire après chargement / pic | 6,8 Go / 16,1 Go | **2,3 Go / 2,8 Go** |
+| Génération | 158 tokens en 246 s → 0,64 token/s | 192 tokens en 101 s → **1,9 token/s** |
+| Avis normal/anormal | « normal » (faux) | « anormal » (juste) |
+
+- **Constat sur l'ordre du prompt** : avec le prompt de SCRUM-28 (logs puis consigne), la version 4 bits **recopie les logs** au lieu de les résumer — reproduit même avec 5 lignes de logs ; une question courte sans logs est bien traitée. Consigne placée **avant** les logs → résumé correct. Cette sensibilité est observée avec Q4_K_M **sous llama.cpp** : l'expérience ne sépare pas l'effet de la quantification de celui du backend (gabarit de conversation, échantillonneur). Règle retenue pour tous les prompts du volet B : consigne d'abord, données ensuite.
+- **Qualité** : aucune des deux versions ne cite les `WARN`. La 4 bits répond « anormal » mais justifie par un problème de suppression mal interprété ; la float32 conclut « normal » et affirme que le bloc « n'est pas supprimé ». Une seule trace : aucune conclusion générale sur la qualité.
+- **Débit** : 1,9 token/s ici contre 3,8 token/s mesurés avec un prompt plus court ; le coût vient surtout du traitement du prompt (~2 200 tokens) et de la pénalité appliquée sur tout le contexte.
+- **Limites (relevées le 13/10)** : mesure faite avec l'ancienne version de `generate.py` (avant la normalisation du cache de SCRUM-28) ; une seule trace, une seule exécution par backend ; les dossiers de sortie d'un même jour s'écrasaient. Ces chiffres sont des **observations**, pas une comparaison contrôlée. Exemple : relancé le 13/10 avec le script corrigé (même bloc, même GGUF, révision figée), llama.cpp donne la même réponse de 192 tokens mais à 0,71 token/s au lieu de 1,9, la machine étant chargée par d'autres processus ; la mémoire est identique (2,28 / 2,77 GiB).
+- **Décision provisoire** : Q4_K_M est le candidat pour la démo et les évaluations, au vu de l'ordre de grandeur (environ ×3 en débit et une mémoire de pic bien plus faible sur cette trace). À confirmer par une comparaison contrôlée sur le code corrigé et plusieurs traces de **validation** (SCRUM-38). Reste pour le Sprint 2 : convertir le modèle adapté par LoRA en GGUF et brancher le backend llama.cpp derrière `generate()`.
+
 ### 08/10/2026 — Préparation de la relecture de SCRUM-28 (Alain)
 
 Lecture du ticket et de la PR #4, puis vérification des quatre artefacts locaux du 06/10 (`metrics.json`, `config.json`, `prompt.txt`, `output.txt`). Les mesures historiques sont conservées. Leur configuration indique le commit `9085610`, antérieur à l'ajout du code SLM ; sans état du code ni hash des sources, ce commit seul ne suffit pas à reconstituer l'exécution.

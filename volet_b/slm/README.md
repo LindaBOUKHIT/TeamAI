@@ -69,4 +69,8 @@ python -m unittest discover -s tests -p test_scrum28_inference.py -v
 
 Les tests utilisent des lignes factices et des dossiers temporaires : ils vérifient que le mode factice ne charge pas les poids, qu'une vraie mesure refuse ce mode, que l'extraction ne mélange pas les blocs, et qu'une relance conserve les preuves antérieures.
 
-La [preuve du 08/10](../../eval/results/SCRUM-28/README.md) publie la synthèse, la réponse brute et les artefacts compacts pour permettre une relecture sans télécharger les poids. Linda vérifie la commande, les artefacts et les limites ; SCRUM-28 reste en revue jusqu'à son approbation et à la fusion de la PR #4. Le tableau complet des environnements (SCRUM-15) demeure une dépendance de clôture suivie dans Jira.
+La [preuve du 08/10](../../eval/results/SCRUM-28/README.md) publie la synthèse, la réponse brute et les artefacts compacts pour permettre une relecture sans télécharger les poids. La PR #4 a été fusionnée dans `dev`. Le tableau complet des environnements (SCRUM-15) reste à compléter par Bachar et Nassim.
+
+## Version 4 bits (SCRUM-57, expérimental)
+
+`python -m volet_b.slm.bench_gguf --backend llamacpp|transformers --offline` compare le GGUF Q4_K_M officiel (révision figée) au modèle float32 sur le même bloc. Installation : `pip install -e ".[volet_b_gguf]" --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu`. C'est un banc de mesure : le backend llama.cpp n'est pas encore disponible via `generate()`. Résultats et limites dans `docs/projet/journal.md`.

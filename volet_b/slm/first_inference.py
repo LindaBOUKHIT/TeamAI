@@ -97,10 +97,10 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
-def new_run_directory(root: Path = RUNS) -> Path:
-    """Crée et rend un dossier d'exécution unique (horodatage UTC + suffixe aléatoire), sans jamais écraser un run précédent."""
+def new_run_directory(root: Path = RUNS, name: str = "first_inference") -> Path:
+    """Crée et rend un dossier d'exécution unique (horodatage UTC + suffixe aléatoire + `name`), sans jamais écraser un run précédent."""
     stamp = datetime.now(timezone.utc).strftime("%Y-%m-%d_%H%M%S_%fZ")
-    path = root / f"{stamp}_{uuid4().hex[:8]}_first_inference"
+    path = root / f"{stamp}_{uuid4().hex[:8]}_{name}"
     path.mkdir(parents=True, exist_ok=False)
     return path
 
