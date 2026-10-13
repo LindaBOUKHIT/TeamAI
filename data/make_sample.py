@@ -15,6 +15,11 @@ BLOCK_PATTERN = re.compile(r"blk_-?\d+")
 
 
 def make_sample(n_blocks=2000, anomaly_ratio=0.25, seed=42):
+    """Tire `n_blocks` blocs (dont `anomaly_ratio` d'anomalies) et écrit l'échantillon dans data/sample/.
+
+    Produit Event_traces.csv (colonnes d'origine) et HDFS_sample.log (lignes brutes des blocs tirés),
+    puis vérifie le résultat avec le chargeur commun ; lève une erreur si un bloc n'a aucune ligne brute.
+    """
     SAMPLE.mkdir(parents=True, exist_ok=True)
 
     # Utiliser le chargeur commun du projet.

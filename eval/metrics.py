@@ -1,3 +1,4 @@
+"""Métriques communes de classification binaire (normal / anomalie) pour comparer les modèles du volet A."""
 
 from sklearn.metrics import (
     accuracy_score,

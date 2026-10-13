@@ -29,6 +29,7 @@ MOCK_ANSWER = {
 
 
 def load_config() -> dict:
+    """Paramètres de génération lus dans configs/generation.yaml."""
     return yaml.safe_load(CONFIG.read_text(encoding="utf-8"))
 
 

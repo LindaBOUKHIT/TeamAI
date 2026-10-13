@@ -169,6 +169,7 @@ def save_sequences(sequences, output_path: Path):
 
 
 def main():
+    """Ligne de commande : parse HDFS.log avec les 29 templates, écrit le CSV des séquences et affiche les statistiques."""
     parser = argparse.ArgumentParser(
         description="SCRUM-19 : parser HDFS_v1"
     )
