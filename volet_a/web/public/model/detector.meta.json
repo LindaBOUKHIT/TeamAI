@@ -1,0 +1,7 @@
+{
+  "threshold": 0.5,
+  "model": "bilstm",
+  "version": "spike",
+  "trained_on": "none-random-weights",
+  "val_macro_f1": null
+}

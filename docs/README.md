@@ -12,7 +12,7 @@ docs/
 │   ├── cadrage/                Rendu J2, cadrage, tâches initiales
 │   └── archives/               Ancienne proposition (support client, abandonnée)
 ├── data/
-│   ├── audit_hdfs.md           Audit du corpus                                      SCRUM-18 / SCRUM-20
+│   ├── audit_hdfs_scrum18.md           Audit du corpus                                      SCRUM-18
 │   └── format_entree.md        Formats acceptés par le site                         SCRUM-21
 ├── volet_a/
 │   ├── optimisation.md         Quantification, taille, latence (tableau comparatif)  SCRUM-40
