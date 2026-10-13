@@ -1,3 +1,4 @@
+"""SCRUM-21 : génère les fichiers d'exemple du site (volet_a/web/public/examples/) à partir des logs bruts HDFS."""
 
 import re
 from pathlib import Path
@@ -13,13 +14,19 @@ BLOCK_PATTERN = re.compile(r"blk_-?\d+")
 
 
 def main():
+    """Choisit deux blocs normaux et un anormal, extrait leurs lignes brutes et écrit cinq fichiers d'exemple.
+
+    Fichiers : bloc normal, bloc anormal, plusieurs blocs mélangés, bloc tronqué, lignes invalides.
+    """
     OUTPUT.mkdir(parents=True, exist_ok=True)
 
-    test = load_split("test")
+    # Exemples de démonstration tirés de la validation : le test officiel reste réservé
+    # à l'évaluation finale (CONTRIBUTING §6, contrat C4).
+    val = load_split("val")
 
-    # Sélection déterministe de blocs du test officiel
-    normal = test[test["label"] == 0].sort_values("BlockId")
-    anomaly = test[test["label"] == 1].sort_values("BlockId")
+    # Sélection déterministe de blocs de validation
+    normal = val[val["label"] == 0].sort_values("BlockId")
+    anomaly = val[val["label"] == 1].sort_values("BlockId")
 
     if normal.empty or anomaly.empty:
         raise RuntimeError("Blocs normaux ou anormaux absents.")
@@ -53,6 +60,7 @@ def main():
             )
 
     def save(filename, lines):
+        """Écrit `lines` dans OUTPUT/filename et affiche le nombre de lignes."""
         path = OUTPUT / filename
         with open(path, "w", encoding="utf-8") as f:
             f.writelines(lines)

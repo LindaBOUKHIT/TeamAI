@@ -36,6 +36,7 @@ def download():
 
 
 def check():
+    """Vérifie le MD5 de l'archive téléchargée ; lève RuntimeError s'il ne correspond pas à Zenodo."""
     h = hashlib.md5()
     with open(ZIP, "rb") as f:
         while chunk := f.read(1 << 20):
