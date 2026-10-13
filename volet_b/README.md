@@ -7,7 +7,7 @@ Modèle : SmolLM2-1.7B-Instruct (repli : plus petit si la machine l'impose, déc
 volet_b/
 ├── slm/                                                         Alain
 │   ├── first_inference.py      1re inférence + mesures mémoire/latence          SCRUM-28
-│   ├── generate.py             Interface unique : generate(prompt, adapter=None)  (utilisée par rag/ et agents/)
+│   ├── generate.py             Interface unique : generate(prompt ou messages, adapter=None)
 │   ├── train_lora.py           Entraînement LoRA / QLoRA                        SCRUM-29 / SCRUM-39
 │   ├── configs/                lora_essai.yaml, lora_final.yaml, generation.yaml
 │   ├── adapters/               — non versionné
@@ -47,6 +47,8 @@ volet_b/
 
 ```bash
 pip install -e ".[data,volet_b]"
-python volet_b/slm/first_inference.py
+python -m volet_b.slm.first_inference
 python volet_b/app/app.py          # interface locale
 ```
+
+Pour SCRUM-28, suivre le [README du SLM](slm/README.md) : installation minimale, mode factice, exécution réelle et preuves d'inférence. Les autres composants de l'arborescence restent des livraisons prévues par leurs tickets.

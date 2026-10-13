@@ -9,9 +9,9 @@ web/
 ├── src/
 │   ├── main.js             Câblage de l'interface
 │   ├── preprocess.js       Logs bruts → séquences (regex de public/vocab.json)   SCRUM-26
-│   ├── model.js            Chargement + cache du modèle, inférence (Web Worker)   SCRUM-23 / SCRUM-39
-│   ├── worker.js           Inférence par lot sans bloquer l'interface             SCRUM-39
-│   └── ui/                 Saisie, dépôt de fichier, tableau, export CSV          SCRUM-27 / SCRUM-40
+│   ├── model.js            Chargement + cache du modèle, inférence (Web Worker)   SCRUM-23 / SCRUM-40
+│   ├── worker.js           Inférence par lot sans bloquer l'interface             SCRUM-40
+│   └── ui/                 Saisie, dépôt de fichier, tableau, export CSV          SCRUM-27 / SCRUM-41
 ├── public/                 Copié tel quel dans le site publié
 │   ├── model/detector.onnx + detector.meta.json      (contrat C3)
 │   ├── vocab.json                                      (contrat C2)

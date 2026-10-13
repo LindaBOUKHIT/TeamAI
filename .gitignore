@@ -36,4 +36,7 @@ eval/runs/
 Thumbs.db
 *.log
 !volet_a/web/public/examples/*.log
+!data/sample/*.log
 ~$*
+
+/data/parsed/

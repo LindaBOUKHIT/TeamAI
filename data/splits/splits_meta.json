@@ -1,0 +1,37 @@
+{
+  "protocol": "C4",
+  "source": "Loghub HDFS_v1/Event_traces.csv",
+  "method": "stratified_random_by_BlockId",
+  "seed": 42,
+  "ratios": {
+    "train": 0.7,
+    "val": 0.15,
+    "test": 0.15
+  },
+  "normal_undersampling": false,
+  "hash_algorithm": "sha256",
+  "splits_csv_sha256": "f504592cb7ac13b8b7e5d532a336b4e3641ec441a863c5efafd164faa2a43f22",
+  "total_blocks": 575061,
+  "splits": {
+    "train": {
+      "size": 402542,
+      "normal": 390755,
+      "anomaly": 11787,
+      "anomaly_rate": 0.029281416597522744
+    },
+    "val": {
+      "size": 86259,
+      "normal": 83734,
+      "anomaly": 2525,
+      "anomaly_rate": 0.029272307817155313
+    },
+    "test": {
+      "size": 86260,
+      "normal": 83734,
+      "anomaly": 2526,
+      "anomaly_rate": 0.029283561326223048,
+      "unseen_seq_count": 1962,
+      "unseen_seq_rate": 0.022745188963598423
+    }
+  }
+}
