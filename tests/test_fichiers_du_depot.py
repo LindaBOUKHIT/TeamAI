@@ -19,6 +19,26 @@ def test_annotations_respectent_C5(path):
         assert validate_example(example) == [], f"{path.name}, exemple n°{n} ({example.get('id')})"
 
 
+@pytest.mark.parametrize("path", ANNOTATIONS, ids=lambda p: p.name)
+def test_sources_des_annotations_existent_dans_le_corpus(path):
+    """Chaque source citée est un identifiant existant de volet_b/rag/corpus/chunks.jsonl (C6)."""
+    corpus_ids = {passage["id"] for passage in load_jsonl(paths.RAG / "corpus" / "chunks.jsonl")}
+    for example in load_jsonl(path):
+        unknown = set(example["expected"]["sources"]) - corpus_ids
+        assert not unknown, f"{path.name}, {example['id']} : sources absentes du corpus {sorted(unknown)}"
+
+
+@pytest.mark.parametrize("path", ANNOTATIONS, ids=lambda p: p.name)
+def test_annotations_hors_test_et_split_conforme(path):
+    """Chaque exemple d'adaptation vient de train ou val, conformément à data/splits/splits.csv (C4)."""
+    import pandas as pd
+
+    official = pd.read_csv(paths.SPLITS / "splits.csv", usecols=["BlockId", "split"]).set_index("BlockId")["split"]
+    for example in load_jsonl(path):
+        assert example["split"] in ("train", "val"), f"{path.name}, {example['id']} : split {example['split']}"
+        assert official.get(example["block_id"]) == example["split"], f"{path.name}, {example['id']}"
+
+
 @pytest.mark.skipif(not TEST_SET.exists(), reason="jeu de test réservé pas encore constitué (SCRUM-35)")
 def test_jeu_de_test_respecte_C5():
     """Le test réservé respecte C5 et ne contient que des exemples du split test."""
