@@ -1,0 +1,12 @@
+{
+  "block_id": "blk_8362325295506522506",
+  "label": "anomalie",
+  "raw_lines": 25,
+  "load_seconds": 37.4,
+  "rss_before_gb": 0.08,
+  "rss_after_load_gb": 6.77,
+  "rss_peak_generation_gb": 16.28,
+  "new_tokens": 156,
+  "generation_seconds": 257.92,
+  "tokens_per_second": 0.6
+}

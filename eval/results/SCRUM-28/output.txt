@@ -1,0 +1,5 @@
+1. Les DataNodes du cluster sont chargés de recevoir et d'envoyer des blocks de données vers leurs serveurs.
+2. Le premier block envoyé est de taille 67108864 octets (environ 67 Mo) et contient une adresse IP et un nom de domaine.
+3. Les DataNodes reçoivent les blocks et les stockent dans leur volumme.
+4. Les DataNodes envoient les blocks vers l'utilisateur en utilisant des port spéciaux.
+5. Les DataNodes terminent la communication avec le client après avoir reçu le block.
