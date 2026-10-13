@@ -11,6 +11,12 @@ Classeur partagé : [TeamAI : Classeur de suivi](https://docs.google.com/spreads
 | 21/09/2026 | Proposition d’un sujet sur les logs HDFS en remplacement du support client | Nouveau sujet présenté dans le texte du groupe et examiné avec un assistant IA | Validation enseignant non connue |
 | 21/09/2026 | Périmètre initial proposé : HDFS_v1, classification binaire par trace et interprétation sourcée | Alignement sur les annotations décrites par Loghub | Audit des fichiers à réaliser |
 | 21/09/2026 | Répartition nominative et liste de tâches préparées | Formaliser les attendus d’organisation du jalon J2 | À confirmer par les quatre membres |
+| 06/10/2026 | Board Jira structuré : 7 epics, 5 sprints alignés sur les jalons, tâches avec responsable, relecteur et critère de fin | Jalon de mi-parcours manqué ; tickets à créer avant le travail | Fait (SCRUM-5 à SCRUM-55) |
+| 06/10/2026 | Dépôt : `main` = production, `dev` = travail en cours, une branche et une PR par ticket | Traçabilité exigée par le sujet | Fait (SCRUM-13) |
+| 06/10/2026 | Structure du dépôt d'Alain conservée sur `main` ; arborescence parallèle de Linda abandonnée (compatible) | Éviter deux structures concurrentes | Décidé avec Linda |
+| 06/10/2026 | Inférence et démo du volet B sur la machine d'Alain (i5-1240P, 32 Go, sans GPU NVIDIA) | Seule machine relevée à ce jour ; RAM suffisante pour un modèle de 1,7 B | SCRUM-15, à confirmer par SCRUM-28 |
+| 06/10/2026 | Entraînement LoRA envisagé sur GPU en ligne (Kaggle, Colab en secours) | Machine d'Alain sans GPU NVIDIA ; essai court requis | Proposition SCRUM-15 ; disponibilité et faisabilité à vérifier dans SCRUM-29 |
+| 08/10/2026 | Rattrapage de SCRUM-15 : relevé d'Alain vérifié, premiers essais SLM référencés, informations manquantes explicites | Avancer avec les éléments vérifiables | PR #3 à compléter par Bachar, Linda et Nassim puis relire par Linda ; ticket ouvert |
 
 ## Usages des assistants IA
 
@@ -18,6 +24,8 @@ Classeur partagé : [TeamAI : Classeur de suivi](https://docs.google.com/spreads
 |---|---|---|---|---|---|
 | 21/09/2026 | Alain | Codex | Aide à la rédaction du courriel et examen du dataset Loghub | Consultation du README Loghub et de la documentation HDFS ; distinction entre anomalie et cause de panne | Données non téléchargées et faisabilité non testée |
 | 21/09/2026 | Alain | Codex | Vérification des attendus du PDF et préparation de l’organisation | Lecture des pages sur le cadrage, les jalons et les livrables ; fichiers de cadrage et tâches préparés | Relecture du groupe requise ; board et classeur partagé non créés |
+| 06/10/2026 | Alain | Claude Code + connecteur MCP Atlassian | Création du board Jira (epics, sprints, tâches, dépendances), téléchargement et audit de HDFS_v1, structure du dépôt, relevé de la machine | Données vérifiées (MD5, statistiques recalculées) ; tickets relus | Répartition et contrats à valider en réunion (SCRUM-55) |
+| 08/10/2026 | Alain | Codex | Complément de SCRUM-15 | Lecture du ticket et de la PR #3, relevé CPU/RAM/GPU/disque et comparaison aux essais documentés dans les PR #4 et #6 | Environnements des camarades et accès GPU non connus ; validation du groupe requise |
 
 ## Expériences
 
@@ -88,6 +96,12 @@ Usage d'assistant : Alain utilise Codex pour l'examen du code et des preuves, le
 ## Réunions
 
 Aucune réunion renseignée à ce stade. Pour chaque réunion, noter les participants, les points examinés, les décisions, les responsables et les échéances.
+
+## Suivi du 12/10/2026 — SCRUM-15 (Alain)
+
+Vérification GitHub : la PR #4 de SCRUM-28 a été approuvée par Linda et fusionnée le 11/10. La PR #3 de SCRUM-15 reste ouverte, sans avis de relecture au contrôle du 12/10. La ligne de Linda est renseignée sur sa branche ; les environnements de Bachar et Nassim restent manquants. Aucune validation collective du choix des machines n'est attestée.
+
+La branche de SCRUM-15 intègre les changements approuvés de `dev`, puis le relevé est actualisé avec les mesures du 08/10 et le chemin de cache observé. Alain utilise Codex pour ces vérifications et corrections documentaires. Le ticket ne remplit pas encore son critère de clôture ; la mise à jour Jira est également indisponible dans cette session faute d'outils MCP TeamAI.
 
 ## 2026-10-11 — SCRUM-22 — Bachar Ben Slama
 

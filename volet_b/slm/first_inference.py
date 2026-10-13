@@ -59,31 +59,37 @@ class PeakMemory:
     """Échantillonne la mémoire résidente du processus toutes les 0,2 s pour en garder le maximum."""
 
     def __init__(self):
+        """Prépare le thread d'échantillonnage sans le démarrer (il démarre à l'entrée du `with`)."""
         self.peak = 0
         self._stop = threading.Event()
         self._thread = threading.Thread(target=self._run, daemon=True)
 
     def _run(self):
+        """Boucle du thread : relève la RSS toutes les 0,2 s jusqu'à l'arrêt demandé."""
         proc = psutil.Process()
         while not self._stop.wait(0.2):
             self.peak = max(self.peak, proc.memory_info().rss)
 
     def __enter__(self):
+        """Part de la RSS actuelle, lance l'échantillonnage et rend l'objet (lire `.peak` après le bloc)."""
         self.peak = psutil.Process().memory_info().rss
         self._thread.start()
         return self
 
     def __exit__(self, *exc):
+        """Arrête le thread et prend une dernière mesure ; ne masque pas les exceptions du bloc."""
         self._stop.set()
         self._thread.join()
         self.peak = max(self.peak, psutil.Process().memory_info().rss)
 
 
 def gb(n_bytes: int) -> float:
+    """Convertit un nombre d'octets en Gio, arrondi à 2 décimales."""
     return round(n_bytes / 1024**3, 2)
 
 
 def sha256_file(path: Path) -> str:
+    """Empreinte SHA-256 (hexadécimale) d'un fichier, lu par morceaux de 1 Mio."""
     digest = hashlib.sha256()
     with path.open("rb") as source:
         for chunk in iter(lambda: source.read(1024 * 1024), b""):
@@ -92,6 +98,7 @@ def sha256_file(path: Path) -> str:
 
 
 def new_run_directory(root: Path = RUNS, name: str = "first_inference") -> Path:
+    """Crée et rend un dossier d'exécution unique (horodatage UTC + suffixe aléatoire + `name`), sans jamais écraser un run précédent."""
     stamp = datetime.now(timezone.utc).strftime("%Y-%m-%d_%H%M%S_%fZ")
     path = root / f"{stamp}_{uuid4().hex[:8]}_{name}"
     path.mkdir(parents=True, exist_ok=False)
@@ -99,6 +106,7 @@ def new_run_directory(root: Path = RUNS, name: str = "first_inference") -> Path:
 
 
 def package_versions() -> dict:
+    """Versions installées des paquets qui influencent la mesure (None si absent)."""
     versions = {}
     for name in ("torch", "transformers", "pandas", "PyYAML", "psutil", "hf-xet"):
         try:
@@ -109,6 +117,10 @@ def package_versions() -> dict:
 
 
 def main(argv=None):
+    """Point d'entrée : choisit le bloc, charge le modèle, génère et enregistre mesures et réponse.
+
+    `argv` permet de passer les options en test ; refuse de tourner avec TEAMAI_SLM_MOCK=1.
+    """
     parser = argparse.ArgumentParser(description="Première inférence CPU sur une trace HDFS.")
     parser.add_argument("--block-id", help="Bloc précis à reproduire ; sinon sélection automatique.")
     parser.add_argument("--offline", action="store_true", help="Poids déjà en cache uniquement.")

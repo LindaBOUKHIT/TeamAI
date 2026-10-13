@@ -14,6 +14,10 @@ from teamai.paths import SPLITS
 
 
 def main():
+    """Découpe les blocs en train/val/test stratifiés et écrit splits.csv et splits_meta.json (contrat C4).
+
+    Le test porte en plus le drapeau `unseen_seq` : séquence absente du train.
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--train-ratio", type=float, default=0.70)
