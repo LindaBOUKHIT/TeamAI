@@ -18,6 +18,7 @@ Classeur partagé : [TeamAI : Classeur de suivi](https://docs.google.com/spreads
 |---|---|---|---|---|---|
 | 21/09/2026 | Alain | Codex | Aide à la rédaction du courriel et examen du dataset Loghub | Consultation du README Loghub et de la documentation HDFS ; distinction entre anomalie et cause de panne | Données non téléchargées et faisabilité non testée |
 | 21/09/2026 | Alain | Codex | Vérification des attendus du PDF et préparation de l’organisation | Lecture des pages sur le cadrage, les jalons et les livrables ; fichiers de cadrage et tâches préparés | Relecture du groupe requise ; board et classeur partagé non créés |
+| 13/10/2026 | Linda | Codex | Aide à la construction du corpus documentaire HDFS et aux corrections demandées dans la revue de SCRUM-30 | Couverture des templates E1–E29 documentée ; sections de liens exclues ; empreintes SHA-256 ajoutées ; reconstruction locale sans téléchargement : 51 passages par section et 28 par fenêtre glissante | Suite à la relecture du reviewer ; tests automatisés non exécutés |
 
 ## Expériences
 
