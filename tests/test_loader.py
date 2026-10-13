@@ -5,6 +5,7 @@ from teamai.data.loader import MAX_LEN, PAD_ID, encode
 
 
 def test_traces_respectent_le_format_C1(fixture_data):
+    """Colonnes, labels et identifiants des traces suivent C1."""
     traces = fixture_data.load_traces()
     assert list(traces.columns) == ["BlockId", "label", "anomaly_type", "events"]
     assert len(traces) == 12
@@ -14,6 +15,7 @@ def test_traces_respectent_le_format_C1(fixture_data):
 
 
 def test_sequences_sont_des_listes_d_eventid(fixture_data):
+    """Chaque séquence est une liste non vide d'EventId de la forme E<n>."""
     traces = fixture_data.load_traces()
     for events in traces["events"]:
         assert isinstance(events, list) and events
@@ -21,12 +23,14 @@ def test_sequences_sont_des_listes_d_eventid(fixture_data):
 
 
 def test_type_d_anomalie_seulement_pour_les_anomalies(fixture_data):
+    """anomaly_type n'est renseigné que pour les blocs anormaux."""
     traces = fixture_data.load_traces()
     assert traces.loc[traces["label"] == 0, "anomaly_type"].isna().all()
     assert traces.loc[traces["label"] == 1, "anomaly_type"].notna().all()
 
 
 def test_vocabulaire_C2_29_evenements_sans_le_padding(fixture_data):
+    """Le vocabulaire C2 compte 29 événements numérotés 1..29, 0 restant réservé au padding."""
     vocab = fixture_data.load_vocab()
     assert len(vocab) == 29
     assert vocab["E1"] == 1 and vocab["E29"] == 29
@@ -34,6 +38,7 @@ def test_vocabulaire_C2_29_evenements_sans_le_padding(fixture_data):
 
 
 def test_encode_complete_jusqu_a_max_len(fixture_data):
+    """Une séquence courte est complétée à droite par PAD_ID jusqu'à MAX_LEN."""
     vocab = fixture_data.load_vocab()
     ids = encode(["E5", "E22", "E11"], vocab)
     assert len(ids) == MAX_LEN
@@ -42,15 +47,17 @@ def test_encode_complete_jusqu_a_max_len(fixture_data):
 
 
 def test_encode_tronque_les_longues_sequences(fixture_data):
+    """Une séquence longue est tronquée à ses MAX_LEN premiers événements."""
     vocab = fixture_data.load_vocab()
     longest = max(fixture_data.load_traces()["events"], key=len)
     assert len(longest) > MAX_LEN  # la fixture contient une trace de 269 événements
     assert encode(longest, vocab) == [vocab[e] for e in longest[:MAX_LEN]]
 
 
-def test_encode_refuse_un_evenement_inconnu(fixture_data):
-    with pytest.raises(KeyError):
-        encode(["E99"], fixture_data.load_vocab())
+@pytest.mark.xfail(reason="C2 : inconnu → unk_id 30, à implémenter dans SCRUM-26", strict=False)
+def test_encode_inconnu_donne_unk_id(fixture_data):
+    """Contrat C2 : un événement inconnu est encodé avec unk_id (30) au lieu de lever une erreur."""
+    assert encode(["E99"], fixture_data.load_vocab())[0] == 30
 
 
 @pytest.mark.full_data

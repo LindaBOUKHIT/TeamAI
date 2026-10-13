@@ -44,4 +44,11 @@ jobs:
       - name: npm test
         if: steps.site.outputs.exists == 'true'
         working-directory: volet_a/web
-        run: npm ci && npm test
+        run: |
+          # Le script npm généré par défaut (« no test specified ») n'est pas un test : on le saute
+          # jusqu'à ce que le site ait de vrais tests (SCRUM-23/26/27), sans bloquer les PR.
+          if node -e "const t=require('./package.json').scripts?.test||''; process.exit(/no test specified/.test(t)?0:1)"; then
+            echo "Pas encore de vrai test npm : étape sautée (voir SCRUM-26)."
+          else
+            npm ci && npm test
+          fi

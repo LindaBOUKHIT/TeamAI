@@ -9,6 +9,7 @@ generate_module = pytest.importorskip("volet_b.slm.generate", reason="volet_b/sl
 
 
 def test_mode_factice_repond_au_format_C5(monkeypatch):
+    """Sans modèle, generate() renvoie une abstention conforme à C5 et aucun token."""
     monkeypatch.setenv("TEAMAI_SLM_MOCK", "1")
     out = generate_module.generate([{"role": "user", "content": "Explique cette trace."}])
     assert out["new_tokens"] == 0

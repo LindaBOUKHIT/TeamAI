@@ -15,6 +15,7 @@ HAS_FULL_DATA = (paths.PREPROCESSED / "Event_traces.csv").exists()
 
 
 def pytest_collection_modifyitems(config, items):
+    """Saute les tests marqués full_data quand le corpus complet n'est pas téléchargé."""
     skip = pytest.mark.skip(reason="corpus complet absent : lancer python data/download_hdfs.py")
     for item in items:
         if "full_data" in item.keywords and not HAS_FULL_DATA:
@@ -32,6 +33,7 @@ def fixture_data(monkeypatch):
 
 @pytest.fixture
 def valid_answer():
+    """Réponse C5 complète, sourcée et sans abstention."""
     return {
         "resume_evenements": "Le bloc est alloué puis reçu par 3 DataNodes ; deux exceptions surviennent en lecture.",
         "faits_observes": ["E4 : exception en servant le bloc à un client"],
@@ -44,6 +46,7 @@ def valid_answer():
 
 @pytest.fixture
 def valid_example(valid_answer):
+    """Exemple annoté C5 complet (annotatrice et relecteur distincts)."""
     return {
         "id": "ex-0001",
         "block_id": "blk_8362325295506522506",

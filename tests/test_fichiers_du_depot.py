@@ -14,12 +14,14 @@ TEST_SET = paths.EVAL / "volet_b" / "test.jsonl"
 
 @pytest.mark.parametrize("path", ANNOTATIONS, ids=lambda p: p.name)
 def test_annotations_respectent_C5(path):
+    """Chaque exemple de volet_b/annotations/*.jsonl respecte C5."""
     for n, example in enumerate(load_jsonl(path), start=1):
         assert validate_example(example) == [], f"{path.name}, exemple n°{n} ({example.get('id')})"
 
 
 @pytest.mark.skipif(not TEST_SET.exists(), reason="jeu de test réservé pas encore constitué (SCRUM-35)")
 def test_jeu_de_test_respecte_C5():
+    """Le test réservé respecte C5 et ne contient que des exemples du split test."""
     for example in load_jsonl(TEST_SET):
         assert validate_example(example) == [], example.get("id")
         assert example["split"] == "test"
@@ -27,5 +29,6 @@ def test_jeu_de_test_respecte_C5():
 
 @pytest.mark.skipif(not TEST_SET.exists() or not ANNOTATIONS, reason="annotations ou test absents")
 def test_aucune_trace_du_test_dans_les_annotations():
+    """Aucun bloc du test réservé ne sert à l'adaptation."""
     training = [row for path in ANNOTATIONS for row in load_jsonl(path)]
     assert leaked_blocks(training, load_jsonl(TEST_SET)) == set()
