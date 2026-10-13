@@ -26,6 +26,7 @@ Classeur partagé : [TeamAI : Classeur de suivi](https://docs.google.com/spreads
 | 21/09/2026 | Alain | Codex | Vérification des attendus du PDF et préparation de l’organisation | Lecture des pages sur le cadrage, les jalons et les livrables ; fichiers de cadrage et tâches préparés | Relecture du groupe requise ; board et classeur partagé non créés |
 | 06/10/2026 | Alain | Claude Code + connecteur MCP Atlassian | Création du board Jira (epics, sprints, tâches, dépendances), téléchargement et audit de HDFS_v1, structure du dépôt, relevé de la machine | Données vérifiées (MD5, statistiques recalculées) ; tickets relus | Répartition et contrats à valider en réunion (SCRUM-55) |
 | 08/10/2026 | Alain | Codex | Complément de SCRUM-15 | Lecture du ticket et de la PR #3, relevé CPU/RAM/GPU/disque et comparaison aux essais documentés dans les PR #4 et #6 | Environnements des camarades et accès GPU non connus ; validation du groupe requise |
+| 13/10/2026 | Linda | Codex | Aide à la construction du corpus documentaire HDFS et aux corrections demandées dans la revue de SCRUM-30 | Couverture des templates E1–E29 documentée ; sections de liens exclues ; empreintes SHA-256 ajoutées ; reconstruction locale sans téléchargement : 51 passages par section et 28 par fenêtre glissante | Suite à la relecture du reviewer ; tests automatisés non exécutés |
 
 ## Expériences
 

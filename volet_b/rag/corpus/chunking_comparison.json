@@ -1,0 +1,37 @@
+{
+  "sources": [
+    "hdfs-architecture-1.2.1",
+    "hdfs-users-1.2.1"
+  ],
+  "source_sha256": {
+    "hdfs-architecture-1.2.1": "f00cb0f42bcea8fe554a9599a53ab0d3a962c428adcc73b97a747e06b080323e",
+    "hdfs-users-1.2.1": "2b58f00b78bef6fb1f2fefdf527dbd201a1fe62c8aabaeec6daf0b39d7fb5a37"
+  },
+  "excluded_sections": {
+    "hdfs-architecture-1.2.1": [
+      "References"
+    ],
+    "hdfs-users-1.2.1": [
+      "Related Documentation"
+    ]
+  },
+  "max_chars": 1600,
+  "overlap_chars": 200,
+  "section": {
+    "chunk_count": 51,
+    "mean_chars": 736.0,
+    "median_chars": 666,
+    "max_chars": 1591,
+    "chunks_spanning_multiple_sections": 0
+  },
+  "sliding_window": {
+    "chunk_count": 28,
+    "mean_chars": 1562.3,
+    "median_chars": 1595,
+    "max_chars": 1599,
+    "chunks_spanning_multiple_sections": 26
+  },
+  "recommended_strategy": "section",
+  "written_strategy": "section",
+  "recommendation_reason": "Les sections préservent le contexte documentaire et les frontières thématiques. Les sections trop longues sont découpées sans mélanger deux sections."
+}
