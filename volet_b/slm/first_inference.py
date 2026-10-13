@@ -91,9 +91,9 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
-def new_run_directory(root: Path = RUNS) -> Path:
+def new_run_directory(root: Path = RUNS, name: str = "first_inference") -> Path:
     stamp = datetime.now(timezone.utc).strftime("%Y-%m-%d_%H%M%S_%fZ")
-    path = root / f"{stamp}_{uuid4().hex[:8]}_first_inference"
+    path = root / f"{stamp}_{uuid4().hex[:8]}_{name}"
     path.mkdir(parents=True, exist_ok=False)
     return path
 
