@@ -94,6 +94,24 @@ Décision : conserver SmolLM2-1.7B-Instruct pour cette première preuve, l'infé
 
 Usage d'assistant : Alain utilise Codex pour l'examen du code et des preuves, les corrections et les tests. Aucune validation de Linda ou fusion n'est attestée. La qualité du modèle et les composants RAG/LoRA restent hors de cette vérification technique.
 
+### 14/10/2026 — Essai LoRA court, chaîne vérifiée sur CPU (SCRUM-29, Alain)
+
+- **Commande** : `python -m volet_b.slm.train_lora --offline --steps 2` · sorties dans `eval/runs/2026-10-14_073337_219673Z_25c752a7_lora_essai/` (non versionné).
+- **Données** : 20 exemples C5 provisoires (`seed_alain.jsonl`, `make_seed.py`) : 10 normaux, 10 anomalies (E7, E20, E28, 2 abstentions), blocs du split train de `data/sample/`, réponses calculées par règles, sans source C6. `reviewed_by` vide jusqu'à relecture.
+- **Réglages** : LoRA r 8, alpha 16, `q_proj`/`v_proj` (1,57 M paramètres entraînables sur 1,71 G), lr 2e-4, batch 1, gradient checkpointing, float32 CPU, 12 threads. Consigne avant les logs ; loss sur la réponse seulement.
+
+| Mesure (i5-1240P, 32 Go, machine chargée par d'autres processus) | Valeur |
+|---|---|
+| Chargement | 10,4 s (modèle en cache) |
+| Pic RSS chargement / entraînement | 9,79 / 8,91 GiB |
+| Pas 1 (579 tokens) / pas 2 (2 056 tokens) | 150 s / 784 s |
+| Loss pas 1 → pas 2 | 1,72 → 1,38 (deux exemples différents : pas une preuve de descente) |
+| Rechargement via `generate(…, adapter=…)` | réussi, 331 s |
+
+- **Constat** : la chaîne complète fonctionne (entraînement, sauvegarde, rechargement), mais 30 pas prendraient environ 4 à 6 h sur ce processeur. La descente de la loss reste à montrer sur l'essai complet.
+- **Décision** : l'essai complet (30 pas) est lancé sur la RTX 3050 6 Go de Nassim (`--device cuda --qlora`), mesures à reporter ici. Kaggle reste l'alternative.
+- **Usage d'assistant** : Alain utilise Claude Code pour écrire `make_seed.py` et `train_lora.py` et lancer la mesure ; les 20 exemples sont générés par règles, sans modèle, et doivent être relus par un humain.
+
 ## Réunions
 
 Aucune réunion renseignée à ce stade. Pour chaque réunion, noter les participants, les points examinés, les décisions, les responsables et les échéances.

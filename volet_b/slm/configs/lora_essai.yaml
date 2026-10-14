@@ -1,0 +1,19 @@
+# SCRUM-29 — Essai LoRA court : faisabilité matérielle, pas qualité.
+# Le modèle de base (id, révision, dtype) est lu dans generation.yaml pour rester identique à l'inférence.
+data: volet_b/annotations/seed_alain.jsonl
+adapter_dir: volet_b/slm/adapters/essai   # non versionné (.gitignore)
+seed: 42
+
+lora:
+  r: 8
+  alpha: 16
+  dropout: 0.05
+  target_modules: [q_proj, v_proj]
+
+training:
+  steps: 30               # « quelques dizaines de pas »
+  batch_size: 1
+  learning_rate: 2.0e-4
+  max_tokens: 3072        # un exemple plus long est refusé, jamais tronqué silencieusement
+  gradient_checkpointing: true
+  torch_threads: 12
