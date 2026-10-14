@@ -94,6 +94,16 @@ Décision : conserver SmolLM2-1.7B-Instruct pour cette première preuve, l'infé
 
 Usage d'assistant : Alain utilise Codex pour l'examen du code et des preuves, les corrections et les tests. Aucune validation de Linda ou fusion n'est attestée. La qualité du modèle et les composants RAG/LoRA restent hors de cette vérification technique.
 
+### 14/10/2026 — Correctifs du spike ONNX au regard du sujet (SCRUM-22, Alain)
+
+Relecture du code de SCRUM-22 face aux exigences du volet A (inférence navigateur, fichiers statiques, modèle mis en cache) : la chaîne est validée, trois points corrigés sur `fix/SCRUM-22-spike-wasm-padding`.
+
+- **Padding** : le BiLSTM lisait les zéros de padding (même bloc de 5 événements : 0,463 paddé contre 0,450 sans padding). Deux LSTM simples, dont l'un lit la séquence retournée dans sa vraie longueur ; état pris au dernier vrai événement (opérations `gather`, exportables). Invariance vérifiée : écart 0. Modèle : 16,8 Ko.
+- **Poids du moteur** : `onnxruntime-web/wasm` au lieu de l'entrée par défaut, qui embarque WebGPU : WASM de 28 Mo (6,8 Mo gzip) à 14 Mo (3,7 Mo gzip) ; script de 407 Ko à 75 Ko.
+- **Déploiement** : `npm run build` et `vite.config.js` (base relative, chaque page HTML devient une entrée) ; le workflow GitHub Pages ne peut plus échouer faute de script. `index.html` reste le livrable de SCRUM-23.
+- **Vérification** : parité PyTorch / ONNX Runtime Python et navigateur (build servi par `vite preview`) : 2,98e-8 ; session réutilisée au second clic.
+- **Usage d'assistant** : Alain utilise Claude Code pour la relecture, les correctifs et le test dans le navigateur.
+
 ## Réunions
 
 Aucune réunion renseignée à ce stade. Pour chaque réunion, noter les participants, les points examinés, les décisions, les responsables et les échéances.
@@ -137,4 +147,4 @@ Usage IA : assistance de Codex pour préparer l’environnement,
 proposer le script Python et la page de comparaison, et interpréter
 les résultats. Exécution et vérification réalisées par Bachar.
 
-Relecture par Nassim à effectuer avant fusion.
+Relu et approuvé par Nassim, fusionné le 12/10 (PR #9).

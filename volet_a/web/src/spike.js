@@ -1,14 +1,25 @@
-import * as ort from "onnxruntime-web";
+// Variante WASM seule : 14 Mo de moteur au lieu de 28 Mo pour l'entrée par défaut (WebGPU inclus).
+import * as ort from "onnxruntime-web/wasm";
 
 ort.env.wasm.numThreads = 1;
 
 const button = document.querySelector("#run");
 const results = document.querySelector("#results");
 
+// Session créée une seule fois puis réutilisée : le modèle n'est téléchargé qu'au premier clic.
+let sessionPromise;
+function getSession() {
+    sessionPromise ??= ort.InferenceSession.create("./model/detector.onnx", { executionProviders: ["wasm"] })
+        .catch((error) => {
+            sessionPromise = undefined;  // nouvel essai possible au clic suivant
+            throw error;
+        });
+    return sessionPromise;
+}
+
 button.addEventListener("click", async () => {
     button.disabled = true;
     results.textContent = "Chargement du modèle…";
-    let session;
 
     try {
         const response = await fetch("./model/spike_cases.json");
@@ -18,14 +29,11 @@ button.addEventListener("click", async () => {
         const cases = await response.json();
 
         const startLoading = performance.now();
-        session = await ort.InferenceSession.create(
-            "./model/detector.onnx",
-            { executionProviders: ["wasm"] }
-        );
+        const session = await getSession();
         const loadingMs = performance.now() - startLoading;
 
         const lines = [
-            `Chargement et préparation : ${loadingMs.toFixed(1)} ms`,
+            `Chargement et préparation : ${loadingMs.toFixed(1)} ms (session réutilisée aux clics suivants)`,
         ];
         let maximumError = 0;
 
@@ -89,7 +97,6 @@ button.addEventListener("click", async () => {
         results.textContent = `ERREUR : ${error.message}`;
         console.error(error);
     } finally {
-        if (session) await session.release();
         button.disabled = false;
     }
 });
