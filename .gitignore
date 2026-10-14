@@ -40,3 +40,6 @@ Thumbs.db
 ~$*
 
 /data/parsed/
+
+# Build du site (npm run build)
+volet_a/web/dist/

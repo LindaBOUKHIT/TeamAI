@@ -1,14 +1,15 @@
 {
   "name": "web",
   "version": "1.0.0",
-  "description": "**Responsable** : Bachar · **Prétraitement JS** : Linda (SCRUM-26) · Déployé automatiquement depuis `main` (GitHub Pages, `.github/workflows/deploy-volet-a.yml`).",
+  "description": "Site du volet A : détection d'anomalies HDFS dans le navigateur (BiLSTM ONNX).",
   "main": "index.js",
   "directories": {
     "test": "tests"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "vite"
+    "dev": "vite",
+    "build": "vite build"
   },
   "keywords": [],
   "author": "",
