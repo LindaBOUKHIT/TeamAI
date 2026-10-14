@@ -9,6 +9,7 @@ import pandas as pd
 from teamai.paths import PREPROCESSED, SAMPLE
 
 PAD_ID = 0
+UNK_ID = 30  # événement absent du vocabulaire (contrat C2)
 MAX_LEN = 50  # couvre > 99,9 % des traces (p99 = 33 événements)
 
 
@@ -34,8 +35,11 @@ def load_vocab() -> dict[str, int]:
 
 
 def encode(events: list[str], vocab: dict[str, int], max_len: int = MAX_LEN) -> list[int]:
-    """Séquence d'EventId → indices tronqués/complétés à max_len (troncature en fin de séquence)."""
-    ids = [vocab[e] for e in events[:max_len]]
+    """Séquence d'EventId → indices tronqués/complétés à max_len (troncature en fin de séquence).
+
+    Un EventId absent du vocabulaire est encodé UNK_ID (contrat C2) ; l'ordre n'est jamais modifié.
+    """
+    ids = [vocab.get(e, UNK_ID) for e in events[:max_len]]
     return ids + [PAD_ID] * (max_len - len(ids))
 
 
