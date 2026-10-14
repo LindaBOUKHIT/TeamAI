@@ -74,3 +74,18 @@ La [preuve du 08/10](../../eval/results/SCRUM-28/README.md) publie la synthèse,
 ## Version 4 bits (SCRUM-57, expérimental)
 
 `python -m volet_b.slm.bench_gguf --backend llamacpp|transformers --offline` compare le GGUF Q4_K_M officiel (révision figée) au modèle float32 sur le même bloc. Installation : `pip install -e ".[volet_b_gguf]" --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu`. C'est un banc de mesure : le backend llama.cpp n'est pas encore disponible via `generate()`. Résultats et limites dans `docs/projet/journal.md`.
+
+## Essai LoRA (SCRUM-29, faisabilité matérielle)
+
+`python -m volet_b.slm.make_seed` régénère les 20 exemples C5 provisoires (`volet_b/annotations/seed_alain.jsonl`, blocs du split train de `data/sample/`, réponses calculées par règles, `sources: []`). `python -m volet_b.slm.train_lora` entraîne un adaptateur LoRA (r 8 sur `q_proj`/`v_proj`, configuration dans `configs/lora_essai.yaml`), puis vérifie qu'il se recharge via `generate(…, adapter=…)`. Mesures dans un dossier `eval/runs/<horodatage>_lora_essai/` (`metrics.json`, `train_log.jsonl`, `config.json`) ; adaptateur dans `volet_b/slm/adapters/essai/` (non versionné).
+
+Sur CPU (i5-1240P, 14/10) la chaîne fonctionne mais un pas prend de 2,5 à 13 min selon la longueur de la trace : l'essai complet se fait sur GPU NVIDIA.
+
+```powershell
+pip install torch --index-url https://download.pytorch.org/whl/cu124   # PyTorch CUDA
+pip install -e ".[lora]" bitsandbytes
+python -m volet_b.slm.train_lora --device cuda --qlora                   # 6 Go de VRAM : 4 bits d'abord
+python -m volet_b.slm.train_lora --device cuda                           # bfloat16, si la VRAM suffit
+```
+
+Le premier lancement télécharge le modèle (3,4 Go, révision figée) ; ensuite `--offline` suffit. Le rechargement de l'adaptateur se fait sur CPU comme toutes les inférences de `generate()` (quelques minutes).

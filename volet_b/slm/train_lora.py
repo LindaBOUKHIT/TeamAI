@@ -2,6 +2,7 @@
 
     python -m volet_b.slm.train_lora --offline              # 30 pas, configs/lora_essai.yaml
     python -m volet_b.slm.train_lora --offline --steps 3    # vérification rapide
+    python -m volet_b.slm.train_lora --device cuda --qlora  # GPU NVIDIA à faible VRAM (bitsandbytes)
 
 Test de faisabilité matérielle, pas de qualité : les exemples sont provisoires (make_seed.py) et la loss
 est mesurée sur ces mêmes exemples. La consigne est placée avant les logs (règle du volet B, SCRUM-57) ;
@@ -52,7 +53,7 @@ def encode_example(example: dict, tokenizer, max_tokens: int) -> dict:
 def package_versions() -> dict:
     """Versions des paquets qui influencent l'entraînement (None si absent)."""
     out = {}
-    for name in ("torch", "transformers", "peft", "accelerate"):
+    for name in ("torch", "transformers", "peft", "accelerate", "bitsandbytes"):
         try:
             out[name] = version(name)
         except PackageNotFoundError:
@@ -66,6 +67,8 @@ def main(argv=None):
     parser.add_argument("--config", type=Path, default=CONFIG)
     parser.add_argument("--steps", type=int, help="Remplace training.steps de la configuration.")
     parser.add_argument("--offline", action="store_true", help="Poids déjà en cache uniquement.")
+    parser.add_argument("--device", choices=("auto", "cpu", "cuda"), default="auto")
+    parser.add_argument("--qlora", action="store_true", help="Modèle de base chargé en 4 bits (GPU NVIDIA, bitsandbytes).")
     args = parser.parse_args(argv)
 
     import torch
@@ -85,12 +88,35 @@ def main(argv=None):
         if ex["split"] != "train" or validate_answer(ex["expected"]):
             raise ValueError(f"{ex['id']} : exemple hors train ou réponse C5 invalide")
 
+    device = ("cuda" if torch.cuda.is_available() else "cpu") if args.device == "auto" else args.device
+    if device == "cuda" and not torch.cuda.is_available():
+        parser.error("--device cuda demandé mais aucun GPU CUDA n'est visible par PyTorch.")
+    if args.qlora and device != "cuda":
+        parser.error("--qlora nécessite un GPU NVIDIA (--device cuda).")
+    # CPU : float32 comme l'inférence (bfloat16 lent sur processeur) ; GPU : bfloat16 si supporté.
+    dtype = getattr(torch, base["dtype"])
+    if device == "cuda":
+        dtype = torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16
+
     proc = psutil.Process()
     start = time.perf_counter()
     source = {"revision": base["revision"], "local_files_only": args.offline}
     with PeakMemory() as load_peak:
         tokenizer = AutoTokenizer.from_pretrained(base["model_id"], **source)
-        model = AutoModelForCausalLM.from_pretrained(base["model_id"], dtype=getattr(torch, base["dtype"]), **source)
+        extra = {}
+        if args.qlora:
+            from transformers import BitsAndBytesConfig
+
+            extra = {"quantization_config": BitsAndBytesConfig(load_in_4bit=True, bnb_4bit_quant_type="nf4",
+                                                               bnb_4bit_compute_dtype=dtype),
+                     "device_map": {"": 0}}
+        model = AutoModelForCausalLM.from_pretrained(base["model_id"], dtype=dtype, **extra, **source)
+        if args.qlora:
+            from peft import prepare_model_for_kbit_training
+
+            model = prepare_model_for_kbit_training(model, use_gradient_checkpointing=train["gradient_checkpointing"])
+        elif device == "cuda":
+            model = model.to(device)
         lora = cfg["lora"]
         model = get_peft_model(model, LoraConfig(r=lora["r"], lora_alpha=lora["alpha"], lora_dropout=lora["dropout"],
                                                  target_modules=lora["target_modules"], task_type="CAUSAL_LM"))
@@ -102,6 +128,8 @@ def main(argv=None):
     encoded = [encode_example(ex, tokenizer, train["max_tokens"]) for ex in examples]
     print(f"Modèle chargé en {load_seconds:.1f} s ; {trainable:,} paramètres entraînables sur {total:,}", flush=True)
 
+    if device == "cuda":
+        torch.cuda.reset_peak_memory_stats()
     optimizer = torch.optim.AdamW([p for p in model.parameters() if p.requires_grad], lr=train["learning_rate"])
     order = list(range(len(encoded)))
     log = []
@@ -112,11 +140,13 @@ def main(argv=None):
                 random.shuffle(order)
             item = encoded[order[step % len(order)]]
             t0 = time.perf_counter()
-            batch = {k: torch.tensor([v]) for k, v in item.items()}
+            batch = {k: torch.tensor([v], device=device) for k, v in item.items()}
             loss = model(**batch).loss
             loss.backward()
             optimizer.step()
             optimizer.zero_grad()
+            if device == "cuda":
+                torch.cuda.synchronize()
             seconds = time.perf_counter() - t0
             log.append({"step": step + 1, "example": examples[order[step % len(order)]]["id"],
                         "tokens": len(item["input_ids"]), "loss": round(loss.item(), 4), "seconds": round(seconds, 1),
@@ -127,10 +157,17 @@ def main(argv=None):
     adapter_dir = ROOT / cfg["adapter_dir"]
     model.save_pretrained(adapter_dir)
     del model, optimizer
+    if device == "cuda":
+        torch.cuda.empty_cache()
 
     window = max(1, min(5, steps // 3))
     first, last = log[:window], log[-window:]
     metrics = {
+        "device": device,
+        "gpu": torch.cuda.get_device_name(0) if device == "cuda" else None,
+        "dtype": str(dtype).removeprefix("torch."),
+        "qlora_4bit": args.qlora,
+        "vram_peak_gb": gb(torch.cuda.max_memory_allocated()) if device == "cuda" else None,
         "steps": steps,
         "examples": len(examples),
         "trainable_parameters": trainable,
@@ -145,7 +182,8 @@ def main(argv=None):
         "loss_window": window,
     }
 
-    # Rechargement par la porte d'entrée commune du volet B (critère du ticket).
+    # Rechargement par la porte d'entrée commune du volet B (critère du ticket) : sur CPU, en float32,
+    # comme toutes les inférences de generate() ; un adaptateur entraîné sur GPU se recharge donc aussi ici.
     from volet_b.slm.generate import generate
 
     t0 = time.perf_counter()
