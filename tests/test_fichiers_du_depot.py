@@ -10,6 +10,7 @@ from teamai.contracts import leaked_blocks, load_jsonl, validate_example
 
 ANNOTATIONS = sorted(paths.ANNOTATIONS.glob("*.jsonl"))
 TEST_SET = paths.EVAL / "volet_b" / "test.jsonl"
+SPLITS_CSV = paths.SPLITS / "splits.csv"
 
 
 @pytest.mark.parametrize("path", ANNOTATIONS, ids=lambda p: p.name)
@@ -29,13 +30,20 @@ def test_sources_des_annotations_existent_dans_le_corpus(path):
 
 
 @pytest.mark.parametrize("path", ANNOTATIONS, ids=lambda p: p.name)
-def test_annotations_hors_test_et_split_conforme(path):
-    """Chaque exemple d'adaptation vient de train ou val, conformément à data/splits/splits.csv (C4)."""
-    import pandas as pd
-
-    official = pd.read_csv(paths.SPLITS / "splits.csv", usecols=["BlockId", "split"]).set_index("BlockId")["split"]
+def test_annotations_hors_test(path):
+    """Chaque exemple d'adaptation déclare le split train ou val, jamais test."""
     for example in load_jsonl(path):
         assert example["split"] in ("train", "val"), f"{path.name}, {example['id']} : split {example['split']}"
+
+
+@pytest.mark.skipif(not SPLITS_CSV.exists(), reason="splits.csv non versionné : python data/make_splits.py")
+@pytest.mark.parametrize("path", ANNOTATIONS, ids=lambda p: p.name)
+def test_split_des_annotations_conforme_a_splits_csv(path):
+    """Le split déclaré correspond à data/splits/splits.csv (C4) ; vérifié là où les splits sont générés."""
+    import pandas as pd
+
+    official = pd.read_csv(SPLITS_CSV, usecols=["BlockId", "split"]).set_index("BlockId")["split"]
+    for example in load_jsonl(path):
         assert official.get(example["block_id"]) == example["split"], f"{path.name}, {example['id']}"
 
 
