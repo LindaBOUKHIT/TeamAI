@@ -140,3 +140,32 @@ proposer le script Python et la page de comparaison, et interpréter
 les résultats. Exécution et vérification réalisées par Bachar.
 
 Relecture par Nassim à effectuer avant fusion.
+
+
+
+## 2026-10-16 — SCRUM-23 — Bachar Ben Slama
+
+Création du site statique v0 avec Vite et ONNX Runtime Web :
+- Page d’accueil et bouton de test sur une séquence artificielle.
+- Chargement du vocabulaire C2 et du modèle ONNX C3.
+- Vérification des empreintes SHA-256 du modèle et du vocabulaire.
+- Mise en cache du modèle avec la Cache API.
+- Avertissement explicite pour le modèle factice de SCRUM-22.
+- Ajout des commandes build et preview.
+- Configuration du chemin /TeamAI/ pour GitHub Pages.
+- Adaptation du workflow : Node.js 24, tests et build.
+- Exclusion du dossier généré dist de Git.
+
+Vérifications locales :
+- Les 11 tests de prétraitement passent.
+- Inférence fonctionnelle sur la page locale et en preview.
+- Réutilisation du cache confirmée après actualisation.
+- Score observé : 0,46178886 sur la séquence artificielle
+  E5, E22, E5, E11. Ce score n’a aucune valeur prédictive.
+
+Usage IA : assistance de Codex pour proposer le code du site,
+le chargement du modèle, la mise en cache et la configuration
+de déploiement. Manipulations et vérifications locales par Bachar.
+
+Publication publique restant à vérifier après passage vers main
+via SCRUM-17. Relecture par Nassim à effectuer.
