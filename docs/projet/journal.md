@@ -140,3 +140,51 @@ proposer le script Python et la page de comparaison, et interpréter
 les résultats. Exécution et vérification réalisées par Bachar.
 
 Relecture par Nassim à effectuer avant fusion.
+
+
+## 2026-10-16 — SCRUM-25 — Bachar Ben Slama
+
+Entraînement du BiLSTM sur HDFS_v1 avec les splits officiels
+SCRUM-20. Le hash de splits.csv correspond exactement à celui
+de l’équipe : f504592cb7ac13b8b7e5d532a336b4e3641ec441a863c5efafd164faa2a43f22.
+
+Run : 20261016T184412Z_4f3011f2_bilstm.
+Architecture : embedding 16, BiLSTM 32 par direction,
+agrégation moyenne hors padding, 13 361 paramètres.
+Entraînement CPU : 5 époques, batch 512, seed 42,
+Adam avec learning rate 0,001 et perte pondérée.
+Durée entraînement et validation : environ 352 secondes.
+
+Sélection sur validation uniquement :
+- Époque retenue : 5.
+- Seuil : 0,99, borne supérieure de la grille explorée.
+- Macro-F1 globale : 0,995514, contre 0,989698 pour la baseline.
+- Macro-F1 sur les 1 929 séquences inédites : 0,976748,
+  contre 0,961848 pour la baseline.
+- Validation globale : 23 fausses alertes et 21 anomalies manquées.
+- Baseline : 103 fausses alertes et aucune anomalie manquée.
+
+Le BiLSTM réduit les fausses alertes et améliore la macro-F1,
+avec une baisse du rappel. La comparaison utilise les résultats
+publiés par Nassim ; la baseline n’a pas été réentraînée ici.
+Le test officiel n’a pas été évalué.
+
+Export ONNX : environ 55,5 Ko, conforme au contrat C3.
+Parité Python sur 86 259 blocs de validation :
+écart maximal 1,1921e-7 et aucune différence de classification.
+Parité navigateur WASM sur dix séquences de validation :
+écart maximal 4,3277e-8. Batchs 1, 3 et 10 vérifiés.
+
+Le modèle entraîné et ses métadonnées remplacent le spike
+sur la branche SCRUM-25. Résumés dans
+eval/results/SCRUM-25-bilstm-v1/ ; checkpoint et prédictions
+détaillées conservés localement dans eval/runs/.
+
+Usage IA : assistance de Codex pour proposer les scripts de
+préparation, d’entraînement, d’export et de contrôle de parité,
+corriger un problème d’import et interpréter les résultats.
+Exécution et vérifications locales réalisées par Bachar.
+
+Relecture par Nassim et vérification de la CI à effectuer.
+Intégration et vérification sur le site complet restant à confirmer
+après combinaison avec SCRUM-23.
