@@ -27,6 +27,8 @@ Classeur partagé : [TeamAI : Classeur de suivi](https://docs.google.com/spreads
 | 06/10/2026 | Alain | Claude Code + connecteur MCP Atlassian | Création du board Jira (epics, sprints, tâches, dépendances), téléchargement et audit de HDFS_v1, structure du dépôt, relevé de la machine | Données vérifiées (MD5, statistiques recalculées) ; tickets relus | Répartition et contrats à valider en réunion (SCRUM-55) |
 | 08/10/2026 | Alain | Codex | Complément de SCRUM-15 | Lecture du ticket et de la PR #3, relevé CPU/RAM/GPU/disque et comparaison aux essais documentés dans les PR #4 et #6 | Environnements des camarades et accès GPU non connus ; validation du groupe requise |
 | 13/10/2026 | Linda | Codex | Aide à la construction du corpus documentaire HDFS et aux corrections demandées dans la revue de SCRUM-30 | Couverture des templates E1–E29 documentée ; sections de liens exclues ; empreintes SHA-256 ajoutées ; reconstruction locale sans téléchargement : 51 passages par section et 28 par fenêtre glissante | Suite à la relecture du reviewer ; tests automatisés non exécutés |
+| 13/10/2026 | Linda | Claude Code + connecteurs Atlassian et GitHub (`gh`) | Préparation des relectures des PR #3, #5, #6 et #18 ; résolution des conflits de fusion sur #5, #6 et #19 ; automatisation Jira « PR fusionnée dans dev → Terminé » | Relectures vérifiées sur le code et relues par Linda avant envoi ; conflits résolus en gardant les deux versions ; CI verte après chaque résolution | Approbations et fusions faites par Linda |
+| 13/10/2026 | Linda | Claude Code | SCRUM-26 : génération de `vocab.json`, prétraitement Python et JavaScript, tests de parité | Parité vérifiée par les tests : 2 000/2 000 blocs de l'échantillon (Python et JS), cas limites partagés, et 575 061/575 061 blocs du corpus complet en Python | Intégration dans l'interface du site (SCRUM-27, Bachar) à faire |
 | 13/10/2026 | Linda | Claude Code | SCRUM-31 : alignement de la grille d'annotation sur C5 v1.1, rédaction des 3 exemples de calibration, contrôles automatiques des sources et des splits | Faits vérifiés ligne par ligne sur les logs bruts de `data/sample/` ; sources présentes dans `chunks.jsonl` ; exemples lus et validés par Linda | Hypothèses et cas d'abstention à discuter en équipe ; `reviewed_by` renseigné après la relecture |
 
 ## Expériences
@@ -139,3 +141,79 @@ proposer le script Python et la page de comparaison, et interpréter
 les résultats. Exécution et vérification réalisées par Bachar.
 
 Relecture par Nassim à effectuer avant fusion.
+
+
+
+## 2026-10-16 — SCRUM-23 — Bachar Ben Slama
+
+Création du site statique v0 avec Vite et ONNX Runtime Web :
+- Page d’accueil et bouton de test sur une séquence artificielle.
+- Chargement du vocabulaire C2 et du modèle ONNX C3.
+- Vérification des empreintes SHA-256 du modèle et du vocabulaire.
+- Mise en cache du modèle avec la Cache API.
+- Avertissement explicite pour le modèle factice de SCRUM-22.
+- Ajout des commandes build et preview.
+- Configuration du chemin /TeamAI/ pour GitHub Pages.
+- Adaptation du workflow : Node.js 24, tests et build.
+- Exclusion du dossier généré dist de Git.
+
+Vérifications locales :
+- Les 11 tests de prétraitement passent.
+- Inférence fonctionnelle sur la page locale et en preview.
+- Réutilisation du cache confirmée après actualisation.
+- Score observé : 0,46178886 sur la séquence artificielle
+  E5, E22, E5, E11. Ce score n’a aucune valeur prédictive.
+
+Usage IA : assistance de Codex pour proposer le code du site,
+le chargement du modèle, la mise en cache et la configuration
+de déploiement. Manipulations et vérifications locales par Bachar.
+
+Publication publique restant à vérifier après passage vers main
+via SCRUM-17. Relecture par Nassim à effectuer.
+
+## 2026-10-16 — SCRUM-25 — Bachar Ben Slama
+
+Entraînement du BiLSTM sur HDFS_v1 avec les splits officiels
+SCRUM-20. Le hash de splits.csv correspond exactement à celui
+de l’équipe : f504592cb7ac13b8b7e5d532a336b4e3641ec441a863c5efafd164faa2a43f22.
+
+Run : 20261016T184412Z_4f3011f2_bilstm.
+Architecture : embedding 16, BiLSTM 32 par direction,
+agrégation moyenne hors padding, 13 361 paramètres.
+Entraînement CPU : 5 époques, batch 512, seed 42,
+Adam avec learning rate 0,001 et perte pondérée.
+Durée entraînement et validation : environ 352 secondes.
+
+Sélection sur validation uniquement :
+- Époque retenue : 5.
+- Seuil : 0,99, borne supérieure de la grille explorée.
+- Macro-F1 globale : 0,995514, contre 0,989698 pour la baseline.
+- Macro-F1 sur les 1 929 séquences inédites : 0,976748,
+  contre 0,961848 pour la baseline.
+- Validation globale : 23 fausses alertes et 21 anomalies manquées.
+- Baseline : 103 fausses alertes et aucune anomalie manquée.
+
+Le BiLSTM réduit les fausses alertes et améliore la macro-F1,
+avec une baisse du rappel. La comparaison utilise les résultats
+publiés par Nassim ; la baseline n’a pas été réentraînée ici.
+Le test officiel n’a pas été évalué.
+
+Export ONNX : environ 55,5 Ko, conforme au contrat C3.
+Parité Python sur 86 259 blocs de validation :
+écart maximal 1,1921e-7 et aucune différence de classification.
+Parité navigateur WASM sur dix séquences de validation :
+écart maximal 4,3277e-8. Batchs 1, 3 et 10 vérifiés.
+
+Le modèle entraîné et ses métadonnées remplacent le spike
+sur la branche SCRUM-25. Résumés dans
+eval/results/SCRUM-25-bilstm-v1/ ; checkpoint et prédictions
+détaillées conservés localement dans eval/runs/.
+
+Usage IA : assistance de Codex pour proposer les scripts de
+préparation, d’entraînement, d’export et de contrôle de parité,
+corriger un problème d’import et interpréter les résultats.
+Exécution et vérifications locales réalisées par Bachar.
+
+Relecture par Nassim et vérification de la CI à effectuer.
+Intégration et vérification sur le site complet restant à confirmer
+après combinaison avec SCRUM-23.

@@ -1,0 +1,65 @@
+{
+  "split": "val",
+  "test_used": false,
+  "n_blocks": 86259,
+  "best_epoch": 5,
+  "threshold": 0.99,
+  "training_and_validation_seconds": 351.75819229999615,
+  "validation": {
+    "accuracy": 0.9994899082994239,
+    "precision_anomaly": 0.9908982983775227,
+    "recall_anomaly": 0.9916831683168317,
+    "macro_f1": 0.9955139190447365,
+    "tn": 83711,
+    "fp": 23,
+    "fn": 21,
+    "tp": 2504
+  },
+  "unseen": {
+    "n_blocks": 1929,
+    "accuracy": 0.9813374805598756,
+    "precision_anomaly": 0.9646182495344506,
+    "recall_anomaly": 0.9682242990654205,
+    "macro_f1": 0.9767480794162711,
+    "tn": 1375,
+    "fp": 19,
+    "fn": 17,
+    "tp": 518
+  },
+  "known": {
+    "n_blocks": 84330,
+    "accuracy": 0.9999051345903001,
+    "precision_anomaly": 0.9979899497487437,
+    "recall_anomaly": 0.9979899497487437,
+    "macro_f1": 0.9989706853431598,
+    "tn": 82336,
+    "fp": 4,
+    "fn": 4,
+    "tp": 1986
+  },
+  "baseline_reference": {
+    "file_sha256": "c8bc5dd55ab691062243869cd6a2245b2a848d53ef069b52c6619696333ee55a",
+    "validation": {
+      "accuracy": 0.998805921700924,
+      "precision_anomaly": 0.960806697108067,
+      "recall_anomaly": 1.0,
+      "macro_f1": 0.989698111159149,
+      "tn": 83631,
+      "fp": 103,
+      "fn": 0,
+      "tp": 2525
+    },
+    "unseen": {
+      "accuracy": 0.9683773976153447,
+      "precision_anomaly": 0.8976510067114094,
+      "recall_anomaly": 1.0,
+      "macro_f1": 0.9618482626335136,
+      "tn": 1333,
+      "fp": 61,
+      "fn": 0,
+      "tp": 535,
+      "n_blocks": 1929
+    },
+    "note": "Résultats publiés par Nassim ; baseline non réentraînée ici."
+  }
+}

@@ -1,0 +1,121 @@
+{
+  "description": "Cas de parité Python ↔ JavaScript du prétraitement (SCRUM-26). Attendus générés par teamai.data.preprocess puis relus à la main.",
+  "cases": [
+    {
+      "name": "lignes réelles, deux blocs entrelacés, ordre du fichier conservé",
+      "lines": [
+        "081109 203532 147 INFO dfs.DataNode$DataXceiver: Receiving block blk_7956543127401791181 src: /10.251.203.246:34121 dest: /10.251.203.246:50010",
+        "081109 203532 147 INFO dfs.DataNode$DataXceiver: Receiving block blk_7956543127401791181 src: /10.251.203.246:51209 dest: /10.251.203.246:50010",
+        "081109 203532 35 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/rand/_temporary/_task_200811092030_0001_m_000017_0/part-00017. blk_7956543127401791181",
+        "081109 203534 166 INFO dfs.DataNode$DataXceiver: Receiving block blk_7956543127401791181 src: /10.251.195.70:54371 dest: /10.251.195.70:50010",
+        "081109 203552 159 INFO dfs.DataNode$DataXceiver: Receiving block blk_-2488242768015281896 src: /10.250.6.214:34322 dest: /10.250.6.214:50010"
+      ],
+      "expected_sequences": {
+        "blk_7956543127401791181": [
+          "E5",
+          "E5",
+          "E22",
+          "E5"
+        ],
+        "blk_-2488242768015281896": [
+          "E5"
+        ]
+      },
+      "expected_stats": {
+        "lines": 5,
+        "empty": 0,
+        "invalid_header": 0,
+        "without_block": 0,
+        "matched": 5,
+        "unknown": 0
+      }
+    },
+    {
+      "name": "fin de ligne Windows (CRLF) et lignes vides ignorées",
+      "lines": [
+        "081109 203532 147 INFO dfs.DataNode$DataXceiver: Receiving block blk_7956543127401791181 src: /10.251.203.246:34121 dest: /10.251.203.246:50010\r",
+        "",
+        "   ",
+        "081109 203532 35 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/rand/_temporary/_task_200811092030_0001_m_000017_0/part-00017. blk_7956543127401791181\r"
+      ],
+      "expected_sequences": {
+        "blk_7956543127401791181": [
+          "E5",
+          "E22"
+        ]
+      },
+      "expected_stats": {
+        "lines": 2,
+        "empty": 2,
+        "invalid_header": 0,
+        "without_block": 0,
+        "matched": 2,
+        "unknown": 0
+      }
+    },
+    {
+      "name": "ligne valide sans template connu → UNK",
+      "lines": [
+        "081109 203532 147 INFO dfs.DataNode$DataXceiver: Receiving block blk_7956543127401791181 src: /10.251.203.246:34121 dest: /10.251.203.246:50010",
+        "081109 203600 143 INFO dfs.DataNode$DataXceiver: Unexpected message about blk_7956543127401791181"
+      ],
+      "expected_sequences": {
+        "blk_7956543127401791181": [
+          "E5",
+          "UNK"
+        ]
+      },
+      "expected_stats": {
+        "lines": 2,
+        "empty": 0,
+        "invalid_header": 0,
+        "without_block": 0,
+        "matched": 1,
+        "unknown": 1
+      }
+    },
+    {
+      "name": "en-tête invalide et ligne sans identifiant de bloc ignorées",
+      "lines": [
+        "ceci n'est pas une ligne HDFS blk_42",
+        "081109 203600 35 INFO dfs.FSNamesystem: BLOCK* NameSystem.heartbeat sans bloc",
+        "081109 203532 147 INFO dfs.DataNode$DataXceiver: Receiving block blk_7956543127401791181 src: /10.251.203.246:34121 dest: /10.251.203.246:50010"
+      ],
+      "expected_sequences": {
+        "blk_7956543127401791181": [
+          "E5"
+        ]
+      },
+      "expected_stats": {
+        "lines": 3,
+        "empty": 0,
+        "invalid_header": 1,
+        "without_block": 1,
+        "matched": 1,
+        "unknown": 0
+      }
+    },
+    {
+      "name": "une ligne qui cite deux blocs compte pour chacun",
+      "lines": [
+        "081109 204005 35 INFO dfs.FSNamesystem: BLOCK* ask 10.250.14.224:50010 to replicate blk_1 to datanode(s) 10.251.215.16:50010 blk_-2"
+      ],
+      "expected_sequences": {
+        "blk_1": [
+          "E25"
+        ],
+        "blk_-2": [
+          "E25"
+        ]
+      },
+      "expected_stats": {
+        "lines": 1,
+        "empty": 0,
+        "invalid_header": 0,
+        "without_block": 0,
+        "matched": 1,
+        "unknown": 0
+      }
+    }
+  ]
+}
