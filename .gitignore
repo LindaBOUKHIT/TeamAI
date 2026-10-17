@@ -41,5 +41,5 @@ Thumbs.db
 
 /data/parsed/
 
-# Site compilé par Vite
+# Site compilé — généré par Vite
 volet_a/web/dist/
