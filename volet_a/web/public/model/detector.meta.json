@@ -3,5 +3,7 @@
   "model": "bilstm",
   "version": "spike",
   "trained_on": "none-random-weights",
-  "val_macro_f1": null
+  "val_macro_f1": null,
+  "model_sha256": "b7b2232172f968a90dde27e6f003d1e4ceaf0701f3d115beec1b4fc06f7b24bb",
+  "vocab_sha256": "77b6688a94a0a6a4dbbbdeb1a2d3cb22871b91d874339cf44f986d82928e443a"
 }

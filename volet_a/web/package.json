@@ -8,7 +8,9 @@
   },
   "scripts": {
     "test": "node --test tests/parity.test.js",
-    "dev": "vite"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "keywords": [],
   "author": "",
