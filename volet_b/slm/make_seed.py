@@ -50,6 +50,12 @@ HYPOTHESES = {
 }
 
 
+def stamp(line: str) -> str:
+    """Horodatage lisible d'une ligne HDFS (`081109 213445` → `09/11 21:34:45`), date incluse pour les traces qui passent minuit."""
+    date, time = line.split()[:2]
+    return f"{date[4:]}/{date[2:4]} {time[:2]}:{time[2:4]}:{time[4:]}"
+
+
 def build_expected(events: list[str], lines: list[str]) -> dict:
     """Réponse C5 attendue, calculée par règles à partir des EventId et des horodatages."""
     counts = Counter(events)
@@ -60,8 +66,7 @@ def build_expected(events: list[str], lines: list[str]) -> dict:
         facts.append("Aucune réception complète du bloc (E9) dans la trace")
     if "E26" not in counts:
         facts.append("Aucune réplique enregistrée (E26) dans la trace")
-    start, end = lines[0].split()[1], lines[-1].split()[1]
-    period = f"entre {start[:2]}:{start[2:4]}:{start[4:]} et {end[:2]}:{end[2:4]}:{end[4:]}"
+    period = f"entre {stamp(lines[0])} et {stamp(lines[-1])}"
     summary = f"{len(events)} événements {period} : " + ", ".join(EVENTS[e] for e in order[:4])
     summary += "…" if len(order) > 4 else "."
     if errors:
