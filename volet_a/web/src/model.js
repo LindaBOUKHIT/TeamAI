@@ -1,4 +1,5 @@
-import * as ort from "onnxruntime-web";
+// Variante WASM seule : 14 Mo de moteur au lieu de 28 Mo (l'entrée par défaut embarque WebGPU, inutilisé ici).
+import * as ort from "onnxruntime-web/wasm";
 
 ort.env.wasm.numThreads = 1;
 
