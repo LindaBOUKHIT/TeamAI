@@ -24,7 +24,7 @@ from teamai.paths import ROOT
 from volet_b.slm.first_inference import PeakMemory, gb, new_run_directory
 from volet_b.slm.generate import load_config
 
-CONFIG = Path(__file__).parent / "configs" / "lora_essai.yaml"
+CONFIG = ROOT / "volet_b" / "slm" / "configs" / "lora_essai.yaml"
 
 INSTRUCTION = """Tu analyses les logs HDFS d'un seul bloc de données. Réponds uniquement par un objet JSON avec les clés :
 resume_evenements (texte), faits_observes, hypotheses, infos_manquantes, sources (listes de textes), abstention (booléen).
