@@ -30,7 +30,12 @@ body { font-family: "Figtree", sans-serif; color: var(--ink); -webkit-print-colo
            transform: translate(-50%, -50%) scale(var(--scale, 1)); box-shadow: 0 30px 80px rgba(0,0,0,.45); }
   .slide:not(.active) { display: none; }
 }
-@media print { html, body { background: none; } .slide { margin: 0; } }
+@media print {
+  html, body { background: none; } .slide { margin: 0; }
+  /* Le grain (milliers de points) et l'effet « tracé à la main » ralentissent fortement les lecteurs PDF : retirés à l'impression. */
+  .slide::before { display: none; }
+  svg [filter] { filter: none; }
+}
 
 h1, h2, h3 { font-family: "Young Serif", serif; font-weight: 400; letter-spacing: -.01em; }
 h1 { font-size: 112px; line-height: 1.04; }
