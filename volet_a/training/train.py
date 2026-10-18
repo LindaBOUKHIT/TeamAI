@@ -9,21 +9,15 @@ import subprocess
 import time
 import uuid
 from datetime import datetime, timezone
-import sys
-from pathlib import Path
-
-# Rend les modules du dépôt accessibles lors du lancement direct du script.
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-
 import numpy as np
 import torch
 from torch import nn
 from torch.utils.data import DataLoader, TensorDataset
 
-from bilstm import BiLSTM
-from dataset import load_datasets
 from eval.metrics import evaluate_binary
-from teamai.paths import PREPROCESSED, ROOT, RUNS, SPLITS, WEB_PUBLIC
+from teamai.paths import PREPROCESSED, RUNS, SPLITS, TRAINING, VOLET_A_RESULTS, WEB_PUBLIC
+from volet_a.training.bilstm import BiLSTM
+from volet_a.training.dataset import load_datasets
 
 
 def write_json(path, value):
@@ -121,7 +115,7 @@ def main():
         "git_commit": git_output("rev-parse", "HEAD"),
         "git_status": git_output("status", "--short"),
         "source_hashes": {
-            name: file_hash(ROOT / "volet_a/training" / name)
+            name: file_hash(TRAINING / name)
             for name in ("dataset.py", "bilstm.py", "train.py")
         },
         "splits_sha256": file_hash(SPLITS / "splits.csv"),
@@ -246,7 +240,7 @@ def main():
             else None
         )
 
-    baseline_path = ROOT / "volet_a/results/SCRUM-24-baseline-results.json"
+    baseline_path = VOLET_A_RESULTS / "SCRUM-24-baseline-results.json"
     baseline = json.loads(baseline_path.read_text(encoding="utf-8"))
     metrics["baseline_reference"] = {
         "file_sha256": file_hash(baseline_path),

@@ -36,7 +36,7 @@ Chaque dossier contient un `README.md` : responsable, tickets Jira, entrées, so
 python -m venv .venv
 .venv\Scripts\activate          # Windows  (Linux/Mac : source .venv/bin/activate)
 pip install -e ".[data]"        # socle commun ; ajouter [volet_a] ou [volet_b] selon sa partie
-python data/download_hdfs.py    # ~180 Mo → data/raw/HDFS_v1/ (non versionné)
+python -m data.download_hdfs    # ~180 Mo → data/raw/HDFS_v1/ (non versionné)
 python -m teamai.data.loader    # vérification : affiche les statistiques du corpus
 ```
 
