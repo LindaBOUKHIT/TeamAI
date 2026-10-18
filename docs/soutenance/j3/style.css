@@ -35,6 +35,19 @@ body { font-family: "Figtree", sans-serif; color: var(--ink); -webkit-print-colo
   /* Le grain (milliers de points) et l'effet « tracé à la main » ralentissent fortement les lecteurs PDF : retirés à l'impression. */
   .slide::before { display: none; }
   svg [filter] { filter: none; }
+  /* Version PDF « à plat » : couleurs pleines, ombres nettes, aucun dégradé transparent ni masque,
+     pour que le lecteur PDF n'ait aucun calcul de transparence à faire avant d'afficher la page. */
+  .slide { background: var(--paper); }
+  .sticky, .printout, .page-card, .polaroid, .path li, .photo-frame, .lined, .seg, .node { box-shadow: 6px 8px 0 #E0D3BF !important; }
+  .node { box-shadow: 5px 6px 0 #DDD3C6 !important; }
+  .tape { -webkit-mask: none; background: #F1CDBD; box-shadow: none; }
+  .hl { background: linear-gradient(#F4ECDF 0 52%, #F3C552 52% 88%, #F4ECDF 88%); box-shadow: none; }
+  mark { background: #F6D47A; }
+  .portrait::after { display: none; }
+  .printout { background-image: repeating-linear-gradient(#FBF7EF 0 57px, #E4E6E3 57px 59px); }
+  .lined { background-image: linear-gradient(90deg, #FBF7EF 38px, #E9B7A3 38px 40px, #FBF7EF 40px), repeating-linear-gradient(#FBF7EF 0 47px, #E2E5E2 47px 49px); }
+  footer { border-top-color: #CFC4B6; }
+  .side { border-left-color: #CFC4B6; }
 }
 
 h1, h2, h3 { font-family: "Young Serif", serif; font-weight: 400; letter-spacing: -.01em; }
