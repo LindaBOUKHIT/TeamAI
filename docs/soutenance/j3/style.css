@@ -176,7 +176,7 @@ footer { position: absolute; left: 120px; right: 120px; bottom: 44px; display: f
 .lesson { margin-top: 30px; }
 
 /* ----- board ----- */
-.photo-frame { position: relative; margin: 0 auto; width: 1500px; height: 680px; background: #FDFAF4; padding: 26px; transform: rotate(var(--tilt)); box-shadow: 0 30px 50px -28px rgba(60,40,20,.6); display: flex; align-items: center; justify-content: center; }
+.photo-frame { position: relative; width: 100%; height: 640px; background: #FDFAF4; padding: 26px; transform: rotate(var(--tilt)); box-shadow: 0 30px 50px -28px rgba(60,40,20,.6); display: flex; align-items: center; justify-content: center; }
 .photo-frame img { width: 100%; height: 100%; object-fit: contain; }
 [hidden] { display: none !important; }
 .placeholder { font-size: 44px; color: var(--ink-soft); text-align: center; border: 3px dashed rgba(94,83,75,.4); width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
@@ -201,3 +201,10 @@ footer { position: absolute; left: 120px; right: 120px; bottom: 44px; display: f
 .right-col { display: flex; flex-direction: column; gap: 40px; }
 .thanks { font-size: 110px; color: var(--terracotta); transform: rotate(-5deg); line-height: 1; margin-top: 20px; }
 .sign { font-size: 28px; color: var(--ink-soft); }
+
+.board-grid { display: grid; grid-template-columns: 1fr 470px; gap: 70px; align-items: start; }
+.board-notes { display: flex; flex-direction: column; gap: 26px; }
+.board-notes .big-hand { font-size: 84px !important; }
+.board-counts { list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 4px 20px; }
+.board-counts li { font-size: 26px; line-height: 1.3; } .board-counts b { font-family: "Young Serif", serif; font-weight: 400; font-size: 44px; color: var(--ocean); margin-right: 10px; }
+.board-hint { color: var(--terracotta) !important; font-size: 28px; }
