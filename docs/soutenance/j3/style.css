@@ -212,3 +212,9 @@ footer { position: absolute; left: 120px; right: 120px; bottom: 44px; display: f
 .board-counts { list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 4px 20px; }
 .board-counts li { font-size: 26px; line-height: 1.3; } .board-counts b { font-family: "Young Serif", serif; font-weight: 400; font-size: 44px; color: var(--ocean); margin-right: 10px; }
 .board-hint { color: var(--terracotta) !important; font-size: 28px; }
+
+.status-side { display: flex; flex-direction: column; gap: 60px; }
+.status-side .lesson { margin-top: 30px; }
+.repo { font-family: "Courier Prime", monospace; font-size: 27px; line-height: 1.5; padding-left: 10px; }
+.repo .hand { font-size: 34px; color: var(--terracotta); }
+.repo .small { font-family: "Figtree", sans-serif; }
