@@ -29,7 +29,7 @@ volet_b = [
 volet_b_gguf = ["llama-cpp-python>=0.3", "huggingface-hub>=0.25", "pyyaml>=6.0", "psutil>=5.9", "pandas>=2.0"]
 
 [tool.setuptools.packages.find]
-include = ["teamai*", "volet_b*"]
+include = ["teamai*", "data*", "eval*", "volet_a*", "volet_b*"]
 
 [tool.setuptools.package-data]
 "volet_b.slm" = ["configs/*.yaml"]

@@ -15,7 +15,7 @@ Les poids sont aléatoires. Les scores n’ont aucune valeur prédictive.
 Ouvrir PowerShell à la racine du dépôt et exécuter :
 
     .\.venv\Scripts\python.exe -m pip install -e ".[volet_a]"
-    .\.venv\Scripts\python.exe volet_a/training/spike_onnx.py
+    .\.venv\Scripts\python.exe -m volet_a.training.spike_onnx
 
 Ces commandes supposent que l’environnement .venv existe déjà.
 Pour le créer : python -m venv .venv
@@ -104,7 +104,7 @@ Depuis la racine du dépôt, dans PowerShell :
 
 Si les splits officiels sont absents :
 
-    .\.venv\Scripts\python.exe data/make_splits.py
+    .\.venv\Scripts\python.exe -m data.make_splits
 
 Vérifier que le hash généré correspond à la référence ci-dessus.
 Le script de génération réécrit splits_meta.json :
@@ -112,14 +112,14 @@ conserver les métadonnées officielles pour la comparaison.
 
 Préparation et entraînement :
 
-    .\.venv\Scripts\python.exe volet_a/training/dataset.py
-    .\.venv\Scripts\python.exe volet_a/training/train.py --split officiel --epochs 5 --batch-size 512 --threads 4
+    .\.venv\Scripts\python.exe -m volet_a.training.dataset
+    .\.venv\Scripts\python.exe -m volet_a.training.train --split officiel --epochs 5 --batch-size 512 --threads 4
 
 Chaque entraînement crée un dossier neuf dans eval/runs/.
 Remplacer CHEMIN_DU_RUN ci-dessous par le dossier affiché :
 
-    .\.venv\Scripts\python.exe volet_a/training/export_onnx.py --run CHEMIN_DU_RUN
-    .\.venv\Scripts\python.exe volet_a/training/check_parity.py --run CHEMIN_DU_RUN
+    .\.venv\Scripts\python.exe -m volet_a.training.export_onnx --run CHEMIN_DU_RUN
+    .\.venv\Scripts\python.exe -m volet_a.training.check_parity --run CHEMIN_DU_RUN
 
 L’export est créé dans le sous-dossier export du run.
 Il ne remplace pas automatiquement le modèle du site.

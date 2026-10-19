@@ -12,8 +12,10 @@ from html.parser import HTMLParser
 from pathlib import Path
 from urllib.request import Request, urlopen
 
+from teamai.paths import CORPUS
 
-CORPUS_DIR = Path(__file__).resolve().parent / "corpus"
+
+CORPUS_DIR = CORPUS
 RAW_DIR = CORPUS_DIR / "raw"
 OUTPUT_PATH = CORPUS_DIR / "chunks.jsonl"
 COMPARISON_PATH = CORPUS_DIR / "chunking_comparison.json"

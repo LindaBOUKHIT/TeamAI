@@ -3,16 +3,13 @@
 import argparse
 import hashlib
 import json
-import sys
 from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 import onnx
 import torch
 
-from bilstm import BiLSTM
 from teamai.paths import ROOT, SPLITS, WEB_PUBLIC
+from volet_a.training.bilstm import BiLSTM
 
 
 def file_hash(path):

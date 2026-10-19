@@ -21,7 +21,7 @@ teamai/data/           Code partagé, importé par tous les volets
 ## Utilisation
 
 ```bash
-python data/download_hdfs.py          # → data/raw/HDFS_v1/
+python -m data.download_hdfs          # → data/raw/HDFS_v1/
 python -m teamai.data.loader          # statistiques de contrôle
 ```
 

@@ -12,11 +12,12 @@ import json
 import os
 import time
 from functools import lru_cache
-from pathlib import Path
 
 import yaml
 
-CONFIG = Path(__file__).parent / "configs" / "generation.yaml"
+from teamai.paths import SLM_CONFIGS
+
+CONFIG = SLM_CONFIGS / "generation.yaml"
 
 MOCK_ANSWER = {
     "resume_evenements": "Réponse factice (TEAMAI_SLM_MOCK=1) : aucun modèle n'a été appelé.",

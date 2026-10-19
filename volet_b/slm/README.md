@@ -36,7 +36,7 @@ La sortie réelle est du texte brut. C'est au consommateur de l'analyser et de c
 
 ## Exécution réelle
 
-Les fichiers publics `data/raw/HDFS_v1/HDFS.log` et `preprocessed/Event_traces.csv` sont requis. S'ils sont absents, utiliser `python data/download_hdfs.py` (téléchargement, MD5 et extraction). Aucun jeu de test réservé n'est utilisé pour cet essai technique. Le bloc inspecté sert au développement et doit être exclu du futur test réservé du volet B.
+Les fichiers publics `data/raw/HDFS_v1/HDFS.log` et `preprocessed/Event_traces.csv` sont requis. S'ils sont absents, utiliser `python -m data.download_hdfs` (téléchargement, MD5 et extraction). Aucun jeu de test réservé n'est utilisé pour cet essai technique. Le bloc inspecté sert au développement et doit être exclu du futur test réservé du volet B.
 
 Avec les poids déjà en cache :
 
