@@ -98,3 +98,74 @@ Dans GitHub : Settings > Pages > Source = GitHub Actions.
 
 URL prévue : https://lindaboukhit.github.io/TeamAI/
 Statut : publication publique à vérifier après déploiement.
+
+## SCRUM-27 — Parcours fonctionnel
+
+### Utilisation
+
+- Coller des logs dans la zone de saisie ou importer un fichier
+  texte .log / .txt, limité à 10 Mo.
+- Cliquer sur « Analyser les logs ».
+- Consulter les résultats par bloc : classe, score, longueur,
+  événements tronqués, inconnus encodés et avertissements.
+- Cocher « Anomalies seulement » pour filtrer le tableau.
+- Exporter les résultats affichés en CSV.
+
+Le seuil est lu dans detector.meta.json :
+p_anomaly >= threshold donne la classe anomalie.
+Le score n’est pas une probabilité calibrée.
+
+Les exemples sont chargés depuis public/examples/.
+Ils permettent de vérifier les blocs normaux, les anomalies,
+les fichiers contenant plusieurs blocs et les entrées dégradées.
+
+### Entrées incomplètes et invalides
+
+Une entrée sans bloc reconnu est rejetée.
+Les lignes invalides ou sans identifiant de bloc sont comptées
+et ignorées. Les événements inconnus sont signalés.
+
+Le prétraitement conserve les 50 premiers événements par bloc,
+complète avec le padding et signale les événements tronqués.
+
+La complétude d’un bloc ne peut pas être garantie à partir
+des seules lignes fournies. L’exemple volontairement incomplet
+est identifié lorsqu’il est chargé par le sélecteur d’exemples.
+Un fichier importé affiche « Complétude non vérifiée ».
+
+Modifier la saisie ou charger une autre source efface les anciens
+résultats. Une erreur ne produit aucune prédiction de remplacement.
+
+### Export CSV
+
+L’export respecte le filtre actif et contient :
+BlockId, label, p_anomaly, length, truncated, unknown,
+warnings, threshold et model_sha256.
+
+Les valeurs sont échappées pour le CSV ; les cellules textuelles
+pouvant être interprétées comme des formules sont neutralisées.
+
+### Vérifications
+
+Depuis volet_a/web :
+
+    npm ci
+    npm test
+    npm run build
+    npm run preview
+
+Ouvrir l’adresse affichée suivie de /TeamAI/.
+
+Vérifications réalisées :
+- 16 tests JavaScript réussis.
+- Compilation de production réussie.
+- Exemple multi-blocs : trois blocs dont une anomalie.
+- Import du même fichier : résultats identiques.
+- Filtre et export : une seule anomalie exportée.
+- Entrée invalide rejetée.
+- Lignes ignorées et événement inconnu signalés.
+- Exemple incomplet signalé.
+
+L’inférence utilise des lots de 64 blocs.
+Le déplacement du traitement vers un Web Worker relève de SCRUM-40.
+Publication publique à vérifier après fusion et déploiement.

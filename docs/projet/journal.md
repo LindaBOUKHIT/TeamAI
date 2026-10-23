@@ -216,3 +216,42 @@ Exécution et vérifications locales réalisées par Bachar.
 Relecture par Nassim et vérification de la CI à effectuer.
 Intégration et vérification sur le site complet restant à confirmer
 après combinaison avec SCRUM-23.
+
+
+
+## 2026-10-23 — SCRUM-27 — Bachar Ben Slama
+
+Ajout du parcours fonctionnel du volet A :
+- Saisie de logs par copier-coller.
+- Import de fichier texte limité à 10 Mo.
+- Chargement des cinq exemples disponibles.
+- Tableau par bloc : classe, score, longueur, événements tronqués,
+  inconnus encodés et avertissements.
+- Filtre « anomalies seulement » et export CSV des lignes affichées.
+- Seuil lu dans detector.meta.json, sans réglage depuis l’interface.
+- Rejet des entrées sans bloc reconnu et effacement des anciens
+  résultats lors d’un changement de source.
+- Signalement des lignes ignorées et des événements inconnus.
+
+La complétude des blocs n’est pas déduite automatiquement :
+elle est indiquée comme non vérifiée. L’exemple volontairement
+incomplet est signalé lorsqu’il est chargé par le sélecteur.
+
+Vérifications locales :
+- 16 tests JavaScript réussis.
+- Build de production réussi.
+- Exemple multi-blocs : trois blocs, dont une anomalie.
+- Import du même fichier : résultats identiques.
+- Filtre et CSV vérifiés : une anomalie exportée.
+- Entrée invalide rejetée.
+- Lignes ignorées, événement inconnu et exemple incomplet signalés.
+
+Le traitement utilise des lots de 64 blocs ; le Web Worker est
+prévu dans SCRUM-40. Aucun test officiel utilisé pour ces essais.
+
+Usage IA : assistance de Codex pour proposer l’interface,
+le raccordement au modèle, l’export CSV et les tests.
+Manipulations et vérifications locales réalisées par Bachar.
+
+Relecture par Nassim à effectuer. Publication publique et tag
+v0.2-J3 à vérifier après intégration et PR dev vers main.
