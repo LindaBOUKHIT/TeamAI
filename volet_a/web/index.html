@@ -4,12 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>TeamAI — Détection d’anomalies HDFS</title>
+    <title>TeamAI — Analyse de logs HDFS</title>
     <style>
         body {
             font-family: system-ui, sans-serif;
-            max-width: 850px;
-            margin: 40px auto;
+            max-width: 1100px;
+            margin: 32px auto;
             padding: 0 20px;
             background: #f5f7fb;
             color: #182235;
@@ -21,46 +21,157 @@
             border-radius: 14px;
         }
 
-        .warning {
-            padding: 16px;
-            background: #fff2cc;
-            border: 1px solid #b88600;
-            border-radius: 8px;
+        h2 {
+            margin-top: 28px;
+        }
+
+        textarea {
+            box-sizing: border-box;
+            width: 100%;
+            min-height: 220px;
+            padding: 12px;
+            font-family: monospace;
+        }
+
+        button,
+        select,
+        input[type="file"] {
+            max-width: 100%;
+            padding: 10px;
+            margin: 8px 0;
         }
 
         button {
-            padding: 12px 18px;
-            margin: 16px 0;
             cursor: pointer;
         }
 
-        pre {
-            white-space: pre-wrap;
-            overflow-wrap: anywhere;
-            padding: 16px;
+        button:disabled {
+            cursor: wait;
+        }
+
+        .notice {
+            padding: 14px;
+            background: #fff2cc;
+            border-radius: 8px;
+        }
+
+        #message[data-error="true"] {
+            color: #a31515;
+            font-weight: bold;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-top: 16px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 10px;
+            border-bottom: 1px solid #dce2eb;
+        }
+
+        th {
             background: #edf1f7;
+        }
+
+        td:first-child {
+            overflow-wrap: anywhere;
+        }
+
+        .anomaly {
+            background: #fff0ee;
         }
     </style>
 </head>
 
 <body>
     <main>
-        <h1>TeamAI — Détection d’anomalies HDFS</h1>
+        <h1>TeamAI — Analyse de logs HDFS</h1>
         <p>
-            Le modèle s’exécute dans votre navigateur.
-            Les entrées de ce test ne sont pas envoyées à un serveur.
+            Analysez les événements regroupés par bloc HDFS.
+            Le traitement s’effectue dans votre navigateur :
+            vos logs ne sont pas envoyés à un serveur.
         </p>
 
         <p id="status" role="status">Chargement du modèle…</p>
-        <p id="warning" class="warning" hidden></p>
+        <p id="warning" class="notice" hidden></p>
 
-        <button id="run" disabled>Tester une inférence</button>
-        <pre id="results" aria-live="polite">Initialisation…</pre>
+        <section aria-labelledby="input-title">
+            <h2 id="input-title">1. Fournir des logs</h2>
 
-        <p>
-            Version v0 : test technique sur une séquence artificielle.
-            La saisie de logs et l’import de fichiers seront ajoutés ensuite.
-        </p>
+            <label for="logs">Collez vos lignes de logs HDFS :</label>
+            <textarea id="logs" spellcheck="false"
+                placeholder="Collez ici les lignes contenant des identifiants blk_…"></textarea>
+
+            <p>
+                <label for="file">Ou importez un fichier texte (.log ou .txt) :</label>
+                <input id="file" type="file" accept=".log,.txt,text/plain" disabled>
+            </p>
+
+            <label for="example">Exemple issu de la validation :</label>
+            <select id="example" disabled>
+                <option value="01_normal.log">Bloc normal</option>
+                <option value="02_anomalie.log">Bloc avec anomalie</option>
+                <option value="03_plusieurs_blocs.log">Plusieurs blocs</option>
+                <option value="04_bloc_incomplet.log">Extrait de bloc incomplet</option>
+                <option value="05_lignes_invalides.log">Lignes invalides</option>
+            </select>
+            <button id="load-example" type="button" disabled>
+                Essayer un exemple
+            </button>
+
+            <p id="source" role="status">Source : saisie libre.</p>
+            <button id="analyze" type="button" disabled>Analyser les logs</button>
+        </section>
+
+        <p id="message" role="status" aria-live="polite"></p>
+
+        <section aria-labelledby="results-title">
+            <h2 id="results-title">2. Résultats par bloc</h2>
+
+            <p class="notice">
+                Un extrait peut ne contenir qu’une partie des événements d’un bloc.
+                La complétude ne peut pas être garantie à partir des seules lignes
+                fournies. Le score n’est pas une probabilité calibrée.
+            </p>
+
+            <p id="summary" aria-live="polite">Aucune analyse effectuée.</p>
+
+            <label>
+                <input id="anomalies-only" type="checkbox" disabled>
+                Anomalies seulement
+            </label>
+            <button id="export" type="button" disabled>
+                Exporter les résultats affichés en CSV
+            </button>
+
+            <p id="result-count"></p>
+
+            <div class="table-container">
+                <table>
+                    <caption>Classification des blocs présents dans les logs fournis</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">Bloc</th>
+                            <th scope="col">Classe</th>
+                            <th scope="col">Score</th>
+                            <th scope="col">Événements reçus</th>
+                            <th scope="col">Tronqués</th>
+                            <th scope="col">Inconnus encodés</th>
+                            <th scope="col">Avertissements</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rows"></tbody>
+                </table>
+            </div>
+        </section>
     </main>
 
     <script type="module" src="./src/main.js"></script>
