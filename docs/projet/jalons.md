@@ -2,8 +2,10 @@
 
 ## Site du projet — SCRUM-23
 
-Le site v0 n’est pas encore déployé.  
-URL : à compléter après sa mise en ligne.
+Le site est en ligne depuis le 23/10/2026 (fusion de la PR #28 `dev` → `main`, workflow « Déploiement volet A » réussi) :
+**https://lindaboukhit.github.io/TeamAI/**
+
+Il charge le BiLSTM v1 entraîné (SCRUM-25), le vocabulaire C2 et le prétraitement JavaScript (SCRUM-26), puis exécute l'inférence dans le navigateur, sans serveur. Le parcours complet (saisie des logs, import, export CSV) arrive avec SCRUM-27.
 
 ## Première inférence — SCRUM-28
 
@@ -38,10 +40,14 @@ Détail et constat sur l'ordre du prompt : [journal du projet](journal.md), entr
 
 ## Capture du board Jira
 
-À ajouter.
+![Board Jira SCRUM](../soutenance/j3/board.png)
+
+Capture reprise du support J3 (SCRUM-32). Board : https://lindaboukhit04.atlassian.net/jira/software/projects/SCRUM/boards/1
 
 ## Livraison
 
-- Site en ligne : à compléter après SCRUM-23.
-- Tag `v0.1-mi-parcours` : à créer après la mise en production.
-- Capture du board et courriel au professeur : à ajouter après vérification des éléments.
+- Site en ligne : https://lindaboukhit.github.io/TeamAI/ (23/10/2026).
+- Tag `v0.1-mi-parcours` sur `main` : https://github.com/LindaBOUKHIT/TeamAI/releases/tag/v0.1-mi-parcours
+- Branche `milestone/mi-parcours` pour consultation : https://github.com/LindaBOUKHIT/TeamAI/tree/milestone/mi-parcours
+- Capture du board : ci-dessus.
+- Courriel au professeur : à envoyer.
