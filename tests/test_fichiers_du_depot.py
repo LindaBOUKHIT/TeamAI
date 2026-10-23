@@ -10,6 +10,7 @@ from teamai.contracts import leaked_blocks, load_jsonl, validate_example
 
 ANNOTATIONS = sorted(paths.ANNOTATIONS.glob("*.jsonl"))
 TEST_SET = paths.EVAL / "volet_b" / "test.jsonl"
+SPLITS_CSV = paths.SPLITS / "splits.csv"
 
 
 @pytest.mark.parametrize("path", ANNOTATIONS, ids=lambda p: p.name)
@@ -17,6 +18,33 @@ def test_annotations_respectent_C5(path):
     """Chaque exemple de volet_b/annotations/*.jsonl respecte C5."""
     for n, example in enumerate(load_jsonl(path), start=1):
         assert validate_example(example) == [], f"{path.name}, exemple n°{n} ({example.get('id')})"
+
+
+@pytest.mark.parametrize("path", ANNOTATIONS, ids=lambda p: p.name)
+def test_sources_des_annotations_existent_dans_le_corpus(path):
+    """Chaque source citée est un identifiant existant de volet_b/rag/corpus/chunks.jsonl (C6)."""
+    corpus_ids = {passage["id"] for passage in load_jsonl(paths.RAG / "corpus" / "chunks.jsonl")}
+    for example in load_jsonl(path):
+        unknown = set(example["expected"]["sources"]) - corpus_ids
+        assert not unknown, f"{path.name}, {example['id']} : sources absentes du corpus {sorted(unknown)}"
+
+
+@pytest.mark.parametrize("path", ANNOTATIONS, ids=lambda p: p.name)
+def test_annotations_hors_test(path):
+    """Chaque exemple d'adaptation déclare le split train ou val, jamais test."""
+    for example in load_jsonl(path):
+        assert example["split"] in ("train", "val"), f"{path.name}, {example['id']} : split {example['split']}"
+
+
+@pytest.mark.skipif(not SPLITS_CSV.exists(), reason="splits.csv non versionné : python data/make_splits.py")
+@pytest.mark.parametrize("path", ANNOTATIONS, ids=lambda p: p.name)
+def test_split_des_annotations_conforme_a_splits_csv(path):
+    """Le split déclaré correspond à data/splits/splits.csv (C4) ; vérifié là où les splits sont générés."""
+    import pandas as pd
+
+    official = pd.read_csv(SPLITS_CSV, usecols=["BlockId", "split"]).set_index("BlockId")["split"]
+    for example in load_jsonl(path):
+        assert official.get(example["block_id"]) == example["split"], f"{path.name}, {example['id']}"
 
 
 @pytest.mark.skipif(not TEST_SET.exists(), reason="jeu de test réservé pas encore constitué (SCRUM-35)")
