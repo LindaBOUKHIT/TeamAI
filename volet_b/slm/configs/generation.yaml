@@ -1,0 +1,9 @@
+# Paramètres de génération du volet B — figés pour toutes les comparaisons (SCRUM-38, SCRUM-45).
+# Toute modification doit être consignée dans le journal : elle rend les résultats antérieurs non comparables.
+model_id: HuggingFaceTB/SmolLM2-1.7B-Instruct
+revision: 31b70e2e869a7173562077fd711b654946d38674 # snapshot du cache local
+dtype: float32          # CPU sans GPU NVIDIA : float32 (bfloat16 est lent sur ce processeur)
+max_new_tokens: 300
+do_sample: false        # décodage glouton : sorties reproductibles
+repetition_penalty: 1.1
+seed: 42

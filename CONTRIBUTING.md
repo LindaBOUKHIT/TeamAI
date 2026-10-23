@@ -38,6 +38,8 @@ SCRUM-25: entraîne le BiLSTM sur le split provisoire
 - Relue par le **binôme** indiqué dans le ticket avant fusion (1 approbation).
 - Le relecteur doit pouvoir lancer le code à partir du README du dossier.
 - Remplir le modèle de PR (`.github/pull_request_template.md`).
+- **Fusion seulement si les tests automatiques sont au vert** (coche verte sur la PR, voir §8).
+- Chaque module, classe et fonction Python a une docstring en français : rôle, entrées utiles, valeur rendue. Vérifié par `python -m unittest tests.test_docstrings`.
 
 ## 5. Ce qui ne va jamais dans Git
 
@@ -55,3 +57,35 @@ Les jeux de test (`eval/volet_a`, `eval/volet_b`) ne servent **qu'à l'évaluati
 | Décisions, abandons de features, usages IA, réunions | `docs/projet/journal.md` + classeur partagé |
 | Résultats d'expériences | `eval/results/` + onglet Expériences du classeur |
 | Documentation d'une partie | `docs/<data|volet_a|volet_b>/` |
+
+## 8. Paquets, imports et chemins
+
+- Chaque dossier contenant du code Python a un `__init__.py` (une docstring, aucun import lourd).
+- Imports absolus depuis la racine : `from volet_a.training.bilstm import BiLSTM`, jamais `from bilstm import …` ni `sys.path.insert`.
+- Chemins : toujours `from teamai.paths import …`. Un chemin manque ? L'ajouter dans `teamai/paths.py`, pas de `Path(__file__)` ni de `Path("data/…")` dans les scripts.
+- Lancement depuis la racine du dépôt : `python -m volet_a.training.train`, pas `python volet_a/training/train.py`.
+- Après l'ajout d'un paquet, relancer une fois `pip install -e ".[dev]"` pour qu'il soit importable.
+- `tests/test_structure_paquets.py` vérifie ces règles en CI.
+
+## 9. Tests automatisés
+
+GitHub Actions (`.github/workflows/tests.yml`) lance les tests à chaque PR vers `dev` ou `main` : une coche verte ou une croix rouge s'affiche sur la PR.
+
+En local, avant d'ouvrir une PR :
+
+```bash
+pip install -e ".[dev]"
+pytest -q -rs          # -rs affiche pourquoi certains tests sont sautés
+```
+
+| Dossier | Contenu |
+|---|---|
+| `tests/` | Tests Python (pytest) : chargeur de données, formats d'échange, fichiers d'annotation, mode factice du SLM |
+| `tests/fixtures/` | Petites données extraites de HDFS_v1 (5 Ko) : les tests tournent partout sans les 1,5 Go |
+| `volet_a/web/tests/` | Tests du site (`npm test`), dont la parité JavaScript ↔ Python |
+
+Règles :
+- Pas de données lourdes ni de modèle dans les tests : utiliser `tests/fixtures/` et `TEAMAI_SLM_MOCK=1`.
+- Un test qui a besoin du corpus complet porte la marque `@pytest.mark.full_data` : il est sauté s'il manque (donc sur GitHub), mais tourne chez ceux qui l'ont téléchargé.
+- Chaque ticket qui ajoute du code ajoute ses tests (ex. parser : concordance avec Loghub ; splits : aucune fuite train/test).
+- `teamai.contracts` vérifie le format C5 : l'utiliser aussi dans le code (taux de réponses conformes du volet B).

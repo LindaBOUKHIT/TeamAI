@@ -1,0 +1,54 @@
+# Lance les tests à chaque PR vers dev ou main (et à chaque mise à jour de ces branches).
+# Pas de données lourdes ni de modèle ici : les tests utilisent tests/fixtures/ et le mode factice du SLM.
+name: Tests
+
+on:
+  pull_request:
+    branches: [dev, main]
+  push:
+    branches: [dev, main]
+  workflow_dispatch:
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  python:
+    name: Tests Python (pytest)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Installation
+        run: pip install -e ".[dev]"
+      - name: pytest
+        run: pytest -q -rs
+
+  web:
+    name: Tests du site (npm test)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Présence du site
+        id: site
+        run: |
+          if [ -f volet_a/web/package.json ]; then echo "exists=true" >> "$GITHUB_OUTPUT"; else echo "exists=false" >> "$GITHUB_OUTPUT"; echo "Pas encore de package.json : rien à tester (SCRUM-23)."; fi
+      - uses: actions/setup-node@v4
+        if: steps.site.outputs.exists == 'true'
+        with:
+          node-version: 20
+      - name: npm test
+        if: steps.site.outputs.exists == 'true'
+        working-directory: volet_a/web
+        run: |
+          # Le script npm généré par défaut (« no test specified ») n'est pas un test : on le saute
+          # jusqu'à ce que le site ait de vrais tests (SCRUM-23/26/27), sans bloquer les PR.
+          if node -e "const t=require('./package.json').scripts?.test||''; process.exit(/no test specified/.test(t)?0:1)"; then
+            echo "Pas encore de vrai test npm : étape sautée (voir SCRUM-26)."
+          else
+            npm ci && npm test
+          fi

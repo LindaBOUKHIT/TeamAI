@@ -1,0 +1,109 @@
+{
+  "ticket": "SCRUM-24",
+  "model": "LogisticRegression",
+  "class_weight": "balanced",
+  "max_iter": 1000,
+  "random_state": 42,
+  "features": [
+    "E1",
+    "E2",
+    "E3",
+    "E4",
+    "E5",
+    "E6",
+    "E7",
+    "E8",
+    "E9",
+    "E10",
+    "E11",
+    "E12",
+    "E13",
+    "E14",
+    "E15",
+    "E16",
+    "E17",
+    "E18",
+    "E19",
+    "E20",
+    "E21",
+    "E22",
+    "E23",
+    "E24",
+    "E25",
+    "E26",
+    "E27",
+    "E28",
+    "E29"
+  ],
+  "n_train": 402542,
+  "n_val": 86259,
+  "n_test": 86260,
+  "validation": {
+    "accuracy": 0.998805921700924,
+    "precision_anomaly": 0.960806697108067,
+    "recall_anomaly": 1.0,
+    "macro_f1": 0.989698111159149,
+    "tn": 83631,
+    "fp": 103,
+    "fn": 0,
+    "tp": 2525
+  },
+  "validation_by_sequence": {
+    "unseen": {
+      "accuracy": 0.9683773976153447,
+      "precision_anomaly": 0.8976510067114094,
+      "recall_anomaly": 1.0,
+      "macro_f1": 0.9618482626335136,
+      "tn": 1333,
+      "fp": 61,
+      "fn": 0,
+      "tp": 535,
+      "n_blocks": 1929
+    },
+    "known": {
+      "accuracy": 0.999501956599075,
+      "precision_anomaly": 0.9793307086614174,
+      "recall_anomaly": 1.0,
+      "macro_f1": 0.9946511644863104,
+      "tn": 82298,
+      "fp": 42,
+      "fn": 0,
+      "tp": 1990,
+      "n_blocks": 84330
+    }
+  },
+  "test": {
+    "accuracy": 0.9986320426617203,
+    "precision_anomaly": 0.956060606060606,
+    "recall_anomaly": 0.9992082343626286,
+    "macro_f1": 0.9882266254061167,
+    "tn": 83618,
+    "fp": 116,
+    "fn": 2,
+    "tp": 2524
+  },
+  "test_by_sequence": {
+    "unseen": {
+      "accuracy": 0.9648318042813455,
+      "precision_anomaly": 0.8898026315789473,
+      "recall_anomaly": 0.996316758747698,
+      "macro_f1": 0.9575846650852846,
+      "tn": 1352,
+      "fp": 67,
+      "fn": 2,
+      "tp": 541,
+      "n_blocks": 1962
+    },
+    "known": {
+      "accuracy": 0.9994187287954637,
+      "precision_anomaly": 0.9758858267716536,
+      "recall_anomaly": 1.0,
+      "macro_f1": 0.9937490200690242,
+      "tn": 82266,
+      "fp": 49,
+      "fn": 0,
+      "tp": 1983,
+      "n_blocks": 84298
+    }
+  }
+}

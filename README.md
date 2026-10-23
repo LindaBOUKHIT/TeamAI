@@ -5,12 +5,12 @@ Projet NLP 2 (M2 IA, FGES) — Alain, Bachar, Linda, Nassim.
 - **Volet A — en ligne** : un BiLSTM entraîné par l'équipe classe chaque trace HDFS en normal / anomalie, **dans le navigateur** (ONNX Runtime Web, site statique gratuit).
 - **Volet B — local** : un SLM (SmolLM2-1.7B-Instruct) adapté par LoRA explique une trace en s'appuyant sur la documentation HDFS (RAG), avec une variante à 3 agents.
 
-Pilotage : [board Jira SCRUM](https://lindaboukhit04.atlassian.net/jira/software/projects/SCRUM/boards/1) · [feuille de route](docs/projet/feuille_de_route.md) · [formats d'échange](docs/contrats.md) · [règles de contribution](CONTRIBUTING.md)
+Pilotage : [board Jira SCRUM](https://lindaboukhit04.atlassian.net/jira/software/projects/SCRUM/boards/1) · [classeur de suivi](https://docs.google.com/spreadsheets/d/1W8IjMS2L9-SxDK-FGQvjVIdG9NSwmwVBR8dpT5AitLg/edit?gid=1148275204#gid=1148275204) · [feuille de route](docs/projet/feuille_de_route.md) · [formats d'échange](docs/contrats.md) · [règles de contribution](CONTRIBUTING.md)
 
 ## Arborescence
 
 ```
-projet/
+TeamAI/
 ├── teamai/            Code Python partagé (chargement HDFS, vocabulaire, métriques) — importé par tous
 ├── data/              Téléchargement, échantillon partagé, splits (données brutes non versionnées)
 ├── volet_a/
@@ -24,6 +24,7 @@ projet/
 │   └── annotations/   Exemples d'explication (adaptation) — jamais le test     (tous)
 ├── eval/              Protocoles, jeux de test réservés, résultats              (Nassim + tous)
 ├── notebooks/         Explorations personnelles (préfixées par le prénom)
+├── tests/             Tests automatisés (pytest), lancés sur chaque PR par GitHub Actions
 └── docs/              Sujet, cadrage, contrats, documentation par volet, rapport, soutenance
 ```
 
@@ -35,7 +36,7 @@ Chaque dossier contient un `README.md` : responsable, tickets Jira, entrées, so
 python -m venv .venv
 .venv\Scripts\activate          # Windows  (Linux/Mac : source .venv/bin/activate)
 pip install -e ".[data]"        # socle commun ; ajouter [volet_a] ou [volet_b] selon sa partie
-python data/download_hdfs.py    # ~180 Mo → data/raw/HDFS_v1/ (non versionné)
+python -m data.download_hdfs    # ~180 Mo → data/raw/HDFS_v1/ (non versionné)
 python -m teamai.data.loader    # vérification : affiche les statistiques du corpus
 ```
 

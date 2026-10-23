@@ -36,4 +36,10 @@ eval/runs/
 Thumbs.db
 *.log
 !volet_a/web/public/examples/*.log
+!data/sample/*.log
 ~$*
+
+/data/parsed/
+
+# Site compilé — généré par Vite
+volet_a/web/dist/

@@ -11,7 +11,7 @@ volet_a/
 │   ├── dataset.py                  Encodage des séquences (teamai.data.loader)        SCRUM-25
 │   ├── bilstm.py                   Architecture du modèle                             SCRUM-25
 │   ├── train.py                    Entraînement + choix du seuil sur val              SCRUM-25
-│   ├── export_onnx.py              Export C3 + quantification int8                    SCRUM-25 / SCRUM-39
+│   ├── export_onnx.py              Export C3 + quantification int8                    SCRUM-25 / SCRUM-40
 │   ├── check_parity.py             Python vs onnxruntime sur les mêmes entrées        SCRUM-25
 │   └── checkpoints/                — non versionné
 └── web/                            Site statique (voir web/README.md)
@@ -37,8 +37,8 @@ logs bruts collés ─► preprocess.js (regex C2) ─► séquences par blk_ �
 
 ```bash
 pip install -e ".[data,volet_a]"
-python volet_a/training/train.py --split provisoire   # tant que SCRUM-20 n'est pas livré
-python volet_a/training/export_onnx.py                # → web/public/model/
+python -m volet_a.training.train --split provisoire   # tant que SCRUM-20 n'est pas livré
+python -m volet_a.training.export_onnx                # → web/public/model/
 cd volet_a/web && npm install && npm run dev          # site en local
 ```
 
