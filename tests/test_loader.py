@@ -54,7 +54,6 @@ def test_encode_tronque_les_longues_sequences(fixture_data):
     assert encode(longest, vocab) == [vocab[e] for e in longest[:MAX_LEN]]
 
 
-@pytest.mark.xfail(reason="C2 : inconnu → unk_id 30, à implémenter dans SCRUM-26", strict=False)
 def test_encode_inconnu_donne_unk_id(fixture_data):
     """Contrat C2 : un événement inconnu est encodé avec unk_id (30) au lieu de lever une erreur."""
     assert encode(["E99"], fixture_data.load_vocab())[0] == 30

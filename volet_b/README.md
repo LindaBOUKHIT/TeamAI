@@ -48,7 +48,7 @@ volet_b/
 ```bash
 pip install -e ".[data,volet_b]"
 python -m volet_b.slm.first_inference
-python volet_b/app/app.py          # interface locale
+python -m volet_b.app.app          # interface locale
 ```
 
 Pour SCRUM-28, suivre le [README du SLM](slm/README.md) : installation minimale, mode factice, exécution réelle et preuves d'inférence. Les autres composants de l'arborescence restent des livraisons prévues par leurs tickets.

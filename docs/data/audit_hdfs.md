@@ -34,7 +34,7 @@ Les performances des modèles devront être rapportées à la fois sur le test c
 - Méthode : découpage aléatoire stratifié par label, au niveau BlockId
 - Sous-échantillonnage des normaux : aucun
 - Distribution réelle des classes conservée dans les trois ensembles
-- Génération : `python data/make_splits.py`
+- Génération : `python -m data.make_splits`
 - Chargement : `teamai.data.splits.load_split(name)`
 - Métadonnées : `data/splits/splits_meta.json`
 - Hash SHA-256 : `f504592cb7ac13b8b7e5d532a336b4e3641ec441a863c5efafd164faa2a43f22`

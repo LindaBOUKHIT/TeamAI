@@ -1,7 +1,6 @@
 """SCRUM-22 : BiLSTM jouet, export ONNX et vérification Python."""
 
 import json
-from pathlib import Path
 
 import numpy as np
 import onnx
@@ -9,9 +8,9 @@ import onnxruntime as ort
 import torch
 from torch import nn
 
+from teamai.paths import MODEL_DIR
 
-ROOT = Path(__file__).resolve().parents[2]
-MODEL_DIR = ROOT / "volet_a/web/public/model"
+
 MODEL_DIR.mkdir(parents=True, exist_ok=True)
 
 torch.manual_seed(22)

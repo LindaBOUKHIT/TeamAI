@@ -1,4 +1,5 @@
-import * as ort from "onnxruntime-web";
+// Variante WASM seule : 14 Mo de moteur au lieu de 28 Mo (l'entrée par défaut embarque WebGPU, inutilisé ici).
+import * as ort from "onnxruntime-web/wasm";
 
 ort.env.wasm.numThreads = 1;
 
@@ -11,15 +12,32 @@ button.addEventListener("click", async () => {
     let session;
 
     try {
-        const response = await fetch("./model/spike_cases.json");
+        const response = await fetch("./model/parity_cases.json");
         if (!response.ok) {
             throw new Error(`Chargement des cas : HTTP ${response.status}`);
         }
         const cases = await response.json();
 
+        const modelResponse = await fetch("./model/detector.onnx", {
+            cache: "no-cache",
+        });
+        if (!modelResponse.ok) {
+            throw new Error(`Modèle : HTTP ${modelResponse.status}`);
+        }
+        const modelBytes = await modelResponse.arrayBuffer();
+
+        const digest = await crypto.subtle.digest("SHA-256", modelBytes);
+        const actualHash = Array.from(new Uint8Array(digest))
+            .map((value) => value.toString(16).padStart(2, "0"))
+            .join("");
+
+        if (actualHash !== cases.model_sha256) {
+            throw new Error("Les cas de parité ne correspondent pas au modèle.");
+        }
+
         const startLoading = performance.now();
         session = await ort.InferenceSession.create(
-            "./model/detector.onnx",
+            modelBytes,
             { executionProviders: ["wasm"] }
         );
         const loadingMs = performance.now() - startLoading;

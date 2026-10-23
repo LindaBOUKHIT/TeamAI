@@ -1,7 +1,6 @@
 """SCRUM-24 : baseline régression logistique sur les comptages d'événements E1–E29 (référence du BiLSTM)."""
 
 import json
-from pathlib import Path
 
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
@@ -10,11 +9,11 @@ from sklearn.preprocessing import StandardScaler
 
 from eval.metrics import evaluate_binary
 from teamai.data.splits import load_split
-from teamai.paths import PREPROCESSED
+from teamai.paths import PREPROCESSED, VOLET_A_RESULTS
 
 
 FEATURES = [f"E{i}" for i in range(1, 30)]
-RESULTS_DIR = Path("volet_a/results")
+RESULTS_DIR = VOLET_A_RESULTS
 RESULTS_FILE = RESULTS_DIR / "SCRUM-24-baseline-results.json"
 
 

@@ -37,8 +37,8 @@ logs bruts collés ─► preprocess.js (regex C2) ─► séquences par blk_ �
 
 ```bash
 pip install -e ".[data,volet_a]"
-python volet_a/training/train.py --split provisoire   # tant que SCRUM-20 n'est pas livré
-python volet_a/training/export_onnx.py                # → web/public/model/
+python -m volet_a.training.train --split provisoire   # tant que SCRUM-20 n'est pas livré
+python -m volet_a.training.export_onnx                # → web/public/model/
 cd volet_a/web && npm install && npm run dev          # site en local
 ```
 

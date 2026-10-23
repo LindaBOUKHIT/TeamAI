@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>TeamAI — Détection d’anomalies HDFS</title>
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            max-width: 850px;
+            margin: 40px auto;
+            padding: 0 20px;
+            background: #f5f7fb;
+            color: #182235;
+        }
+
+        main {
+            background: white;
+            padding: 28px;
+            border-radius: 14px;
+        }
+
+        .warning {
+            padding: 16px;
+            background: #fff2cc;
+            border: 1px solid #b88600;
+            border-radius: 8px;
+        }
+
+        button {
+            padding: 12px 18px;
+            margin: 16px 0;
+            cursor: pointer;
+        }
+
+        pre {
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+            padding: 16px;
+            background: #edf1f7;
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <h1>TeamAI — Détection d’anomalies HDFS</h1>
+        <p>
+            Le modèle s’exécute dans votre navigateur.
+            Les entrées de ce test ne sont pas envoyées à un serveur.
+        </p>
+
+        <p id="status" role="status">Chargement du modèle…</p>
+        <p id="warning" class="warning" hidden></p>
+
+        <button id="run" disabled>Tester une inférence</button>
+        <pre id="results" aria-live="polite">Initialisation…</pre>
+
+        <p>
+            Version v0 : test technique sur une séquence artificielle.
+            La saisie de logs et l’import de fichiers seront ajoutés ensuite.
+        </p>
+    </main>
+
+    <script type="module" src="./src/main.js"></script>
+</body>
+
+</html>

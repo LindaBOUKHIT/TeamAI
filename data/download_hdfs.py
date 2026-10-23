@@ -1,19 +1,19 @@
 """Télécharge et vérifie le corpus HDFS_v1 de Loghub (Zenodo, CC-BY-4.0).
 
-Usage : python data/download_hdfs.py   (depuis la racine du dépôt TeamAI)
+Usage : python -m data.download_hdfs   (depuis la racine du dépôt TeamAI)
 Résultat : data/raw/HDFS_v1/ (HDFS.log + preprocessed/). Les données ne sont pas versionnées.
 """
 import hashlib
 import time
 import urllib.request
 import zipfile
-from pathlib import Path
+
+from teamai.paths import RAW
 
 URL = "https://zenodo.org/api/records/8196385/files/HDFS_v1.zip/content"
 SIZE = 186_645_559
 MD5 = "76a24b4d9a6164d543fb275f89773260"
 
-RAW = Path(__file__).resolve().parent / "raw"
 ZIP = RAW / "HDFS_v1.zip"
 
 
