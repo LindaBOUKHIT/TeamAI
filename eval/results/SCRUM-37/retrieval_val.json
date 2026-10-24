@@ -2,7 +2,7 @@
   "ticket": "SCRUM-37",
   "split": "val (data/sample)",
   "reference": "docs\\volet_b\\corpus_rag.md",
-  "evaluated_at": "2026-10-24T17:16:26Z",
+  "evaluated_at": "2026-10-24T17:51:22Z",
   "variants": [
     {
       "method": "dense",
@@ -412,5 +412,36 @@
         }
       }
     }
-  ]
+  ],
+  "score_separation": {
+    "dense": {
+      "relevant": {
+        "n": 609,
+        "min": 0.7261,
+        "median": 0.7793,
+        "max": 0.8113
+      },
+      "not_relevant": {
+        "n": 309,
+        "min": 0.7316,
+        "median": 0.8127,
+        "max": 0.8422
+      }
+    },
+    "bm25": {
+      "relevant": {
+        "n": 609,
+        "min": 21.1662,
+        "median": 79.6641,
+        "max": 150.2234
+      },
+      "not_relevant": {
+        "n": 309,
+        "min": 16.42,
+        "median": 60.5027,
+        "max": 117.4113
+      }
+    }
+  },
+  "min_score_decision": "aucun seuil : les passages non pertinents ont des scores dense aussi élevés que les pertinents (médiane plus haute) et les scores BM25 se chevauchent ; un min_score retirerait autant de passages pertinents que de non pertinents."
 }

@@ -7,7 +7,7 @@ import numpy as np
 import pytest
 
 from teamai.data.preprocess import load_vocab_json
-from volet_b.agents.single_agent import build_messages, explain_block, lines_by_block
+from volet_b.agents.single_agent import build_messages, explain_block, lines_by_block, refuse_test_blocks
 from volet_b.agents.validate import check_answer
 from volet_b.rag.evaluate_retrieval import reference_passages
 from volet_b.rag.retriever import Retriever, load_event_descriptions, load_passages, query_for_events
@@ -121,6 +121,16 @@ def test_agent_en_mode_factice_produit_une_ligne_c7(monkeypatch):
     assert record["mock"] is True and record["errors"] == []
     assert record["steps"]["events"] == ["E22", "E5"]
     assert len(record["steps"]["retrieved"]) == 2
+
+
+def test_blocs_du_test_refuses_meme_via_un_fichier():
+    """Un bloc du split test est refusé, qu'il soit donné seul ou au milieu d'un fichier de logs."""
+    import pandas as pd
+
+    split = pd.Series({"blk_1": "val", "blk_2": "test"})
+    refuse_test_blocks(["blk_1"], split)
+    with pytest.raises(SystemExit, match="1 bloc"):
+        refuse_test_blocks(["blk_1", "blk_2"], split)
 
 
 def test_lignes_regroupees_par_bloc():

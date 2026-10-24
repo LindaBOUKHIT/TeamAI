@@ -84,17 +84,26 @@ def official_split() -> pd.Series:
     return pd.read_csv(SPLITS / "splits.csv", usecols=["BlockId", "split"]).set_index("BlockId")["split"]
 
 
+def refuse_test_blocks(block_ids, split: pd.Series) -> None:
+    """Arrête le programme si un bloc appartient au split test (réservé à l'évaluation finale, SCRUM-45)."""
+    in_test = sorted(b for b in block_ids if split.get(b) == "test")
+    if in_test:
+        shown = ", ".join(in_test[:3]) + (" …" if len(in_test) > 3 else "")
+        raise SystemExit(f"{len(in_test)} bloc(s) du split test ({shown}) : réservés à l'évaluation finale (SCRUM-45).")
+
+
 def select_blocks(args) -> dict[str, list[str]]:
-    """Blocs à traiter selon --block, --file ou --split, avec leurs lignes brutes."""
+    """Blocs à traiter selon --block, --file ou --split, avec leurs lignes brutes ; le split test est refusé."""
+    split = official_split()
     if args.file:
         with open(args.file, encoding="utf-8", errors="replace") as f:
-            return lines_by_block(f.readlines())
+            blocks = lines_by_block(f.readlines())
+        refuse_test_blocks(blocks, split)
+        return blocks
     with open(SAMPLE_LOG, encoding="utf-8") as f:
         sample = lines_by_block(f.readlines())
-    split = official_split()
     if args.block:
-        if split.get(args.block) == "test":
-            raise SystemExit("Bloc du split test : réservé à l'évaluation finale (SCRUM-45).")
+        refuse_test_blocks([args.block], split)
         if args.block not in sample:
             raise SystemExit(f"{args.block} absent de {SAMPLE_LOG} : utiliser --file avec ses lignes brutes.")
         return {args.block: sample[args.block]}

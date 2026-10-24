@@ -9,12 +9,16 @@ Référence : la table « template E1–E29 → passage C6 ou aucun » de docs/v
 - traces : sur les blocs du split `val` de data/sample/, part des passages de référence de la trace
   (union sur ses événements) présents dans le top k, en moyenne sur les traces qui en ont au moins un.
 
+Le fichier de sortie contient aussi la comparaison des scores des passages pertinents et non
+pertinents (`score_separation`), qui a conduit à ne pas fixer de `min_score` par défaut.
+
 Limite : la référence et les paraphrases d'événements ont été écrites par l'équipe ; ce n'est pas un
 jugement indépendant de la pertinence. Le test n'est jamais utilisé.
 """
 import argparse
 import json
 import re
+import statistics
 from collections import Counter
 from datetime import datetime, timezone
 
@@ -75,6 +79,29 @@ def evaluate(retriever, reference: dict, sequences: Counter, method: str, mode: 
     }
 
 
+def score_separation(retriever, reference: dict, sequences: Counter, k: int) -> dict:
+    """Les scores séparent-ils les passages pertinents des autres ? (sert à décider d'un `min_score`)
+
+    Pour chaque trace de validation, les k passages de la méthode par défaut sont classés pertinents
+    (référence de la trace) ou non ; on compare les médianes des scores dense et BM25, pondérées par
+    le nombre de blocs.
+    """
+    values = {"dense": {True: [], False: []}, "bm25": {True: [], False: []}}
+    for sequence, count in sequences.items():
+        expected = {reference[e] for e in sequence if e in reference}
+        for passage in retriever.search(query_for_events(list(sequence)), k):
+            for name in values:
+                values[name][passage["id"] in expected] += [passage["scores"][name]] * count
+    summary = {}
+    for name, groups in values.items():
+        summary[name] = {
+            label: {"n": len(scores), "min": round(min(scores), 4), "median": round(statistics.median(scores), 4),
+                    "max": round(max(scores), 4)} if scores else None
+            for label, scores in (("relevant", groups[True]), ("not_relevant", groups[False]))
+        }
+    return summary
+
+
 def main(argv=None):
     """Évalue les variantes de VARIANTS et écrit le résumé versionné."""
     parser = argparse.ArgumentParser(description="SCRUM-37 : rappel@k du retrieval sur la validation.")
@@ -84,15 +111,22 @@ def main(argv=None):
     retriever = load_retriever(local_files_only=args.offline)
     reference, sequences = reference_passages(), val_sequences()
     results = [evaluate(retriever, reference, sequences, method, mode, args.k) for method, mode in VARIANTS]
+    separation = score_separation(retriever, reference, sequences, args.k)
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     OUTPUT.write_text(json.dumps({
         "ticket": "SCRUM-37", "split": "val (data/sample)", "reference": str(COVERAGE_TABLE.relative_to(DOCS.parent)),
         "evaluated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), "variants": results,
+        "score_separation": separation,
+        "min_score_decision": "aucun seuil : les passages non pertinents ont des scores dense aussi élevés que les "
+                              "pertinents (médiane plus haute) et les scores BM25 se chevauchent ; un min_score "
+                              "retirerait autant de passages pertinents que de non pertinents.",
     }, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     for r in results:
         print(f"{r['method']:7s} {r['query']:12s} templates {r['templates_hit_at_k']:>5s} | "
               f"rappel@{r['k']} traces {r['traces_recall_at_k']} | tous trouvés {r['traces_all_expected_at_k']} "
               f"(n={r['n_traces']}, sans référence : {r['n_traces_without_reference']})")
+    for name, groups in separation.items():
+        print(f"{name:5s} médiane pertinents {groups['relevant']['median']} | non pertinents {groups['not_relevant']['median']}")
     print(f"Résultats : {OUTPUT}")
 
 
