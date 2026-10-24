@@ -1,0 +1,416 @@
+{
+  "ticket": "SCRUM-37",
+  "split": "val (data/sample)",
+  "reference": "docs\\volet_b\\corpus_rag.md",
+  "evaluated_at": "2026-10-24T17:16:26Z",
+  "variants": [
+    {
+      "method": "dense",
+      "query": "template",
+      "k": 3,
+      "templates_hit_at_k": "3/10",
+      "traces_recall_at_k": 0.3233,
+      "traces_all_expected_at_k": 0.0196,
+      "n_traces": 306,
+      "n_traces_without_reference": 0,
+      "templates": {
+        "E2": {
+          "expected": "hdfs-architecture-1.2.1#data-integrity#1",
+          "rank": 2,
+          "top": [
+            "hdfs-architecture-1.2.1#replica-placement-the-first-baby-steps#2",
+            "hdfs-architecture-1.2.1#data-integrity#1",
+            "hdfs-architecture-1.2.1#safemode#1"
+          ]
+        },
+        "E3": {
+          "expected": "hdfs-architecture-1.2.1#namenode-and-datanodes#1",
+          "rank": null,
+          "top": [
+            "hdfs-architecture-1.2.1#safemode#1",
+            "hdfs-users-1.2.1#overview#2",
+            "hdfs-architecture-1.2.1#replica-placement-the-first-baby-steps#2"
+          ]
+        },
+        "E5": {
+          "expected": "hdfs-architecture-1.2.1#replication-pipelining#1",
+          "rank": null,
+          "top": [
+            "hdfs-architecture-1.2.1#safemode#1",
+            "hdfs-users-1.2.1#fetchdt#1",
+            "hdfs-users-1.2.1#overview#2"
+          ]
+        },
+        "E6": {
+          "expected": "hdfs-architecture-1.2.1#replication-pipelining#1",
+          "rank": null,
+          "top": [
+            "hdfs-architecture-1.2.1#safemode#1",
+            "hdfs-architecture-1.2.1#decrease-replication-factor#1",
+            "hdfs-architecture-1.2.1#data-replication#1"
+          ]
+        },
+        "E9": {
+          "expected": "hdfs-architecture-1.2.1#replication-pipelining#1",
+          "rank": null,
+          "top": [
+            "hdfs-architecture-1.2.1#safemode#1",
+            "hdfs-architecture-1.2.1#data-blocks#1",
+            "hdfs-architecture-1.2.1#decrease-replication-factor#1"
+          ]
+        },
+        "E12": {
+          "expected": "hdfs-architecture-1.2.1#replication-pipelining#1",
+          "rank": null,
+          "top": [
+            "hdfs-architecture-1.2.1#safemode#1",
+            "hdfs-architecture-1.2.1#staging#1",
+            "hdfs-architecture-1.2.1#replica-placement-the-first-baby-steps#2"
+          ]
+        },
+        "E16": {
+          "expected": "hdfs-architecture-1.2.1#replication-pipelining#1",
+          "rank": 2,
+          "top": [
+            "hdfs-architecture-1.2.1#safemode#1",
+            "hdfs-architecture-1.2.1#replication-pipelining#1",
+            "hdfs-users-1.2.1#fetchdt#1"
+          ]
+        },
+        "E21": {
+          "expected": "hdfs-architecture-1.2.1#decrease-replication-factor#1",
+          "rank": 2,
+          "top": [
+            "hdfs-architecture-1.2.1#file-deletes-and-undeletes#1",
+            "hdfs-architecture-1.2.1#decrease-replication-factor#1",
+            "hdfs-architecture-1.2.1#data-blocks#1"
+          ]
+        },
+        "E22": {
+          "expected": "hdfs-architecture-1.2.1#staging#1",
+          "rank": null,
+          "top": [
+            "hdfs-architecture-1.2.1#safemode#1",
+            "hdfs-architecture-1.2.1#data-replication#1",
+            "hdfs-architecture-1.2.1#data-blocks#1"
+          ]
+        },
+        "E25": {
+          "expected": "hdfs-architecture-1.2.1#data-disk-failure-heartbeats-and-re-replication#1",
+          "rank": null,
+          "top": [
+            "hdfs-architecture-1.2.1#replica-selection#1",
+            "hdfs-architecture-1.2.1#replica-placement-the-first-baby-steps#2",
+            "hdfs-architecture-1.2.1#replication-pipelining#1"
+          ]
+        }
+      }
+    },
+    {
+      "method": "dense",
+      "query": "description",
+      "k": 3,
+      "templates_hit_at_k": "6/10",
+      "traces_recall_at_k": 0.3481,
+      "traces_all_expected_at_k": 0.0,
+      "n_traces": 306,
+      "n_traces_without_reference": 0,
+      "templates": {
+        "E2": {
+          "expected": "hdfs-architecture-1.2.1#data-integrity#1",
+          "rank": 2,
+          "top": [
+            "hdfs-architecture-1.2.1#safemode#1",
+            "hdfs-architecture-1.2.1#data-integrity#1",
+            "hdfs-architecture-1.2.1#data-disk-failure-heartbeats-and-re-replication#1"
+          ]
+        },
+        "E3": {
+          "expected": "hdfs-architecture-1.2.1#namenode-and-datanodes#1",
+          "rank": null,
+          "top": [
+            "hdfs-architecture-1.2.1#safemode#1",
+            "hdfs-architecture-1.2.1#data-disk-failure-heartbeats-and-re-replication#1",
+            "hdfs-architecture-1.2.1#staging#1"
+          ]
+        },
+        "E5": {
+          "expected": "hdfs-architecture-1.2.1#replication-pipelining#1",
+          "rank": null,
+          "top": [
+            "hdfs-architecture-1.2.1#safemode#1",
+            "hdfs-architecture-1.2.1#staging#1",
+            "hdfs-architecture-1.2.1#data-disk-failure-heartbeats-and-re-replication#1"
+          ]
+        },
+        "E6": {
+          "expected": "hdfs-architecture-1.2.1#replication-pipelining#1",
+          "rank": null,
+          "top": [
+            "hdfs-architecture-1.2.1#safemode#1",
+            "hdfs-users-1.2.1#rebalancer#1",
+            "hdfs-architecture-1.2.1#the-persistence-of-file-system-metadata#2"
+          ]
+        },
+        "E9": {
+          "expected": "hdfs-architecture-1.2.1#replication-pipelining#1",
+          "rank": null,
+          "top": [
+            "hdfs-architecture-1.2.1#safemode#1",
+            "hdfs-users-1.2.1#rebalancer#1",
+            "hdfs-architecture-1.2.1#namenode-and-datanodes#2"
+          ]
+        },
+        "E12": {
+          "expected": "hdfs-architecture-1.2.1#replication-pipelining#1",
+          "rank": 1,
+          "top": [
+            "hdfs-architecture-1.2.1#replication-pipelining#1",
+            "hdfs-architecture-1.2.1#safemode#1",
+            "hdfs-users-1.2.1#rebalancer#1"
+          ]
+        },
+        "E16": {
+          "expected": "hdfs-architecture-1.2.1#replication-pipelining#1",
+          "rank": 3,
+          "top": [
+            "hdfs-architecture-1.2.1#safemode#1",
+            "hdfs-users-1.2.1#rebalancer#1",
+            "hdfs-architecture-1.2.1#replication-pipelining#1"
+          ]
+        },
+        "E21": {
+          "expected": "hdfs-architecture-1.2.1#decrease-replication-factor#1",
+          "rank": 1,
+          "top": [
+            "hdfs-architecture-1.2.1#decrease-replication-factor#1",
+            "hdfs-architecture-1.2.1#the-persistence-of-file-system-metadata#2",
+            "hdfs-users-1.2.1#safemode#1"
+          ]
+        },
+        "E22": {
+          "expected": "hdfs-architecture-1.2.1#staging#1",
+          "rank": 1,
+          "top": [
+            "hdfs-architecture-1.2.1#staging#1",
+            "hdfs-users-1.2.1#safemode#1",
+            "hdfs-architecture-1.2.1#safemode#1"
+          ]
+        },
+        "E25": {
+          "expected": "hdfs-architecture-1.2.1#data-disk-failure-heartbeats-and-re-replication#1",
+          "rank": 3,
+          "top": [
+            "hdfs-architecture-1.2.1#safemode#1",
+            "hdfs-users-1.2.1#rebalancer#1",
+            "hdfs-architecture-1.2.1#data-disk-failure-heartbeats-and-re-replication#1"
+          ]
+        }
+      }
+    },
+    {
+      "method": "bm25",
+      "query": "description",
+      "k": 3,
+      "templates_hit_at_k": "6/10",
+      "traces_recall_at_k": 0.6948,
+      "traces_all_expected_at_k": 0.1993,
+      "n_traces": 306,
+      "n_traces_without_reference": 0,
+      "templates": {
+        "E2": {
+          "expected": "hdfs-architecture-1.2.1#data-integrity#1",
+          "rank": 1,
+          "top": [
+            "hdfs-architecture-1.2.1#data-integrity#1",
+            "hdfs-architecture-1.2.1#replication-pipelining#1",
+            "hdfs-users-1.2.1#rebalancer#1"
+          ]
+        },
+        "E3": {
+          "expected": "hdfs-architecture-1.2.1#namenode-and-datanodes#1",
+          "rank": null,
+          "top": [
+            "hdfs-architecture-1.2.1#data-integrity#1",
+            "hdfs-architecture-1.2.1#staging#1",
+            "hdfs-architecture-1.2.1#replication-pipelining#1"
+          ]
+        },
+        "E5": {
+          "expected": "hdfs-architecture-1.2.1#replication-pipelining#1",
+          "rank": 1,
+          "top": [
+            "hdfs-architecture-1.2.1#replication-pipelining#1",
+            "hdfs-architecture-1.2.1#data-integrity#1",
+            "hdfs-architecture-1.2.1#staging#1"
+          ]
+        },
+        "E6": {
+          "expected": "hdfs-architecture-1.2.1#replication-pipelining#1",
+          "rank": 3,
+          "top": [
+            "hdfs-architecture-1.2.1#data-integrity#1",
+            "hdfs-architecture-1.2.1#data-replication#1",
+            "hdfs-architecture-1.2.1#replication-pipelining#1"
+          ]
+        },
+        "E9": {
+          "expected": "hdfs-architecture-1.2.1#replication-pipelining#1",
+          "rank": null,
+          "top": [
+            "hdfs-architecture-1.2.1#data-integrity#1",
+            "hdfs-architecture-1.2.1#data-replication#1",
+            "hdfs-architecture-1.2.1#staging#1"
+          ]
+        },
+        "E12": {
+          "expected": "hdfs-architecture-1.2.1#replication-pipelining#1",
+          "rank": 1,
+          "top": [
+            "hdfs-architecture-1.2.1#replication-pipelining#1",
+            "hdfs-users-1.2.1#rebalancer#1",
+            "hdfs-architecture-1.2.1#data-replication#1"
+          ]
+        },
+        "E16": {
+          "expected": "hdfs-architecture-1.2.1#replication-pipelining#1",
+          "rank": 2,
+          "top": [
+            "hdfs-architecture-1.2.1#data-integrity#1",
+            "hdfs-architecture-1.2.1#replication-pipelining#1",
+            "hdfs-architecture-1.2.1#cluster-rebalancing#1"
+          ]
+        },
+        "E21": {
+          "expected": "hdfs-architecture-1.2.1#decrease-replication-factor#1",
+          "rank": null,
+          "top": [
+            "hdfs-architecture-1.2.1#file-deletes-and-undeletes#1",
+            "hdfs-architecture-1.2.1#data-integrity#1",
+            "hdfs-architecture-1.2.1#replication-pipelining#1"
+          ]
+        },
+        "E22": {
+          "expected": "hdfs-architecture-1.2.1#staging#1",
+          "rank": 1,
+          "top": [
+            "hdfs-architecture-1.2.1#staging#1",
+            "hdfs-users-1.2.1#rebalancer#1",
+            "hdfs-architecture-1.2.1#the-persistence-of-file-system-metadata#1"
+          ]
+        },
+        "E25": {
+          "expected": "hdfs-architecture-1.2.1#data-disk-failure-heartbeats-and-re-replication#1",
+          "rank": null,
+          "top": [
+            "hdfs-architecture-1.2.1#replication-pipelining#1",
+            "hdfs-architecture-1.2.1#safemode#1",
+            "hdfs-architecture-1.2.1#namenode-and-datanodes#1"
+          ]
+        }
+      }
+    },
+    {
+      "method": "hybrid",
+      "query": "description",
+      "k": 3,
+      "templates_hit_at_k": "6/10",
+      "traces_recall_at_k": 0.6644,
+      "traces_all_expected_at_k": 0.1895,
+      "n_traces": 306,
+      "n_traces_without_reference": 0,
+      "templates": {
+        "E2": {
+          "expected": "hdfs-architecture-1.2.1#data-integrity#1",
+          "rank": 1,
+          "top": [
+            "hdfs-architecture-1.2.1#data-integrity#1",
+            "hdfs-architecture-1.2.1#safemode#1",
+            "hdfs-architecture-1.2.1#replication-pipelining#1"
+          ]
+        },
+        "E3": {
+          "expected": "hdfs-architecture-1.2.1#namenode-and-datanodes#1",
+          "rank": null,
+          "top": [
+            "hdfs-architecture-1.2.1#staging#1",
+            "hdfs-architecture-1.2.1#data-integrity#1",
+            "hdfs-architecture-1.2.1#safemode#1"
+          ]
+        },
+        "E5": {
+          "expected": "hdfs-architecture-1.2.1#replication-pipelining#1",
+          "rank": 1,
+          "top": [
+            "hdfs-architecture-1.2.1#replication-pipelining#1",
+            "hdfs-architecture-1.2.1#staging#1",
+            "hdfs-architecture-1.2.1#data-integrity#1"
+          ]
+        },
+        "E6": {
+          "expected": "hdfs-architecture-1.2.1#replication-pipelining#1",
+          "rank": 3,
+          "top": [
+            "hdfs-architecture-1.2.1#safemode#1",
+            "hdfs-users-1.2.1#rebalancer#1",
+            "hdfs-architecture-1.2.1#replication-pipelining#1"
+          ]
+        },
+        "E9": {
+          "expected": "hdfs-architecture-1.2.1#replication-pipelining#1",
+          "rank": null,
+          "top": [
+            "hdfs-architecture-1.2.1#safemode#1",
+            "hdfs-users-1.2.1#rebalancer#1",
+            "hdfs-architecture-1.2.1#data-integrity#1"
+          ]
+        },
+        "E12": {
+          "expected": "hdfs-architecture-1.2.1#replication-pipelining#1",
+          "rank": 1,
+          "top": [
+            "hdfs-architecture-1.2.1#replication-pipelining#1",
+            "hdfs-users-1.2.1#rebalancer#1",
+            "hdfs-architecture-1.2.1#data-replication#1"
+          ]
+        },
+        "E16": {
+          "expected": "hdfs-architecture-1.2.1#replication-pipelining#1",
+          "rank": 1,
+          "top": [
+            "hdfs-architecture-1.2.1#replication-pipelining#1",
+            "hdfs-users-1.2.1#rebalancer#1",
+            "hdfs-architecture-1.2.1#safemode#1"
+          ]
+        },
+        "E21": {
+          "expected": "hdfs-architecture-1.2.1#decrease-replication-factor#1",
+          "rank": null,
+          "top": [
+            "hdfs-architecture-1.2.1#file-deletes-and-undeletes#1",
+            "hdfs-architecture-1.2.1#the-persistence-of-file-system-metadata#2",
+            "hdfs-architecture-1.2.1#data-integrity#1"
+          ]
+        },
+        "E22": {
+          "expected": "hdfs-architecture-1.2.1#staging#1",
+          "rank": 1,
+          "top": [
+            "hdfs-architecture-1.2.1#staging#1",
+            "hdfs-architecture-1.2.1#the-persistence-of-file-system-metadata#1",
+            "hdfs-users-1.2.1#rebalancer#1"
+          ]
+        },
+        "E25": {
+          "expected": "hdfs-architecture-1.2.1#data-disk-failure-heartbeats-and-re-replication#1",
+          "rank": null,
+          "top": [
+            "hdfs-architecture-1.2.1#safemode#1",
+            "hdfs-architecture-1.2.1#replication-pipelining#1",
+            "hdfs-users-1.2.1#rebalancer#1"
+          ]
+        }
+      }
+    }
+  ]
+}
