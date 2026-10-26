@@ -29,6 +29,7 @@ Classeur partagé : [TeamAI : Classeur de suivi](https://docs.google.com/spreads
 | 13/10/2026 | Linda | Codex | Aide à la construction du corpus documentaire HDFS et aux corrections demandées dans la revue de SCRUM-30 | Couverture des templates E1–E29 documentée ; sections de liens exclues ; empreintes SHA-256 ajoutées ; reconstruction locale sans téléchargement : 51 passages par section et 28 par fenêtre glissante | Suite à la relecture du reviewer ; tests automatisés non exécutés |
 | 13/10/2026 | Linda | Claude Code + connecteurs Atlassian et GitHub (`gh`) | Préparation des relectures des PR #3, #5, #6 et #18 ; résolution des conflits de fusion sur #5, #6 et #19 ; automatisation Jira « PR fusionnée dans dev → Terminé » | Relectures vérifiées sur le code et relues par Linda avant envoi ; conflits résolus en gardant les deux versions ; CI verte après chaque résolution | Approbations et fusions faites par Linda |
 | 13/10/2026 | Linda | Claude Code | SCRUM-26 : génération de `vocab.json`, prétraitement Python et JavaScript, tests de parité | Parité vérifiée par les tests : 2 000/2 000 blocs de l'échantillon (Python et JS), cas limites partagés, et 575 061/575 061 blocs du corpus complet en Python | Intégration dans l'interface du site (SCRUM-27, Bachar) à faire |
+| 13/10/2026 | Linda | Claude Code | SCRUM-31 : alignement de la grille d'annotation sur C5 v1.1, rédaction des 3 exemples de calibration, contrôles automatiques des sources et des splits | Faits vérifiés ligne par ligne sur les logs bruts de `data/sample/` ; sources présentes dans `chunks.jsonl` ; exemples lus et validés par Linda | Hypothèses et cas d'abstention à discuter en équipe ; `reviewed_by` renseigné après la relecture |
 
 ## Expériences
 
@@ -218,7 +219,6 @@ Intégration et vérification sur le site complet restant à confirmer
 après combinaison avec SCRUM-23.
 
 
-
 ## 2026-10-23 — SCRUM-27 — Bachar Ben Slama
 
 Ajout du parcours fonctionnel du volet A :
@@ -255,6 +255,62 @@ Manipulations et vérifications locales réalisées par Bachar.
 
 Relecture par Nassim à effectuer. Publication publique et tag
 v0.2-J3 à vérifier après intégration et PR dev vers main.
+
+## 2026-10-23 — SCRUM-62 — Bachar Ben Slama
+
+Analyse du seuil du BiLSTM v1 en réponse aux retours sur SCRUM-25.
+Les poids restent inchangés ; seule la décision de classification
+est ajustée, sur la validation uniquement.
+
+Les scores des 21 anomalies initialement manquées ont été examinés.
+Le script explore les seuils distincts et une grille de 0 à 1,
+avec courbes précision, rappel et F1 de la classe anomalie.
+
+Choix proposé : seuil 0,40814146399497986, maximisant le F1 anomalie
+avec au maximum deux anomalies manquées.
+Le même seuil est optimal sous la contrainte d’une seule manquée.
+
+Validation globale :
+- Ancien seuil 0,99 : 23 fausses alertes, 21 anomalies manquées.
+- Nouveau seuil : 59 fausses alertes, 1 anomalie manquée.
+- Rappel anomalie : 0,999604.
+- F1 anomalie : 0,988254.
+- Macro-F1 : 0,993948, contre 0,995514 auparavant.
+
+Validation sur les 1 929 séquences inédites :
+- 41 fausses alertes et 1 anomalie manquée.
+- Auparavant : 19 fausses alertes et 17 anomalies manquées.
+- Rappel anomalie : 0,998131.
+- Macro-F1 : 0,973439.
+
+Le compromis privilégie le rappel : 20 anomalies récupérées pour
+36 fausses alertes supplémentaires sur la validation globale.
+Le candidat sans anomalie manquée entraîne 295 fausses alertes.
+
+Métadonnées du site actualisées : threshold et val_macro_f1,
+avec référence à l’analyse et à l’objectif de sélection.
+
+Parité au nouveau seuil :
+- Python / ONNX : 86 259 blocs, aucune différence de classe,
+  écart maximal 1,1921e-7.
+- Navigateur WASM : dix cas proches du seuil, dont un exactement
+  au seuil ; batchs 1, 3 et 10 ; aucune différence de classe,
+  écart maximal 5,9605e-8.
+
+Résultats :
+eval/results/SCRUM-62_20261023T153242Z_690fcb/
+
+Aucun test officiel évalué. SCRUM-44 est réservé à Nassim,
+après fixation du seuil et de la version finale du modèle.
+La quantification SCRUM-40 nécessitera une nouvelle vérification
+des scores et des décisions au seuil retenu.
+
+Usage IA : assistance de Codex pour les scripts d’analyse,
+la vérification de parité, le test navigateur et la documentation.
+Exécutions et vérifications locales réalisées par Bachar.
+
+Relecture par Alain à effectuer. Les modifications de SCRUM-27,
+encore en attente, ne sont pas intégrées dans cette branche.
 
 ## 2026-10-24 — SCRUM-37 — Linda Boukhit
 
