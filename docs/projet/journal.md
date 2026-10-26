@@ -219,7 +219,6 @@ Intégration et vérification sur le site complet restant à confirmer
 après combinaison avec SCRUM-23.
 
 
-
 ## 2026-10-23 — SCRUM-27 — Bachar Ben Slama
 
 Ajout du parcours fonctionnel du volet A :
@@ -256,3 +255,59 @@ Manipulations et vérifications locales réalisées par Bachar.
 
 Relecture par Nassim à effectuer. Publication publique et tag
 v0.2-J3 à vérifier après intégration et PR dev vers main.
+
+## 2026-10-23 — SCRUM-62 — Bachar Ben Slama
+
+Analyse du seuil du BiLSTM v1 en réponse aux retours sur SCRUM-25.
+Les poids restent inchangés ; seule la décision de classification
+est ajustée, sur la validation uniquement.
+
+Les scores des 21 anomalies initialement manquées ont été examinés.
+Le script explore les seuils distincts et une grille de 0 à 1,
+avec courbes précision, rappel et F1 de la classe anomalie.
+
+Choix proposé : seuil 0,40814146399497986, maximisant le F1 anomalie
+avec au maximum deux anomalies manquées.
+Le même seuil est optimal sous la contrainte d’une seule manquée.
+
+Validation globale :
+- Ancien seuil 0,99 : 23 fausses alertes, 21 anomalies manquées.
+- Nouveau seuil : 59 fausses alertes, 1 anomalie manquée.
+- Rappel anomalie : 0,999604.
+- F1 anomalie : 0,988254.
+- Macro-F1 : 0,993948, contre 0,995514 auparavant.
+
+Validation sur les 1 929 séquences inédites :
+- 41 fausses alertes et 1 anomalie manquée.
+- Auparavant : 19 fausses alertes et 17 anomalies manquées.
+- Rappel anomalie : 0,998131.
+- Macro-F1 : 0,973439.
+
+Le compromis privilégie le rappel : 20 anomalies récupérées pour
+36 fausses alertes supplémentaires sur la validation globale.
+Le candidat sans anomalie manquée entraîne 295 fausses alertes.
+
+Métadonnées du site actualisées : threshold et val_macro_f1,
+avec référence à l’analyse et à l’objectif de sélection.
+
+Parité au nouveau seuil :
+- Python / ONNX : 86 259 blocs, aucune différence de classe,
+  écart maximal 1,1921e-7.
+- Navigateur WASM : dix cas proches du seuil, dont un exactement
+  au seuil ; batchs 1, 3 et 10 ; aucune différence de classe,
+  écart maximal 5,9605e-8.
+
+Résultats :
+eval/results/SCRUM-62_20261023T153242Z_690fcb/
+
+Aucun test officiel évalué. SCRUM-44 est réservé à Nassim,
+après fixation du seuil et de la version finale du modèle.
+La quantification SCRUM-40 nécessitera une nouvelle vérification
+des scores et des décisions au seuil retenu.
+
+Usage IA : assistance de Codex pour les scripts d’analyse,
+la vérification de parité, le test navigateur et la documentation.
+Exécutions et vérifications locales réalisées par Bachar.
+
+Relecture par Alain à effectuer. Les modifications de SCRUM-27,
+encore en attente, ne sont pas intégrées dans cette branche.
