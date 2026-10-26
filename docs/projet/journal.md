@@ -278,3 +278,9 @@ RAG de référence à un agent : trace → requête → passages C6 → `generat
 - **Agent** : `python -m volet_b.agents.single_agent` vérifié de bout en bout en mode factice (`--mock`) ; l'exécution avec le vrai SLM est à faire sur la machine d'Alain (SCRUM-38).
 
 Usage IA : Linda avec Claude Code pour le code du retrieval, de l'agent et des tests, et pour la comparaison des méthodes ; chiffres recalculés par le script `evaluate_retrieval`.
+
+## 2026-10-26 — SCRUM-38
+
+SCRUM-38 : script des mesures avant adaptation, écrit avec Codex (gpt-6.1-sol), relu par Alain.
+
+Essai réel du 26/10 (pas une mesure) : une trace de calibration du split `train`, vrai SmolLM2 float32 sur CPU, `--limit 1`. En `base`, réponse JSON conforme à C5 (182 tokens, 77 s de génération). En `rag1`, trois passages récupérés, mais le modèle écrit des clés sans guillemets : `invalid_json`, compté comme échec. Mémoire RSS maximale du processus : environ 10,7 Go. Le pipeline complet fonctionne ; le test n'a pas été ouvert.
