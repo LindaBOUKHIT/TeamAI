@@ -311,3 +311,26 @@ Exécutions et vérifications locales réalisées par Bachar.
 
 Relecture par Alain à effectuer. Les modifications de SCRUM-27,
 encore en attente, ne sont pas intégrées dans cette branche.
+
+## 2026-10-24 — SCRUM-37 — Linda Boukhit
+
+RAG de référence à un agent : trace → requête → passages C6 → `generate()` → réponse C5 vérifiée par code.
+
+- **Retrieval** : 51 passages encodés avec `BAAI/bge-small-en-v1.5` (révision `5c38ec7c`), index FAISS exact (cosinus) dans `volet_b/rag/index/` (non versionné, reconstruit par `build_index`). BM25 (`rank-bm25`) et fusion des deux par Reciprocal Rank Fusion.
+- **Requête** : les templates bruts (« allocateBlock ») donnaient de mauvais résultats ; chaque événement est paraphrasé en anglais (`volet_b/rag/event_descriptions.json`, écrit à partir des templates seuls).
+- **Mesure sur la validation** (`eval/results/SCRUM-37/retrieval_val.json`, 306 blocs `val` de `data/sample/`, référence : table de couverture de `corpus_rag.md`) :
+
+| Méthode | Requête | Templates trouvés (top 3) | Rappel@3 traces |
+|---|---|---:|---:|
+| dense | template brut | 3/10 | 0,323 |
+| dense | paraphrase | 6/10 | 0,348 |
+| BM25 | paraphrase | 6/10 | 0,695 |
+| hybride (retenu) | paraphrase | 6/10 | 0,664 |
+
+- **Décision** : méthode hybride par défaut. BM25 seul est légèrement meilleur ici, mais l'hybride garde les embeddings, plus robustes aux reformulations libres des agents (SCRUM-42). Les deux passages « Safemode » remontent souvent dans le top 3 avec les embeddings seuls (passages très généraux).
+- **Limites** : la référence (table de couverture) et les paraphrases ont été écrites par l'équipe : ce n'est pas un jugement indépendant de la pertinence. Les traces de validation de l'échantillon répètent peu de séquences distinctes. Le test n'a pas été utilisé.
+- **Seuil `min_score` (liste vide → abstention)** : étudié puis non activé. Sur les passages du top 3 des traces de validation, la médiane du cosinus est de 0,779 pour les pertinents et de 0,813 pour les non pertinents (les passages généraux comme « Safemode » sont très proches de tout) ; les scores BM25 se chevauchent (médianes 79,7 et 60,5) et dépendent de la longueur de la requête. Un seuil retirerait autant de passages pertinents que de non pertinents. Le cas « aucun passage utile » reste traité par la consigne (`sources: []` autorisé) et par le contrôle C5. Mesure reproductible : champ `score_separation` de `retrieval_val.json`.
+- **Garde-fou** : l'agent refuse tout bloc du split `test`, qu'il vienne de `--block` ou d'un fichier `--file`.
+- **Agent** : `python -m volet_b.agents.single_agent` vérifié de bout en bout en mode factice (`--mock`) ; l'exécution avec le vrai SLM est à faire sur la machine d'Alain (SCRUM-38).
+
+Usage IA : Linda avec Claude Code pour le code du retrieval, de l'agent et des tests, et pour la comparaison des méthodes ; chiffres recalculés par le script `evaluate_retrieval`.
