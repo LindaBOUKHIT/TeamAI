@@ -255,3 +255,15 @@ Manipulations et vérifications locales réalisées par Bachar.
 
 Relecture par Nassim à effectuer. Publication publique et tag
 v0.2-J3 à vérifier après intégration et PR dev vers main.
+
+## 2026-10-26 — SCRUM-57 : backend llama.cpp et conversion LoRA → GGUF
+
+Code écrit avec Codex (gpt-6.1-sol), supervisé par Claude ; relecture d'Alain à faire avant fusion. Transformers float32 reste le défaut de `generate()` ; `backend: llamacpp` charge le GGUF officiel Q4_K_M à la révision figée du banc du 06/10, l'adaptateur GGUF étant passé par `lora_path`.
+
+Conversions réelles de l'adaptateur `essai` (llama.cpp cloné au commit `d854d98`) :
+- route b, adaptateur seul : `adapter.gguf` f16 de 3,1 Mo, chargé sur la base Q4_K_M ;
+- route a, fusion PEFT → HF → GGUF f16 → Q4_K_M : 3 264 → 1 005 Mio. Elle exigeait `sentencepiece`, ajouté à l'extra `volet_b_gguf`. Le modèle fusionné se charge et répond à une consigne courte (`{"ok": true}`, 5 tokens en 0,81 s) ; `meta.json` garde `inference_validated: false`, cette vérification n'étant pas une évaluation.
+
+Comparaison sur cinq blocs `val` du sample (preuve : [`eval/results/SCRUM-57/`](../../eval/results/SCRUM-57/README.md)) : llama.cpp Q4_K_M donne environ ×1,6 en débit (2,4 contre 1,5 token/s), un pic RSS de 2,1–2,8 GiB contre 9,3–9,9 GiB et un chargement de 1,7 s contre 11,5 s. Qualité : 0/5 sorties conformes C5 pour les deux backends, avec ou sans adaptateur ; le modèle rend les bonnes clés avec des champs vides. Cette comparaison ne départage donc pas la qualité, et le backend reste confondu avec la quantification. Proposition à valider en équipe : Q4_K_M sous llama.cpp pour la démo ; pour comparer base, LoRA, RAG et agents, un seul couple backend/quantification, à consigner ici.
+
+Correction associée : `validate_answer` plantait lorsqu'un objet apparaissait dans `sources` (sortie llama.cpp) ; il signale désormais l'erreur sans exception (test ajouté).

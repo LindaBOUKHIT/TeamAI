@@ -26,8 +26,15 @@ RAG = VOLET_B / "rag"
 CORPUS = RAG / "corpus"
 SLM = VOLET_B / "slm"
 SLM_CONFIGS = SLM / "configs"
+SLM_ADAPTERS = SLM / "adapters"
 ANNOTATIONS = VOLET_B / "annotations"
 
 EVAL = ROOT / "eval"
 RESULTS = EVAL / "results"
 RUNS = EVAL / "runs"
+
+
+def resolve_path(value: str | Path) -> Path:
+    """Résout un chemin fourni par l'utilisateur, relatif à la racine du dépôt."""
+    path = Path(value).expanduser()
+    return (ROOT / path).resolve() if not path.is_absolute() else path.resolve()

@@ -15,7 +15,7 @@ from functools import lru_cache
 
 import yaml
 
-from teamai.paths import SLM_CONFIGS
+from teamai.paths import SLM_CONFIGS, resolve_path
 
 CONFIG = SLM_CONFIGS / "generation.yaml"
 
@@ -59,19 +59,68 @@ def _load_model(adapter: str | None, local_files_only: bool):
     return model, tokenizer
 
 
+@lru_cache(maxsize=1)
+def _load_llamacpp(repo, filename, revision, n_ctx, seed, adapter, offline, model_path):
+    """Charge une instance llama.cpp ; la clé inclut tous ses paramètres de chargement."""
+    from huggingface_hub import hf_hub_download
+    from llama_cpp import Llama
+
+    if adapter and not resolve_path(adapter).is_file():
+        raise FileNotFoundError(f"Adaptateur GGUF introuvable : {adapter}")
+    path = str(resolve_path(model_path)) if model_path else hf_hub_download(
+        repo, filename, revision=revision, local_files_only=offline
+    )
+    return Llama(model_path=path, n_ctx=n_ctx, last_n_tokens_size=n_ctx,
+                 seed=seed, verbose=False, n_gpu_layers=0,
+                 lora_path=str(resolve_path(adapter)) if adapter else None)
+
+
+def load_backend(cfg: dict, adapter: str | None = None):
+    """Charge le backend demandé, en conservant le chargeur Transformers historique."""
+    backend = cfg.get("backend", "transformers")
+    if backend == "transformers":
+        return load_model(adapter, local_files_only=cfg.get("local_files_only", False))
+    if backend != "llamacpp":
+        raise ValueError(f"Backend inconnu : {backend}")
+    return _load_llamacpp(cfg["gguf_repo"], cfg["gguf_file"], cfg["gguf_revision"],
+                          cfg["n_ctx"], cfg["seed"], adapter,
+                          cfg.get("local_files_only", False), cfg.get("gguf_path"))
+
+
+def clear_model_cache():
+    """Libère les références des deux caches entre les mesures des backends."""
+    _load_model.cache_clear()
+    _load_llamacpp.cache_clear()
+
+
 def generate(messages: str | list[dict], adapter: str | None = None, **overrides) -> dict:
     """Accepte un prompt texte ou des messages chat ({"role", "content"})."""
     if isinstance(messages, str):
         messages = [{"role": "user", "content": messages}]
     if not messages:
         raise ValueError("Au moins un message est nécessaire.")
+    cfg = {**load_config(), **overrides}
+    if cfg.get("backend", "transformers") not in {"transformers", "llamacpp"}:
+        raise ValueError(f"Backend inconnu : {cfg['backend']}")
     if os.environ.get("TEAMAI_SLM_MOCK") == "1":
         return {"text": json.dumps(MOCK_ANSWER, ensure_ascii=False), "new_tokens": 0, "seconds": 0.0}
 
+    if cfg.get("backend") == "llamacpp":
+        if cfg["do_sample"]:
+            raise ValueError("Le backend llama.cpp exige do_sample=false (glouton).")
+        llm = load_backend(cfg, adapter)
+        start = time.perf_counter()
+        out = llm.create_chat_completion(
+            messages=messages, max_tokens=cfg["max_new_tokens"], temperature=0.0,
+            repeat_penalty=cfg["repetition_penalty"],
+        )
+        return {"text": out["choices"][0]["message"]["content"] or "",
+                "new_tokens": int(out["usage"]["completion_tokens"]),
+                "seconds": time.perf_counter() - start}
+
     import torch
 
-    cfg = {**load_config(), **overrides}
-    model, tokenizer = load_model(adapter, local_files_only=cfg.get("local_files_only", False))
+    model, tokenizer = load_backend(cfg, adapter)
     torch.manual_seed(cfg["seed"])
 
     inputs = tokenizer.apply_chat_template(
