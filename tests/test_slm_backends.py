@@ -109,7 +109,8 @@ def test_dry_run_never_converts(monkeypatch, tmp_path, capsys):
     source = tmp_path / "source"
     source.mkdir()
     (source / "adapter_config.json").write_text(json.dumps({
-        "peft_type": "LORA", "base_model_name_or_path": slm.load_config()["model_id"]}), encoding="utf-8")
+        "peft_type": "LORA", "base_model_name_or_path": "google/gemma-4-E4B-it-qat-q4_0-unquantized",
+        "target_modules": ["q_proj", "v_proj"], "bias": "none"}), encoding="utf-8")
     output_root = tmp_path / "adapters"
     monkeypatch.setattr(convert, "SLM_ADAPTERS", output_root)
     monkeypatch.setattr(convert, "run_converter", MagicMock(side_effect=AssertionError("Conversion")))

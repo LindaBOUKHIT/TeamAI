@@ -394,3 +394,59 @@ et un résumé boucle ; 0,19 hypothèse par bloc avec indice d’incident. Ces r
 ne valident ni une détection par le SLM ni la fidélité globale des explications.
 
 Usage IA : code écrit avec Codex gpt-6.1-sol, supervisé par Claude ; relecture d'Alain à faire.
+
+## 27/10/2026 — SCRUM-29 : essai LoRA adapté à Gemma 4 E4B QAT
+
+L'essai utilise désormais `google/gemma-4-E4B-it-qat-q4_0-unquantized`,
+révision complète `476025a01dbf99361c062bbeca3d6a76bb4c4566` (relevée sur l'API
+Hugging Face le 27/10), chargé en texte seul via `Gemma4ForCausalLM` et
+`Gemma4TextConfig`, avec Transformers 5.6.2. Configuration T4 Kaggle : FP16,
+QLoRA NF4/calcul float16, batch 1, checkpointing, r=8 sur q_proj/v_proj.
+Les embeddings gelés ne sont pas promus temporairement en FP32. L'entraînement
+sur RTX 3050 6 Go est exclu ; cette carte servira à l'inférence llama.cpp.
+
+Vingt exemples ont été régénérés par `make_seed.py` à partir du sample train et
+du prompt v16 inchangé. Leurs réponses copient les faits et utilisent uniquement
+les hypothèses autorisées et ancrées. La perte masque le prompt et les marqueurs
+de fin de tour pour apprendre seulement le JSON. Couverture : E27 dans 2 blocs,
+E28 dans 2 blocs ; E24 absent du train du sample. Tous les `reviewed_by` sont
+vides : la relecture Linda de l'ancien format ne s'applique plus. Le validateur
+C5 conserve son exigence de relecture ; seule cette erreur explicite est tolérée
+pour ces brouillons. Les contrôles v16 sont exécutés avant l'écriture des exemples.
+
+Le sous-ensemble C4 des 2 000 blocs du sample est versionné avec sa provenance ;
+l'empreinte du CSV officiel source correspond à `splits_meta.json`
+(`f504592cb7ac13b8b7e5d532a336b4e3641ec441a863c5efafd164faa2a43f22`).
+L'entrée d'entraînement est recoupée avec C4, les codes et les lignes sources :
+un bloc val/test est refusé même s'il se déclare train. Aucun nouveau split créé.
+
+La commande locale `python -m volet_b.slm.kaggle_lora_essai --bundle sortie.zip`
+construit l'archive minimale envoyée sur Kaggle, jamais le dépôt complet : code
+nécessaire (`teamai/`, `volet_b/slm/`, initialiseur `volet_b/`), `pyproject.toml`,
+config `lora_essai.yaml`, `seed_alain.jsonl` et `train_allowlist.json`.
+L'autorisation contient uniquement les identifiants train des exemples utilisés,
+l'empreinte du CSV C4 source et les empreintes des fichiers. Aucun fichier de
+`data/sample/`, log brut séparé, CSV de split ni identifiant val/test n'est envoyé.
+Les extraits train inclus dans les annotations sont conservés. Les preuves v16
+sont reconstruites localement ; Kaggle ne lit que cette archive extraite et refuse
+un sample présent, un fichier supplémentaire ou une autorisation non-train.
+
+`kaggle_lora_essai.py` décrit une installation figée, le téléchargement de la base,
+30 pas puis l'export immédiat de l'adaptateur seul dans `/kaggle/working/`.
+Son import et `--dry-run` sont sans installation, poids ou réseau. Conversion au
+commit llama.cpp `0c1e57098`, configuration locale de la base exacte, journal et
+comparaison exhaustive des paires A/B PEFT et GGUF : une cible ignorée fait échouer
+l'export. La fusion historique reste disponible mais n'est pas retenue pour QAT.
+Les sorties C7 conservent VRAM, durée par pas et pertes ; la vérification finale
+porte sur les tenseurs PEFT locaux, sans passer par `generate()`.
+
+Suite complète lancée par Alain avec le Python du projet le 27/10 : 116 tests réussis, 6 ignorés, sans poids ni réseau. Archive Kaggle vérifiée : 18 fichiers, aucun bloc val/test.
+
+À vérifier avec Nassim : résolution des versions figées, chargement texte du
+checkpoint multimodal, frontières du template et budget réel en tokens,
+pertes/gradients finis, VRAM T4, conversion réelle, puis inférence sur RTX 3050
+avec llama-cpp-python 0.3.36 et comparaison `lora_scale=0.0/1.0` à prompts v16
+identiques. Le transfert NF4 vers le GGUF Q4_0 et la qualité ne sont pas validés.
+
+Usage IA : Codex gpt-6.1-sol supervisé par Claude ; relecture d'Alain à faire ;
+relecture des exemples par Linda à refaire.
