@@ -6,6 +6,7 @@ gguf_file: gemma-4-E4B_q4_0-it.gguf
 gguf_revision: 4b4a2c1d584be7264f87aac328a1bc739ce81b6c
 revision: 4b4a2c1d584be7264f87aac328a1bc739ce81b6c
 n_ctx: 4096
+n_gpu_layers: -1      # RTX 3050 Laptop 6 Go : toutes les couches sur GPU (0 = CPU)
 max_new_tokens: 800
 do_sample: false
 temperature: 0.0
