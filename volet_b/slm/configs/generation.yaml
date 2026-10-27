@@ -1,14 +1,16 @@
-# Paramètres de génération du volet B — figés pour toutes les comparaisons (SCRUM-38, SCRUM-45).
-# Toute modification doit être consignée dans le journal : elle rend les résultats antérieurs non comparables.
-model_id: HuggingFaceTB/SmolLM2-1.7B-Instruct
-backend: transformers   # conserver les résultats historiques par défaut
-gguf_repo: HuggingFaceTB/SmolLM2-1.7B-Instruct-GGUF
-gguf_file: smollm2-1.7b-instruct-q4_k_m.gguf
-gguf_revision: 2d4a76a30b4af41ecd395c35725ac11688d4cfe4
+# SCRUM-63 : configuration Gemma v16 figée ; SmolLM2 reste dans les résultats historiques.
+model_id: google/gemma-4-E4B-it-qat-q4_0-gguf
+backend: llamacpp
+gguf_repo: google/gemma-4-E4B-it-qat-q4_0-gguf
+gguf_file: gemma-4-E4B_q4_0-it.gguf
+gguf_revision: 4b4a2c1d584be7264f87aac328a1bc739ce81b6c
+revision: 4b4a2c1d584be7264f87aac328a1bc739ce81b6c
 n_ctx: 4096
-revision: 31b70e2e869a7173562077fd711b654946d38674 # snapshot du cache local
-dtype: float32          # CPU sans GPU NVIDIA : float32 (bfloat16 est lent sur ce processeur)
-max_new_tokens: 300
-do_sample: false        # décodage glouton : sorties reproductibles
-repetition_penalty: 1.1
+max_new_tokens: 800
+do_sample: false
+temperature: 0.0
+repetition_penalty: 1.0
 seed: 42
+enable_thinking: false
+local_files_only: true
+dtype: float32 # compatibilité du backend Transformers historique

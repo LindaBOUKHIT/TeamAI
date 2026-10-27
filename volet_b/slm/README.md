@@ -1,3 +1,71 @@
+# SLM actuel — Gemma 4 E4B QAT, prompt v16 figé (SCRUM-63)
+
+`generation.yaml` sélectionne `google/gemma-4-E4B-it-qat-q4_0-gguf`, fichier
+`gemma-4-E4B_q4_0-it.gguf`, révision `4b4a2c1d584be7264f87aac328a1bc739ce81b6c`.
+Contexte 4096, réponse 800 tokens, température 0, seed 42, repeat_penalty 1.0,
+réflexion désactivée. Le cache local est imposé par défaut (`local_files_only: true`).
+Une version de llama-cpp-python compatible Gemma 4 est nécessaire ; l’exploration
+utilisait 0.3.36. Aucun modèle n’a été chargé ou téléchargé pour ce port.
+
+Gemma a été retenu après comparaison exploratoire (v11 : 40/40 contrats contre
+22/40 pour Granite). Les erreurs de causalité et de chronologie persistent :
+[trace et limites SCRUM-63](../../eval/results/SCRUM-63/README.md).
+La machine cible est le portable de Nassim ; son environnement CUDA/Python et
+ses performances restent à relever. Le chargeur local existant reste sur CPU ;
+le passage GPU sur ce portable n’est pas validé par ce port.
+
+```python
+from data.parse_hdfs import compile_templates
+from teamai.paths import resolve_path
+from volet_b.slm.v16.facts import prepare_block
+from volet_b.slm.v16.explain import explain_block
+
+templates = compile_templates(resolve_path("tests/fixtures/preprocessed/HDFS.log_templates.csv"))
+# lines : couples (numéro de ligne dans le journal source, texte brut), dans l’ordre.
+# Le numéro d’origine est nécessaire à l’identité des références Txx.
+block = prepare_block(block_id, lines, templates)
+result = explain_block(block)
+# À conserver par l’appelant : result["first_response"], result["second_response"].
+```
+
+`prepare_block` ne reçoit aucun label. Le glossaire est restreint aux codes présents
+lors de la construction des faits. `explain_block` envoie le prompt et le schéma
+JSON fermés à `generate()`, vérifie le contexte avant chaque appel et contrôle les
+réponses. Comme le worker v16, le template par défaut doit être identique à celui
+produit avec `enable_thinking=False`, sans marqueur de réflexion. Le budget des
+prompts est 2900 tokens bruts et une marge de 32 tokens après formatage.
+
+Les contrôles v16 et leur déclencheur de correction sont conservés. Seul ajout :
+une référence ou un segment de tokens lexicaux répété six fois de suite,
+ou une réponse utilisant au moins 95 % des 800 tokens (760), est rejeté après
+les contrôles v16. Cette erreur précise déclenche la correction unique partagée.
+La seconde réponse reste conservée même invalide, sans troisième appel.
+Si le contexte interdit la correction, la première réponse et la raison restent
+conservées. Les alertes de revue sémantique ne certifient pas la vérité du résumé.
+
+`generate(messages, adapter=None)` conserve son retour habituel `text`, `new_tokens`,
+`seconds` et le mode `TEAMAI_SLM_MOCK=1`. Les options `response_format` (schéma JSON)
+et `return_metadata=True` (ajout de `finish_reason`, `prompt_tokens`) servent au
+contrôle v16. Un adaptateur SmolLM2 historique n’est pas compatible avec Gemma.
+Les chaînes RAG/agents existantes utilisent encore leurs propres prompts ; leurs
+résultats ne sont pas une exécution v16. La référence v16 fonctionne sans RAG,
+sans LoRA et ne détecte pas les anomalies : elle explique les preuves reçues.
+
+Vérification sans GGUF ni réseau : `python -m pytest -q`.
+`tests/test_v16.py` reconstruit les 40 prompts à partir de lignes `val` uniquement,
+vérifie leurs SHA-256 et ceux des schémas et de la consigne contre le gel original.
+La politique originale est conservée byte pour byte dans la trace ; son SHA-256
+est vérifié et son AST est comparé à celui de la politique exécutée après retrait
+des seules docstrings ajoutées pour SCRUM-59. Les empreintes de référence ne
+sont jamais régénérées. Le SHA du runtime Kaggle est une provenance historique :
+le module porté exclut l’orchestration Kaggle et ajoute le contrôle autorisé.
+
+## Historique SmolLM2 — SCRUM-28 et SCRUM-57
+
+Les sections ci-dessous décrivent les anciens essais SmolLM2 et leurs commandes.
+Elles ne décrivent pas le modèle actuel. Les configurations C7 archivées restent
+la référence pour leur reproduction ; le YAML actuel ne reproduit pas ces essais.
+
 # Première inférence locale — SCRUM-28
 
 Responsable : Alain. Relectrice : Linda. [PR #4](https://github.com/LindaBOUKHIT/TeamAI/pull/4) vers `dev`.
@@ -77,7 +145,7 @@ La [preuve du 08/10](../../eval/results/SCRUM-28/README.md) publie la synthèse,
 
 ## Backend llama.cpp et conversion LoRA → GGUF
 
-`configs/generation.yaml` conserve `backend: transformers` par défaut. Mettre `backend: llamacpp` ou passer cet override à `generate()` pour utiliser llama.cpp. L'interface et le retour (`text`, `new_tokens`, `seconds`) sont inchangés. `TEAMAI_SLM_MOCK=1` fonctionne avec les deux backends sans charger de poids.
+Dans SCRUM-57, Transformers était le défaut et SmolLM2 la base. Depuis SCRUM-63, le YAML sélectionne Gemma sous llama.cpp ; ces commandes historiques exigent de reprendre les configurations archivées dans les résultats SCRUM-28/SCRUM-57 pour reproduire leurs mesures. L'interface et le retour (`text`, `new_tokens`, `seconds`) sont inchangés. `TEAMAI_SLM_MOCK=1` fonctionne avec les deux backends sans charger de poids.
 
 La base GGUF officielle est retrouvée par `hf_hub_download` avec `gguf_repo`, `gguf_file`, `gguf_revision` figés dans le YAML (valeurs du banc historique). `local_files_only=True` impose le cache local. Le cache d'instances llama.cpp comprend la base, la révision, le contexte, la seed et l'adaptateur. Le backend utilise le CPU, 4 096 tokens de contexte, la pénalité sur tout le contexte et le décodage glouton ; `do_sample=true` est refusé.
 

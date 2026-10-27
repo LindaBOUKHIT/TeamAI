@@ -8,6 +8,7 @@
 Mode factice (sans modèle, pour développer le RAG et les agents sur n'importe quelle machine) :
     TEAMAI_SLM_MOCK=1  → renvoie une réponse au format C5 de docs/contrats.md.
 """
+import hashlib
 import json
 import os
 import time
@@ -93,6 +94,34 @@ def clear_model_cache():
     _load_llamacpp.cache_clear()
 
 
+def v16_context_error(llm, messages, cfg):
+    """Vérifie le contexte et le template sans réflexion, comme le worker v16.
+
+    Renvoie une erreur précise ou None ; aucune génération n'est effectuée.
+    Le template Gemma doit produire exactement le même texte par défaut
+    qu'avec enable_thinking=False (aucun argument chat non supporté ajouté).
+    """
+    from llama_cpp.llama_chat_format import Jinja2ChatFormatter
+
+    template = llm.metadata["tokenizer.chat_template"]
+    if hashlib.sha256(template.encode()).hexdigest() != "0a2c8073c878ab1da004bee933a998606537bbb62016310352c7285c3f01c5b5":
+        return "template différent de v13"
+    formatter = Jinja2ChatFormatter(
+        template=template,
+        bos_token=llm.detokenize([llm.token_bos()], special=True).decode(),
+        eos_token=llm.detokenize([llm.token_eos()], special=True).decode())
+    rendered = formatter(messages=messages).prompt
+    if (rendered != formatter(messages=messages, enable_thinking=False).prompt
+            or "<|think|>" in rendered or "<|channel>thought" in rendered):
+        return "réflexion active dans le template v16"
+    if len(llm.tokenize(messages[0]["content"].encode())) > 2900:
+        return "prompt supérieur au plafond v13 de 2900 tokens"
+    length = len(llm.tokenize(rendered.encode(), add_bos=False, special=True))
+    if length + cfg["max_new_tokens"] + 32 > cfg["n_ctx"]:
+        return "contexte insuffisant pour la réponse complète"
+    return None
+
+
 def generate(messages: str | list[dict], adapter: str | None = None, **overrides) -> dict:
     """Accepte un prompt texte ou des messages chat ({"role", "content"})."""
     if isinstance(messages, str):
@@ -103,20 +132,34 @@ def generate(messages: str | list[dict], adapter: str | None = None, **overrides
     if cfg.get("backend", "transformers") not in {"transformers", "llamacpp"}:
         raise ValueError(f"Backend inconnu : {cfg['backend']}")
     if os.environ.get("TEAMAI_SLM_MOCK") == "1":
-        return {"text": json.dumps(MOCK_ANSWER, ensure_ascii=False), "new_tokens": 0, "seconds": 0.0}
+        result = {"text": json.dumps(MOCK_ANSWER, ensure_ascii=False), "new_tokens": 0, "seconds": 0.0}
+        if cfg.get("return_metadata"):
+            result.update(finish_reason="stop", prompt_tokens=0)
+        return result
 
     if cfg.get("backend") == "llamacpp":
         if cfg["do_sample"]:
             raise ValueError("Le backend llama.cpp exige do_sample=false (glouton).")
         llm = load_backend(cfg, adapter)
         start = time.perf_counter()
+        options = {}
+        if cfg.get("response_format") is not None:
+            options["response_format"] = cfg["response_format"]
+        if cfg.get("enforce_v16_context"):
+            problem = v16_context_error(llm, messages, cfg)
+            if problem:
+                raise ValueError(problem)
         out = llm.create_chat_completion(
             messages=messages, max_tokens=cfg["max_new_tokens"], temperature=0.0,
-            repeat_penalty=cfg["repetition_penalty"],
+            repeat_penalty=cfg["repetition_penalty"], **options,
         )
-        return {"text": out["choices"][0]["message"]["content"] or "",
+        result = {"text": out["choices"][0]["message"]["content"] or "",
                 "new_tokens": int(out["usage"]["completion_tokens"]),
                 "seconds": time.perf_counter() - start}
+        if cfg.get("return_metadata"):
+            result.update(finish_reason=out["choices"][0].get("finish_reason"),
+                          prompt_tokens=out["usage"].get("prompt_tokens", 0))
+        return result
 
     import torch
 

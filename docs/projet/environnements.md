@@ -4,10 +4,10 @@ Socle commun : Python 3.10+ dans un `.venv` à la racine du dépôt TeamAI, `pip
 
 | Personne | OS | Éditeur | Python | Node | Rôle matériel |
 |---|---|---|---|---|---|
-| Alain | Windows 11 Pro | VS Code 1.121 + Claude Code | 3.12.10 (PyTorch 2.12 CPU) | 24.12.0 | Machine d'inférence du SLM (volet B) |
+| Alain | Windows 11 Pro | VS Code 1.121 + Claude Code | 3.12.10 (PyTorch 2.12 CPU) | 24.12.0 | Ancienne machine d’inférence SmolLM2 (CPU) |
 | Bachar | À renseigner | À renseigner | À renseigner | À renseigner | À confirmer |
 | Linda | Windows 11 Famille Unilingue | VS Code | 3.13.7 | 24.19.0 | Poste de développement |
-| Nassim | Windows 11 | À renseigner | À renseigner | À renseigner | Seul poste avec GPU NVIDIA (RTX 3050 6 Go) : candidat pour l'essai LoRA local |
+| Nassim | Windows 11 | À renseigner | À renseigner | À renseigner | Machine cible du SLM Gemma (SCRUM-63) |
 
 Point du 13/10 : les environnements d'Alain et de Linda sont renseignés ; le matériel de Nassim est relevé (versions logicielles à compléter). La ligne de Bachar reste à compléter par l'intéressé dans la PR [#3](https://github.com/LindaBOUKHIT/TeamAI/pull/3). Une version non installée doit être indiquée comme telle, plutôt que laissée vide. La présence d'une ligne ne vaut pas validation collective du choix des machines.
 
@@ -24,7 +24,16 @@ Point du 13/10 : les environnements d'Alain et de Linda sont renseignés ; le ma
 
 C'est la seule machine de l'équipe avec un GPU NVIDIA. 6 Go de VRAM ne permettent pas d'entraîner SmolLM2-1.7B en précision complète, mais un LoRA sur le modèle chargé en 4 bits (QLoRA, `bitsandbytes`) est plausible : **à tester** dans SCRUM-29, en alternative à Kaggle. Aucune mesure n'a encore été faite sur cette machine.
 
-## Machine cible du SLM (volet B)
+## Machine cible du SLM (volet B) — SCRUM-63, 27/10/2026
+
+Le portable de **Nassim** devient la cible pour Gemma 4 E4B QAT : Ryzen 5 8645HS,
+32 Go de RAM, RTX 3050 Laptop 6 Go. Versions CUDA et Python **à relever par Nassim**.
+Aucune inférence Gemma ni mesure de performances n’a été faite sur ce portable
+pour SCRUM-63. La configuration du port est llama.cpp, contexte 4096, réponse
+800 tokens ; le chargeur CPU existant est conservé, l’offload GPU reste à valider.
+Voir la [trace SCRUM-63](../../eval/results/SCRUM-63/README.md).
+
+## Ancienne machine cible — Alain, historique SmolLM2
 
 | Élément | Valeur |
 |---|---|
@@ -48,7 +57,7 @@ python --version
 node --version
 ```
 
-## Ce que cette machine permet
+## Mesures historiques sur la machine d’Alain (SmolLM2)
 
 | Usage | Faisable ? | Pourquoi |
 |---|---|---|

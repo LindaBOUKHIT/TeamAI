@@ -1,0 +1,531 @@
+{
+  "status": "completed",
+  "scope": "40 résumés finaux et questions relus avec les preuves citées ; deux premières/secondes réponses relues.",
+  "automatic_alerts_separate_from_manual_findings": true,
+  "summary": {
+    "responses_reviewed": 40,
+    "second_responses_reviewed": 2,
+    "network_causes_without_support_found": 0,
+    "same_second_order_error_cases": [
+      13
+    ],
+    "other_chronology_error_cases": [
+      37
+    ],
+    "unsupported_causal_link_cases": [
+      21
+    ],
+    "pseudo_reference_cases": [
+      8
+    ],
+    "citation_precision_examples": [
+      1,
+      35
+    ],
+    "unsupported_identifier_cases": [
+      9
+    ],
+    "unhelpful_questions_with_incident_examples": [
+      17,
+      35,
+      40
+    ],
+    "required_event_missing_only_from_summary_cases": [
+      3
+    ],
+    "required_events_present_in_facts": true,
+    "unknown_cause_incident_blocks": [
+      1,
+      3,
+      5,
+      7,
+      9,
+      11,
+      13,
+      15,
+      19,
+      21,
+      23,
+      25,
+      27,
+      29,
+      31,
+      33,
+      37,
+      39
+    ],
+    "unknown_cause_explicitly_stated_in_summary": 0,
+    "unknown_cause_statement_missing_in_summary_count": 18,
+    "unknown_cause_note": "Aucun résumé concerné ne précise que la cause reste indéterminée. Les trois faits E28 copiés indiquent toutefois déjà que le message ne précise pas la cause.",
+    "do_not_interpret_all_automatic_alerts_as_all_errors": true
+  },
+  "cases": [
+    {
+      "case": 1,
+      "block_id": "blk_5809931191239895555",
+      "reviewed": true,
+      "automatic_alerts": [],
+      "manual_tag": "citation_imprecise",
+      "manual_finding": "La première phrase décrit les écritures en citant seulement L01, qui décrit E27. Ces écritures existent dans les faits mais cette référence ne les soutient pas. La question sur la suppression n’est pas reliée à la redondance E27.",
+      "explicit_unknown_cause_missing_in_summary": true,
+      "hypotheses": [],
+      "attempt_count": 1
+    },
+    {
+      "case": 2,
+      "block_id": "blk_-7326416392478650425",
+      "reviewed": true,
+      "automatic_alerts": [],
+      "manual_tag": "pas_erreur_nette_relevee",
+      "manual_finding": "Inventaire fidèle ; E5 précède réellement E9 dans les horodatages. Aucune question sur ce bloc sans incident.",
+      "explicit_unknown_cause_missing_in_summary": false,
+      "hypotheses": [],
+      "attempt_count": 1
+    },
+    {
+      "case": 3,
+      "block_id": "blk_-3412728853703264676",
+      "reviewed": true,
+      "automatic_alerts": [
+        "evenement_atypique_non_reference_dans_resume_E28"
+      ],
+      "manual_tag": "limite_couverture_resume",
+      "manual_finding": "E28 manque au résumé, mais son fait exact est sélectionné et une question cite L05 : la mention factuelle obligatoire est satisfaite.",
+      "explicit_unknown_cause_missing_in_summary": true,
+      "hypotheses": [],
+      "attempt_count": 1
+    },
+    {
+      "case": 4,
+      "block_id": "blk_3871505081979665782",
+      "reviewed": true,
+      "automatic_alerts": [],
+      "manual_tag": "pas_erreur_nette_relevee",
+      "manual_finding": "Nombre de lignes et durée exacts ; prudence explicite sur l’achèvement des opérations.",
+      "explicit_unknown_cause_missing_in_summary": false,
+      "hypotheses": [],
+      "attempt_count": 1
+    },
+    {
+      "case": 5,
+      "block_id": "blk_-1876345605821081227",
+      "reviewed": true,
+      "automatic_alerts": [],
+      "manual_tag": "questionnement_a_preciser",
+      "manual_finding": "Exception factuelle, aucune cause réseau inventée. La question sur le statut de suppression vise une opération ordinaire sans lien explicite avec E4.",
+      "explicit_unknown_cause_missing_in_summary": true,
+      "hypotheses": [],
+      "attempt_count": 1
+    },
+    {
+      "case": 6,
+      "block_id": "blk_6270729741183809671",
+      "reviewed": true,
+      "automatic_alerts": [],
+      "manual_tag": "pas_erreur_nette_relevee",
+      "manual_finding": "Allocation et débuts d’écriture sont joints par et sans ordre relatif explicite ; les suppressions locales sont réellement plus tardives que E23.",
+      "explicit_unknown_cause_missing_in_summary": false,
+      "hypotheses": [],
+      "attempt_count": 1
+    },
+    {
+      "case": 7,
+      "block_id": "blk_6861364042242754579",
+      "reviewed": true,
+      "automatic_alerts": [],
+      "manual_tag": "amelioration_ponctuelle",
+      "manual_finding": "Le lien causal entre lectures et WARN relevé en v15 a disparu ; les exceptions sont décrites séparément.",
+      "explicit_unknown_cause_missing_in_summary": true,
+      "hypotheses": [],
+      "attempt_count": 1
+    },
+    {
+      "case": 8,
+      "block_id": "blk_-2197890281206701914",
+      "reviewed": true,
+      "automatic_alerts": [
+        "phrase_du_resume_sans_reference"
+      ],
+      "manual_tag": "pseudo_reference",
+      "manual_finding": "Le résumé cite [Aucun WARN, exception ou événement atypique reconnu dans ce bloc], qui n’est pas une référence F/T/L. La formule Aucun événement, exception ou comportement atypique est aussi ambiguë, puisque des événements ordinaires sont présents.",
+      "explicit_unknown_cause_missing_in_summary": false,
+      "hypotheses": [],
+      "attempt_count": 1
+    },
+    {
+      "case": 9,
+      "block_id": "blk_-71418885337923132",
+      "reviewed": true,
+      "automatic_alerts": [],
+      "manual_tag": "identifiant_non_etaye",
+      "manual_finding": "La question ajoute :50010 à l’adresse client /10.251.127.243 ; les lignes L01/L02 ne donnent pas de port client. Le port 50010 fourni concerne le DataNode source.",
+      "explicit_unknown_cause_missing_in_summary": true,
+      "hypotheses": [],
+      "attempt_count": 1
+    },
+    {
+      "case": 10,
+      "block_id": "blk_5486735541977305440",
+      "reviewed": true,
+      "automatic_alerts": [],
+      "manual_tag": "pas_erreur_nette_relevee",
+      "manual_finding": "Les définitions des écritures, réceptions et allocations correspondent aux références.",
+      "explicit_unknown_cause_missing_in_summary": false,
+      "hypotheses": [],
+      "attempt_count": 1
+    },
+    {
+      "case": 11,
+      "block_id": "blk_-673857767367889201",
+      "reviewed": true,
+      "automatic_alerts": [],
+      "manual_tag": "correction_reussie",
+      "manual_finding": "La première réponse inventait F16 ; la seconde cite des références existantes et décrit les exceptions sans cause spéculative.",
+      "explicit_unknown_cause_missing_in_summary": true,
+      "hypotheses": [],
+      "attempt_count": 2
+    },
+    {
+      "case": 12,
+      "block_id": "blk_-6882278779228077054",
+      "reviewed": true,
+      "automatic_alerts": [],
+      "manual_tag": "formulation_a_nuancer",
+      "manual_finding": "Initialement écrit est plus affirmatif que le début d’écriture cité F03 ; les réceptions figurent ensuite. Les relations temporelles entre E23 et E21 correspondent aux heures.",
+      "explicit_unknown_cause_missing_in_summary": false,
+      "hypotheses": [],
+      "attempt_count": 1
+    },
+    {
+      "case": 13,
+      "block_id": "blk_-6623096049432513933",
+      "reviewed": true,
+      "automatic_alerts": [
+        "ordre_affirme_entre_evenements_de_la_meme_seconde"
+      ],
+      "manual_tag": "ordre_meme_seconde_errone",
+      "manual_finding": "Débuts d’écriture suivis d’une allocation [T01,T02] impose un ordre entre E5 et E22, tous deux à 2008-11-09 21:19:33. L’alerte automatique est confirmée.",
+      "explicit_unknown_cause_missing_in_summary": true,
+      "hypotheses": [],
+      "attempt_count": 1
+    },
+    {
+      "case": 14,
+      "block_id": "blk_7869923956433750840",
+      "reviewed": true,
+      "automatic_alerts": [],
+      "manual_tag": "pas_erreur_nette_relevee",
+      "manual_finding": "Allocation et écriture sont énumérées sans connecteur imposant leur ordre dans la même seconde ; suppression demandée et journal local restent distincts.",
+      "explicit_unknown_cause_missing_in_summary": false,
+      "hypotheses": [],
+      "attempt_count": 1
+    },
+    {
+      "case": 15,
+      "block_id": "blk_-3578165899288618426",
+      "reviewed": true,
+      "automatic_alerts": [],
+      "manual_tag": "amelioration_ponctuelle",
+      "manual_finding": "Les références inventées dans le résumé v15 ne réapparaissent pas. Les citations d’allocation, d’exception et de demande de suppression conviennent.",
+      "explicit_unknown_cause_missing_in_summary": true,
+      "hypotheses": [],
+      "attempt_count": 1
+    },
+    {
+      "case": 16,
+      "block_id": "blk_6685520562458453481",
+      "reviewed": true,
+      "automatic_alerts": [],
+      "manual_tag": "pas_erreur_nette_relevee",
+      "manual_finding": "Les débuts d’écriture précèdent les réceptions ; le résumé reste dans le périmètre du journal.",
+      "explicit_unknown_cause_missing_in_summary": false,
+      "hypotheses": [],
+      "attempt_count": 1
+    },
+    {
+      "case": 17,
+      "block_id": "blk_8490580439615020929",
+      "reviewed": true,
+      "automatic_alerts": [],
+      "manual_tag": "questions_inutiles_dans_bloc_avec_incident",
+      "manual_finding": "La chronologie fautive de v15 autour d’E20 n’est plus affirmée : E21 et E20 sont énumérés après E23. En revanche, demander si L01 concerne une suppression redemande une information explicite, et questionner les E5 ordinaires n’éclaire pas l’absence de BlockInfo.",
+      "explicit_unknown_cause_missing_in_summary": false,
+      "hypotheses": [
+        "L’erreur de suppression pourrait être liée à l’absence d’entrée BlockInfo dans volumeMap [L01]."
+      ],
+      "attempt_count": 1
+    },
+    {
+      "case": 18,
+      "block_id": "blk_770925084470916407",
+      "reviewed": true,
+      "automatic_alerts": [],
+      "manual_tag": "pas_erreur_nette_relevee",
+      "manual_finding": "Allocation à 21:59:42, écritures à 21:59:43 : l’antériorité est réellement établie. Les suppressions sont décrites comme journalisées.",
+      "explicit_unknown_cause_missing_in_summary": false,
+      "hypotheses": [],
+      "attempt_count": 1
+    },
+    {
+      "case": 19,
+      "block_id": "blk_-3349289973286267883",
+      "reviewed": true,
+      "automatic_alerts": [],
+      "manual_tag": "amelioration_ponctuelle",
+      "manual_finding": "E28 est présent dans le résumé avec L05 ; les causes réseau/surcharge proposées en v15 ont disparu.",
+      "explicit_unknown_cause_missing_in_summary": true,
+      "hypotheses": [],
+      "attempt_count": 1
+    },
+    {
+      "case": 20,
+      "block_id": "blk_5094143259497688375",
+      "reviewed": true,
+      "automatic_alerts": [],
+      "manual_tag": "pas_erreur_nette_relevee",
+      "manual_finding": "Le début d’écriture est au début de la période et les réceptions/mises à jour à sa fin ; pas de conclusion globale ajoutée.",
+      "explicit_unknown_cause_missing_in_summary": false,
+      "hypotheses": [],
+      "attempt_count": 1
+    },
+    {
+      "case": 21,
+      "block_id": "blk_6124078019968307727",
+      "reviewed": true,
+      "automatic_alerts": [
+        "lien_causal_a_verifier"
+      ],
+      "manual_tag": "causalite_non_demontree",
+      "manual_finding": "Ce qui a entraîné relie l’inscription dans invalidSet à la journalisation locale. Les messages prouvent les opérations et leur succession, sans établir à eux seuls cette relation causale. Alerte automatique confirmée.",
+      "explicit_unknown_cause_missing_in_summary": true,
+      "hypotheses": [],
+      "attempt_count": 1
+    },
+    {
+      "case": 22,
+      "block_id": "blk_281337360704025623",
+      "reviewed": true,
+      "automatic_alerts": [],
+      "manual_tag": "portee_a_nuancer",
+      "manual_finding": "La demande de suppression du bloc dans son ensemble est plus large que ce qu’attestent les demandes E23 vers des réplicas ; aucune preuve d’exhaustivité de toutes les copies n’est fournie.",
+      "explicit_unknown_cause_missing_in_summary": false,
+      "hypotheses": [],
+      "attempt_count": 1
+    },
+    {
+      "case": 23,
+      "block_id": "blk_7800270577648029182",
+      "reviewed": true,
+      "automatic_alerts": [],
+      "manual_tag": "amelioration_ponctuelle",
+      "manual_finding": "Les 15 exceptions sont bien conservées malgré les six extraits ; aucune suppression causée par les exceptions n’est désormais proposée.",
+      "explicit_unknown_cause_missing_in_summary": true,
+      "hypotheses": [],
+      "attempt_count": 1
+    },
+    {
+      "case": 24,
+      "block_id": "blk_-7225661686170202727",
+      "reviewed": true,
+      "automatic_alerts": [],
+      "manual_tag": "correction_reussie",
+      "manual_finding": "F14 était inexistant dans la première réponse ; la seconde l’enlève. Elle omet E21 du résumé, mais le conserve comme fait copié ; aucune exigence de résumé exhaustif n’a été fixée.",
+      "explicit_unknown_cause_missing_in_summary": false,
+      "hypotheses": [],
+      "attempt_count": 2
+    },
+    {
+      "case": 25,
+      "block_id": "blk_498931071351273739",
+      "reviewed": true,
+      "automatic_alerts": [],
+      "manual_tag": "amelioration_ponctuelle",
+      "manual_finding": "L’allocation est maintenant citée par T01/E22, corrigeant la mauvaise attribution de référence relevée en v15.",
+      "explicit_unknown_cause_missing_in_summary": true,
+      "hypotheses": [],
+      "attempt_count": 1
+    },
+    {
+      "case": 26,
+      "block_id": "blk_3202203826390057918",
+      "reviewed": true,
+      "automatic_alerts": [],
+      "manual_tag": "pas_erreur_nette_relevee",
+      "manual_finding": "Messages indiquant la suppression reste une formulation de journal ; aucun achèvement global n’est certifié.",
+      "explicit_unknown_cause_missing_in_summary": false,
+      "hypotheses": [],
+      "attempt_count": 1
+    },
+    {
+      "case": 27,
+      "block_id": "blk_-2525721779588456824",
+      "reviewed": true,
+      "automatic_alerts": [],
+      "manual_tag": "amelioration_ponctuelle",
+      "manual_finding": "L’événement E28, absent du résumé v15, est maintenant mentionné avec T16 et conservé dans les faits.",
+      "explicit_unknown_cause_missing_in_summary": true,
+      "hypotheses": [],
+      "attempt_count": 1
+    },
+    {
+      "case": 28,
+      "block_id": "blk_5962596299735010625",
+      "reviewed": true,
+      "automatic_alerts": [],
+      "manual_tag": "pas_erreur_nette_relevee",
+      "manual_finding": "Inventaire cohérent des débuts d’écriture, réceptions, demandes de suppression et journal local.",
+      "explicit_unknown_cause_missing_in_summary": false,
+      "hypotheses": [],
+      "attempt_count": 1
+    },
+    {
+      "case": 29,
+      "block_id": "blk_5495200848998243328",
+      "reviewed": true,
+      "automatic_alerts": [],
+      "manual_tag": "pas_erreur_nette_relevee",
+      "manual_finding": "La demande E23 à 10:30:43 précède bien les journaux locaux à 10:36:05 et 10:37:39. La référence E26 mêlée aux réceptions est complétée par une référence E9 valable.",
+      "explicit_unknown_cause_missing_in_summary": true,
+      "hypotheses": [],
+      "attempt_count": 1
+    },
+    {
+      "case": 30,
+      "block_id": "blk_-8088126798866012916",
+      "reviewed": true,
+      "automatic_alerts": [],
+      "manual_tag": "pas_erreur_nette_relevee",
+      "manual_finding": "La fin du PacketResponder est explicitement distinguée d’une interruption ou d’une erreur ; aucune alerte automatique erronée ici.",
+      "explicit_unknown_cause_missing_in_summary": false,
+      "hypotheses": [],
+      "attempt_count": 1
+    },
+    {
+      "case": 31,
+      "block_id": "blk_3365693550135486376",
+      "reviewed": true,
+      "automatic_alerts": [],
+      "manual_tag": "amelioration_ponctuelle",
+      "manual_finding": "La suppression locale présentée comme achevée en v15 n’est plus affirmée dans ce résumé.",
+      "explicit_unknown_cause_missing_in_summary": true,
+      "hypotheses": [],
+      "attempt_count": 1
+    },
+    {
+      "case": 32,
+      "block_id": "blk_-182305440626057147",
+      "reviewed": true,
+      "automatic_alerts": [],
+      "manual_tag": "pas_erreur_nette_relevee",
+      "manual_finding": "Les groupes de même seconde sont énumérés sans ordre interne explicite ; les références aux demandes et journaux locaux sont valables.",
+      "explicit_unknown_cause_missing_in_summary": false,
+      "hypotheses": [],
+      "attempt_count": 1
+    },
+    {
+      "case": 33,
+      "block_id": "blk_-1988202877309867568",
+      "reviewed": true,
+      "automatic_alerts": [],
+      "manual_tag": "amelioration_ponctuelle",
+      "manual_finding": "La référence F17 inventée en v15 ne réapparaît pas ; les demandes E23 précèdent réellement les journaux E21 cités.",
+      "explicit_unknown_cause_missing_in_summary": true,
+      "hypotheses": [],
+      "attempt_count": 1
+    },
+    {
+      "case": 34,
+      "block_id": "blk_9019908840879489840",
+      "reviewed": true,
+      "automatic_alerts": [],
+      "manual_tag": "pas_erreur_nette_relevee",
+      "manual_finding": "L’allocation précède effectivement les écritures d’une seconde ; les références de réception et PacketResponder correspondent aux événements.",
+      "explicit_unknown_cause_missing_in_summary": false,
+      "hypotheses": [],
+      "attempt_count": 1
+    },
+    {
+      "case": 35,
+      "block_id": "blk_8520721369739431294",
+      "reviewed": true,
+      "automatic_alerts": [],
+      "manual_tag": "citation_imprecise_et_question_inutile",
+      "manual_finding": "La première phrase cite F01 pour les écritures/réplications, alors que F01 donne seulement intervalle et durée. Le détail BlockInfo de L01 soutient bien l’explication immédiate, mais la question sur les trois E5 ordinaires n’est pas motivée par cet incident.",
+      "explicit_unknown_cause_missing_in_summary": false,
+      "hypotheses": [
+        "L’erreur de suppression pourrait être liée à l’absence d’entrée BlockInfo dans volumeMap [L01]."
+      ],
+      "attempt_count": 1
+    },
+    {
+      "case": 36,
+      "block_id": "blk_-5394320246293156794",
+      "reviewed": true,
+      "automatic_alerts": [],
+      "manual_tag": "pas_erreur_nette_relevee",
+      "manual_finding": "Inventaire factuel, sans l’ancienne négation qui provoquait un faux positif PacketResponder dans le bilan automatique v15.",
+      "explicit_unknown_cause_missing_in_summary": false,
+      "hypotheses": [],
+      "attempt_count": 1
+    },
+    {
+      "case": 37,
+      "block_id": "blk_6989377882518604195",
+      "reviewed": true,
+      "automatic_alerts": [],
+      "manual_tag": "chronologie_inversee",
+      "manual_finding": "Le résumé affirme E23 puis une nouvelle copie E25. Or E25/T09 est à 2008-11-10 01:25:43 et E23/T19,T20 à 10:30:32 : l’ordre réel est inverse. Cette erreur n’est pas détectée par les heuristiques automatiques.",
+      "explicit_unknown_cause_missing_in_summary": true,
+      "hypotheses": [],
+      "attempt_count": 1
+    },
+    {
+      "case": 38,
+      "block_id": "blk_7551395295149463319",
+      "reviewed": true,
+      "automatic_alerts": [],
+      "manual_tag": "precision_non_etayee",
+      "manual_finding": "D’autres DataNodes n’est pas établi par les faits F03/F04 qui comptent des occurrences. S’est conclu suggère aussi une clôture du processus plus large que la fin du journal observé.",
+      "explicit_unknown_cause_missing_in_summary": false,
+      "hypotheses": [],
+      "attempt_count": 1
+    },
+    {
+      "case": 39,
+      "block_id": "blk_-6431128224865365636",
+      "reviewed": true,
+      "automatic_alerts": [],
+      "manual_tag": "pas_erreur_nette_relevee",
+      "manual_finding": "Les exceptions et la journalisation locale de fin de période sont fidèles ; aucune hypothèse causale inventée.",
+      "explicit_unknown_cause_missing_in_summary": true,
+      "hypotheses": [],
+      "attempt_count": 1
+    },
+    {
+      "case": 40,
+      "block_id": "blk_3036603747764053369",
+      "reviewed": true,
+      "automatic_alerts": [],
+      "manual_tag": "cause_immediate_et_question_a_preciser",
+      "manual_finding": "Le détail Could not read from stream est fidèlement cité et la seule hypothèse autorisée le reprend. La question sur les circonstances de l’allocation ordinaire est peu reliée à E7.",
+      "explicit_unknown_cause_missing_in_summary": false,
+      "hypotheses": [
+        "L’exception d’écriture pourrait être liée à l’impossibilité de lire le flux [L01]."
+      ],
+      "attempt_count": 1
+    }
+  ],
+  "short_review": [
+    "Les hypothèses réseau sans indice ont disparu ; les trois hypothèses restantes reprennent des explications immédiates autorisées, pas des diagnostics de cause racine.",
+    "Les 19 blocs sans incident n’appellent plus d’enquête. Des questions peu utiles persistent toutefois dans des blocs avec incident, notamment sur les débuts d’écriture ordinaires ou sur une opération déjà explicite.",
+    "Le résumé conserve des erreurs indépendantes des hypothèses : ordre dans une même seconde, chronologie inverse, causalité et précision des citations.",
+    "La consigne de mentionner explicitement une cause indéterminée n’est pas suivie dans les 18 résumés concernés."
+  ],
+  "automatic_alert_interpretation": {
+    "same_second_order_case13": "confirmée à la relecture",
+    "causal_link_case21": "confirmée à la relecture",
+    "missing_summary_reference_case8": "pseudo-référence textuelle confirmée",
+    "E28_summary_omission_case3": "omission du résumé confirmée ; fait exact présent, exigence factuelle satisfaite",
+    "network_retry": "Aucune alerte réseau v16 ; efficacité de sa correction non évaluée sur ces sorties."
+  }
+}

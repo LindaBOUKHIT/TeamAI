@@ -33,6 +33,7 @@ include = ["teamai*", "data*", "eval*", "volet_a*", "volet_b*"]
 
 [tool.setuptools.package-data]
 "volet_b.slm" = ["configs/*.yaml"]
+"volet_b.slm.v16" = ["glossaire.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
