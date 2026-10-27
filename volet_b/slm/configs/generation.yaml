@@ -1,6 +1,12 @@
 # Paramètres de génération du volet B — figés pour toutes les comparaisons (SCRUM-38, SCRUM-45).
 # Toute modification doit être consignée dans le journal : elle rend les résultats antérieurs non comparables.
 model_id: HuggingFaceTB/SmolLM2-1.7B-Instruct
+backend: transformers   # conserver les résultats historiques par défaut
+gguf_repo: HuggingFaceTB/SmolLM2-1.7B-Instruct-GGUF
+gguf_file: smollm2-1.7b-instruct-q4_k_m.gguf
+gguf_revision: 2d4a76a30b4af41ecd395c35725ac11688d4cfe4
+n_ctx: 4096
+n_gpu_layers: 0         # -1 = toutes les couches sur GPU, 0 = CPU
 revision: 31b70e2e869a7173562077fd711b654946d38674 # snapshot du cache local
 dtype: float32          # CPU sans GPU NVIDIA : float32 (bfloat16 est lent sur ce processeur)
 max_new_tokens: 300
