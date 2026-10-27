@@ -60,7 +60,7 @@ def _load_model(adapter: str | None, local_files_only: bool):
 
 
 @lru_cache(maxsize=1)
-def _load_llamacpp(repo, filename, revision, n_ctx, seed, adapter, offline, model_path):
+def _load_llamacpp(repo, filename, revision, n_ctx, seed, adapter, offline, model_path, n_gpu_layers):
     """Charge une instance llama.cpp ; la clé inclut tous ses paramètres de chargement."""
     from huggingface_hub import hf_hub_download
     from llama_cpp import Llama
@@ -71,7 +71,7 @@ def _load_llamacpp(repo, filename, revision, n_ctx, seed, adapter, offline, mode
         repo, filename, revision=revision, local_files_only=offline
     )
     return Llama(model_path=path, n_ctx=n_ctx, last_n_tokens_size=n_ctx,
-                 seed=seed, verbose=False, n_gpu_layers=0,
+                 seed=seed, verbose=False, n_gpu_layers=n_gpu_layers,
                  lora_path=str(resolve_path(adapter)) if adapter else None)
 
 
@@ -84,7 +84,8 @@ def load_backend(cfg: dict, adapter: str | None = None):
         raise ValueError(f"Backend inconnu : {backend}")
     return _load_llamacpp(cfg["gguf_repo"], cfg["gguf_file"], cfg["gguf_revision"],
                           cfg["n_ctx"], cfg["seed"], adapter,
-                          cfg.get("local_files_only", False), cfg.get("gguf_path"))
+                          cfg.get("local_files_only", False), cfg.get("gguf_path"),
+                          cfg.get("n_gpu_layers", 0))
 
 
 def clear_model_cache():

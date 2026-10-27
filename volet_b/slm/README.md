@@ -79,7 +79,9 @@ La [preuve du 08/10](../../eval/results/SCRUM-28/README.md) publie la synthèse,
 
 `configs/generation.yaml` conserve `backend: transformers` par défaut. Mettre `backend: llamacpp` ou passer cet override à `generate()` pour utiliser llama.cpp. L'interface et le retour (`text`, `new_tokens`, `seconds`) sont inchangés. `TEAMAI_SLM_MOCK=1` fonctionne avec les deux backends sans charger de poids.
 
-La base GGUF officielle est retrouvée par `hf_hub_download` avec `gguf_repo`, `gguf_file`, `gguf_revision` figés dans le YAML (valeurs du banc historique). `local_files_only=True` impose le cache local. Le cache d'instances llama.cpp comprend la base, la révision, le contexte, la seed et l'adaptateur. Le backend utilise le CPU, 4 096 tokens de contexte, la pénalité sur tout le contexte et le décodage glouton ; `do_sample=true` est refusé.
+La base GGUF officielle est retrouvée par `hf_hub_download` avec `gguf_repo`, `gguf_file`, `gguf_revision` figés dans le YAML (valeurs du banc historique). `local_files_only=True` impose le cache local. Le cache d'instances llama.cpp comprend la base, la révision, le contexte, la seed, l'adaptateur et `n_gpu_layers`. Le backend utilise le CPU par défaut, 4 096 tokens de contexte, la pénalité sur tout le contexte et le décodage glouton ; `do_sample=true` est refusé.
+
+`n_gpu_layers` règle le nombre de couches sur GPU avec une installation llama.cpp compatible : `-1` pour toutes les couches, `0` pour le CPU (valeur historique et défaut si le champ est absent).
 
 Avec ce backend, `adapter` est **un fichier GGUF d'adaptateur**, transmis à `Llama(lora_path=...)` au-dessus de la base Q4_K_M. Un modèle fusionné est une base complète : passer `gguf_path` sans `adapter`.
 
