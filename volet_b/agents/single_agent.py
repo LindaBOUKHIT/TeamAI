@@ -34,22 +34,29 @@ SAMPLE_LOG = SAMPLE / "HDFS_sample.log"
 MAX_LINES = 60  # au-delà, les lignes sont tronquées dans le prompt (le nombre omis est indiqué)
 
 
-def build_messages(trace_lines: list[str], passages: list[dict], max_lines: int = MAX_LINES) -> list[dict]:
+def build_messages(trace_lines: list[str], passages: list[dict], max_lines: int = MAX_LINES,
+                   empty_note: str | None = None) -> list[dict]:
     """Prompt du volet B : consigne d'abord, puis la trace, puis les passages avec leur identifiant."""
     shown = trace_lines[:max_lines]
     if len(trace_lines) > max_lines:
         shown = shown + [f"(… {len(trace_lines) - max_lines} lignes suivantes omises)"]
-    documentation = "\n\n".join(f"[{p['id']}]\n{p['text']}" for p in passages) or "(aucun passage pertinent trouvé)"
+    documentation = "\n\n".join(f"[{p['id']}]\n{p['text']}" for p in passages) or empty_note or "(aucun passage pertinent trouvé)"
     content = PROMPT.read_text(encoding="utf-8").replace("<<TRACE>>", "\n".join(shown))
     return [{"role": "user", "content": content.replace("<<PASSAGES>>", documentation)}]
+
+
+def retrieve_for_trace(block_id: str, trace_lines: list[str], retriever, k: int = DEFAULT_K) -> tuple:
+    """Événements, requête et passages d'un bloc, calculés uniquement depuis ses lignes brutes."""
+    events = parse_lines(trace_lines, load_vocab_json())["sequences"].get(block_id, [])
+    query = query_for_events(events)
+    passages = retriever.search(query, k)
+    return events, query, passages
 
 
 def explain_block(block_id: str, trace_lines: list[str], retriever, k: int = DEFAULT_K,
                   adapter: str | None = None) -> dict:
     """Une ligne C7 pour un bloc : sortie brute, réponse analysée, erreurs, mesures et étapes."""
-    events = parse_lines(trace_lines, load_vocab_json())["sequences"].get(block_id, [])
-    query = query_for_events(events)
-    passages = retriever.search(query, k)
+    events, query, passages = retrieve_for_trace(block_id, trace_lines, retriever, k)
     messages = build_messages(trace_lines, passages)
     out = generate(messages, adapter=adapter)
     answer, errors = check_answer(out["text"], [p["id"] for p in passages])
