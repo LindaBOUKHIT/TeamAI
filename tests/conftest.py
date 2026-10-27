@@ -16,7 +16,7 @@ HAS_FULL_DATA = (paths.PREPROCESSED / "Event_traces.csv").exists()
 
 def pytest_collection_modifyitems(config, items):
     """Saute les tests marqués full_data quand le corpus complet n'est pas téléchargé."""
-    skip = pytest.mark.skip(reason="corpus complet absent : lancer python data/download_hdfs.py")
+    skip = pytest.mark.skip(reason="corpus complet absent : lancer python -m data.download_hdfs")
     for item in items:
         if "full_data" in item.keywords and not HAS_FULL_DATA:
             item.add_marker(skip)

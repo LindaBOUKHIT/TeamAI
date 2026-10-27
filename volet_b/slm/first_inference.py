@@ -176,7 +176,7 @@ def main(argv=None):
         "python": platform.python_version(),
         "packages": package_versions(),
         "source_sha256": {str(path.relative_to(ROOT)): sha256_file(path) for path in
-                          (Path(__file__), CONFIG, Path(__file__).with_name("generate.py"))},
+                          (SLM / "first_inference.py", CONFIG, SLM / "generate.py")},
         "prompt_sha256": hashlib.sha256(messages[0]["content"].encode("utf-8")).hexdigest(),
         "raw_log_sha256": sha256_file(RAW_HDFS / "HDFS.log"),
         "purpose": "technical_smoke_test_not_final_evaluation",

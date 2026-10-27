@@ -26,7 +26,7 @@ def load_split(name: str) -> pd.DataFrame:
     if not path.exists():
         raise FileNotFoundError(
             "Fichier splits.csv introuvable. "
-            "Exécuter : python data/make_splits.py"
+            "Exécuter : python -m data.make_splits"
         )
 
     splits = pd.read_csv(

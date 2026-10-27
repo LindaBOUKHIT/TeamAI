@@ -27,6 +27,9 @@ Classeur partagé : [TeamAI : Classeur de suivi](https://docs.google.com/spreads
 | 06/10/2026 | Alain | Claude Code + connecteur MCP Atlassian | Création du board Jira (epics, sprints, tâches, dépendances), téléchargement et audit de HDFS_v1, structure du dépôt, relevé de la machine | Données vérifiées (MD5, statistiques recalculées) ; tickets relus | Répartition et contrats à valider en réunion (SCRUM-55) |
 | 08/10/2026 | Alain | Codex | Complément de SCRUM-15 | Lecture du ticket et de la PR #3, relevé CPU/RAM/GPU/disque et comparaison aux essais documentés dans les PR #4 et #6 | Environnements des camarades et accès GPU non connus ; validation du groupe requise |
 | 13/10/2026 | Linda | Codex | Aide à la construction du corpus documentaire HDFS et aux corrections demandées dans la revue de SCRUM-30 | Couverture des templates E1–E29 documentée ; sections de liens exclues ; empreintes SHA-256 ajoutées ; reconstruction locale sans téléchargement : 51 passages par section et 28 par fenêtre glissante | Suite à la relecture du reviewer ; tests automatisés non exécutés |
+| 13/10/2026 | Linda | Claude Code + connecteurs Atlassian et GitHub (`gh`) | Préparation des relectures des PR #3, #5, #6 et #18 ; résolution des conflits de fusion sur #5, #6 et #19 ; automatisation Jira « PR fusionnée dans dev → Terminé » | Relectures vérifiées sur le code et relues par Linda avant envoi ; conflits résolus en gardant les deux versions ; CI verte après chaque résolution | Approbations et fusions faites par Linda |
+| 13/10/2026 | Linda | Claude Code | SCRUM-26 : génération de `vocab.json`, prétraitement Python et JavaScript, tests de parité | Parité vérifiée par les tests : 2 000/2 000 blocs de l'échantillon (Python et JS), cas limites partagés, et 575 061/575 061 blocs du corpus complet en Python | Intégration dans l'interface du site (SCRUM-27, Bachar) à faire |
+| 13/10/2026 | Linda | Claude Code | SCRUM-31 : alignement de la grille d'annotation sur C5 v1.1, rédaction des 3 exemples de calibration, contrôles automatiques des sources et des splits | Faits vérifiés ligne par ligne sur les logs bruts de `data/sample/` ; sources présentes dans `chunks.jsonl` ; exemples lus et validés par Linda | Hypothèses et cas d'abstention à discuter en équipe ; `reviewed_by` renseigné après la relecture |
 
 ## Expériences
 
@@ -156,3 +159,238 @@ proposer le script Python et la page de comparaison, et interpréter
 les résultats. Exécution et vérification réalisées par Bachar.
 
 Relecture par Nassim à effectuer avant fusion.
+
+
+
+## 2026-10-16 — SCRUM-23 — Bachar Ben Slama
+
+Création du site statique v0 avec Vite et ONNX Runtime Web :
+- Page d’accueil et bouton de test sur une séquence artificielle.
+- Chargement du vocabulaire C2 et du modèle ONNX C3.
+- Vérification des empreintes SHA-256 du modèle et du vocabulaire.
+- Mise en cache du modèle avec la Cache API.
+- Avertissement explicite pour le modèle factice de SCRUM-22.
+- Ajout des commandes build et preview.
+- Configuration du chemin /TeamAI/ pour GitHub Pages.
+- Adaptation du workflow : Node.js 24, tests et build.
+- Exclusion du dossier généré dist de Git.
+
+Vérifications locales :
+- Les 11 tests de prétraitement passent.
+- Inférence fonctionnelle sur la page locale et en preview.
+- Réutilisation du cache confirmée après actualisation.
+- Score observé : 0,46178886 sur la séquence artificielle
+  E5, E22, E5, E11. Ce score n’a aucune valeur prédictive.
+
+Usage IA : assistance de Codex pour proposer le code du site,
+le chargement du modèle, la mise en cache et la configuration
+de déploiement. Manipulations et vérifications locales par Bachar.
+
+Publication publique restant à vérifier après passage vers main
+via SCRUM-17. Relecture par Nassim à effectuer.
+
+## 2026-10-16 — SCRUM-25 — Bachar Ben Slama
+
+Entraînement du BiLSTM sur HDFS_v1 avec les splits officiels
+SCRUM-20. Le hash de splits.csv correspond exactement à celui
+de l’équipe : f504592cb7ac13b8b7e5d532a336b4e3641ec441a863c5efafd164faa2a43f22.
+
+Run : 20261016T184412Z_4f3011f2_bilstm.
+Architecture : embedding 16, BiLSTM 32 par direction,
+agrégation moyenne hors padding, 13 361 paramètres.
+Entraînement CPU : 5 époques, batch 512, seed 42,
+Adam avec learning rate 0,001 et perte pondérée.
+Durée entraînement et validation : environ 352 secondes.
+
+Sélection sur validation uniquement :
+- Époque retenue : 5.
+- Seuil : 0,99, borne supérieure de la grille explorée.
+- Macro-F1 globale : 0,995514, contre 0,989698 pour la baseline.
+- Macro-F1 sur les 1 929 séquences inédites : 0,976748,
+  contre 0,961848 pour la baseline.
+- Validation globale : 23 fausses alertes et 21 anomalies manquées.
+- Baseline : 103 fausses alertes et aucune anomalie manquée.
+
+Le BiLSTM réduit les fausses alertes et améliore la macro-F1,
+avec une baisse du rappel. La comparaison utilise les résultats
+publiés par Nassim ; la baseline n’a pas été réentraînée ici.
+Le test officiel n’a pas été évalué.
+
+Export ONNX : environ 55,5 Ko, conforme au contrat C3.
+Parité Python sur 86 259 blocs de validation :
+écart maximal 1,1921e-7 et aucune différence de classification.
+Parité navigateur WASM sur dix séquences de validation :
+écart maximal 4,3277e-8. Batchs 1, 3 et 10 vérifiés.
+
+Le modèle entraîné et ses métadonnées remplacent le spike
+sur la branche SCRUM-25. Résumés dans
+eval/results/SCRUM-25-bilstm-v1/ ; checkpoint et prédictions
+détaillées conservés localement dans eval/runs/.
+
+Usage IA : assistance de Codex pour proposer les scripts de
+préparation, d’entraînement, d’export et de contrôle de parité,
+corriger un problème d’import et interpréter les résultats.
+Exécution et vérifications locales réalisées par Bachar.
+
+Relecture par Nassim et vérification de la CI à effectuer.
+Intégration et vérification sur le site complet restant à confirmer
+après combinaison avec SCRUM-23.
+
+
+## 2026-10-23 — SCRUM-27 — Bachar Ben Slama
+
+Ajout du parcours fonctionnel du volet A :
+- Saisie de logs par copier-coller.
+- Import de fichier texte limité à 10 Mo.
+- Chargement des cinq exemples disponibles.
+- Tableau par bloc : classe, score, longueur, événements tronqués,
+  inconnus encodés et avertissements.
+- Filtre « anomalies seulement » et export CSV des lignes affichées.
+- Seuil lu dans detector.meta.json, sans réglage depuis l’interface.
+- Rejet des entrées sans bloc reconnu et effacement des anciens
+  résultats lors d’un changement de source.
+- Signalement des lignes ignorées et des événements inconnus.
+
+La complétude des blocs n’est pas déduite automatiquement :
+elle est indiquée comme non vérifiée. L’exemple volontairement
+incomplet est signalé lorsqu’il est chargé par le sélecteur.
+
+Vérifications locales :
+- 16 tests JavaScript réussis.
+- Build de production réussi.
+- Exemple multi-blocs : trois blocs, dont une anomalie.
+- Import du même fichier : résultats identiques.
+- Filtre et CSV vérifiés : une anomalie exportée.
+- Entrée invalide rejetée.
+- Lignes ignorées, événement inconnu et exemple incomplet signalés.
+
+Le traitement utilise des lots de 64 blocs ; le Web Worker est
+prévu dans SCRUM-40. Aucun test officiel utilisé pour ces essais.
+
+Usage IA : assistance de Codex pour proposer l’interface,
+le raccordement au modèle, l’export CSV et les tests.
+Manipulations et vérifications locales réalisées par Bachar.
+
+Relecture par Nassim à effectuer. Publication publique et tag
+v0.2-J3 à vérifier après intégration et PR dev vers main.
+
+## 2026-10-23 — SCRUM-62 — Bachar Ben Slama
+
+Analyse du seuil du BiLSTM v1 en réponse aux retours sur SCRUM-25.
+Les poids restent inchangés ; seule la décision de classification
+est ajustée, sur la validation uniquement.
+
+Les scores des 21 anomalies initialement manquées ont été examinés.
+Le script explore les seuils distincts et une grille de 0 à 1,
+avec courbes précision, rappel et F1 de la classe anomalie.
+
+Choix proposé : seuil 0,40814146399497986, maximisant le F1 anomalie
+avec au maximum deux anomalies manquées.
+Le même seuil est optimal sous la contrainte d’une seule manquée.
+
+Validation globale :
+- Ancien seuil 0,99 : 23 fausses alertes, 21 anomalies manquées.
+- Nouveau seuil : 59 fausses alertes, 1 anomalie manquée.
+- Rappel anomalie : 0,999604.
+- F1 anomalie : 0,988254.
+- Macro-F1 : 0,993948, contre 0,995514 auparavant.
+
+Validation sur les 1 929 séquences inédites :
+- 41 fausses alertes et 1 anomalie manquée.
+- Auparavant : 19 fausses alertes et 17 anomalies manquées.
+- Rappel anomalie : 0,998131.
+- Macro-F1 : 0,973439.
+
+Le compromis privilégie le rappel : 20 anomalies récupérées pour
+36 fausses alertes supplémentaires sur la validation globale.
+Le candidat sans anomalie manquée entraîne 295 fausses alertes.
+
+Métadonnées du site actualisées : threshold et val_macro_f1,
+avec référence à l’analyse et à l’objectif de sélection.
+
+Parité au nouveau seuil :
+- Python / ONNX : 86 259 blocs, aucune différence de classe,
+  écart maximal 1,1921e-7.
+- Navigateur WASM : dix cas proches du seuil, dont un exactement
+  au seuil ; batchs 1, 3 et 10 ; aucune différence de classe,
+  écart maximal 5,9605e-8.
+
+Résultats :
+eval/results/SCRUM-62_20261023T153242Z_690fcb/
+
+Aucun test officiel évalué. SCRUM-44 est réservé à Nassim,
+après fixation du seuil et de la version finale du modèle.
+La quantification SCRUM-40 nécessitera une nouvelle vérification
+des scores et des décisions au seuil retenu.
+
+Usage IA : assistance de Codex pour les scripts d’analyse,
+la vérification de parité, le test navigateur et la documentation.
+Exécutions et vérifications locales réalisées par Bachar.
+
+Relecture par Alain à effectuer. Les modifications de SCRUM-27,
+encore en attente, ne sont pas intégrées dans cette branche.
+
+## 2026-10-24 — SCRUM-37 — Linda Boukhit
+
+RAG de référence à un agent : trace → requête → passages C6 → `generate()` → réponse C5 vérifiée par code.
+
+- **Retrieval** : 51 passages encodés avec `BAAI/bge-small-en-v1.5` (révision `5c38ec7c`), index FAISS exact (cosinus) dans `volet_b/rag/index/` (non versionné, reconstruit par `build_index`). BM25 (`rank-bm25`) et fusion des deux par Reciprocal Rank Fusion.
+- **Requête** : les templates bruts (« allocateBlock ») donnaient de mauvais résultats ; chaque événement est paraphrasé en anglais (`volet_b/rag/event_descriptions.json`, écrit à partir des templates seuls).
+- **Mesure sur la validation** (`eval/results/SCRUM-37/retrieval_val.json`, 306 blocs `val` de `data/sample/`, référence : table de couverture de `corpus_rag.md`) :
+
+| Méthode | Requête | Templates trouvés (top 3) | Rappel@3 traces |
+|---|---|---:|---:|
+| dense | template brut | 3/10 | 0,323 |
+| dense | paraphrase | 6/10 | 0,348 |
+| BM25 | paraphrase | 6/10 | 0,695 |
+| hybride (retenu) | paraphrase | 6/10 | 0,664 |
+
+- **Décision** : méthode hybride par défaut. BM25 seul est légèrement meilleur ici, mais l'hybride garde les embeddings, plus robustes aux reformulations libres des agents (SCRUM-42). Les deux passages « Safemode » remontent souvent dans le top 3 avec les embeddings seuls (passages très généraux).
+- **Limites** : la référence (table de couverture) et les paraphrases ont été écrites par l'équipe : ce n'est pas un jugement indépendant de la pertinence. Les traces de validation de l'échantillon répètent peu de séquences distinctes. Le test n'a pas été utilisé.
+- **Seuil `min_score` (liste vide → abstention)** : étudié puis non activé. Sur les passages du top 3 des traces de validation, la médiane du cosinus est de 0,779 pour les pertinents et de 0,813 pour les non pertinents (les passages généraux comme « Safemode » sont très proches de tout) ; les scores BM25 se chevauchent (médianes 79,7 et 60,5) et dépendent de la longueur de la requête. Un seuil retirerait autant de passages pertinents que de non pertinents. Le cas « aucun passage utile » reste traité par la consigne (`sources: []` autorisé) et par le contrôle C5. Mesure reproductible : champ `score_separation` de `retrieval_val.json`.
+- **Garde-fou** : l'agent refuse tout bloc du split `test`, qu'il vienne de `--block` ou d'un fichier `--file`.
+- **Agent** : `python -m volet_b.agents.single_agent` vérifié de bout en bout en mode factice (`--mock`) ; l'exécution avec le vrai SLM est à faire sur la machine d'Alain (SCRUM-38).
+
+Usage IA : Linda avec Claude Code pour le code du retrieval, de l'agent et des tests, et pour la comparaison des méthodes ; chiffres recalculés par le script `evaluate_retrieval`.
+
+## 2026-10-26 — SCRUM-57 : backend llama.cpp et conversion LoRA → GGUF
+
+Code écrit avec Codex (gpt-6.1-sol), supervisé par Claude ; relecture d'Alain à faire avant fusion. Transformers float32 reste le défaut de `generate()` ; `backend: llamacpp` charge le GGUF officiel Q4_K_M à la révision figée du banc du 06/10, l'adaptateur GGUF étant passé par `lora_path`.
+
+Conversions réelles de l'adaptateur `essai` (llama.cpp cloné au commit `d854d98`) :
+- route b, adaptateur seul : `adapter.gguf` f16 de 3,1 Mo, chargé sur la base Q4_K_M ;
+- route a, fusion PEFT → HF → GGUF f16 → Q4_K_M : 3 264 → 1 005 Mio. Elle exigeait `sentencepiece`, ajouté à l'extra `volet_b_gguf`. Le modèle fusionné se charge et répond à une consigne courte (`{"ok": true}`, 5 tokens en 0,81 s) ; `meta.json` garde `inference_validated: false`, cette vérification n'étant pas une évaluation.
+
+Comparaison sur cinq blocs `val` du sample (preuve : [`eval/results/SCRUM-57/`](../../eval/results/SCRUM-57/README.md)) : llama.cpp Q4_K_M donne environ ×1,6 en débit (2,4 contre 1,5 token/s), un pic RSS de 2,1–2,8 GiB contre 9,3–9,9 GiB et un chargement de 1,7 s contre 11,5 s. Qualité : 0/5 sorties conformes C5 pour les deux backends, avec ou sans adaptateur ; le modèle rend les bonnes clés avec des champs vides. Cette comparaison ne départage donc pas la qualité, et le backend reste confondu avec la quantification. Proposition à valider en équipe : Q4_K_M sous llama.cpp pour la démo ; pour comparer base, LoRA, RAG et agents, un seul couple backend/quantification, à consigner ici.
+
+Correction associée : `validate_answer` plantait lorsqu'un objet apparaissait dans `sources` (sortie llama.cpp) ; il signale désormais l'erreur sans exception (test ajouté).
+
+
+## 2026-10-27 — SCRUM-63 : passage à Gemma 4 E4B QAT
+
+Le modèle courant du volet B devient Gemma 4 E4B QAT (GGUF Q4_0), révision
+`4b4a2c1d584be7264f87aac328a1bc739ce81b6c`, sous llama.cpp. Prompt v16 figé,
+contexte 4096, 800 tokens maximum, température 0, seed 42, repeat_penalty 1.0,
+réflexion désactivée. SmolLM2 et ses mesures SCRUM-28/SCRUM-57 restent historiques.
+La machine cible devient le portable de Nassim (Ryzen 5 8645HS, 32 Go, RTX 3050
+Laptop 6 Go) ; versions CUDA/Python et inférence locale à relever par Nassim.
+
+Port de l’extraction des faits via `data.parse_hdfs`, du glossaire restreint aux
+codes présents, de la consigne, du schéma, des listes de causes et contrôles v16,
+avec correction unique et conservation des deux réponses. L’interface existante
+de `generate()` est conservée et transmet désormais le schéma JSON à llama.cpp.
+Seul ajout aux contrôles : répétition en boucle ou budget presque épuisé (95 %),
+qui déclenche la correction unique sans changer le prompt initial.
+
+Tests sans réseau ni GGUF : 40 prompts reconstruits depuis les lignes val,
+40 schémas, consigne et politique vérifiés contre les empreintes originales ;
+cas réel F09 ×130 (783 tokens), cas normal et correction unique couverts.
+Suite complète `python -m pytest -q` exécutée le 27/10 avec le Python du projet : 89 tests réussis, 5 ignorés, sans réseau ni GGUF. Aucun modèle téléchargé ou exécuté, aucun service externe appelé.
+
+[Trace SCRUM-63](../../eval/results/SCRUM-63/README.md) : choix v6–v11,
+réglage v12–v16 et validation unique de 40 nouveaux blocs val. Les contrôles
+formels se maintiennent, mais chronologies et causalités restent parfois fausses,
+et un résumé boucle ; 0,19 hypothèse par bloc avec indice d’incident. Ces résultats
+ne valident ni une détection par le SLM ni la fidélité globale des explications.
+
+Usage IA : code écrit avec Codex gpt-6.1-sol, supervisé par Claude ; relecture d'Alain à faire.

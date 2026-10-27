@@ -1,7 +1,9 @@
 # Volet B — Explication sourcée d'une trace HDFS en local
 
 **Epics** : SCRUM-8 (SLM, LoRA — Alain, binôme Linda) · SCRUM-9 (RAG, agents, interface — Linda, binôme Alain)
-Modèle : SmolLM2-1.7B-Instruct (repli : plus petit si la machine l'impose, décision tracée).
+Modèle actuel : Gemma 4 E4B QAT, GGUF Q4_0, backend llama.cpp, prompt v16 figé.
+
+Gemma est retenu pour la qualité relative des explications exploratoires (v11 : 40/40 contrats contre 22/40 pour Granite), avec des erreurs sémantiques persistantes : [trace SCRUM-63](../eval/results/SCRUM-63/README.md). `slm/v16/` extrait les faits avec `data.parse_hdfs`, applique les causes fermées, contrôle les réponses et autorise une seule correction. Cette référence n’utilise pas le RAG ; les chaînes RAG existantes gardent leurs propres prompts et ne sont pas couvertes par la validation v16. SmolLM2 et les essais LoRA associés sont historiques.
 
 ```
 volet_b/
@@ -17,7 +19,9 @@ volet_b/
 │   ├── corpus/sources.md       URL, version, licence de chaque document         SCRUM-30
 │   ├── build_corpus.py         Nettoyage + découpage → corpus/chunks.jsonl (C6)  SCRUM-30
 │   ├── build_index.py          Embeddings + index FAISS → index/                SCRUM-37
-│   ├── retriever.py            retrieve(query, k) → passages C6                 SCRUM-37
+│   ├── retriever.py            search(query, k) → passages C6 + score (hybride) SCRUM-37
+│   ├── event_descriptions.json Paraphrase anglaise des 29 événements (requête)   SCRUM-37
+│   ├── evaluate_retrieval.py   Rappel@k sur la validation                       SCRUM-37
 │   └── index/                  — non versionné
 ├── agents/                                                      Linda
 │   ├── single_agent.py         Référence : résumé → retrieval → réponse C5      SCRUM-37
@@ -37,7 +41,7 @@ volet_b/
 
 - `slm/generate.py` est la **seule** porte d'entrée vers le modèle : RAG et agents l'appellent sans savoir s'il s'agit du modèle de base ou adapté.
 - En attendant le vrai modèle, `generate.py` peut renvoyer une réponse factice au format C5 : Linda développe le RAG et les agents sans attendre la machine d'Alain.
-- En attendant l'index, `retriever.py` peut renvoyer 3 passages fixes au format C6.
+- Les tests du RAG (`tests/test_rag.py`) utilisent un encodeur haché et le mode factice : ils tournent sans modèle.
 
 ## Les 4 configurations évaluées (eval/volet_b)
 
@@ -48,7 +52,18 @@ volet_b/
 ```bash
 pip install -e ".[data,volet_b]"
 python -m volet_b.slm.first_inference
-python volet_b/app/app.py          # interface locale
+python -m volet_b.app.app          # interface locale
 ```
+
+### RAG à un agent (SCRUM-37)
+
+```bash
+python -m volet_b.rag.build_index                                   # index FAISS des 51 passages (une fois)
+python -m volet_b.rag.evaluate_retrieval                            # rappel@3 sur la validation → eval/results/SCRUM-37/
+python -m volet_b.agents.single_agent --split val --n 5 --mock      # chaîne complète sans modèle
+python -m volet_b.agents.single_agent --block blk_4971154345890344  # un bloc de data/sample/, avec le SLM
+```
+
+La requête paraphrase en anglais les événements distincts de la trace (`rag/event_descriptions.json`) ; le retriever fusionne embeddings (BGE small, FAISS) et BM25 (`--method dense|bm25|hybrid`). Le prompt (`agents/prompts/single_agent.txt`) donne la consigne avant la trace et les passages ; `agents/validate.py` vérifie le JSON, le format C5 et que chaque source citée fait partie des passages fournis. Chaque exécution écrit un dossier C7 dans `eval/runs/` (étapes, scores, erreurs). Le split `test` est refusé.
 
 Pour SCRUM-28, suivre le [README du SLM](slm/README.md) : installation minimale, mode factice, exécution réelle et preuves d'inférence. Les autres composants de l'arborescence restent des livraisons prévues par leurs tickets.

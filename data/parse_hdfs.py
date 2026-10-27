@@ -11,7 +11,7 @@ import re
 from collections import defaultdict
 from pathlib import Path
 
-from teamai.paths import PREPROCESSED
+from teamai.paths import PARSED, PREPROCESSED
 
 
 BLOCK_PATTERN = re.compile(r"blk_-?\d+")
@@ -191,7 +191,7 @@ def main():
     parser.add_argument(
         "--output",
         type=Path,
-        default=Path("data/parsed/Event_traces_parsed.csv"),
+        default=PARSED / "Event_traces_parsed.csv",
         help="Chemin du CSV généré",
     )
 

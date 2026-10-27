@@ -1,0 +1,153 @@
+{
+  "contract_version": "v1",
+  "pad_id": 0,
+  "unk_id": 30,
+  "max_len": 50,
+  "events": {
+    "E1": {
+      "id": 1,
+      "template": "[*]Adding an already existing block[*]",
+      "regex": "^.*?Adding an already existing block.*?$"
+    },
+    "E2": {
+      "id": 2,
+      "template": "[*]Verification succeeded for[*]",
+      "regex": "^.*?Verification succeeded for.*?$"
+    },
+    "E3": {
+      "id": 3,
+      "template": "[*]Served block[*]to[*]",
+      "regex": "^.*?Served block.*?to.*?$"
+    },
+    "E4": {
+      "id": 4,
+      "template": "[*]Got exception while serving[*]to[*]",
+      "regex": "^.*?Got exception while serving.*?to.*?$"
+    },
+    "E5": {
+      "id": 5,
+      "template": "[*]Receiving block[*]src:[*]dest:[*]",
+      "regex": "^.*?Receiving block.*?src:.*?dest:.*?$"
+    },
+    "E6": {
+      "id": 6,
+      "template": "[*]Received block[*]src:[*]dest:[*]of size[*]",
+      "regex": "^.*?Received block.*?src:.*?dest:.*?of size.*?$"
+    },
+    "E7": {
+      "id": 7,
+      "template": "[*]writeBlock[*]received exception[*]",
+      "regex": "^.*?writeBlock.*?received exception.*?$"
+    },
+    "E8": {
+      "id": 8,
+      "template": "[*]PacketResponder[*]for block[*]Interrupted[*]",
+      "regex": "^.*?PacketResponder.*?for block.*?Interrupted.*?$"
+    },
+    "E9": {
+      "id": 9,
+      "template": "[*]Received block[*]of size[*]from[*]",
+      "regex": "^.*?Received block.*?of size.*?from.*?$"
+    },
+    "E10": {
+      "id": 10,
+      "template": "[*]PacketResponder[*]Exception[*]",
+      "regex": "^.*?PacketResponder.*?Exception.*?$"
+    },
+    "E11": {
+      "id": 11,
+      "template": "[*]PacketResponder[*]for block[*]terminating[*]",
+      "regex": "^.*?PacketResponder.*?for block.*?terminating.*?$"
+    },
+    "E12": {
+      "id": 12,
+      "template": "[*]:Exception writing block[*]to mirror[*]",
+      "regex": "^.*?:Exception writing block.*?to mirror.*?$"
+    },
+    "E13": {
+      "id": 13,
+      "template": "[*]Receiving empty packet for block[*]",
+      "regex": "^.*?Receiving empty packet for block.*?$"
+    },
+    "E14": {
+      "id": 14,
+      "template": "[*]Exception in receiveBlock for block[*]",
+      "regex": "^.*?Exception in receiveBlock for block.*?$"
+    },
+    "E15": {
+      "id": 15,
+      "template": "[*]Changing block file offset of block[*]from[*]to[*]meta file offset to[*]",
+      "regex": "^.*?Changing block file offset of block.*?from.*?to.*?meta file offset to.*?$"
+    },
+    "E16": {
+      "id": 16,
+      "template": "[*]:Transmitted block[*]to[*]",
+      "regex": "^.*?:Transmitted block.*?to.*?$"
+    },
+    "E17": {
+      "id": 17,
+      "template": "[*]:Failed to transfer[*]to[*]got[*]",
+      "regex": "^.*?:Failed to transfer.*?to.*?got.*?$"
+    },
+    "E18": {
+      "id": 18,
+      "template": "[*]Starting thread to transfer block[*]to[*]",
+      "regex": "^.*?Starting thread to transfer block.*?to.*?$"
+    },
+    "E19": {
+      "id": 19,
+      "template": "[*]Reopen Block[*]",
+      "regex": "^.*?Reopen Block.*?$"
+    },
+    "E20": {
+      "id": 20,
+      "template": "[*]Unexpected error trying to delete block[*]BlockInfo not found in volumeMap[*]",
+      "regex": "^.*?Unexpected error trying to delete block.*?BlockInfo not found in volumeMap.*?$"
+    },
+    "E21": {
+      "id": 21,
+      "template": "[*]Deleting block[*]file[*]",
+      "regex": "^.*?Deleting block.*?file.*?$"
+    },
+    "E22": {
+      "id": 22,
+      "template": "[*]BLOCK* NameSystem[*]allocateBlock:[*]",
+      "regex": "^.*?BLOCK\\* NameSystem.*?allocateBlock:.*?$"
+    },
+    "E23": {
+      "id": 23,
+      "template": "[*]BLOCK* NameSystem[*]delete:[*]is added to invalidSet of[*]",
+      "regex": "^.*?BLOCK\\* NameSystem.*?delete:.*?is added to invalidSet of.*?$"
+    },
+    "E24": {
+      "id": 24,
+      "template": "[*]BLOCK* Removing block[*]from neededReplications as it does not belong to any file[*]",
+      "regex": "^.*?BLOCK\\* Removing block.*?from neededReplications as it does not belong to any file.*?$"
+    },
+    "E25": {
+      "id": 25,
+      "template": "[*]BLOCK* ask[*]to replicate[*]to[*]",
+      "regex": "^.*?BLOCK\\* ask.*?to replicate.*?to.*?$"
+    },
+    "E26": {
+      "id": 26,
+      "template": "[*]BLOCK* NameSystem[*]addStoredBlock: blockMap updated:[*]is added to[*]size[*]",
+      "regex": "^.*?BLOCK\\* NameSystem.*?addStoredBlock: blockMap updated:.*?is added to.*?size.*?$"
+    },
+    "E27": {
+      "id": 27,
+      "template": "[*]BLOCK* NameSystem[*]addStoredBlock: Redundant addStoredBlock request received for[*]on[*]size[*]",
+      "regex": "^.*?BLOCK\\* NameSystem.*?addStoredBlock: Redundant addStoredBlock request received for.*?on.*?size.*?$"
+    },
+    "E28": {
+      "id": 28,
+      "template": "[*]BLOCK* NameSystem[*]addStoredBlock: addStoredBlock request received for[*]on[*]size[*]But it does not belong to any file[*]",
+      "regex": "^.*?BLOCK\\* NameSystem.*?addStoredBlock: addStoredBlock request received for.*?on.*?size.*?But it does not belong to any file.*?$"
+    },
+    "E29": {
+      "id": 29,
+      "template": "[*]PendingReplicationMonitor timed out block[*]",
+      "regex": "^.*?PendingReplicationMonitor timed out block.*?$"
+    }
+  }
+}

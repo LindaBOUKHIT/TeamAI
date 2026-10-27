@@ -1,0 +1,29 @@
+{
+  "ticket": "SCRUM-25",
+  "model": "BiLSTM",
+  "embedding_dim": 16,
+  "hidden_size": 32,
+  "device": "cpu",
+  "machine": "Windows-11-10.0.26300-SP0",
+  "torch_version": "2.14.1+cpu",
+  "parameters": {
+    "split": "officiel",
+    "epochs": 5,
+    "batch_size": 512,
+    "threads": 4,
+    "seed": 42,
+    "lr": 0.001
+  },
+  "git_commit": "1117d070a296605012cdcb1678f7816b4332ed9f",
+  "git_status": "M data/splits/splits_meta.json\n?? volet_a/training/bilstm.py\n?? volet_a/training/dataset.py\n?? volet_a/training/train.py\n?? volet_a/web/dist/",
+  "source_hashes": {
+    "dataset.py": "6378b125b92fb9b557ff9bfddd3c850551534cac2ea75c976d5e68a118b49dce",
+    "bilstm.py": "001df96d550bafa7a0f92b0d1decd2efc58b64d10fd0653a4b7c4a4d18737908",
+    "train.py": "bda7d7ee181ba2286aad1c75c0e126e17a3fcfd7aa4848f99656ade261b51b75"
+  },
+  "splits_sha256": "f504592cb7ac13b8b7e5d532a336b4e3641ec441a863c5efafd164faa2a43f22",
+  "data_sha256": "68cd80eac007b28f5ca10d8acceb104d61067e74e1c4eef2c6c6015b2d769d3c",
+  "vocab_sha256": "77b6688a94a0a6a4dbbbdeb1a2d3cb22871b91d874339cf44f986d82928e443a",
+  "threshold_selection": "macro-F1 validation, grille 0.01 à 0.99",
+  "test_used": false
+}
