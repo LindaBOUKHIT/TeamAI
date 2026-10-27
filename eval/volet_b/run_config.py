@@ -161,17 +161,18 @@ def metrics(records: list[dict], peak_bytes: int, peak_vram_bytes=None) -> dict:
             group = 'with_incident' if r['attention'] else 'without_incident'
             counts['blocks_' + group] += 1
             hypotheses = (r['parsed_response'] or {}).get('hypotheses', [])
-            counts['hypotheses_' + group] += len(hypotheses) if isinstance(hypotheses, list) else 0
+            counts['hypotheses_' + group] += len(hypotheses) if not r['errors'] and isinstance(hypotheses, list) else 0
     values.update(counts)
     for key in counts:
         values[key + '_rate'] = counts[key] / n if n else None
     for name, count in [('conformity', valid), ('sources_valid', sources), ('abstention', abstentions)]:
         values[name + '_rate'] = count / n if n else None
     for group in ('with_incident', 'without_incident'):
-        # Contribution par bloc lu : le dénominateur n ne masque aucun échec.
-        values['hypotheses_per_block_' + group] = counts['hypotheses_' + group] / n if n else None
+        # Chaque bloc du groupe reste au dénominateur, même en échec.
+        blocks = counts['blocks_' + group]
+        values['hypotheses_per_block_' + group] = counts['hypotheses_' + group] / blocks if blocks else None
     values['protocol'] = {
-        'denominator': 'Tous les exemples lus, échecs compris ; hypotheses_per_block par groupe = somme du groupe / n total.',
+        'denominator': 'Taux sur tous les exemples lus, échecs compris ; hypotheses_per_block par groupe = somme des hypothèses valides / nombre de blocs du groupe avec attention connu, échecs compris (réponse invalide = 0 hypothèse) ; None si groupe vide.',
         'incident': 'Indice attention calculé par facts.prepare_block, jamais label annoté.',
         'v16': 'Contrat final ; faits exacts évaluables si structure valide ; alertes lexicales, pas vérité sémantique.',
         'loops': 'Exemples avec au moins une tentative rejetée par repetition_errors, budget 95 % compris.',

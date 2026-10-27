@@ -134,7 +134,7 @@ def test_loop_corrected_and_alert_metrics(examples, tmp_path, monkeypatch):
     assert values['corrections_triggered'] == values['corrections_attempted'] == 2
     assert values['unknown_references_rate'] == values['unsupported_network_rate'] == 0.5
     assert values['hypotheses_per_block_with_incident'] == 0.5
-    assert values['hypotheses_per_block_without_incident'] == 0
+    assert values['hypotheses_per_block_without_incident'] is None
     assert values['slm_calls'] == 4
     assert records[0]['generation_seconds'] == 0.5 and records[0]['new_tokens'] == 883
 
@@ -265,3 +265,40 @@ def test_gpu_nvml_pid_and_unavailable():
     assert sampler.sample() == 2048
     fake.nvmlDeviceGetComputeRunningProcesses = lambda handle: [SimpleNamespace(pid=os.getpid(), usedGpuMemory=None)]
     assert sampler.sample() is None
+
+
+@pytest.mark.parametrize('incident', [True, False])
+@pytest.mark.parametrize('invalid_response', [None, {'hypotheses': ['à ignorer']}])
+def test_hypotheses_per_group_includes_failures(incident, invalid_response):
+    """Trois blocs : deux du même groupe dont un échec, même si le JSON est parsé."""
+    records = [
+        dict(attention=incident, parsed_response={'hypotheses': ['H1', 'H2', 'H3']}, errors=[]),
+        dict(attention=incident, parsed_response=invalid_response, errors=['réponse invalide']),
+        dict(attention=not incident, parsed_response={'hypotheses': ['H4', 'H5']}, errors=[]),
+    ]
+    for record in records:
+        record.update(seconds=1, sources_valid=False, slm_calls=0, attempts=[])
+    values = runner.metrics(records, peak_bytes=0)
+    group = 'with_incident' if incident else 'without_incident'
+    other = 'without_incident' if incident else 'with_incident'
+    assert values['n'] == 3 and values['failures'] == 1
+    assert values['blocks_' + group] == 2
+    assert values['hypotheses_' + group] == 3
+    assert values['hypotheses_per_block_' + group] == 3 / 2
+    assert values['blocks_' + other] == 1
+    assert values['hypotheses_per_block_' + other] == 2 / 1
+
+
+@pytest.mark.parametrize('attention', [True, False, None])
+def test_hypotheses_empty_group(attention):
+    """Un groupe absent vaut None ; un échec connu seul donne zéro dans son groupe."""
+    record = dict(attention=attention, parsed_response=None, errors=['échec'],
+                  seconds=1, sources_valid=False, slm_calls=0, attempts=[])
+    values = runner.metrics([record], peak_bytes=0)
+    for group, signal in [('with_incident', True), ('without_incident', False)]:
+        assert values['blocks_' + group] == int(attention is signal)
+        expected = 0 if attention is signal else None
+        assert values['hypotheses_per_block_' + group] == expected
+    empty = runner.metrics([], peak_bytes=0)
+    assert empty['hypotheses_per_block_with_incident'] is None
+    assert empty['hypotheses_per_block_without_incident'] is None

@@ -386,6 +386,8 @@ Usage IA : code écrit avec Codex gpt-6.1-sol, supervisé par Claude ; relecture
 
 ## 2026-10-27 — SCRUM-38 : mesures base alignées sur le pipeline v16 ; rag1 reporté
 
+Correctif de relecture : hypothèses par bloc rapportées au nombre de blocs du groupe.
+
 `base` reconstruit les faits depuis les lignes brutes C5 et appelle le pipeline
 v16 figé : schéma fermé, contrôles, correction unique et anti-boucle. Aucune
 annotation n'atteint le prompt. Le code `volet_b/slm/v16/` reste inchangé.

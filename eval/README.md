@@ -71,9 +71,12 @@ Chaque lancement écrit un C7 neuf dans `eval/runs/` :
   corrections déclenchées, tentées et réussies ; latences et mémoire.
 
 Tous les taux ont pour dénominateur **tous les exemples lus, échecs compris**.
-Les hypothèses par bloc avec/sans incident sont les contributions de chaque groupe
-rapportées au nombre total d'exemples ; les effectifs des groupes et les sommes
-sont conservés. L'incident correspond à `attention` calculé par v16, jamais au label.
+Les hypothèses par bloc avec/sans incident sont rapportées au **nombre de blocs
+du groupe**, échecs compris dès que `attention` est connu ; une réponse invalide
+compte 0 hypothèse. Un groupe vide donne `None` (`null` en JSON). Les effectifs
+et les sommes sont conservés. Ce calcul suit SCRUM-63 : 4 hypothèses / 21 blocs
+avec incident = 0,19 après arrondi ; la métrique conserve la valeur non arrondie.
+L'incident correspond à `attention` calculé par v16, jamais au label.
 Les faits exactement copiés exigent une structure évaluable par les contrôles v16.
 L'anti-boucle compte un exemple si une tentative est rejetée par `repetition_errors`
 (répétition ou budget presque épuisé). Une correction réussie satisfait tous les
