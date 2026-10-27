@@ -8,6 +8,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from teamai.contracts import validate_answer
+from volet_b.slm import bench_gguf as bench
 from volet_b.slm import compare_backends as compare
 from volet_b.slm import convert_gguf as convert
 from volet_b.slm import generate as slm
@@ -54,9 +55,49 @@ def test_llamacpp_config_cache_adapter_and_greedy(monkeypatch, tmp_path):
     assert llama.call_count == 1
     assert llama.call_args.kwargs["lora_path"] == str(adapter.resolve())
     assert llama.call_args.kwargs["last_n_tokens_size"] == cfg["n_ctx"]
+    assert cfg["n_gpu_layers"] == -1
+    assert llama.call_args.kwargs["n_gpu_layers"] == -1
     download.assert_called_once_with(cfg["gguf_repo"], cfg["gguf_file"],
                                      revision=cfg["gguf_revision"], local_files_only=True)
     assert llama.return_value.create_chat_completion.call_args.kwargs["temperature"] == 0.0
+
+
+@pytest.mark.parametrize("loader", [slm.load_backend, bench.load_llamacpp])
+@pytest.mark.parametrize("n_gpu_layers", [None, 0, -1, 8])
+def test_llamacpp_gpu_layers_config(monkeypatch, loader, n_gpu_layers):
+    """Les deux chargeurs transmettent les couches GPU et gardent le défaut CPU sans poids."""
+    cfg = {**slm.load_config(), "backend": "llamacpp"}
+    cfg.pop("n_gpu_layers", None)
+    if n_gpu_layers is not None:
+        cfg["n_gpu_layers"] = n_gpu_layers
+    download = MagicMock(return_value="cached.gguf")
+    llama = MagicMock()
+    monkeypatch.setitem(sys.modules, "huggingface_hub", SimpleNamespace(hf_hub_download=download))
+    monkeypatch.setitem(sys.modules, "llama_cpp", SimpleNamespace(Llama=llama))
+
+    assert loader(cfg) is llama.return_value
+
+    llama.assert_called_once()
+    assert llama.call_args.kwargs["n_gpu_layers"] == (0 if n_gpu_layers is None else n_gpu_layers)
+    download.assert_called_once()
+
+
+def test_llamacpp_gpu_layers_cache(monkeypatch):
+    """Une modification des couches GPU recharge l'instance ; une config identique la réutilise."""
+    cfg = {**slm.load_config(), "backend": "llamacpp", "n_gpu_layers": 0}
+    download = MagicMock(return_value="cached.gguf")
+    llama = MagicMock(side_effect=[object(), object()])
+    monkeypatch.setitem(sys.modules, "huggingface_hub", SimpleNamespace(hf_hub_download=download))
+    monkeypatch.setitem(sys.modules, "llama_cpp", SimpleNamespace(Llama=llama))
+
+    cpu = slm.load_backend(cfg)
+    assert slm.load_backend(cfg) is cpu
+    gpu_cfg = {**cfg, "n_gpu_layers": -1}
+    gpu = slm.load_backend(gpu_cfg)
+    assert gpu is not cpu
+    assert slm.load_backend(gpu_cfg) is gpu
+    assert [call.kwargs["n_gpu_layers"] for call in llama.call_args_list] == [0, -1]
+    assert download.call_count == 2
 
 
 def test_transformers_loading_and_interface(monkeypatch):

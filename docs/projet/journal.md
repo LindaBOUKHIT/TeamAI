@@ -357,6 +357,8 @@ Essai réel du 26/10 (pas une mesure) : une trace de calibration du split `train
 
 ## 2026-10-27 — SCRUM-63 : passage à Gemma 4 E4B QAT
 
+Correctif de relecture : GPU activé (`n_gpu_layers: -1`) et pré-téléchargement du GGUF documenté.
+
 Le modèle courant du volet B devient Gemma 4 E4B QAT (GGUF Q4_0), révision
 `4b4a2c1d584be7264f87aac328a1bc739ce81b6c`, sous llama.cpp. Prompt v16 figé,
 contexte 4096, 800 tokens maximum, température 0, seed 42, repeat_penalty 1.0,

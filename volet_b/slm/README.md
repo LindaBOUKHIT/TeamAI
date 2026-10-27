@@ -11,8 +11,36 @@ Gemma a été retenu après comparaison exploratoire (v11 : 40/40 contrats contr
 22/40 pour Granite). Les erreurs de causalité et de chronologie persistent :
 [trace et limites SCRUM-63](../../eval/results/SCRUM-63/README.md).
 La machine cible est le portable de Nassim ; son environnement CUDA/Python et
-ses performances restent à relever. Le chargeur local existant reste sur CPU ;
-le passage GPU sur ce portable n’est pas validé par ce port.
+ses performances restent à relever. La configuration demande toutes les couches
+sur GPU (`n_gpu_layers: -1`) ; l’inférence sur ce portable reste à valider.
+
+## Installation Gemma sur le portable de Nassim
+
+Depuis la racine du dépôt, dans l’environnement Python activé :
+
+```powershell
+python -m pip install -e ".[volet_b_gguf]"
+python -m pip install --upgrade --force-reinstall --no-cache-dir --only-binary=llama-cpp-python llama-cpp-python==0.3.36 --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cu124
+```
+
+La roue CUDA 12.4 de `llama-cpp-python` est nécessaire pour que
+`n_gpu_layers: -1` active le GPU RTX 3050 Laptop 6 Go de Nassim, avec `n_ctx: 4096`.
+Une installation CPU seule ne permet pas cet usage du GPU.
+
+Avant la première inférence, pré-télécharger uniquement le GGUF à la révision
+figée, avec un accès réseau autorisé :
+
+```powershell
+python -c "from huggingface_hub import hf_hub_download; hf_hub_download(repo_id='google/gemma-4-E4B-it-qat-q4_0-gguf', filename='gemma-4-E4B_q4_0-it.gguf', revision='4b4a2c1d584be7264f87aac328a1bc739ce81b6c', local_files_only=False)"
+```
+
+Le projet déclare `huggingface-hub>=0.25`, sans version exacte épinglée ; cet
+appel Python reprend l’API `hf_hub_download` utilisée par le chargeur, sans
+dépendre du nom de la commande CLI. Utiliser le même environnement et le même
+cache Hugging Face pour le pré-téléchargement et l’inférence. Si le dépôt exige
+une autorisation, accepter ses conditions et s’authentifier au préalable.
+Garder `local_files_only: true` dans `generation.yaml` : seule cette étape
+explicite de préparation accède au réseau ; les inférences utilisent le cache.
 
 ```python
 from data.parse_hdfs import compile_templates
@@ -147,7 +175,9 @@ La [preuve du 08/10](../../eval/results/SCRUM-28/README.md) publie la synthèse,
 
 Dans SCRUM-57, Transformers était le défaut et SmolLM2 la base. Depuis SCRUM-63, le YAML sélectionne Gemma sous llama.cpp ; ces commandes historiques exigent de reprendre les configurations archivées dans les résultats SCRUM-28/SCRUM-57 pour reproduire leurs mesures. L'interface et le retour (`text`, `new_tokens`, `seconds`) sont inchangés. `TEAMAI_SLM_MOCK=1` fonctionne avec les deux backends sans charger de poids.
 
-La base GGUF officielle est retrouvée par `hf_hub_download` avec `gguf_repo`, `gguf_file`, `gguf_revision` figés dans le YAML (valeurs du banc historique). `local_files_only=True` impose le cache local. Le cache d'instances llama.cpp comprend la base, la révision, le contexte, la seed et l'adaptateur. Le backend utilise le CPU, 4 096 tokens de contexte, la pénalité sur tout le contexte et le décodage glouton ; `do_sample=true` est refusé.
+La base GGUF officielle est retrouvée par `hf_hub_download` avec `gguf_repo`, `gguf_file`, `gguf_revision` figés dans le YAML (valeurs du banc historique). `local_files_only=True` impose le cache local. Le cache d'instances llama.cpp comprend la base, la révision, le contexte, la seed, l'adaptateur et `n_gpu_layers`. Le backend utilise le CPU par défaut, 4 096 tokens de contexte, la pénalité sur tout le contexte et le décodage glouton ; `do_sample=true` est refusé.
+
+`n_gpu_layers` règle le nombre de couches sur GPU avec une installation llama.cpp compatible : `-1` pour toutes les couches, `0` pour le CPU (valeur historique et défaut si le champ est absent).
 
 Avec ce backend, `adapter` est **un fichier GGUF d'adaptateur**, transmis à `Llama(lora_path=...)` au-dessus de la base Q4_K_M. Un modèle fusionné est une base complète : passer `gguf_path` sans `adapter`.
 
