@@ -1,0 +1,113 @@
+{
+  "generation": {
+    "model_id": "HuggingFaceTB/SmolLM2-1.7B-Instruct",
+    "backend": "transformers",
+    "gguf_repo": "HuggingFaceTB/SmolLM2-1.7B-Instruct-GGUF",
+    "gguf_file": "smollm2-1.7b-instruct-q4_k_m.gguf",
+    "gguf_revision": "2d4a76a30b4af41ecd395c35725ac11688d4cfe4",
+    "n_ctx": 4096,
+    "revision": "31b70e2e869a7173562077fd711b654946d38674",
+    "dtype": "float32",
+    "max_new_tokens": 300,
+    "do_sample": false,
+    "repetition_penalty": 1.1,
+    "seed": 42,
+    "local_files_only": true
+  },
+  "blocks": [
+    {
+      "block_id": "blk_-5205249637781423478",
+      "split": "val",
+      "messages": [
+        {
+          "role": "user",
+          "content": "Analyse les logs HDFS ci-dessous en français, sans inventer d'information. Réponds uniquement par un objet JSON avec les six clés : resume_evenements (texte), faits_observes, hypotheses, infos_manquantes, sources (listes de textes), abstention (booléen). Distingue les faits des hypothèses. Aucun document n'est fourni : sources doit être vide. Si les informations ne suffisent pas, abstiens-toi : hypotheses vide et infos_manquantes non vide.\n\nLogs du bloc :\n081110 213502 15131 INFO dfs.DataNode$DataXceiver: Receiving block blk_-5205249637781423478 src: /10.250.7.96:59989 dest: /10.250.7.96:50010\n081110 213502 15138 INFO dfs.DataNode$DataXceiver: Receiving block blk_-5205249637781423478 src: /10.251.27.63:46429 dest: /10.251.27.63:50010\n081110 213502 15420 INFO dfs.DataNode$DataXceiver: Receiving block blk_-5205249637781423478 src: /10.250.7.96:54587 dest: /10.250.7.96:50010\n081110 213502 26 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/rand3/_temporary/_task_200811101024_0005_m_000867_0/part-00867. blk_-5205249637781423478\n081110 213529 15139 INFO dfs.DataNode$PacketResponder: PacketResponder 0 for block blk_-5205249637781423478 terminating\n081110 213529 15139 INFO dfs.DataNode$PacketResponder: Received block blk_-5205249637781423478 of size 67108864 from /10.251.27.63\n081110 213529 34 INFO dfs.FSNamesystem: BLOCK* NameSystem.addStoredBlock: blockMap updated: 10.251.105.189:50010 is added to blk_-5205249637781423478 size 67108864\n081110 213530 15132 INFO dfs.DataNode$PacketResponder: PacketResponder 2 for block blk_-5205249637781423478 terminating\n081110 213530 15132 INFO dfs.DataNode$PacketResponder: Received block blk_-5205249637781423478 of size 67108864 from /10.250.7.96\n081110 213530 15421 INFO dfs.DataNode$PacketResponder: PacketResponder 1 for block blk_-5205249637781423478 terminating\n081110 213530 15421 INFO dfs.DataNode$PacketResponder: Received block blk_-5205249637781423478 of size 67108864 from /10.250.7.96\n081110 213530 29 INFO dfs.FSNamesystem: BLOCK* NameSystem.addStoredBlock: blockMap updated: 10.251.27.63:50010 is added to blk_-5205249637781423478 size 67108864\n081110 213530 33 INFO dfs.FSNamesystem: BLOCK* NameSystem.addStoredBlock: blockMap updated: 10.250.7.96:50010 is added to blk_-5205249637781423478 size 67108864\n081110 220645 32 INFO dfs.FSNamesystem: BLOCK* NameSystem.delete: blk_-5205249637781423478 is added to invalidSet of 10.250.7.96:50010\n081110 220645 32 INFO dfs.FSNamesystem: BLOCK* NameSystem.delete: blk_-5205249637781423478 is added to invalidSet of 10.251.105.189:50010\n081110 220645 32 INFO dfs.FSNamesystem: BLOCK* NameSystem.delete: blk_-5205249637781423478 is added to invalidSet of 10.251.27.63:50010\n081110 220921 18 INFO dfs.FSDataset: Deleting block blk_-5205249637781423478 file /mnt/hadoop/dfs/data/current/subdir35/blk_-5205249637781423478\n081110 220927 19 INFO dfs.FSDataset: Deleting block blk_-5205249637781423478 file /mnt/hadoop/dfs/data/current/subdir6/blk_-5205249637781423478\n081110 220947 19 INFO dfs.FSDataset: Deleting block blk_-5205249637781423478 file /mnt/hadoop/dfs/data/current/subdir3/blk_-5205249637781423478"
+        }
+      ]
+    },
+    {
+      "block_id": "blk_-2109567036218931458",
+      "split": "val",
+      "messages": [
+        {
+          "role": "user",
+          "content": "Analyse les logs HDFS ci-dessous en français, sans inventer d'information. Réponds uniquement par un objet JSON avec les six clés : resume_evenements (texte), faits_observes, hypotheses, infos_manquantes, sources (listes de textes), abstention (booléen). Distingue les faits des hypothèses. Aucun document n'est fourni : sources doit être vide. Si les informations ne suffisent pas, abstiens-toi : hypotheses vide et infos_manquantes non vide.\n\nLogs du bloc :\n081110 015446 30 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/randtxt/_temporary/_task_200811092030_0003_m_001726_0/part-01726. blk_-2109567036218931458\n081110 015446 5910 INFO dfs.DataNode$DataXceiver: Receiving block blk_-2109567036218931458 src: /10.251.107.242:42551 dest: /10.251.107.242:50010\n081110 015447 6071 INFO dfs.DataNode$DataXceiver: Receiving block blk_-2109567036218931458 src: /10.251.107.242:40111 dest: /10.251.107.242:50010\n081110 015447 6072 INFO dfs.DataNode$DataXceiver: Receiving block blk_-2109567036218931458 src: /10.251.42.84:33908 dest: /10.251.42.84:50010\n081110 015545 6073 INFO dfs.DataNode$PacketResponder: PacketResponder 0 for block blk_-2109567036218931458 terminating\n081110 015545 6073 INFO dfs.DataNode$PacketResponder: Received block blk_-2109567036218931458 of size 67108864 from /10.251.42.84\n081110 015546 26 INFO dfs.FSNamesystem: BLOCK* NameSystem.addStoredBlock: blockMap updated: 10.251.107.242:50010 is added to blk_-2109567036218931458 size 67108864\n081110 015546 26 INFO dfs.FSNamesystem: BLOCK* NameSystem.addStoredBlock: blockMap updated: 10.251.74.134:50010 is added to blk_-2109567036218931458 size 67108864\n081110 015546 30 INFO dfs.FSNamesystem: BLOCK* NameSystem.addStoredBlock: blockMap updated: 10.251.42.84:50010 is added to blk_-2109567036218931458 size 67108864\n081110 015546 5911 INFO dfs.DataNode$PacketResponder: PacketResponder 2 for block blk_-2109567036218931458 terminating\n081110 015546 5911 INFO dfs.DataNode$PacketResponder: Received block blk_-2109567036218931458 of size 67108864 from /10.251.107.242\n081110 015546 6072 INFO dfs.DataNode$PacketResponder: PacketResponder 1 for block blk_-2109567036218931458 terminating\n081110 015546 6072 INFO dfs.DataNode$PacketResponder: Received block blk_-2109567036218931458 of size 67108864 from /10.251.107.242\n081110 053553 7128 INFO dfs.DataNode$DataXceiver: 10.251.42.84:50010 Served block blk_-2109567036218931458 to /10.251.42.84\n081110 054011 6943 INFO dfs.DataNode$DataXceiver: 10.251.107.242:50010 Served block blk_-2109567036218931458 to /10.251.67.225\n081110 054055 6959 WARN dfs.DataNode$DataXceiver: 10.251.107.242:50010:Got exception while serving blk_-2109567036218931458 to /10.251.74.192:\n081110 072051 7817 INFO dfs.DataNode$DataXceiver: 10.251.74.134:50010 Served block blk_-2109567036218931458 to /10.251.74.134\n081110 072116 7870 INFO dfs.DataNode$DataXceiver: 10.251.42.84:50010 Served block blk_-2109567036218931458 to /10.251.125.193\n081110 072135 7888 WARN dfs.DataNode$DataXceiver: 10.251.42.84:50010:Got exception while serving blk_-2109567036218931458 to /10.251.74.192:\n081110 082856 8524 INFO dfs.DataNode$DataXceiver: 10.251.42.84:50010 Served block blk_-2109567036218931458 to /10.251.42.84\n081110 082908 8462 INFO dfs.DataNode$DataXceiver: 10.251.74.134:50010 Served block blk_-2109567036218931458 to /10.251.125.193\n081110 082934 8542 WARN dfs.DataNode$DataXceiver: 10.251.42.84:50010:Got exception while serving blk_-2109567036218931458 to /10.251.214.130:\n081110 103047 34 INFO dfs.FSNamesystem: BLOCK* NameSystem.delete: blk_-2109567036218931458 is added to invalidSet of 10.251.107.242:50010\n081110 103047 34 INFO dfs.FSNamesystem: BLOCK* NameSystem.delete: blk_-2109567036218931458 is added to invalidSet of 10.251.42.84:50010\n081110 103047 34 INFO dfs.FSNamesystem: BLOCK* NameSystem.delete: blk_-2109567036218931458 is added to invalidSet of 10.251.74.134:50010\n081110 103539 19 INFO dfs.FSDataset: Deleting block blk_-2109567036218931458 file /mnt/hadoop/dfs/data/current/subdir22/blk_-2109567036218931458\n081110 103602 19 INFO dfs.FSDataset: Deleting block blk_-2109567036218931458 file /mnt/hadoop/dfs/data/current/subdir23/blk_-2109567036218931458\n081110 103646 19 INFO dfs.FSDataset: Deleting block blk_-2109567036218931458 file /mnt/hadoop/dfs/data/current/subdir35/blk_-2109567036218931458"
+        }
+      ]
+    },
+    {
+      "block_id": "blk_1539372360994626689",
+      "split": "val",
+      "messages": [
+        {
+          "role": "user",
+          "content": "Analyse les logs HDFS ci-dessous en français, sans inventer d'information. Réponds uniquement par un objet JSON avec les six clés : resume_evenements (texte), faits_observes, hypotheses, infos_manquantes, sources (listes de textes), abstention (booléen). Distingue les faits des hypothèses. Aucun document n'est fourni : sources doit être vide. Si les informations ne suffisent pas, abstiens-toi : hypotheses vide et infos_manquantes non vide.\n\nLogs du bloc :\n081110 120225 10707 INFO dfs.DataNode$DataXceiver: Receiving block blk_1539372360994626689 src: /10.251.199.19:58700 dest: /10.251.199.19:50010\n081110 120225 33 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/randtxt2/_temporary/_task_200811101024_0002_m_001025_0/part-01025. blk_1539372360994626689\n081110 120227 10574 INFO dfs.DataNode$DataXceiver: Receiving block blk_1539372360994626689 src: /10.251.199.225:41707 dest: /10.251.199.225:50010\n081110 120227 10803 INFO dfs.DataNode$DataXceiver: Receiving block blk_1539372360994626689 src: /10.251.199.19:42021 dest: /10.251.199.19:50010\n081110 120300 10575 INFO dfs.DataNode$PacketResponder: PacketResponder 0 for block blk_1539372360994626689 terminating\n081110 120300 10575 INFO dfs.DataNode$PacketResponder: Received block blk_1539372360994626689 of size 67108864 from /10.251.199.225\n081110 120300 10710 INFO dfs.DataNode$PacketResponder: PacketResponder 2 for block blk_1539372360994626689 terminating\n081110 120300 10710 INFO dfs.DataNode$PacketResponder: Received block blk_1539372360994626689 of size 67108864 from /10.251.199.19\n081110 120300 10804 INFO dfs.DataNode$PacketResponder: PacketResponder 1 for block blk_1539372360994626689 terminating\n081110 120300 10804 INFO dfs.DataNode$PacketResponder: Received block blk_1539372360994626689 of size 67108864 from /10.251.199.19\n081110 120300 30 INFO dfs.FSNamesystem: BLOCK* NameSystem.addStoredBlock: blockMap updated: 10.251.199.19:50010 is added to blk_1539372360994626689 size 67108864\n081110 120300 31 INFO dfs.FSNamesystem: BLOCK* NameSystem.addStoredBlock: blockMap updated: 10.251.199.225:50010 is added to blk_1539372360994626689 size 67108864\n081110 120300 35 INFO dfs.FSNamesystem: BLOCK* NameSystem.addStoredBlock: blockMap updated: 10.251.214.175:50010 is added to blk_1539372360994626689 size 67108864\n081110 181915 14033 INFO dfs.DataNode$DataXceiver: 10.251.199.225:50010 Served block blk_1539372360994626689 to /10.251.199.225\n081110 182026 14026 INFO dfs.DataNode$DataXceiver: 10.251.199.225:50010 Served block blk_1539372360994626689 to /10.251.31.180\n081110 182441 13800 WARN dfs.DataNode$DataXceiver: 10.251.199.19:50010:Got exception while serving blk_1539372360994626689 to /10.251.75.79:\n081111 011525 17492 INFO dfs.DataNode$DataXceiver: 10.251.199.225:50010 Served block blk_1539372360994626689 to /10.251.199.225\n081111 011810 17369 WARN dfs.DataNode$DataXceiver: 10.251.199.19:50010:Got exception while serving blk_1539372360994626689 to /10.251.199.19:\n081111 011817 17495 INFO dfs.DataNode$DataXceiver: 10.251.199.225:50010 Served block blk_1539372360994626689 to /10.251.31.180\n081111 023024 27 INFO dfs.FSNamesystem: BLOCK* NameSystem.delete: blk_1539372360994626689 is added to invalidSet of 10.251.199.19:50010\n081111 023024 27 INFO dfs.FSNamesystem: BLOCK* NameSystem.delete: blk_1539372360994626689 is added to invalidSet of 10.251.199.225:50010\n081111 023024 27 INFO dfs.FSNamesystem: BLOCK* NameSystem.delete: blk_1539372360994626689 is added to invalidSet of 10.251.214.175:50010\n081111 023253 19 INFO dfs.FSDataset: Deleting block blk_1539372360994626689 file /mnt/hadoop/dfs/data/current/subdir9/blk_1539372360994626689\n081111 023254 19 INFO dfs.FSDataset: Deleting block blk_1539372360994626689 file /mnt/hadoop/dfs/data/current/subdir15/blk_1539372360994626689\n081111 023306 19 INFO dfs.FSDataset: Deleting block blk_1539372360994626689 file /mnt/hadoop/dfs/data/current/subdir25/blk_1539372360994626689"
+        }
+      ]
+    },
+    {
+      "block_id": "blk_-934823916414850441",
+      "split": "val",
+      "messages": [
+        {
+          "role": "user",
+          "content": "Analyse les logs HDFS ci-dessous en français, sans inventer d'information. Réponds uniquement par un objet JSON avec les six clés : resume_evenements (texte), faits_observes, hypotheses, infos_manquantes, sources (listes de textes), abstention (booléen). Distingue les faits des hypothèses. Aucun document n'est fourni : sources doit être vide. Si les informations ne suffisent pas, abstiens-toi : hypotheses vide et infos_manquantes non vide.\n\nLogs du bloc :\n081110 145447 12653 INFO dfs.DataNode$DataXceiver: Receiving block blk_-934823916414850441 src: /10.251.65.237:60967 dest: /10.251.65.237:50010\n081110 145447 12791 INFO dfs.DataNode$DataXceiver: Receiving block blk_-934823916414850441 src: /10.251.65.237:35925 dest: /10.251.65.237:50010\n081110 145447 29 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/sortrand2/_temporary/_task_200811101024_0003_r_000045_0/part-00045. blk_-934823916414850441\n081110 145448 12868 INFO dfs.DataNode$DataXceiver: Receiving block blk_-934823916414850441 src: /10.251.37.240:34018 dest: /10.251.37.240:50010\n081110 145546 12654 INFO dfs.DataNode$PacketResponder: PacketResponder 1 for block blk_-934823916414850441 terminating\n081110 145546 12654 INFO dfs.DataNode$PacketResponder: Received block blk_-934823916414850441 of size 67108864 from /10.251.65.237\n081110 145546 12794 INFO dfs.DataNode$PacketResponder: Received block blk_-934823916414850441 of size 67108864 from /10.251.65.237\n081110 145546 12869 INFO dfs.DataNode$PacketResponder: PacketResponder 0 for block blk_-934823916414850441 terminating\n081110 145546 12869 INFO dfs.DataNode$PacketResponder: Received block blk_-934823916414850441 of size 67108864 from /10.251.37.240\n081110 145546 28 INFO dfs.FSNamesystem: BLOCK* NameSystem.addStoredBlock: blockMap updated: 10.251.65.237:50010 is added to blk_-934823916414850441 size 67108864\n081110 145546 29 INFO dfs.FSNamesystem: BLOCK* NameSystem.addStoredBlock: blockMap updated: 10.251.37.240:50010 is added to blk_-934823916414850441 size 67108864\n081110 145546 29 INFO dfs.FSNamesystem: BLOCK* NameSystem.addStoredBlock: blockMap updated: 10.251.39.242:50010 is added to blk_-934823916414850441 size 67108864\n081110 145547 12794 INFO dfs.DataNode$PacketResponder: PacketResponder 2 for block blk_-934823916414850441 terminating\n081110 210115 28 INFO dfs.FSNamesystem: BLOCK* NameSystem.delete: blk_-934823916414850441 is added to invalidSet of 10.251.37.240:50010\n081110 210115 28 INFO dfs.FSNamesystem: BLOCK* NameSystem.delete: blk_-934823916414850441 is added to invalidSet of 10.251.39.242:50010\n081110 210115 28 INFO dfs.FSNamesystem: BLOCK* NameSystem.delete: blk_-934823916414850441 is added to invalidSet of 10.251.65.237:50010\n081110 210205 19 INFO dfs.FSDataset: Deleting block blk_-934823916414850441 file /mnt/hadoop/dfs/data/current/subdir13/blk_-934823916414850441\n081110 210456 19 INFO dfs.FSDataset: Deleting block blk_-934823916414850441 file /mnt/hadoop/dfs/data/current/subdir51/blk_-934823916414850441\n081110 210523 19 INFO dfs.FSDataset: Deleting block blk_-934823916414850441 file /mnt/hadoop/dfs/data/current/subdir57/blk_-934823916414850441"
+        }
+      ]
+    },
+    {
+      "block_id": "blk_-8683556509854596383",
+      "split": "val",
+      "messages": [
+        {
+          "role": "user",
+          "content": "Analyse les logs HDFS ci-dessous en français, sans inventer d'information. Réponds uniquement par un objet JSON avec les six clés : resume_evenements (texte), faits_observes, hypotheses, infos_manquantes, sources (listes de textes), abstention (booléen). Distingue les faits des hypothèses. Aucun document n'est fourni : sources doit être vide. Si les informations ne suffisent pas, abstiens-toi : hypotheses vide et infos_manquantes non vide.\n\nLogs du bloc :\n081111 101936 26415 INFO dfs.DataNode$DataXceiver: Receiving block blk_-8683556509854596383 src: /10.251.65.203:35785 dest: /10.251.65.203:50010\n081111 101936 26718 INFO dfs.DataNode$DataXceiver: Receiving block blk_-8683556509854596383 src: /10.251.65.203:59721 dest: /10.251.65.203:50010\n081111 101936 27 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/randtxt9/_temporary/_task_200811101024_0016_m_000597_0/part-00597. blk_-8683556509854596383\n081111 101937 26416 INFO dfs.DataNode$DataXceiver: Receiving block blk_-8683556509854596383 src: /10.251.39.179:54110 dest: /10.251.39.179:50010\n081111 102008 26416 INFO dfs.DataNode$PacketResponder: PacketResponder 2 for block blk_-8683556509854596383 terminating\n081111 102008 26416 INFO dfs.DataNode$PacketResponder: Received block blk_-8683556509854596383 of size 67108864 from /10.251.65.203\n081111 102008 26417 INFO dfs.DataNode$PacketResponder: PacketResponder 0 for block blk_-8683556509854596383 terminating\n081111 102008 26417 INFO dfs.DataNode$PacketResponder: Received block blk_-8683556509854596383 of size 67108864 from /10.251.39.179\n081111 102008 26719 INFO dfs.DataNode$PacketResponder: PacketResponder 1 for block blk_-8683556509854596383 terminating\n081111 102008 26719 INFO dfs.DataNode$PacketResponder: Received block blk_-8683556509854596383 of size 67108864 from /10.251.65.203\n081111 102008 26 INFO dfs.FSNamesystem: BLOCK* NameSystem.addStoredBlock: blockMap updated: 10.251.65.203:50010 is added to blk_-8683556509854596383 size 67108864\n081111 102008 27 INFO dfs.FSNamesystem: BLOCK* NameSystem.addStoredBlock: blockMap updated: 10.251.125.174:50010 is added to blk_-8683556509854596383 size 67108864\n081111 102008 35 INFO dfs.FSNamesystem: BLOCK* NameSystem.addStoredBlock: blockMap updated: 10.251.39.179:50010 is added to blk_-8683556509854596383 size 67108864\n081111 110432 26 INFO dfs.FSNamesystem: BLOCK* NameSystem.delete: blk_-8683556509854596383 is added to invalidSet of 10.251.125.174:50010\n081111 110432 26 INFO dfs.FSNamesystem: BLOCK* NameSystem.delete: blk_-8683556509854596383 is added to invalidSet of 10.251.39.179:50010\n081111 110432 26 INFO dfs.FSNamesystem: BLOCK* NameSystem.delete: blk_-8683556509854596383 is added to invalidSet of 10.251.65.203:50010\n081111 110450 19 INFO dfs.FSDataset: Deleting block blk_-8683556509854596383 file /mnt/hadoop/dfs/data/current/subdir42/blk_-8683556509854596383\n081111 110506 19 INFO dfs.FSDataset: Deleting block blk_-8683556509854596383 file /mnt/hadoop/dfs/data/current/subdir3/blk_-8683556509854596383\n081111 110530 19 INFO dfs.FSDataset: Deleting block blk_-8683556509854596383 file /mnt/hadoop/dfs/data/current/subdir54/blk_-8683556509854596383"
+        }
+      ]
+    }
+  ],
+  "split": "val",
+  "split_sha256": "f504592cb7ac13b8b7e5d532a336b4e3641ec441a863c5efafd164faa2a43f22",
+  "sample_sha256": "4b7967bb75cfa3adfcbfef51ec917ddf422ba7f6152fe4ba8b7331614457e263",
+  "log_sha256": "42aed1c2583ed272135d2b192caa7b67819023bedb1bc84960985567244e7eb9",
+  "seed": 42,
+  "backends": [
+    "transformers",
+    "llamacpp"
+  ],
+  "adapters": {
+    "transformers": "D:\\scolaire\\master\\m2\\26-27 Natural Language Processing 2_M2IA_S3\\projet\\volet_b\\slm\\adapters\\essai",
+    "llamacpp": "C:\\Users\\Principal\\AppData\\Local\\Temp\\claude\\D--scolaire-master-m2-26-27-Natural-Language-Processing-2-M2IA-S3\\87ab482c-ba4a-4713-844c-770e6c1774a2\\scratchpad\\wt\\scrum57\\volet_b\\slm\\adapters\\essai-adapter\\adapter.gguf"
+  },
+  "adapter_sha256": {
+    "transformers": "2e9f99715b08a1aa177b6b0ad00da62afd9ec152a8520a6bc36b0821c0ad6192",
+    "llamacpp": "011618f43e7529b2688636cb2bccbfe8579db82679434387ba4b6f375cf9461f"
+  },
+  "commit": "5ea3765cda54cd426cc95ee304def1de1f6a80cd",
+  "git_dirty": true,
+  "machine": "Windows-11-10.0.26300-SP0",
+  "python": "3.12.10",
+  "packages": {
+    "torch": "2.12.0",
+    "transformers": "4.57.6",
+    "pandas": "3.0.3",
+    "PyYAML": "6.0.3",
+    "psutil": "7.2.2",
+    "hf-xet": "1.6.0",
+    "llama-cpp-python": "0.3.36",
+    "peft": "0.17.1",
+    "gguf": "0.19.0"
+  },
+  "quantization": {
+    "transformers": null,
+    "llamacpp": "Q4_K_M"
+  },
+  "mock": false,
+  "device": "cpu",
+  "rag": null,
+  "agents": 1,
+  "calls_per_block": 1,
+  "memory": "RSS processus indépendant par backend ; octets ; pic échantillonné à 0,2 s, chargement inclus",
+  "timing": "Chargement : imports et poids. Génération : prompt inclus ; Transformers hors tokenisation/décodage, llama.cpp chat complet.",
+  "purpose": "diagnostic backend + quantification ; aucun score de justesse sémantique"
+}

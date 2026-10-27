@@ -93,3 +93,11 @@ def test_detection_de_fuite_vers_le_test(valid_example):
     test = [{**valid_example, "split": "test"}]
     assert leaked_blocks(train, test) == {"blk_8362325295506522506"}
     assert leaked_blocks(train[1:], test) == set()
+
+
+def test_validate_answer_sources_non_textuelles():
+    """Une source qui n'est pas un texte (ex. un objet) est une erreur, jamais une exception."""
+    answer = {"resume_evenements": "r", "faits_observes": [], "hypotheses": [], "infos_manquantes": [],
+              "sources": [{"id": "x"}], "abstention": False}
+    errors = validate_answer(answer, allowed_sources=[])
+    assert any(e.startswith("sources") for e in errors)

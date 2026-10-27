@@ -29,6 +29,7 @@ AGENTS = VOLET_B / "agents"
 PROMPTS = AGENTS / "prompts"
 SLM = VOLET_B / "slm"
 SLM_CONFIGS = SLM / "configs"
+SLM_ADAPTERS = SLM / "adapters"
 ANNOTATIONS = VOLET_B / "annotations"
 
 DOCS = ROOT / "docs"
@@ -40,3 +41,9 @@ VOLET_B_TEST_SHA256 = EVAL_VOLET_B / "test.sha256"
 RESULTS = EVAL / "results"
 VOLET_B_SUMMARY = RESULTS / "volet_b.md"
 RUNS = EVAL / "runs"
+
+
+def resolve_path(value: str | Path) -> Path:
+    """Résout un chemin fourni par l'utilisateur, relatif à la racine du dépôt."""
+    path = Path(value).expanduser()
+    return (ROOT / path).resolve() if not path.is_absolute() else path.resolve()
