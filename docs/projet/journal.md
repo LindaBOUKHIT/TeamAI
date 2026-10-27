@@ -334,3 +334,47 @@ RAG de référence à un agent : trace → requête → passages C6 → `generat
 - **Agent** : `python -m volet_b.agents.single_agent` vérifié de bout en bout en mode factice (`--mock`) ; l'exécution avec le vrai SLM est à faire sur la machine d'Alain (SCRUM-38).
 
 Usage IA : Linda avec Claude Code pour le code du retrieval, de l'agent et des tests, et pour la comparaison des méthodes ; chiffres recalculés par le script `evaluate_retrieval`.
+
+## 2026-10-26 — SCRUM-57 : backend llama.cpp et conversion LoRA → GGUF
+
+Code écrit avec Codex (gpt-6.1-sol), supervisé par Claude ; relecture d'Alain à faire avant fusion. Transformers float32 reste le défaut de `generate()` ; `backend: llamacpp` charge le GGUF officiel Q4_K_M à la révision figée du banc du 06/10, l'adaptateur GGUF étant passé par `lora_path`.
+
+Conversions réelles de l'adaptateur `essai` (llama.cpp cloné au commit `d854d98`) :
+- route b, adaptateur seul : `adapter.gguf` f16 de 3,1 Mo, chargé sur la base Q4_K_M ;
+- route a, fusion PEFT → HF → GGUF f16 → Q4_K_M : 3 264 → 1 005 Mio. Elle exigeait `sentencepiece`, ajouté à l'extra `volet_b_gguf`. Le modèle fusionné se charge et répond à une consigne courte (`{"ok": true}`, 5 tokens en 0,81 s) ; `meta.json` garde `inference_validated: false`, cette vérification n'étant pas une évaluation.
+
+Comparaison sur cinq blocs `val` du sample (preuve : [`eval/results/SCRUM-57/`](../../eval/results/SCRUM-57/README.md)) : llama.cpp Q4_K_M donne environ ×1,6 en débit (2,4 contre 1,5 token/s), un pic RSS de 2,1–2,8 GiB contre 9,3–9,9 GiB et un chargement de 1,7 s contre 11,5 s. Qualité : 0/5 sorties conformes C5 pour les deux backends, avec ou sans adaptateur ; le modèle rend les bonnes clés avec des champs vides. Cette comparaison ne départage donc pas la qualité, et le backend reste confondu avec la quantification. Proposition à valider en équipe : Q4_K_M sous llama.cpp pour la démo ; pour comparer base, LoRA, RAG et agents, un seul couple backend/quantification, à consigner ici.
+
+Correction associée : `validate_answer` plantait lorsqu'un objet apparaissait dans `sources` (sortie llama.cpp) ; il signale désormais l'erreur sans exception (test ajouté).
+
+
+## 2026-10-27 — SCRUM-63 : passage à Gemma 4 E4B QAT
+
+Correctif de relecture : GPU activé (`n_gpu_layers: -1`) et pré-téléchargement du GGUF documenté.
+
+Le modèle courant du volet B devient Gemma 4 E4B QAT (GGUF Q4_0), révision
+`4b4a2c1d584be7264f87aac328a1bc739ce81b6c`, sous llama.cpp. Prompt v16 figé,
+contexte 4096, 800 tokens maximum, température 0, seed 42, repeat_penalty 1.0,
+réflexion désactivée. SmolLM2 et ses mesures SCRUM-28/SCRUM-57 restent historiques.
+La machine cible devient le portable de Nassim (Ryzen 5 8645HS, 32 Go, RTX 3050
+Laptop 6 Go) ; versions CUDA/Python et inférence locale à relever par Nassim.
+
+Port de l’extraction des faits via `data.parse_hdfs`, du glossaire restreint aux
+codes présents, de la consigne, du schéma, des listes de causes et contrôles v16,
+avec correction unique et conservation des deux réponses. L’interface existante
+de `generate()` est conservée et transmet désormais le schéma JSON à llama.cpp.
+Seul ajout aux contrôles : répétition en boucle ou budget presque épuisé (95 %),
+qui déclenche la correction unique sans changer le prompt initial.
+
+Tests sans réseau ni GGUF : 40 prompts reconstruits depuis les lignes val,
+40 schémas, consigne et politique vérifiés contre les empreintes originales ;
+cas réel F09 ×130 (783 tokens), cas normal et correction unique couverts.
+Suite complète `python -m pytest -q` exécutée le 27/10 avec le Python du projet : 89 tests réussis, 5 ignorés, sans réseau ni GGUF. Aucun modèle téléchargé ou exécuté, aucun service externe appelé.
+
+[Trace SCRUM-63](../../eval/results/SCRUM-63/README.md) : choix v6–v11,
+réglage v12–v16 et validation unique de 40 nouveaux blocs val. Les contrôles
+formels se maintiennent, mais chronologies et causalités restent parfois fausses,
+et un résumé boucle ; 0,19 hypothèse par bloc avec indice d’incident. Ces résultats
+ne valident ni une détection par le SLM ni la fidélité globale des explications.
+
+Usage IA : code écrit avec Codex gpt-6.1-sol, supervisé par Claude ; relecture d'Alain à faire.
