@@ -219,6 +219,8 @@ figé dans `configs/generation.yaml` ; ces deux identifiants sont distincts.
 5.6.2), sans tours vision/audio. Le chargement refuse des poids texte manquants,
 des dimensions incompatibles ou des clés inattendues hors tours multimodales.
 Sur T4 : FP16, NF4 avec calcul float16, lot 1, checkpointing, r=8 et q_proj/v_proj.
+En fp16 sur T4, vérifier dès les premiers pas que la perte n'est ni NaN ni infinie
+(risque connu des modèles Gemma en fp16) ; arrêter le run sinon.
 La préparation gèle la base sans promouvoir temporairement ses embeddings en FP32
 (ce qui doublerait leur occupation). DoRA, `modules_to_save`, embeddings,
 `lm_head`, `per_layer_model_projection` et `all-linear` sont refusés.
@@ -230,8 +232,8 @@ prennent leurs hypothèses que dans les formulations compatibles et référencé
 Sans indice, les listes d'hypothèses et d'informations manquantes restent vides.
 Le JSON suit `runtime.schema(block)` ; ce schéma reste un paramètre de décodage
 v16, il n'est pas ajouté au texte du prompt. Le dialogue est rendu par le template
-Gemma avec `enable_thinking=False`. La perte porte seulement sur le JSON, sans
-les tokens du prompt ni les marqueurs de fin de tour. Aucun exemple n'est tronqué.
+Gemma avec `enable_thinking=False`. La perte porte sur le JSON et le marqueur de fin de tour qui le suit immédiatement,
+sans les tokens du prompt ni la suite éventuelle du dialogue. Aucun exemple n'est tronqué.
 
 Couverture régénérée : **E27 : 2 blocs ; E28 : 2 blocs ; E24 : absent** du train
 du sample (20 blocs E27 et 24 blocs E28 disponibles). Les quatre blocs auparavant

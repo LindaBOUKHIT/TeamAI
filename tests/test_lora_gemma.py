@@ -49,13 +49,21 @@ def test_forbidden_options(extra):
 class CharacterTokenizer:
     """Double minimal : template avec thinking désactivé, BOS et fin de tour explicites."""
 
+    end_of_turn = "<end>"
+    trailing = "\n<user>tour suivant<end>"
+
+    @property
+    def all_special_tokens(self):
+        """Expose le marqueur du template, sans imposer son nom au code testé."""
+        return ["<bos>", "<user>", "<model>", self.end_of_turn]
+
     def apply_chat_template(self, messages, *, tokenize, enable_thinking, add_generation_prompt):
         """Vérifie les options et rend un préfixe identique en génération et entraînement."""
         assert tokenize is False and enable_thinking is False
         prefix = "<bos><user>" + messages[0]["content"] + "<end><model>"
         if add_generation_prompt:
             return prefix
-        return prefix + messages[1]["content"] + "<end>"
+        return prefix + messages[1]["content"] + self.end_of_turn + self.trailing
 
     def __call__(self, text, *, add_special_tokens):
         """Encode chaque caractère sans ajouter un second BOS."""
@@ -63,17 +71,35 @@ class CharacterTokenizer:
         return {"input_ids": list(text.encode("utf-8"))}
 
 
-def test_loss_only_on_json():
-    """Le prompt et les marqueurs de fin ont -100 ; le JSON entier contribue à la perte."""
+@pytest.mark.parametrize("ending", ["<end>", "<turn|>", "<end_of_turn>"])
+@pytest.mark.parametrize("trailing", ["", "\n", "\n<user>tour suivant<end>"])
+def test_loss_on_json_and_end_of_turn(ending, trailing):
+    """Le prompt est masqué ; JSON et fin de tour contribuent, sans la suite."""
     example = {"id": "fixture", "prompt": "consigne v16 et faits", "expected": {"réponse": []}}
-    encoded = encode_example(example, CharacterTokenizer(), 1000)
+    tokenizer = CharacterTokenizer()
+    tokenizer.end_of_turn, tokenizer.trailing = ending, trailing
+    encoded = encode_example(example, tokenizer, 1000)
     learned = bytes(i for i in encoded["labels"] if i != -100).decode("utf-8")
-    assert learned == json.dumps(example["expected"], ensure_ascii=False)
+    assert learned == json.dumps(example["expected"], ensure_ascii=False) + ending
     prefix_len = len("<bos><user>consigne v16 et faits<end><model>".encode())
+    learned_end = prefix_len + len(learned.encode("utf-8"))
     assert encoded["labels"][:prefix_len] == [-100] * prefix_len
-    assert encoded["labels"][-5:] == [-100] * 5
+    assert encoded["labels"][prefix_len:learned_end] == encoded["input_ids"][prefix_len:learned_end]
+    assert encoded["labels"][learned_end:] == [-100] * len(trailing.encode("utf-8"))
     with pytest.raises(ValueError, match="max_tokens"):
-        encode_example(example, CharacterTokenizer(), 5)
+        encode_example(example, tokenizer, 5)
+
+
+@pytest.mark.parametrize("ending", ["", "inconnu", "\n<end>"])
+def test_missing_end_of_turn_refused(ending, monkeypatch):
+    """Une fin absente, non déclarée ou séparée du JSON échoue explicitement."""
+    tokenizer = CharacterTokenizer()
+    tokenizer.end_of_turn, tokenizer.trailing = ending, ""
+    example = {"id": "fixture", "prompt": "consigne", "expected": {}}
+    # Le template est modifié sans déclarer son nouveau marqueur au tokenizer.
+    monkeypatch.setattr(CharacterTokenizer, "all_special_tokens", ["<bos>", "<user>", "<model>", "<end>"])
+    with pytest.raises(ValueError, match="fin de tour introuvable"):
+        encode_example(example, tokenizer, 1000)
 
 
 def test_seed_v16_and_train_only():

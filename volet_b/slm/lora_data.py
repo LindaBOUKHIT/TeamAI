@@ -1,4 +1,4 @@
-"""Données LoRA v16 : provenance C4, preuves reconstruites et perte sur le JSON seul."""
+"""Données LoRA v16 : provenance C4, preuves reconstruites et perte sur JSON et fin de tour."""
 import csv
 import json
 import re
@@ -113,9 +113,12 @@ def prepare_examples(examples, splits_path=None):
 
 
 def encode_example(example, tokenizer, max_tokens):
-    """Rend le dialogue Gemma sans thinking et masque tout sauf les tokens du JSON.
+    """Rend le dialogue Gemma sans thinking et apprend le JSON et sa fin de tour.
 
-    Les fins de tour restent dans l'entrée, avec une perte masquée. Les frontières
+    Le marqueur spécial immédiatement après le JSON est identifié via le tokenizer
+    dans le rendu du template ; son absence provoque un échec explicite.
+    Il peut occuper plusieurs tokens. Le prompt et la suite (saut de ligne,
+    tour suivant) restent masqués à -100. Les frontières
     tokenisées doivent être identiques ; aucune troncature silencieuse n'est admise.
     """
     messages = [{"role": "user", "content": example["prompt"]}]
@@ -126,13 +129,22 @@ def encode_example(example, tokenizer, max_tokens):
                                          add_generation_prompt=False, **options)
     if not full.startswith(prompt + answer):
         raise ValueError("Template Gemma : préfixe assistant incompatible")
+    suffix = full[len(prompt + answer):]
+    endings = [str(token) for token in getattr(tokenizer, "all_special_tokens", [])
+               if str(token) and suffix.startswith(str(token))]
+    if not endings:
+        raise ValueError("Template Gemma : token de fin de tour introuvable après le JSON")
+    end_of_turn = max(endings, key=len)
     prompt_ids = tokenizer(prompt, add_special_tokens=False)["input_ids"]
     through_answer = tokenizer(prompt + answer, add_special_tokens=False)["input_ids"]
+    through_end = tokenizer(prompt + answer + end_of_turn, add_special_tokens=False)["input_ids"]
     ids = tokenizer(full, add_special_tokens=False)["input_ids"]
-    if through_answer[:len(prompt_ids)] != prompt_ids or ids[:len(through_answer)] != through_answer:
+    if (through_answer[:len(prompt_ids)] != prompt_ids
+            or through_end[:len(through_answer)] != through_answer
+            or ids[:len(through_end)] != through_end):
         raise ValueError("Frontière JSON incompatible avec la tokenisation")
     if len(ids) > max_tokens:
         raise ValueError(f"{example['id']} : {len(ids)} tokens > max_tokens {max_tokens}")
     labels = [-100] * len(ids)
-    labels[len(prompt_ids):len(through_answer)] = ids[len(prompt_ids):len(through_answer)]
+    labels[len(prompt_ids):len(through_end)] = ids[len(prompt_ids):len(through_end)]
     return {"input_ids": ids, "attention_mask": [1] * len(ids), "labels": labels}

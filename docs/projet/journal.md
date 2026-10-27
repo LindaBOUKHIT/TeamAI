@@ -397,6 +397,8 @@ Usage IA : code écrit avec Codex gpt-6.1-sol, supervisé par Claude ; relecture
 
 ## 27/10/2026 — SCRUM-29 : essai LoRA adapté à Gemma 4 E4B QAT
 
+Correctif de relecture : le token de fin de tour entre dans la perte.
+
 L'essai utilise désormais `google/gemma-4-E4B-it-qat-q4_0-unquantized`,
 révision complète `476025a01dbf99361c062bbeca3d6a76bb4c4566` (relevée sur l'API
 Hugging Face le 27/10), chargé en texte seul via `Gemma4ForCausalLM` et
