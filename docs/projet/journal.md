@@ -383,3 +383,27 @@ et un résumé boucle ; 0,19 hypothèse par bloc avec indice d’incident. Ces r
 ne valident ni une détection par le SLM ni la fidélité globale des explications.
 
 Usage IA : code écrit avec Codex gpt-6.1-sol, supervisé par Claude ; relecture d'Alain à faire.
+
+## 2026-10-27 — SCRUM-38 : mesures base alignées sur le pipeline v16 ; rag1 reporté
+
+`base` reconstruit les faits depuis les lignes brutes C5 et appelle le pipeline
+v16 figé : schéma fermé, contrôles, correction unique et anti-boucle. Aucune
+annotation n'atteint le prompt. Le code `volet_b/slm/v16/` reste inchangé.
+`rag1` est refusé explicitement en attendant une variante v16 + RAG figée
+(SCRUM-42/SCRUM-45) ; le retrieval de Linda reste disponible.
+
+Le C7 conserve les empreintes de consigne et politique v16, la révision GGUF,
+le contexte, le budget, les tentatives et leurs erreurs, arrêts, tokens, temps
+et nombre réel d'appels. Les mesures ajoutent contrat v16, faits exacts,
+références inexistantes, causes réseau sans appui, enquêtes sans incident,
+hypothèses avec/sans incident, anti-boucle et corrections déclenchées/réussies.
+Tous les exemples restent au dénominateur. Le RSS est conservé et la VRAM du PID
+NVIDIA est relevée si disponible, sans dépendance obligatoire.
+
+À exécuter sur le portable de Nassim après fusion de #40, poids déjà présents,
+sans réglage après ouverture du test. Aucun modèle téléchargé ou exécuté,
+aucun service externe ni aucune opération git pendant cette mission.
+
+Suite complète lancée par Alain avec le Python du projet le 27/10 : 108 tests réussis, 5 ignorés, en mode factice.
+
+Usage IA : Codex gpt-6.1-sol supervisé par Claude ; relecture d'Alain à faire.

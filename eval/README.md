@@ -10,7 +10,7 @@ eval/
 ├── volet_b/
 │   ├── test.jsonl              Jeu de test RÉSERVÉ (C5), figé et hashé avant tout réglage           SCRUM-35
 │   ├── test.sha256
-│   ├── run_config.py           Exécute une des 4 configurations → runs/                            SCRUM-38 / SCRUM-45
+│   ├── run_config.py           Mesure base via v16 (SCRUM-38) → runs/                            SCRUM-38 / SCRUM-45
 │   ├── grille.md               Grille d'évaluation humaine (lien vers docs/volet_b/grille_annotation.md)
 │   └── double_annotation.csv   Notes des 2 annotateurs + arbitrage                                SCRUM-45
 ├── runs/                       Sorties brutes par exécution (C7) — non versionné
@@ -23,54 +23,72 @@ eval/
 ## Règles
 
 - Le test n'est ouvert qu'une fois, modèles et prompts figés.
-- Toute exécution enregistre sa configuration et le commit Git (C7) ; un résultat sans configuration n'existe pas.
+- Toute exécution enregistre sa configuration (C7) ; le commit est à renseigner hors script, sans commande git dans SCRUM-38.
 - Un résultat négatif (ex. pas de gain des agents) est un résultat : il va dans `results/`.
 
 ## Mesures avant adaptation du volet B (SCRUM-38)
 
-Depuis la racine, avec les poids déjà disponibles et les prompts figés :
+SCRUM-38 mesure **base seulement**, avec Gemma 4 E4B QAT Q4_0 sous llama.cpp
+et le pipeline v16 figé. À lancer sur le **portable de Nassim après fusion de #40**,
+avec les poids déjà disponibles localement et le test C5 figé par SCRUM-35 :
 
 ```bash
 python -m eval.volet_b.run_config --config base
-python -m eval.volet_b.run_config --config rag1
 ```
 
-L'entrée par défaut est `eval/volet_b/test.jsonl` (C5, SCRUM-35). Son absence arrête
-le script avec un message explicite. Le SHA-256 du fichier entier est enregistré,
-même avec `--limit N` ; pour le test officiel, une divergence avec `test.sha256`
-refuse l'exécution. `--data CHEMIN` permet un essai sur des exemples fabriqués
-train/val ; `--adapter DOSSIER` transmet un adaptateur à `generate()`.
-Les paramètres de `generation.yaml` sont conservés sans surcharge.
+`rag1` renvoie une erreur explicite : « rag1 reporté : pas de variante v16 + RAG
+figée ; voir SCRUM-42/SCRUM-45 ». Le retrieval de Linda reste utilisable dans
+`single_agent.retrieve_for_trace` ; aucune variante RAG n'est mesurée ici.
 
-`base` emploie la consigne de `single_agent.txt` sans passage ; la place des passages
-indique « aucune documentation fournie dans cette configuration » (et non « aucun passage
-trouvé », qui laisserait croire à une recherche). La consigne autorise déjà `sources: []`. `rag1` réutilise le parsing des lignes,
-la requête, le retrieval hybride (top 3) et la construction du prompt de SCRUM-37.
-L'index et l'encodeur RAG doivent être présents localement (chargement hors ligne).
-Ni les annotations, ni `events` annotés, ni `label` ou `expected` ne sont transmis
-au modèle ou au retrieval.
+Pour chaque exemple, `facts.prepare_block` reconstruit les faits, la chronologie,
+les preuves et les causes autorisées depuis `trace_lines`, puis `explain_block`
+exécute le schéma fermé, les contrôles et l'éventuelle correction unique.
+`expected`, `label`, `events` annotés et les autres annotations ne sont jamais
+transmis au prompt. Les références de ligne sont locales à `trace_lines`, à partir
+de 1 : C5 ne conserve pas les numéros du journal global. Les 29 templates sont lus
+dans `data/raw/HDFS_v1/preprocessed/`, sinon dans leur copie versionnée de
+`tests/fixtures/preprocessed/` ; le chemin et l'empreinte sont enregistrés.
 
-Chaque lancement crée un dossier C7 neuf sous `eval/runs/` avec `config.json`,
-`predictions.jsonl` et `metrics.json`. Les sorties brutes, erreurs, passages fournis,
-tokens et mesures sont conservés pour chaque exemple, y compris en cas d'échec.
-La sortie est analysée exactement comme dans l'agent (`volet_b.agents.validate.check_answer` :
-objet JSON du premier « { » au dernier « } », sans réparation) ; les réponses analysables
-mais non conformes restent visibles. La conformité utilise `validate_answer()` et
-les IDs des passages fournis (`[]` sans RAG). Le taux de sources valides accepte
-une liste vide ; le taux d'abstention compte les abstentions C5 conformes.
-Tous les taux ont pour dénominateur tous les exemples lus, erreurs comprises.
-La latence murale inclut le retrieval et le chargement éventuel ; le temps renvoyé
-par `generate()` est conservé séparément. Le maximum RSS du processus est
-échantillonné toutes les 0,2 s, chargement inclus (ni GPU ni processus enfants).
-Une mesure indisponible vaut `null`.
+Le script vérifie le SHA-256 du test officiel contre `test.sha256` s'il existe.
+Une entrée absente ou une empreinte divergente arrête le lancement. `--data CHEMIN`
+et `--limit N` servent aux essais sur des exemples fabriqués train/val. Un
+`--adapter CHEMIN` est transmis à v16, mais exclut la publication avant adaptation.
+Ne jamais ajuster un prompt ou un paramètre après lecture du test réservé.
 
-La fonction `eval.volet_b.run_config.update_summary(metric_paths)` ajoute ou
-actualise « Avant adaptation » dans `eval/results/volet_b.md`, avec une ligne par
-configuration (la dernière fournie remplace la précédente). `metric_paths` est une
-liste de chemins vers les `metrics.json` retenus. Elle exige des exécutions réelles
-sur le test officiel complet, sans adaptateur ; les essais factices et partiels
-ne sont pas publiés comme résultats. Aucun résumé n'est modifié automatiquement.
-Ne jamais ajuster une consigne ou un paramètre après lecture des résultats du test.
+Chaque lancement écrit un C7 neuf dans `eval/runs/` :
 
-Les tests `tests/test_run_config.py` utilisent `TEAMAI_SLM_MOCK=1` et un bloc
-`train` de `data/sample/`, avec un retriever simulé ; aucun modèle n'est chargé.
+- `config.json` : empreintes de consigne et politique issues de
+  `eval/results/SCRUM-63/prompt_freeze.json`, modèle, fichier et révision GGUF,
+  contexte 4096, budget 800, paramètres figés, plateforme réelle et machine cible
+  informative (portable de Nassim). Le commit reste `null`, à renseigner hors
+  script : aucune commande git n'est exécutée.
+- `predictions.jsonl` : toutes les tentatives, textes et prompts, erreurs de
+  contrat et factuelles, alertes, `finish_reason`, tokens, temps et nombre réel
+  d'appels, y compris une correction échouée. Les entrées invalides comptent aussi.
+- `metrics.json` : conformité C5, sources valides et abstention ; contrat v16,
+  faits exactement copiés, références inexistantes, causes réseau sans appui,
+  enquêtes sans indice d'incident, hypothèses avec et sans incident, anti-boucle,
+  corrections déclenchées, tentées et réussies ; latences et mémoire.
+
+Tous les taux ont pour dénominateur **tous les exemples lus, échecs compris**.
+Les hypothèses par bloc avec/sans incident sont les contributions de chaque groupe
+rapportées au nombre total d'exemples ; les effectifs des groupes et les sommes
+sont conservés. L'incident correspond à `attention` calculé par v16, jamais au label.
+Les faits exactement copiés exigent une structure évaluable par les contrôles v16.
+L'anti-boucle compte un exemple si une tentative est rejetée par `repetition_errors`
+(répétition ou budget presque épuisé). Une correction réussie satisfait tous les
+contrôles v16 ; les alertes lexicales ne certifient pas la fidélité sémantique.
+
+Le temps mural inclut préparation, contrôles et chargement éventuel ; les temps
+renvoyés par la génération sont conservés séparément et sommés. Les pics RSS et
+VRAM du processus sont échantillonnés toutes les 0,2 s, chargement inclus. La VRAM
+somme le PID courant sur les GPU NVIDIA : `pynvml` si disponible, sinon
+`nvidia-smi --query-compute-apps`. Une mesure indisponible vaut `null` ; aucune
+nouvelle dépendance GPU n'est obligatoire. Ce relevé peut manquer un pic bref.
+
+`update_summary(metric_paths)` actualise seulement la ligne `base` de « Avant
+adaptation » dans `eval/results/volet_b.md`. Il refuse `rag1`, les runs factices,
+partiels, vides, hors test officiel ou avec adaptateur. Aucun résumé n'est publié
+automatiquement. Les tests fabriqués de `tests/test_run_config.py` traversent v16
+avec une génération simulée, dont une boucle et une correction, sans modèle ni
+réseau. Les tests d'empreintes de `tests/test_v16.py` restent inchangés.

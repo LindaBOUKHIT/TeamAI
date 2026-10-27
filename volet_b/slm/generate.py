@@ -12,6 +12,7 @@ import hashlib
 import json
 import os
 import time
+from contextvars import ContextVar
 from functools import lru_cache
 
 import yaml
@@ -122,7 +123,25 @@ def v16_context_error(llm, messages, cfg):
     return None
 
 
+GENERATION_OBSERVER = ContextVar("generation_observer", default=None)
+
+
 def generate(messages: str | list[dict], adapter: str | None = None, **overrides) -> dict:
+    """Génère et notifie l'observateur local au contexte, même si un appel échoue."""
+    observer = GENERATION_OBSERVER.get()
+    started = time.perf_counter()
+    try:
+        out = _generate(messages, adapter=adapter, **overrides)
+    except Exception as error:
+        if observer is not None:
+            observer(messages, None, error, time.perf_counter() - started)
+        raise
+    if observer is not None:
+        observer(messages, out, None, time.perf_counter() - started)
+    return out
+
+
+def _generate(messages: str | list[dict], adapter: str | None = None, **overrides) -> dict:
     """Accepte un prompt texte ou des messages chat ({"role", "content"})."""
     if isinstance(messages, str):
         messages = [{"role": "user", "content": messages}]
