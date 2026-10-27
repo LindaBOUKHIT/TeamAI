@@ -1,0 +1,283 @@
+{
+  "scope": "40 blocs val inédits du sample local ; comparaison descriptive avec les 20 blocs v13 utilisés pour le réglage. Pas de comparaison appariée v13/v15.",
+  "planned_blocks": 40,
+  "actual_blocks": 40,
+  "run_complete": true,
+  "run_state": {
+    "phase": "completed",
+    "updated": 1793022902.6918533,
+    "count": 40,
+    "worker_states": [
+      {
+        "phase": "completed",
+        "updated": 1793022890.197411,
+        "count": 20,
+        "seconds": 679.74,
+        "failed_checks": 1
+      },
+      {
+        "phase": "completed",
+        "updated": 1793022901.5888746,
+        "count": 20,
+        "seconds": 691.15,
+        "failed_checks": 1
+      }
+    ],
+    "worker_wall_seconds": 698.4
+  },
+  "automatic_metrics": {
+    "v13_historical_20": {
+      "responses": 20,
+      "contract_ok": 20,
+      "finish": {
+        "stop": 20
+      },
+      "facts_copied_exactly": 20,
+      "no_unknown_references": 20,
+      "mean_seconds": 28.939,
+      "total_seconds": 578.789,
+      "mean_new_tokens": 317.85,
+      "nonempty_hypotheses": 2,
+      "abstentions": 0,
+      "normal_blocks_with_investigation_questions": 2,
+      "targeted_alerts_not_semantic_score": {
+        "enquete_demandee_sans_indice_incident": 2,
+        "ordre_affirme_entre_evenements_de_la_meme_seconde": 1
+      },
+      "runtime_contract_errors": {},
+      "runtime_factual_errors": {},
+      "blocks_without_incident_signal": 7
+    },
+    "v15_first_attempt": {
+      "responses": 40,
+      "json_responses": 40,
+      "contract_ok": 40,
+      "finish": {
+        "stop": 40
+      },
+      "facts_copied_exactly": 40,
+      "no_unknown_references": 38,
+      "mean_seconds": 34.25,
+      "total_seconds": 1369.993,
+      "mean_new_tokens": 362.1,
+      "mean_total_new_tokens_including_retries": 362.1,
+      "nonempty_hypotheses": 21,
+      "hypothesis_count": 42,
+      "hypotheses_with_existing_L_or_E_anchor": 42,
+      "abstentions": 0,
+      "normal_blocks_with_investigation_questions": 18,
+      "targeted_alerts_not_semantic_score": {
+        "enquete_demandee_sans_indice_incident": 18,
+        "lien_causal_a_verifier": 1,
+        "conclusion_finale_a_verifier": 2,
+        "evenement_atypique_non_reference_dans_resume_E28": 1,
+        "fin_PacketResponder_interpretee_comme_incident": 1
+      },
+      "runtime_contract_errors": {},
+      "runtime_factual_errors": {
+        "références inexistantes : F17,F18": 1,
+        "références inexistantes : F17": 1
+      },
+      "blocks_without_incident_signal": 19
+    },
+    "v15_final": {
+      "responses": 40,
+      "json_responses": 40,
+      "contract_ok": 40,
+      "finish": {
+        "stop": 40
+      },
+      "facts_copied_exactly": 40,
+      "no_unknown_references": 38,
+      "mean_seconds": 34.25,
+      "total_seconds": 1369.993,
+      "mean_new_tokens": 362.1,
+      "mean_total_new_tokens_including_retries": 362.1,
+      "nonempty_hypotheses": 21,
+      "hypothesis_count": 42,
+      "hypotheses_with_existing_L_or_E_anchor": 42,
+      "abstentions": 0,
+      "normal_blocks_with_investigation_questions": 18,
+      "targeted_alerts_not_semantic_score": {
+        "enquete_demandee_sans_indice_incident": 18,
+        "lien_causal_a_verifier": 1,
+        "conclusion_finale_a_verifier": 2,
+        "evenement_atypique_non_reference_dans_resume_E28": 1,
+        "fin_PacketResponder_interpretee_comme_incident": 1
+      },
+      "runtime_contract_errors": {},
+      "runtime_factual_errors": {
+        "références inexistantes : F17,F18": 1,
+        "références inexistantes : F17": 1
+      },
+      "blocks_without_incident_signal": 19
+    }
+  },
+  "retry_metrics": {
+    "second_attempts": 0,
+    "anchor_successes": 0,
+    "anchor_success_rate": null,
+    "all_checks_successes": 0,
+    "all_checks_success_rate": null,
+    "skipped_due_to_guard": 0,
+    "second_attempt_seconds": 0
+  },
+  "worker_inference_seconds": {
+    "0": 679.295,
+    "1": 690.699
+  },
+  "selection": {
+    "seed": 42,
+    "population": "Blocs val présents dans le sample local, pas tout le corpus HDFS.",
+    "sampling": "random.Random(42), populations triées par BlockId, 20 WARN puis 20 sans WARN, alternance, deux lots contigus de 20",
+    "eligible_with_warn": 62,
+    "eligible_without_warn": 199,
+    "excluded_prior_blocks": 45,
+    "selected": [
+      "blk_5809931191239895555",
+      "blk_-7326416392478650425",
+      "blk_-3412728853703264676",
+      "blk_3871505081979665782",
+      "blk_-1876345605821081227",
+      "blk_6270729741183809671",
+      "blk_6861364042242754579",
+      "blk_-2197890281206701914",
+      "blk_-71418885337923132",
+      "blk_5486735541977305440",
+      "blk_-673857767367889201",
+      "blk_-6882278779228077054",
+      "blk_-6623096049432513933",
+      "blk_7869923956433750840",
+      "blk_-3578165899288618426",
+      "blk_6685520562458453481",
+      "blk_8490580439615020929",
+      "blk_770925084470916407",
+      "blk_-3349289973286267883",
+      "blk_5094143259497688375",
+      "blk_6124078019968307727",
+      "blk_281337360704025623",
+      "blk_7800270577648029182",
+      "blk_-7225661686170202727",
+      "blk_498931071351273739",
+      "blk_3202203826390057918",
+      "blk_-2525721779588456824",
+      "blk_5962596299735010625",
+      "blk_5495200848998243328",
+      "blk_-8088126798866012916",
+      "blk_3365693550135486376",
+      "blk_-182305440626057147",
+      "blk_-1988202877309867568",
+      "blk_9019908840879489840",
+      "blk_8520721369739431294",
+      "blk_-5394320246293156794",
+      "blk_6989377882518604195",
+      "blk_7551395295149463319",
+      "blk_-6431128224865365636",
+      "blk_3036603747764053369"
+    ],
+    "with_warn": 20,
+    "without_warn": 20,
+    "labels_local_only": {
+      "Fail": 10,
+      "Success": 30
+    },
+    "max_notable_lines": 6,
+    "required_hypothesis_codes": [
+      "E24",
+      "E27",
+      "E28"
+    ],
+    "required_code_coverage": {
+      "E24": 0,
+      "E27": 1,
+      "E28": 3
+    }
+  },
+  "qualitative_review": {
+    "status": "completed",
+    "file": "revue_qualitative_v15.json",
+    "automatic_alerts_are_not_findings": true,
+    "summary": {
+      "responses_reviewed": 40,
+      "same_second_order_errors_found": 0,
+      "other_chronology_error_cases": [
+        17
+      ],
+      "unsupported_network_hypothesis_cases": [
+        3,
+        5,
+        7,
+        9,
+        11,
+        13,
+        15,
+        19,
+        21,
+        23,
+        25,
+        29,
+        31,
+        33,
+        37,
+        39
+      ],
+      "unsupported_network_hypothesis_response_count": 16,
+      "unnecessary_investigation_cases": [
+        2,
+        4,
+        6,
+        10,
+        12,
+        14,
+        16,
+        18,
+        20,
+        22,
+        24,
+        26,
+        28,
+        30,
+        32,
+        34,
+        36,
+        38
+      ],
+      "unnecessary_investigation_count": 18,
+      "blocks_without_incident_signal": 19,
+      "fabricated_reference_cases": [
+        15,
+        33
+      ],
+      "false_positive_automatic_alerts": [
+        {
+          "case": 36,
+          "alert": "fin_PacketResponder_interpretee_comme_incident",
+          "reason": "Négation explicite non reconnue par l’heuristique v13."
+        }
+      ],
+      "second_attempts": 0,
+      "second_attempt_success_rate": null
+    }
+  },
+  "conclusion": {
+    "status": "completed",
+    "causal_gain_from_two_changes_identifiable": false,
+    "reason": "Sans exécuter v13 sur ces mêmes blocs, les différences peuvent venir du tirage ou des changements ; seule la correction première/seconde tentative est appariée.",
+    "historical_v13_checks_frozen": true,
+    "presence_of_reference_does_not_establish_support": true,
+    "generalization": "Le format et la copie des faits se maintiennent, mais le gain global de qualité observé sur les anciens blocs n’est pas confirmé : enquêtes inutiles et hypothèses génériques sont fréquentes sur ces blocs inédits.",
+    "same_second_change": "Aucune erreur explicite d’ordre entre événements de même seconde relevée sur ces 40 réponses. Résultat encourageant, sans attribution causale possible aux nouveaux faits ; une autre erreur chronologique subsiste.",
+    "anchored_hypotheses_change": "Les 42 hypothèses ont une référence Lxx/Exx existante. Cela assure un ancrage formel, pas un appui sémantique : 16 réponses proposent notamment une cause réseau sans indice précis.",
+    "retry": "Aucune correction n’a été déclenchée. Son taux de réussite est non évaluable, pas de 100 %. Les références inventées des résumés restent hors du déclencheur prévu.",
+    "decision": "La v15 est un essai exploratoire complet ; elle ne constitue pas une amélioration globale validée par rapport à v13."
+  },
+  "execution": {
+    "gpu_quota_seconds": 771.4529999999995,
+    "setup_to_generation_seconds": 73.280173626,
+    "parallel_inference_wall_seconds": 692.394664025,
+    "cumulative_generation_seconds": 1369.993409828,
+    "workers": 2,
+    "same_wheel_reused": true,
+    "automatic_job_restart": false
+  }
+}
