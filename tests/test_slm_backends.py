@@ -55,6 +55,8 @@ def test_llamacpp_config_cache_adapter_and_greedy(monkeypatch, tmp_path):
     assert llama.call_count == 1
     assert llama.call_args.kwargs["lora_path"] == str(adapter.resolve())
     assert llama.call_args.kwargs["last_n_tokens_size"] == cfg["n_ctx"]
+    assert cfg["n_gpu_layers"] == -1
+    assert llama.call_args.kwargs["n_gpu_layers"] == -1
     download.assert_called_once_with(cfg["gguf_repo"], cfg["gguf_file"],
                                      revision=cfg["gguf_revision"], local_files_only=True)
     assert llama.return_value.create_chat_completion.call_args.kwargs["temperature"] == 0.0
