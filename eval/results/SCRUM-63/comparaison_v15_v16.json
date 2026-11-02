@@ -1,0 +1,2163 @@
+{
+  "scope": "Comparaison appariée sur le jeu de mise au point v15 ; aucune preuve de généralisation.",
+  "planned_blocks": 40,
+  "actual_blocks": 40,
+  "run_complete": true,
+  "automatic_metrics": {
+    "v15_on_completed_pairs": {
+      "responses": 40,
+      "valid_json_fields": 40,
+      "contract_ok": 40,
+      "contract_scope": "contrat propre à chaque version ; les schémas v16 sont plus restrictifs",
+      "facts_copied_exactly": 40,
+      "responses_with_unknown_references": 2,
+      "unknown_reference_errors": {
+        "resume_evenements : références inexistantes F17,F18": 1,
+        "resume_evenements : références inexistantes F17": 1
+      },
+      "hypotheses_by_incident": {
+        "with_incident": {
+          "blocks": 21,
+          "blocks_with_hypotheses": 21,
+          "total_hypotheses": 42,
+          "mean_hypotheses_per_block": 2
+        },
+        "without_incident": {
+          "blocks": 19,
+          "blocks_with_hypotheses": 0,
+          "total_hypotheses": 0,
+          "mean_hypotheses_per_block": 0
+        }
+      },
+      "network_alert_responses": 16,
+      "network_alert_hypotheses": 16,
+      "unnecessary_investigation_responses": 18,
+      "responses_missing_required_factual_copy": 0,
+      "targeted_alerts_not_semantic_score": {
+        "enquete_demandee_sans_indice_incident": 18,
+        "cause_reseau_sans_appui": 16,
+        "lien_causal_a_verifier": 1,
+        "conclusion_finale_a_verifier": 2,
+        "evenement_atypique_non_reference_dans_resume_E28": 1,
+        "fin_PacketResponder_interpretee_comme_incident": 1
+      },
+      "finish": {
+        "stop": 40
+      },
+      "mean_seconds_including_retries": 34.25,
+      "cumulative_generation_seconds": 1369.993,
+      "mean_final_new_tokens": 362.1,
+      "mean_total_new_tokens_including_retries": 362.1
+    },
+    "v16_first_attempt": {
+      "responses": 40,
+      "valid_json_fields": 40,
+      "contract_ok": 40,
+      "contract_scope": "contrat propre à chaque version ; les schémas v16 sont plus restrictifs",
+      "facts_copied_exactly": 40,
+      "responses_with_unknown_references": 2,
+      "unknown_reference_errors": {
+        "resume_evenements : références inexistantes F16": 1,
+        "resume_evenements : références inexistantes F14": 1
+      },
+      "hypotheses_by_incident": {
+        "with_incident": {
+          "blocks": 21,
+          "blocks_with_hypotheses": 3,
+          "total_hypotheses": 3,
+          "mean_hypotheses_per_block": 0.143
+        },
+        "without_incident": {
+          "blocks": 19,
+          "blocks_with_hypotheses": 0,
+          "total_hypotheses": 0,
+          "mean_hypotheses_per_block": 0
+        }
+      },
+      "network_alert_responses": 0,
+      "network_alert_hypotheses": 0,
+      "unnecessary_investigation_responses": 0,
+      "responses_missing_required_factual_copy": 0,
+      "targeted_alerts_not_semantic_score": {
+        "evenement_atypique_non_reference_dans_resume_E28": 1,
+        "phrase_du_resume_sans_reference": 1,
+        "ordre_affirme_entre_evenements_de_la_meme_seconde": 1,
+        "lien_causal_a_verifier": 1
+      },
+      "finish": {
+        "stop": 40
+      },
+      "mean_seconds_including_retries": 29.122,
+      "cumulative_generation_seconds": 1164.887,
+      "mean_final_new_tokens": 315.725,
+      "mean_total_new_tokens_including_retries": 315.725
+    },
+    "v16_final": {
+      "responses": 40,
+      "valid_json_fields": 40,
+      "contract_ok": 40,
+      "contract_scope": "contrat propre à chaque version ; les schémas v16 sont plus restrictifs",
+      "facts_copied_exactly": 40,
+      "responses_with_unknown_references": 0,
+      "unknown_reference_errors": {},
+      "hypotheses_by_incident": {
+        "with_incident": {
+          "blocks": 21,
+          "blocks_with_hypotheses": 3,
+          "total_hypotheses": 3,
+          "mean_hypotheses_per_block": 0.143
+        },
+        "without_incident": {
+          "blocks": 19,
+          "blocks_with_hypotheses": 0,
+          "total_hypotheses": 0,
+          "mean_hypotheses_per_block": 0
+        }
+      },
+      "network_alert_responses": 0,
+      "network_alert_hypotheses": 0,
+      "unnecessary_investigation_responses": 0,
+      "responses_missing_required_factual_copy": 0,
+      "targeted_alerts_not_semantic_score": {
+        "evenement_atypique_non_reference_dans_resume_E28": 1,
+        "phrase_du_resume_sans_reference": 1,
+        "ordre_affirme_entre_evenements_de_la_meme_seconde": 1,
+        "lien_causal_a_verifier": 1
+      },
+      "finish": {
+        "stop": 40
+      },
+      "mean_seconds_including_retries": 30.458,
+      "cumulative_generation_seconds": 1218.305,
+      "mean_final_new_tokens": 314.55,
+      "mean_total_new_tokens_including_retries": 330.55
+    }
+  },
+  "retry_metrics": {
+    "second_attempts": 2,
+    "correction_successes": 2,
+    "correction_success_rate": 1.0,
+    "all_checks_successes": 2,
+    "all_checks_success_rate": 1.0,
+    "by_trigger_overlapping_categories": {
+      "network": {
+        "retried": 0,
+        "successes": 0,
+        "success_rate": null
+      },
+      "unknown_reference": {
+        "retried": 2,
+        "successes": 2,
+        "success_rate": 1.0
+      },
+      "anchor": {
+        "retried": 0,
+        "successes": 0,
+        "success_rate": null
+      }
+    },
+    "attempts_total": 42,
+    "skipped_due_to_guard": 0,
+    "second_attempt_seconds": 53.418
+  },
+  "pairs": [
+    {
+      "block_id": "blk_5809931191239895555",
+      "selection_index": 0,
+      "v15": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 2,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 34.23869870200002,
+        "new_tokens": 348
+      },
+      "v16_first": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 28.339788314999964,
+        "new_tokens": 296
+      },
+      "v16_final": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 28.339788314999964,
+        "new_tokens": 296
+      },
+      "hypothesis_delta": -2,
+      "seconds_delta": -5.899
+    },
+    {
+      "block_id": "blk_-7326416392478650425",
+      "selection_index": 1,
+      "v15": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": true,
+        "mandatory_fact_errors": [],
+        "incident_signal": false,
+        "seconds": 27.525244397999984,
+        "new_tokens": 306
+      },
+      "v16_first": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": false,
+        "seconds": 24.07293592000002,
+        "new_tokens": 272
+      },
+      "v16_final": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": false,
+        "seconds": 24.07293592000002,
+        "new_tokens": 272
+      },
+      "hypothesis_delta": 0,
+      "seconds_delta": -3.452
+    },
+    {
+      "block_id": "blk_-3412728853703264676",
+      "selection_index": 2,
+      "v15": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 2,
+        "network_alerts": [
+          {
+            "hypothesis_index": 2,
+            "text": "Si E4 est présent [L01, L02, L03, L04], alors les exceptions lors de l'envoi du bloc à un client pourraient indiquer des problèmes de réseau ou de disponibilité du DataNode.",
+            "alert": "cause_reseau_sans_appui"
+          }
+        ],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 40.79060532,
+        "new_tokens": 422
+      },
+      "v16_first": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 36.231484271,
+        "new_tokens": 379
+      },
+      "v16_final": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 36.231484271,
+        "new_tokens": 379
+      },
+      "hypothesis_delta": -2,
+      "seconds_delta": -4.559
+    },
+    {
+      "block_id": "blk_3871505081979665782",
+      "selection_index": 3,
+      "v15": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": true,
+        "mandatory_fact_errors": [],
+        "incident_signal": false,
+        "seconds": 28.74821541299997,
+        "new_tokens": 316
+      },
+      "v16_first": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": false,
+        "seconds": 23.429578139,
+        "new_tokens": 266
+      },
+      "v16_final": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": false,
+        "seconds": 23.429578139,
+        "new_tokens": 266
+      },
+      "hypothesis_delta": 0,
+      "seconds_delta": -5.319
+    },
+    {
+      "block_id": "blk_-1876345605821081227",
+      "selection_index": 4,
+      "v15": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 2,
+        "network_alerts": [
+          {
+            "hypothesis_index": 1,
+            "text": "Si E4 est observé, cela pourrait indiquer un problème de réseau lors de la livraison du bloc au client [L01, L02].",
+            "alert": "cause_reseau_sans_appui"
+          }
+        ],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 33.670681401000024,
+        "new_tokens": 359
+      },
+      "v16_first": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 26.286019909000004,
+        "new_tokens": 267
+      },
+      "v16_final": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 26.286019909000004,
+        "new_tokens": 267
+      },
+      "hypothesis_delta": -2,
+      "seconds_delta": -7.385
+    },
+    {
+      "block_id": "blk_6270729741183809671",
+      "selection_index": 5,
+      "v15": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": true,
+        "mandatory_fact_errors": [],
+        "incident_signal": false,
+        "seconds": 30.435336721,
+        "new_tokens": 326
+      },
+      "v16_first": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": false,
+        "seconds": 29.75317947100001,
+        "new_tokens": 335
+      },
+      "v16_final": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": false,
+        "seconds": 29.75317947100001,
+        "new_tokens": 335
+      },
+      "hypothesis_delta": 0,
+      "seconds_delta": -0.682
+    },
+    {
+      "block_id": "blk_6861364042242754579",
+      "selection_index": 6,
+      "v15": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 2,
+        "network_alerts": [
+          {
+            "hypothesis_index": 1,
+            "text": "Si E4 est observé, cela pourrait indiquer un problème de réseau lors de la transmission du bloc au client [L01, L02, L03, L04].",
+            "alert": "cause_reseau_sans_appui"
+          }
+        ],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 35.65666075000007,
+        "new_tokens": 369
+      },
+      "v16_first": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 30.542827174000024,
+        "new_tokens": 325
+      },
+      "v16_final": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 30.542827174000024,
+        "new_tokens": 325
+      },
+      "hypothesis_delta": -2,
+      "seconds_delta": -5.114
+    },
+    {
+      "block_id": "blk_-2197890281206701914",
+      "selection_index": 7,
+      "v15": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": false,
+        "seconds": 22.292639503000032,
+        "new_tokens": 276
+      },
+      "v16_first": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": false,
+        "seconds": 18.665497996,
+        "new_tokens": 232
+      },
+      "v16_final": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": false,
+        "seconds": 18.665497996,
+        "new_tokens": 232
+      },
+      "hypothesis_delta": 0,
+      "seconds_delta": -3.627
+    },
+    {
+      "block_id": "blk_-71418885337923132",
+      "selection_index": 8,
+      "v15": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 2,
+        "network_alerts": [
+          {
+            "hypothesis_index": 1,
+            "text": "Si E4 est observé, cela pourrait indiquer un problème de réseau lors de la livraison du bloc au client [L01, L02].",
+            "alert": "cause_reseau_sans_appui"
+          }
+        ],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 40.64429339000003,
+        "new_tokens": 420
+      },
+      "v16_first": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 37.33728325499999,
+        "new_tokens": 387
+      },
+      "v16_final": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 37.33728325499999,
+        "new_tokens": 387
+      },
+      "hypothesis_delta": -2,
+      "seconds_delta": -3.307
+    },
+    {
+      "block_id": "blk_5486735541977305440",
+      "selection_index": 9,
+      "v15": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": true,
+        "mandatory_fact_errors": [],
+        "incident_signal": false,
+        "seconds": 30.329594530999998,
+        "new_tokens": 326
+      },
+      "v16_first": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": false,
+        "seconds": 23.275628323999968,
+        "new_tokens": 267
+      },
+      "v16_final": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": false,
+        "seconds": 23.275628323999968,
+        "new_tokens": 267
+      },
+      "hypothesis_delta": 0,
+      "seconds_delta": -7.054
+    },
+    {
+      "block_id": "blk_-673857767367889201",
+      "selection_index": 10,
+      "v15": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 2,
+        "network_alerts": [
+          {
+            "hypothesis_index": 1,
+            "text": "Si E4 est observé, cela pourrait indiquer un problème de réseau lors de la transmission du bloc au client [L01].",
+            "alert": "cause_reseau_sans_appui"
+          }
+        ],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 36.61831700199991,
+        "new_tokens": 384
+      },
+      "v16_first": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [
+          "resume_evenements : références inexistantes F16"
+        ],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 29.498467353000024,
+        "new_tokens": 320
+      },
+      "v16_final": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 62.34341069600009,
+        "new_tokens": 354
+      },
+      "hypothesis_delta": -2,
+      "seconds_delta": 25.725
+    },
+    {
+      "block_id": "blk_-6882278779228077054",
+      "selection_index": 11,
+      "v15": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": true,
+        "mandatory_fact_errors": [],
+        "incident_signal": false,
+        "seconds": 31.240218312000025,
+        "new_tokens": 331
+      },
+      "v16_first": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": false,
+        "seconds": 30.936132791999967,
+        "new_tokens": 338
+      },
+      "v16_final": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": false,
+        "seconds": 30.936132791999967,
+        "new_tokens": 338
+      },
+      "hypothesis_delta": 0,
+      "seconds_delta": -0.304
+    },
+    {
+      "block_id": "blk_-6623096049432513933",
+      "selection_index": 12,
+      "v15": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 2,
+        "network_alerts": [
+          {
+            "hypothesis_index": 1,
+            "text": "Si E4 est observé, cela pourrait indiquer un problème de réseau lors du service du bloc à un client [L01, L02].",
+            "alert": "cause_reseau_sans_appui"
+          }
+        ],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 40.491285969000046,
+        "new_tokens": 419
+      },
+      "v16_first": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 34.20631978899996,
+        "new_tokens": 359
+      },
+      "v16_final": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 34.20631978899996,
+        "new_tokens": 359
+      },
+      "hypothesis_delta": -2,
+      "seconds_delta": -6.285
+    },
+    {
+      "block_id": "blk_7869923956433750840",
+      "selection_index": 13,
+      "v15": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": true,
+        "mandatory_fact_errors": [],
+        "incident_signal": false,
+        "seconds": 26.532795978999957,
+        "new_tokens": 293
+      },
+      "v16_first": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": false,
+        "seconds": 29.309268471999985,
+        "new_tokens": 331
+      },
+      "v16_final": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": false,
+        "seconds": 29.309268471999985,
+        "new_tokens": 331
+      },
+      "hypothesis_delta": 0,
+      "seconds_delta": 2.776
+    },
+    {
+      "block_id": "blk_-3578165899288618426",
+      "selection_index": 14,
+      "v15": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [
+          "resume_evenements : références inexistantes F17,F18"
+        ],
+        "hypothesis_count": 2,
+        "network_alerts": [
+          {
+            "hypothesis_index": 1,
+            "text": "Si E4 est observé, cela pourrait indiquer un problème de réseau lors de l'envoi du bloc à un client [L01, L02].",
+            "alert": "cause_reseau_sans_appui"
+          }
+        ],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 43.14810153499991,
+        "new_tokens": 444
+      },
+      "v16_first": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 32.17564408700002,
+        "new_tokens": 337
+      },
+      "v16_final": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 32.17564408700002,
+        "new_tokens": 337
+      },
+      "hypothesis_delta": -2,
+      "seconds_delta": -10.972
+    },
+    {
+      "block_id": "blk_6685520562458453481",
+      "selection_index": 15,
+      "v15": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": true,
+        "mandatory_fact_errors": [],
+        "incident_signal": false,
+        "seconds": 30.070280299000046,
+        "new_tokens": 323
+      },
+      "v16_first": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": false,
+        "seconds": 24.05654162799999,
+        "new_tokens": 273
+      },
+      "v16_final": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": false,
+        "seconds": 24.05654162799999,
+        "new_tokens": 273
+      },
+      "hypothesis_delta": 0,
+      "seconds_delta": -6.014
+    },
+    {
+      "block_id": "blk_8490580439615020929",
+      "selection_index": 16,
+      "v15": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 2,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 38.62278171000003,
+        "new_tokens": 403
+      },
+      "v16_first": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 1,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 41.43867940400003,
+        "new_tokens": 439
+      },
+      "v16_final": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 1,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 41.43867940400003,
+        "new_tokens": 439
+      },
+      "hypothesis_delta": -1,
+      "seconds_delta": 2.816
+    },
+    {
+      "block_id": "blk_770925084470916407",
+      "selection_index": 17,
+      "v15": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": true,
+        "mandatory_fact_errors": [],
+        "incident_signal": false,
+        "seconds": 32.48801885,
+        "new_tokens": 341
+      },
+      "v16_first": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": false,
+        "seconds": 29.355882471999962,
+        "new_tokens": 332
+      },
+      "v16_final": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": false,
+        "seconds": 29.355882471999962,
+        "new_tokens": 332
+      },
+      "hypothesis_delta": 0,
+      "seconds_delta": -3.132
+    },
+    {
+      "block_id": "blk_-3349289973286267883",
+      "selection_index": 18,
+      "v15": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 2,
+        "network_alerts": [
+          {
+            "hypothesis_index": 2,
+            "text": "Si E4 est présent, alors les exceptions pendant l'envoi du bloc à un client pourraient être liées à des problèmes de réseau ou de surcharge lors du service du bloc [L01, L02, L03, L04].",
+            "alert": "cause_reseau_sans_appui"
+          }
+        ],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 45.50943577500004,
+        "new_tokens": 455
+      },
+      "v16_first": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 35.50871378399995,
+        "new_tokens": 359
+      },
+      "v16_final": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 35.50871378399995,
+        "new_tokens": 359
+      },
+      "hypothesis_delta": -2,
+      "seconds_delta": -10.001
+    },
+    {
+      "block_id": "blk_5094143259497688375",
+      "selection_index": 19,
+      "v15": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": true,
+        "mandatory_fact_errors": [],
+        "incident_signal": false,
+        "seconds": 30.241402876000052,
+        "new_tokens": 339
+      },
+      "v16_first": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": false,
+        "seconds": 17.912342644999967,
+        "new_tokens": 215
+      },
+      "v16_final": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": false,
+        "seconds": 17.912342644999967,
+        "new_tokens": 215
+      },
+      "hypothesis_delta": 0,
+      "seconds_delta": -12.329
+    },
+    {
+      "block_id": "blk_6124078019968307727",
+      "selection_index": 20,
+      "v15": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 2,
+        "network_alerts": [
+          {
+            "hypothesis_index": 1,
+            "text": "Si E4 est observé, cela pourrait indiquer un problème de réseau lors de la transmission du bloc au client [L01, L02].",
+            "alert": "cause_reseau_sans_appui"
+          }
+        ],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 32.62319460600003,
+        "new_tokens": 328
+      },
+      "v16_first": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 31.961950992999988,
+        "new_tokens": 329
+      },
+      "v16_final": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 31.961950992999988,
+        "new_tokens": 329
+      },
+      "hypothesis_delta": -2,
+      "seconds_delta": -0.661
+    },
+    {
+      "block_id": "blk_281337360704025623",
+      "selection_index": 21,
+      "v15": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": true,
+        "mandatory_fact_errors": [],
+        "incident_signal": false,
+        "seconds": 28.80426583999997,
+        "new_tokens": 326
+      },
+      "v16_first": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": false,
+        "seconds": 21.642228386,
+        "new_tokens": 248
+      },
+      "v16_final": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": false,
+        "seconds": 21.642228386,
+        "new_tokens": 248
+      },
+      "hypothesis_delta": 0,
+      "seconds_delta": -7.162
+    },
+    {
+      "block_id": "blk_7800270577648029182",
+      "selection_index": 22,
+      "v15": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 2,
+        "network_alerts": [
+          {
+            "hypothesis_index": 1,
+            "text": "Si les 15 occurrences de E4 correspondent à des tentatives de lecture échouées, cela pourrait indiquer un problème de disponibilité ou de réseau lors du service du bloc [L01, L02, L03, L04, L05, L06].",
+            "alert": "cause_reseau_sans_appui"
+          }
+        ],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 47.27385962699998,
+        "new_tokens": 481
+      },
+      "v16_first": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 31.315143385,
+        "new_tokens": 327
+      },
+      "v16_final": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 31.315143385,
+        "new_tokens": 327
+      },
+      "hypothesis_delta": -2,
+      "seconds_delta": -15.959
+    },
+    {
+      "block_id": "blk_-7225661686170202727",
+      "selection_index": 23,
+      "v15": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": true,
+        "mandatory_fact_errors": [],
+        "incident_signal": false,
+        "seconds": 29.918922554999995,
+        "new_tokens": 328
+      },
+      "v16_first": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [
+          "resume_evenements : références inexistantes F14"
+        ],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": false,
+        "seconds": 27.832434799999987,
+        "new_tokens": 320
+      },
+      "v16_final": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": false,
+        "seconds": 48.405396586999984,
+        "new_tokens": 239
+      },
+      "hypothesis_delta": 0,
+      "seconds_delta": 18.486
+    },
+    {
+      "block_id": "blk_498931071351273739",
+      "selection_index": 24,
+      "v15": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 2,
+        "network_alerts": [
+          {
+            "hypothesis_index": 1,
+            "text": "Si E4 est observé, cela pourrait indiquer un problème de réseau lors de l'envoi du bloc à un client [L01, L02].",
+            "alert": "cause_reseau_sans_appui"
+          }
+        ],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 42.42796102400001,
+        "new_tokens": 436
+      },
+      "v16_first": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 29.278187360000004,
+        "new_tokens": 304
+      },
+      "v16_final": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 29.278187360000004,
+        "new_tokens": 304
+      },
+      "hypothesis_delta": -2,
+      "seconds_delta": -13.15
+    },
+    {
+      "block_id": "blk_3202203826390057918",
+      "selection_index": 25,
+      "v15": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": true,
+        "mandatory_fact_errors": [],
+        "incident_signal": false,
+        "seconds": 24.547500170999967,
+        "new_tokens": 276
+      },
+      "v16_first": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": false,
+        "seconds": 23.29085292000002,
+        "new_tokens": 263
+      },
+      "v16_final": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": false,
+        "seconds": 23.29085292000002,
+        "new_tokens": 263
+      },
+      "hypothesis_delta": 0,
+      "seconds_delta": -1.257
+    },
+    {
+      "block_id": "blk_-2525721779588456824",
+      "selection_index": 26,
+      "v15": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 2,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 36.11269581800002,
+        "new_tokens": 379
+      },
+      "v16_first": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 36.61964026700002,
+        "new_tokens": 369
+      },
+      "v16_final": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 36.61964026700002,
+        "new_tokens": 369
+      },
+      "hypothesis_delta": -2,
+      "seconds_delta": 0.507
+    },
+    {
+      "block_id": "blk_5962596299735010625",
+      "selection_index": 27,
+      "v15": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": true,
+        "mandatory_fact_errors": [],
+        "incident_signal": false,
+        "seconds": 34.17641849900008,
+        "new_tokens": 364
+      },
+      "v16_first": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": false,
+        "seconds": 21.596391145999974,
+        "new_tokens": 248
+      },
+      "v16_final": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": false,
+        "seconds": 21.596391145999974,
+        "new_tokens": 248
+      },
+      "hypothesis_delta": 0,
+      "seconds_delta": -12.58
+    },
+    {
+      "block_id": "blk_5495200848998243328",
+      "selection_index": 28,
+      "v15": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 2,
+        "network_alerts": [
+          {
+            "hypothesis_index": 1,
+            "text": "Si E4 est observé, cela pourrait indiquer un problème de réseau lors de la livraison du bloc au client [L01, L02, L03].",
+            "alert": "cause_reseau_sans_appui"
+          }
+        ],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 36.95459683499996,
+        "new_tokens": 368
+      },
+      "v16_first": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 39.156213217000015,
+        "new_tokens": 404
+      },
+      "v16_final": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 39.156213217000015,
+        "new_tokens": 404
+      },
+      "hypothesis_delta": -2,
+      "seconds_delta": 2.202
+    },
+    {
+      "block_id": "blk_-8088126798866012916",
+      "selection_index": 29,
+      "v15": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": true,
+        "mandatory_fact_errors": [],
+        "incident_signal": false,
+        "seconds": 29.985250323999935,
+        "new_tokens": 326
+      },
+      "v16_first": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": false,
+        "seconds": 26.316523246999964,
+        "new_tokens": 305
+      },
+      "v16_final": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": false,
+        "seconds": 26.316523246999964,
+        "new_tokens": 305
+      },
+      "hypothesis_delta": 0,
+      "seconds_delta": -3.669
+    },
+    {
+      "block_id": "blk_3365693550135486376",
+      "selection_index": 30,
+      "v15": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 2,
+        "network_alerts": [
+          {
+            "hypothesis_index": 1,
+            "text": "Si E4 est observé, cela pourrait indiquer un problème de réseau lors de la transmission du bloc au client [L01, L02].",
+            "alert": "cause_reseau_sans_appui"
+          }
+        ],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 39.02171711400001,
+        "new_tokens": 403
+      },
+      "v16_first": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 25.982981821999942,
+        "new_tokens": 270
+      },
+      "v16_final": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 25.982981821999942,
+        "new_tokens": 270
+      },
+      "hypothesis_delta": -2,
+      "seconds_delta": -13.039
+    },
+    {
+      "block_id": "blk_-182305440626057147",
+      "selection_index": 31,
+      "v15": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": true,
+        "mandatory_fact_errors": [],
+        "incident_signal": false,
+        "seconds": 30.64569502300003,
+        "new_tokens": 334
+      },
+      "v16_first": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": false,
+        "seconds": 29.802547756999957,
+        "new_tokens": 330
+      },
+      "v16_final": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": false,
+        "seconds": 29.802547756999957,
+        "new_tokens": 330
+      },
+      "hypothesis_delta": 0,
+      "seconds_delta": -0.843
+    },
+    {
+      "block_id": "blk_-1988202877309867568",
+      "selection_index": 32,
+      "v15": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [
+          "resume_evenements : références inexistantes F17"
+        ],
+        "hypothesis_count": 2,
+        "network_alerts": [
+          {
+            "hypothesis_index": 1,
+            "text": "Si E4 est observé, cela pourrait indiquer un problème de réseau lors de l'envoi du bloc à un client [L01, L02].",
+            "alert": "cause_reseau_sans_appui"
+          }
+        ],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 42.73401477999994,
+        "new_tokens": 442
+      },
+      "v16_first": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 31.860737408999967,
+        "new_tokens": 336
+      },
+      "v16_final": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 31.860737408999967,
+        "new_tokens": 336
+      },
+      "hypothesis_delta": -2,
+      "seconds_delta": -10.873
+    },
+    {
+      "block_id": "blk_9019908840879489840",
+      "selection_index": 33,
+      "v15": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": true,
+        "mandatory_fact_errors": [],
+        "incident_signal": false,
+        "seconds": 34.04367873399997,
+        "new_tokens": 377
+      },
+      "v16_first": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": false,
+        "seconds": 29.508915085000012,
+        "new_tokens": 330
+      },
+      "v16_final": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": false,
+        "seconds": 29.508915085000012,
+        "new_tokens": 330
+      },
+      "hypothesis_delta": 0,
+      "seconds_delta": -4.535
+    },
+    {
+      "block_id": "blk_8520721369739431294",
+      "selection_index": 34,
+      "v15": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 2,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 38.08153521600002,
+        "new_tokens": 387
+      },
+      "v16_first": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 1,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 31.42368602399995,
+        "new_tokens": 352
+      },
+      "v16_final": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 1,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 31.42368602399995,
+        "new_tokens": 352
+      },
+      "hypothesis_delta": -1,
+      "seconds_delta": -6.658
+    },
+    {
+      "block_id": "blk_-5394320246293156794",
+      "selection_index": 35,
+      "v15": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": true,
+        "mandatory_fact_errors": [],
+        "incident_signal": false,
+        "seconds": 30.876641969999923,
+        "new_tokens": 343
+      },
+      "v16_first": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": false,
+        "seconds": 26.45592573600004,
+        "new_tokens": 291
+      },
+      "v16_final": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": false,
+        "seconds": 26.45592573600004,
+        "new_tokens": 291
+      },
+      "hypothesis_delta": 0,
+      "seconds_delta": -4.421
+    },
+    {
+      "block_id": "blk_6989377882518604195",
+      "selection_index": 36,
+      "v15": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 2,
+        "network_alerts": [
+          {
+            "hypothesis_index": 1,
+            "text": "Si E4 est observé, cela pourrait indiquer un problème de réseau lors de la transmission du bloc au client [L01, L02, L03, L04].",
+            "alert": "cause_reseau_sans_appui"
+          }
+        ],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 36.09084723199999,
+        "new_tokens": 359
+      },
+      "v16_first": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 35.7426787280001,
+        "new_tokens": 359
+      },
+      "v16_final": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 35.7426787280001,
+        "new_tokens": 359
+      },
+      "hypothesis_delta": -2,
+      "seconds_delta": -0.348
+    },
+    {
+      "block_id": "blk_7551395295149463319",
+      "selection_index": 37,
+      "v15": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": true,
+        "mandatory_fact_errors": [],
+        "incident_signal": false,
+        "seconds": 28.33487789900005,
+        "new_tokens": 309
+      },
+      "v16_first": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": false,
+        "seconds": 24.801433397999972,
+        "new_tokens": 278
+      },
+      "v16_final": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": false,
+        "seconds": 24.801433397999972,
+        "new_tokens": 278
+      },
+      "hypothesis_delta": 0,
+      "seconds_delta": -3.533
+    },
+    {
+      "block_id": "blk_-6431128224865365636",
+      "selection_index": 38,
+      "v15": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 2,
+        "network_alerts": [
+          {
+            "hypothesis_index": 1,
+            "text": "Si E4 est observé, cela pourrait indiquer un problème de réseau lors de la transmission du bloc au client [L01, L02].",
+            "alert": "cause_reseau_sans_appui"
+          }
+        ],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 37.81806412399999,
+        "new_tokens": 393
+      },
+      "v16_first": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 31.80048130800003,
+        "new_tokens": 343
+      },
+      "v16_final": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 0,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 31.80048130800003,
+        "new_tokens": 343
+      },
+      "hypothesis_delta": -2,
+      "seconds_delta": -6.018
+    },
+    {
+      "block_id": "blk_3036603747764053369",
+      "selection_index": 39,
+      "v15": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 2,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 30.227064000999917,
+        "new_tokens": 325
+      },
+      "v16_first": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 1,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 26.166087901000083,
+        "new_tokens": 294
+      },
+      "v16_final": {
+        "valid_json_fields": true,
+        "contract_ok": true,
+        "facts_exact": true,
+        "unknown_reference_errors": [],
+        "hypothesis_count": 1,
+        "network_alerts": [],
+        "unnecessary_investigation": false,
+        "mandatory_fact_errors": [],
+        "incident_signal": true,
+        "seconds": 26.166087901000083,
+        "new_tokens": 294
+      },
+      "hypothesis_delta": -1,
+      "seconds_delta": -4.061
+    }
+  ],
+  "per_worker_cumulative_seconds": {
+    "0": 615.177,
+    "1": 603.128
+  },
+  "qualitative_review": {
+    "status": "completed",
+    "file": "revue_qualitative_v16.json",
+    "automatic_alerts_are_not_findings": true,
+    "summary": {
+      "responses_reviewed": 40,
+      "second_responses_reviewed": 2,
+      "network_causes_without_support_found": 0,
+      "same_second_order_error_cases": [
+        13
+      ],
+      "other_chronology_error_cases": [
+        37
+      ],
+      "unsupported_causal_link_cases": [
+        21
+      ],
+      "pseudo_reference_cases": [
+        8
+      ],
+      "citation_precision_examples": [
+        1,
+        35
+      ],
+      "unsupported_identifier_cases": [
+        9
+      ],
+      "unhelpful_questions_with_incident_examples": [
+        17,
+        35,
+        40
+      ],
+      "required_event_missing_only_from_summary_cases": [
+        3
+      ],
+      "required_events_present_in_facts": true,
+      "unknown_cause_incident_blocks": [
+        1,
+        3,
+        5,
+        7,
+        9,
+        11,
+        13,
+        15,
+        19,
+        21,
+        23,
+        25,
+        27,
+        29,
+        31,
+        33,
+        37,
+        39
+      ],
+      "unknown_cause_explicitly_stated_in_summary": 0,
+      "unknown_cause_statement_missing_in_summary_count": 18,
+      "unknown_cause_note": "Aucun résumé concerné ne précise que la cause reste indéterminée. Les trois faits E28 copiés indiquent toutefois déjà que le message ne précise pas la cause.",
+      "do_not_interpret_all_automatic_alerts_as_all_errors": true
+    }
+  },
+  "interpretation_limits": [
+    "Les listes fermées et maxItems 0 garantissent une partie des gains par construction.",
+    "Les références existantes ne garantissent pas la fidélité du résumé.",
+    "Les alertes historiques restent gelées, y compris leur faux positif possible sur une négation PacketResponder.",
+    "E24 absent, aucune conclusion expérimentale sur ce code."
+  ],
+  "next_step": "Prompt figé, puis validation unique sur 40 nouveaux blocs val ; aucune v17 de réglage.",
+  "execution": {
+    "gpu_quota_seconds": 679.8670000000002,
+    "setup_to_generation_seconds": 57.75740754,
+    "parallel_inference_wall_seconds": 616.351744671,
+    "total_inference_seconds_across_workers": 1218.305161219,
+    "inference_seconds_by_worker": {
+      "0": 615.1771585429999,
+      "1": 603.128002676
+    },
+    "all_40_blocks_finished": true
+  },
+  "conclusion": {
+    "status": "completed",
+    "targeted_gain_on_development_set": true,
+    "reason": "Sur les mêmes 40 blocs, disparition des alertes réseau et enquêtes sans incident, correction des deux références inexistantes, faits et contrat conservés.",
+    "mechanism": "Les listes fermées d’hypothèses et maxItems 0 produisent une partie des gains par construction ; aucune preuve d’un meilleur raisonnement causal du modèle.",
+    "remaining_limits": "Deux erreurs chronologiques manuelles, une causalité non démontrée et plusieurs imprécisions de citation/questionnement. La mention cause indéterminée manque dans les résumés concernés.",
+    "generalization_not_established": true,
+    "E24_not_evaluated": true,
+    "stop_rule": "Prompt, schéma et règles figés après v16 ; seule étape suivante : validation unique sur 40 nouveaux blocs val, après estimation et accord."
+  }
+}

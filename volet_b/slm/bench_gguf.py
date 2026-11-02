@@ -43,7 +43,8 @@ def load_llamacpp(cfg: dict, local_files_only: bool = False):
     from llama_cpp import Llama
 
     path = hf_hub_download(GGUF_REPO, GGUF_FILE, revision=GGUF_REVISION, local_files_only=local_files_only)
-    return Llama(model_path=path, n_ctx=N_CTX, last_n_tokens_size=N_CTX, seed=cfg["seed"], verbose=False)
+    return Llama(model_path=path, n_ctx=N_CTX, last_n_tokens_size=N_CTX, seed=cfg["seed"],
+                 verbose=False, n_gpu_layers=cfg.get("n_gpu_layers", 0))
 
 
 def generate_llamacpp(llm, messages: list[dict], cfg: dict) -> dict:

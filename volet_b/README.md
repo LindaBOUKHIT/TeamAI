@@ -1,7 +1,9 @@
 # Volet B — Explication sourcée d'une trace HDFS en local
 
 **Epics** : SCRUM-8 (SLM, LoRA — Alain, binôme Linda) · SCRUM-9 (RAG, agents, interface — Linda, binôme Alain)
-Modèle : SmolLM2-1.7B-Instruct (repli : plus petit si la machine l'impose, décision tracée).
+Modèle actuel : Gemma 4 E4B QAT, GGUF Q4_0, backend llama.cpp, prompt v16 figé.
+
+Gemma est retenu pour la qualité relative des explications exploratoires (v11 : 40/40 contrats contre 22/40 pour Granite), avec des erreurs sémantiques persistantes : [trace SCRUM-63](../eval/results/SCRUM-63/README.md). `slm/v16/` extrait les faits avec `data.parse_hdfs`, applique les causes fermées, contrôle les réponses et autorise une seule correction. Cette référence n’utilise pas le RAG ; les chaînes RAG existantes gardent leurs propres prompts et ne sont pas couvertes par la validation v16. SmolLM2 et les essais LoRA associés sont historiques.
 
 ```
 volet_b/
