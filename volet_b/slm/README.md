@@ -73,4 +73,64 @@ La [preuve du 08/10](../../eval/results/SCRUM-28/README.md) publie la synthèse,
 
 ## Version 4 bits (SCRUM-57, expérimental)
 
-`python -m volet_b.slm.bench_gguf --backend llamacpp|transformers --offline` compare le GGUF Q4_K_M officiel (révision figée) au modèle float32 sur le même bloc. Installation : `pip install -e ".[volet_b_gguf]" --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu`. C'est un banc de mesure : le backend llama.cpp n'est pas encore disponible via `generate()`. Résultats et limites dans `docs/projet/journal.md`.
+`python -m volet_b.slm.bench_gguf --backend llamacpp|transformers --offline` conserve le banc historique sur un bloc. Installation : `pip install -e ".[volet_b_gguf]" --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu`. Résultats et limites dans `docs/projet/journal.md`.
+
+## Backend llama.cpp et conversion LoRA → GGUF
+
+`configs/generation.yaml` conserve `backend: transformers` par défaut. Mettre `backend: llamacpp` ou passer cet override à `generate()` pour utiliser llama.cpp. L'interface et le retour (`text`, `new_tokens`, `seconds`) sont inchangés. `TEAMAI_SLM_MOCK=1` fonctionne avec les deux backends sans charger de poids.
+
+La base GGUF officielle est retrouvée par `hf_hub_download` avec `gguf_repo`, `gguf_file`, `gguf_revision` figés dans le YAML (valeurs du banc historique). `local_files_only=True` impose le cache local. Le cache d'instances llama.cpp comprend la base, la révision, le contexte, la seed, l'adaptateur et `n_gpu_layers`. Le backend utilise le CPU par défaut, 4 096 tokens de contexte, la pénalité sur tout le contexte et le décodage glouton ; `do_sample=true` est refusé.
+
+`n_gpu_layers` règle le nombre de couches sur GPU avec une installation llama.cpp compatible : `-1` pour toutes les couches, `0` pour le CPU (valeur historique et défaut si le champ est absent).
+
+Avec ce backend, `adapter` est **un fichier GGUF d'adaptateur**, transmis à `Llama(lora_path=...)` au-dessus de la base Q4_K_M. Un modèle fusionné est une base complète : passer `gguf_path` sans `adapter`.
+
+```python
+from volet_b.slm.generate import generate
+out = generate("Consigne puis logs", backend="llamacpp", local_files_only=True,
+               adapter="volet_b/slm/adapters/essai-adapter/adapter.gguf")
+# Route fusionnée, une fois convertie :
+out = generate("Consigne puis logs", backend="llamacpp", local_files_only=True,
+               gguf_path="volet_b/slm/adapters/essai-merged/model-q4_k_m.gguf")
+```
+
+Les commandes suivantes sont à lancer manuellement depuis la racine. Elles exigent les dépendances SLM/PEFT/GGUF et le clone local llama.cpp. Elles ne téléchargent rien. `--llama-cpp` remplace la variable `TEAMAI_LLAMA_CPP` si souhaité.
+
+```powershell
+$py = 'D:\scolaire\master\m2\26-27 Natural Language Processing 2_M2IA_S3\projet\.venv\Scripts\python.exe'
+$adapter = 'D:\scolaire\master\m2\26-27 Natural Language Processing 2_M2IA_S3\projet\volet_b\slm\adapters\essai'
+$env:HF_HOME = 'D:\IA_Caches\HuggingFace'
+$env:TEAMAI_LLAMA_CPP = 'D:\IA_Caches\llama.cpp'
+
+# Inspection uniquement : aucun chargement ni conversion.
+& $py -m volet_b.slm.convert_gguf adapter $adapter --name essai-adapter --dry-run
+& $py -m volet_b.slm.convert_gguf merged $adapter --name essai-merged --dry-run
+
+# Route b : adaptateur f16 à charger sur la base Q4_K_M officielle.
+& $py -m volet_b.slm.convert_gguf adapter $adapter --name essai-adapter
+
+# Route a : fusion float32 CPU, HF temporaire, GGUF f16 puis Q4_K_M.
+& $py -m volet_b.slm.convert_gguf merged $adapter --name essai-merged
+
+# Base seule : Transformers float32 contre GGUF Q4_K_M officiel.
+& $py -m volet_b.slm.compare_backends --n 5
+
+# Même adaptateur source côté PEFT et côté GGUF (route b).
+& $py -m volet_b.slm.compare_backends --n 5 --adapter-hf $adapter --adapter-gguf volet_b/slm/adapters/essai-adapter/adapter.gguf
+
+# Un seul backend pour fractionner les calculs.
+& $py -m volet_b.slm.compare_backends --n 5 --backends llamacpp
+
+# Tests sans modèle ni conversion.
+& $py -m pytest -q
+```
+
+Chaque conversion occupe un **nouveau** sous-dossier de `volet_b/slm/adapters/` (déjà ignoré par Git) ; un nom existant est refusé. `meta.json` conserve la route, l'empreinte source (noms relatifs, tailles et contenus), la révision de base, le commit llama.cpp et la taille produite. Les intermédiaires HF/f16 sont supprimés, y compris sur erreur. Si l'adaptateur ne déclare aucune révision, sa révision d'entraînement reste à confirmer par son producteur. Une conversion réussie n'atteste pas une inférence correcte (`inference_validated: false`).
+
+Les deux routes ont été exécutées le 26/10 sur l'adaptateur `essai` (deux pas d'entraînement) : elles servent à vérifier le chemin, pas à conclure sur la qualité. La route a demande `sentencepiece` (inclus dans l'extra `volet_b_gguf`). En cas d'incompatibilité PEFT/architecture sur un autre adaptateur, la conserver comme preuve, essayer l'autre route puis évaluer PEFT sur GPU si les deux échouent.
+
+Le fichier C4 `data/splits/splits.csv` doit déjà exister dans ce checkout : le sample seul n'indique pas les splits. S'il manque, le banc s'arrête sans générer de split. Il tire cinq blocs `val` du sample avec la seed du YAML (42) ; `--n` permet de modifier l'effectif. Tout split différent de `val` est refusé. Ni labels ni annotations ne sont transmis au modèle. Le prompt exact, identique des deux côtés, demande C5 et place la consigne avant les logs. Un appel par bloc, sans réparation ni relance sur erreur.
+
+Chaque comparaison crée un dossier C7 neuf : `config.json`, `predictions.jsonl`, `metrics.json`, `comparison.md` et résultats intermédiaires des workers. Les backends tournent dans des processus CPU distincts pour séparer la RSS (pic échantillonné à 0,2 s, chargement inclus). Le débit est la moyenne des tokens/s mesurés ; les échecs restent au dénominateur de conformité et d'abstention. Les valeurs non mesurées sont `null`. La conformité C5 et l'abstention ne mesurent pas la justesse : relire les sorties brutes. Le temps de génération inclut le prompt ; Transformers exclut tokenisation/décodage, llama.cpp mesure l'appel chat complet.
+
+Ce diagnostic change à la fois le backend et la quantification. Pour les évaluations comparant base, LoRA, RAG et agents, conserver un unique couple backend/quantification et le consigner au journal. Mesures du 26/10 et lecture : `eval/results/SCRUM-57/README.md` et journal.
