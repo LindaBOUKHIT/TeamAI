@@ -1,0 +1,134 @@
+{
+  "source": "Messages réels des 40 blocs v15/v16 ; causes immédiates seulement, aucune connaissance externe.",
+  "representation": "Liste fermée de formulations conditionnelles avec référence calculée ; [] si aucun détail discriminant.",
+  "catalog": [
+    {
+      "code": "E4",
+      "blocks": 17,
+      "causes": {},
+      "examples": [
+        {
+          "selection_index": 2,
+          "block_id": "blk_-3412728853703264676",
+          "reference": "L01",
+          "line": 5583,
+          "message": "[L01] 081110 021051 5962 WARN dfs.DataNode$DataXceiver: 10.251.106.10:50010:Got exception while serving blk_-3412728853703264676 to /10.251.126.255:"
+        },
+        {
+          "selection_index": 2,
+          "block_id": "blk_-3412728853703264676",
+          "reference": "L02",
+          "line": 5986,
+          "message": "[L02] 081110 065603 7440 WARN dfs.DataNode$DataXceiver: 10.251.30.101:50010:Got exception while serving blk_-3412728853703264676 to /10.251.126.255:"
+        },
+        {
+          "selection_index": 2,
+          "block_id": "blk_-3412728853703264676",
+          "reference": "L03",
+          "line": 6322,
+          "message": "[L03] 081110 080426 7695 WARN dfs.DataNode$DataXceiver: 10.251.106.10:50010:Got exception while serving blk_-3412728853703264676 to /10.251.126.255:"
+        }
+      ]
+    },
+    {
+      "code": "E7",
+      "blocks": 1,
+      "causes": {
+        "impossibilité de lire le flux pendant l’écriture": "Could not read from stream"
+      },
+      "examples": [
+        {
+          "selection_index": 39,
+          "block_id": "blk_3036603747764053369",
+          "reference": "L01",
+          "line": 5207,
+          "message": "[L01] 081110 014832 5994 INFO dfs.DataNode$DataXceiver: writeBlock blk_3036603747764053369 received exception java.io.IOException: Could not read from stream"
+        }
+      ]
+    },
+    {
+      "code": "E20",
+      "blocks": 2,
+      "causes": {
+        "entrée BlockInfo absente de volumeMap lors de la suppression": "BlockInfo not found in volumeMap"
+      },
+      "examples": [
+        {
+          "selection_index": 16,
+          "block_id": "blk_8490580439615020929",
+          "reference": "L01",
+          "line": 9059,
+          "message": "[L01] 081110 103854 19 WARN dfs.FSDataset: Unexpected error trying to delete block blk_8490580439615020929. BlockInfo not found in volumeMap."
+        },
+        {
+          "selection_index": 34,
+          "block_id": "blk_8520721369739431294",
+          "reference": "L01",
+          "line": 18326,
+          "message": "[L01] 081110 220930 18 WARN dfs.FSDataset: Unexpected error trying to delete block blk_8520721369739431294. BlockInfo not found in volumeMap."
+        }
+      ]
+    },
+    {
+      "code": "E27",
+      "blocks": 1,
+      "causes": {},
+      "examples": [
+        {
+          "selection_index": 0,
+          "block_id": "blk_5809931191239895555",
+          "reference": "L01",
+          "line": 3147,
+          "message": "[L01] 081109 235454 31 WARN dfs.FSNamesystem: BLOCK* NameSystem.addStoredBlock: Redundant addStoredBlock request received for blk_5809931191239895555 on 10.250.13.240:50010 size 67108864"
+        }
+      ]
+    },
+    {
+      "code": "E28",
+      "blocks": 3,
+      "causes": {},
+      "examples": [
+        {
+          "selection_index": 2,
+          "block_id": "blk_-3412728853703264676",
+          "reference": "L05",
+          "line": 9468,
+          "message": "[L05] 081110 104629 27 INFO dfs.FSNamesystem: BLOCK* NameSystem.addStoredBlock: addStoredBlock request received for blk_-3412728853703264676 on 10.251.106.10:50010 size 67108864 But it does not belong to any file."
+        },
+        {
+          "selection_index": 18,
+          "block_id": "blk_-3349289973286267883",
+          "reference": "L05",
+          "line": 9467,
+          "message": "[L05] 081110 104629 27 INFO dfs.FSNamesystem: BLOCK* NameSystem.addStoredBlock: addStoredBlock request received for blk_-3349289973286267883 on 10.251.106.10:50010 size 67108864 But it does not belong to any file."
+        },
+        {
+          "selection_index": 26,
+          "block_id": "blk_-2525721779588456824",
+          "reference": "L05",
+          "line": 9464,
+          "message": "[L05] 081110 104629 27 INFO dfs.FSNamesystem: BLOCK* NameSystem.addStoredBlock: addStoredBlock request received for blk_-2525721779588456824 on 10.251.106.10:50010 size 67108864 But it does not belong to any file."
+        }
+      ]
+    }
+  ],
+  "E24": "Absent du tirage ; le fait reste obligatoire si ce code est présent. Aucune conclusion expérimentale sur E24.",
+  "network_markers": {
+    "Socket": "\\bsocket\\w*",
+    "Connection": "\\bconnection\\w*",
+    "timeout": "\\btimeout\\b|\\btimed\\s+out\\b",
+    "Broken pipe": "\\bbroken\\s+pipe\\b",
+    "Connection reset": "\\bconnection\\s+reset\\b"
+  },
+  "network_marker_origin": "Exemples demandés par l’utilisateur, non observés dans le jeu connu.",
+  "known_val_blocks_checked": 85,
+  "known_warn_exception_lines_checked": 106,
+  "observed_network_marker_counts": {},
+  "observed_network_marker_examples": [],
+  "v16_blocks_with_network_evidence": 0,
+  "limitations": [
+    "Un nom de DataNode, une adresse IP et Could not read from stream ne suffisent pas à identifier une cause réseau.",
+    "La présence d’un mot réseau est un appui lexical minimal, pas une preuve de causalité.",
+    "L’alerte sur les hypothèses est lexicale ; une négation peut être un faux positif à relire."
+  ]
+}
