@@ -496,10 +496,23 @@ restent inchangés.
 
 Tests factices CPU ajoutés pour l'égalité loss/gradients, les frontières, le
 saut isolé suivi d'un pas appliqué, les sauts persistants, la loss non finie,
-les paramètres entraînables float32 et l'environnement du lanceur. Aucun Python
-ni pytest exécuté pour ce correctif ; aucun service externe, opération git,
-chargement de modèle ou essai GPU. **non revalidé sur GPU à ce stade**.
-Restent à contrôler sur T4 : pic VRAM réel, stabilité fp16, pas effectivement
-appliqués et durée, puis sauvegarde/rechargement et conversion réels.
+les paramètres entraînables float32 et l'environnement du lanceur. Suite complète
+lancée par Alain avec le Python du projet : 155 passed, 6 skipped.
+
+Deux correctifs supplémentaires sont apparus sur Kaggle : `torchvision==0.24.1`
+et `torchaudio==2.9.1` figés avec `torch==2.9.1` (sinon l'import de PEFT échoue
+sur `torchvision::nms`), et les infos de chargement Transformers 5 (ensembles)
+rendues sérialisables pour `metrics.json`.
+
+**Essai T4 Kaggle du 08/11/2026** (notebook privé `wsear07/teamai-scrum61-lora`,
+version 3, code au commit `c7947c1`, 20 exemples train seuls, aucun fichier de
+`data/sample/` envoyé) : 30 pas appliqués, 0 sauté, échelle 1024 stable, loss
+moyenne 0,586 sur les 5 premiers pas et 0,052 sur les 5 derniers (exemples
+d'entraînement : faisabilité, pas qualité), 4,9 s par pas, pic VRAM 10,24 Gio
+(8,63 au chargement), 2 269 184 paramètres entraînables. Adaptateur PEFT
+rechargé, puis converti en GGUF F16 (4,5 Mo) avec llama.cpp `0c1e57098` :
+q_proj sur les 42 couches, v_proj sur les couches 0 à 23 (les couches 24 à 41
+partagent le cache KV, `num_kv_shared_layers: 18`, et n'ont pas de v_proj). Inférence avec l'adaptateur sur la
+RTX 3050 non faite (SCRUM-61).
 
 Usage IA : Codex gpt-6.1-sol supervisé par Claude ; relecture d'Alain à faire.
