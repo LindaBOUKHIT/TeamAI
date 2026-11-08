@@ -24,7 +24,7 @@ import zipfile
 from teamai.paths import ROOT
 
 COMMIT = "0c1e57098"
-PACKAGES = ["torch==2.9.1", "transformers==5.6.2", "peft==0.18.1", "accelerate==1.12.0",
+PACKAGES = ["torch==2.9.1", "torchvision==0.24.1", "torchaudio==2.9.1", "transformers==5.6.2", "peft==0.18.1", "accelerate==1.12.0",
             "bitsandbytes==0.49.2", "safetensors==0.7.0", "gguf==0.19.0", "sentencepiece==0.2.1",
             "pyyaml==6.0.3", "psutil==7.2.2", "pandas==3.0.3"]
 
