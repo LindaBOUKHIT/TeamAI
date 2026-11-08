@@ -1,9 +1,11 @@
+"""Preparer le document de relecture des annotations."""
+
 
 import json
 import csv
 from pathlib import Path
 
-base = Path("eval/volet_b")
+base = EVAL_VOLET_B
 
 with (base / "annotations_travail.jsonl").open(encoding="utf-8") as f:
     rows = [json.loads(line) for line in f]
@@ -71,3 +73,5 @@ with output.open("w", encoding="utf-8") as f:
 
 print("Dossier de relecture créé :", output)
 print("Nombre de fiches :", len(rows))
+
+from teamai.paths import EVAL_VOLET_B

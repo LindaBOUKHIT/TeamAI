@@ -7,15 +7,14 @@ import csv
 import json
 import random
 import re
-from pathlib import Path
+from teamai.paths import SPLITS as SPLITS_DIR, RAW_HDFS, EVAL_VOLET_B
 
 from teamai.data.loader import load_traces
 from teamai.data.preprocess import BLOCK_REGEX, HEADER_REGEX
 
-ROOT = Path(__file__).resolve().parents[2]
-SPLITS = ROOT / "data/splits/splits.csv"
-LOGS = ROOT / "data/raw/HDFS_v1/HDFS.log"
-OUTPUT = ROOT / "eval/volet_b/candidats_annotation.jsonl"
+SPLITS = SPLITS_DIR / "splits.csv"
+LOGS = RAW_HDFS / "HDFS.log"
+OUTPUT = EVAL_VOLET_B / "candidats_annotation.jsonl"
 
 SEED = 35
 N_NORMAL = 40
@@ -30,6 +29,7 @@ EXCLUDED = {
 
 
 def main():
+    """Selectionner les traces du test officiel pour annotation."""
     # 1. Charger les identifiants du test officiel
     test_ids = set()
     with SPLITS.open(encoding="utf-8", newline="") as f:

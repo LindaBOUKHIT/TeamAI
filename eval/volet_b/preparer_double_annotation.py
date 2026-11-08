@@ -1,9 +1,11 @@
+"""Preparer les fiches de double annotation du Volet B."""
+
 
 import csv
 import json
 from pathlib import Path
 
-base = Path("eval/volet_b")
+base = EVAL_VOLET_B
 output_dir = base / "double_annotation"
 output_dir.mkdir(exist_ok=True)
 
@@ -55,3 +57,5 @@ print("Traces par annotateur :", len(selection))
 print("Explications préremplies : 0")
 print("Labels officiels exposés : 0")
 print("Annotations originales modifiées : 0")
+
+from teamai.paths import EVAL_VOLET_B

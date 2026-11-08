@@ -1,11 +1,13 @@
+"""Proposer des passages documentaires C6 pour les annotations."""
+
 
 import json
 import csv
 from pathlib import Path
 
-annotations_path = Path("eval/volet_b/annotations_travail.jsonl")
-corpus_path = Path("volet_b/rag/corpus/chunks.jsonl")
-output_path = Path("eval/volet_b/suggestions_sources.csv")
+annotations_path = EVAL_VOLET_B / "annotations_travail.jsonl"
+corpus_path = CORPUS / "chunks.jsonl"
+output_path = EVAL_VOLET_B / "suggestions_sources.csv"
 
 rows = [
     json.loads(line)
@@ -67,3 +69,5 @@ print("Fiches analysées :", len(rows))
 print("Suggestions créées :", output_path)
 print("Sources C6 valides :", len(valid_ids))
 print("Annotations C5 modifiées : 0")
+
+from teamai.paths import CORPUS, EVAL_VOLET_B

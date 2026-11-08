@@ -1,10 +1,12 @@
+"""Selectionner les traces pour la double annotation."""
+
 
 import json
 import random
 import csv
 from pathlib import Path
 
-base = Path("eval/volet_b")
+base = EVAL_VOLET_B
 
 rows = [
     json.loads(line)
@@ -54,3 +56,5 @@ print("Normales :", sum(r["label"] == 0 for r in selection))
 print("Anomalies :", sum(r["label"] == 1 for r in selection))
 print("Fichier créé :", output)
 print("Annotations existantes modifiées : 0")
+
+from teamai.paths import EVAL_VOLET_B
