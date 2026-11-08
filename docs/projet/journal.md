@@ -378,3 +378,8 @@ et un résumé boucle ; 0,19 hypothèse par bloc avec indice d’incident. Ces r
 ne valident ni une détection par le SLM ni la fidélité globale des explications.
 
 Usage IA : code écrit avec Codex gpt-6.1-sol, supervisé par Claude ; relecture d'Alain à faire.
+
+## 2026-11-09 — SCRUM-46 : défauts du volet B et feuille de route (version provisoire avant les mesures SCRUM-38)
+Section rédigée dans docs/volet_b/defauts_feuille_de_route.md : périmètre, défauts sourcés, causes probables, priorités et chiffres à compléter après SCRUM-38/45.
+Lecture seule des preuves val et du code ; aucune donnée test consultée, aucun modèle exécuté, aucun service externe appelé, aucune opération git.
+Usage IA : rédaction Codex gpt-6.1-sol supervisée par Claude ; relecture d'Alain à faire.
