@@ -8,7 +8,7 @@ Depuis la racine extraite (jamais le dépôt complet) :
 python -m volet_b.slm.kaggle_lora_essai --dry-run
 python -m volet_b.slm.kaggle_lora_essai --install
 Redémarrer le kernel si des bibliothèques avaient déjà été importées, puis :
-python -m volet_b.slm.kaggle_lora_essai --steps 30
+python -m volet_b.slm.kaggle_lora_essai --steps 3  # premier essai
 """
 import argparse
 import hashlib
@@ -29,9 +29,24 @@ PACKAGES = ["torch==2.9.1", "transformers==5.6.2", "peft==0.18.1", "accelerate==
             "pyyaml==6.0.3", "psutil==7.2.2", "pandas==3.0.3"]
 
 
+def training_environment(environ):
+    """Copie l'environnement et active les segments extensibles sans écraser le choix utilisateur."""
+    env = dict(environ)
+    env.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
+    return env
+
+
+def training_command(working, steps):
+    """Construit la commande train identique pour le plan et le sous-processus effectif."""
+    return [sys.executable, "-m", "volet_b.slm.train_lora", "--config", str(working / "lora_essai.yaml"),
+            "--steps", str(steps), "--device", "cuda", "--qlora", "--offline"]
+
+
 def plan(working, steps):
-    """Décrit les entrées, versions et sorties sans importer les bibliothèques GPU."""
+    """Décrit commande, allocateur, entrées et sorties sans exposer l'environnement complet ni importer torch."""
     return {"install": [sys.executable, "-m", "pip", "install", *PACKAGES],
+            "training_command": training_command(working, steps),
+            "training_env": {"PYTORCH_CUDA_ALLOC_CONF": training_environment(os.environ)["PYTORCH_CUDA_ALLOC_CONF"]},
             "model_id": "google/gemma-4-E4B-it-qat-q4_0-unquantized", "revision": "476025a01dbf99361c062bbeca3d6a76bb4c4566",
             "llama_cpp_commit": COMMIT, "steps": steps, "device": "cuda", "qlora": "nf4/float16",
             "batch_size": 1, "thinking": False, "split": "train only, checked against C4",
@@ -67,7 +82,7 @@ def fetch_converter(working):
 
 
 def main(argv=None):
-    """Valide les données avant tout téléchargement, puis entraîne et convertit en processus séparés."""
+    """Valide les données, puis entraîne avec l'environnement allocateur dédié et convertit séparément."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--bundle", type=Path, help="Construit localement une archive train seule et quitte")
     parser.add_argument("--dry-run", action="store_true")
@@ -129,8 +144,8 @@ def main(argv=None):
     cfg["resolved_base_revision"] = revision
     config_path = working / "lora_essai.yaml"
     config_path.write_text(yaml.safe_dump(cfg), encoding="utf-8")
-    subprocess.run([sys.executable, "-m", "volet_b.slm.train_lora", "--config", str(config_path),
-                    "--steps", str(args.steps), "--device", "cuda", "--qlora", "--offline"], cwd=ROOT, check=True)
+    subprocess.run(training_command(working, args.steps), cwd=ROOT,
+                   env=training_environment(os.environ), check=True)
     env = {**os.environ, "PYTHONPATH": os.pathsep.join([str(tools / "gguf-py"), str(ROOT), os.environ.get("PYTHONPATH", "")])}
     subprocess.run([sys.executable, "-m", "volet_b.slm.convert_gguf", "adapter", str(working / "adapter"),
                     "--base-config", str(base_config), "--llama-cpp", str(tools),

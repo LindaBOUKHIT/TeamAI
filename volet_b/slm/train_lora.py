@@ -1,15 +1,16 @@
 """SCRUM-29 — Essai LoRA Gemma texte seul sur T4 Kaggle : mémoire, durée par pas, descente de la loss, rechargement.
 
     python -m volet_b.slm.train_lora --offline              # 30 pas, configs/lora_essai.yaml
-    python -m volet_b.slm.train_lora --offline --steps 3    # vérification rapide
+    python -m volet_b.slm.train_lora --offline --steps 3    # premier essai
     python -m volet_b.slm.train_lora --device cuda --qlora  # T4 16 Go (bitsandbytes), pas une carte 6 Go
 
 Test de faisabilité matérielle, pas de qualité : les exemples sont provisoires (make_seed.py) et la loss
 est mesurée sur ces mêmes exemples. La consigne est placée avant les logs (règle du volet B, SCRUM-57) ;
-seule la réponse JSON v16 contribue à la loss. Les sorties vont dans un dossier C7 unique de eval/runs/.
+seuls le JSON v16 et sa fin de tour contribuent à la loss. Les sorties vont dans un dossier C7 unique de eval/runs/.
 """
 import argparse
 import json
+import math
 import platform
 import random
 import time
@@ -25,6 +26,114 @@ from volet_b.slm.first_inference import PeakMemory, gb, new_run_directory
 from volet_b.slm.lora_data import encode_example, prepare_examples, validate_lora_config
 
 CONFIG = ROOT / "volet_b" / "slm" / "configs" / "lora_essai.yaml"
+FP16_FAILURE = ("gradients non finis persistants en fp16 : l'échelle ne suffit pas, "
+                "activations hors plage fp16 probables")
+
+
+def supervised_causal_loss(model, batch, *, first=None):
+    """Calcule la CE décalée FP32 sur le suffixe utile d'un seul exemple.
+
+    Sans labels au forward, Gemma découpe les états avant lm_head et softcapping.
+    first peut être fourni pour vérifier une frontière précalculée ; tous les
+    labels supervisés doivent être à partir de cet indice (strictement positif).
+    Les trous et la fin masquée restent autorisés. Seuls les logits réduits sont
+    promus en FP32 ; autograd garde les tenseurs nécessaires au backward.
+    """
+    import torch
+
+    labels = batch["labels"]
+    if labels.ndim != 2 or labels.shape[0] != 1 or labels.shape != batch["input_ids"].shape:
+        raise ValueError("Loss réduite : batch_size=1 et labels alignés requis")
+    positions = (labels[0] != -100).nonzero(as_tuple=True)[0]
+    if positions.numel() == 0:
+        raise ValueError("Loss réduite : aucun label supervisé")
+    actual_first = int(positions[0].item())
+    first = actual_first if first is None else first
+    if not isinstance(first, int) or not 0 < first < labels.shape[1]:
+        raise ValueError("Loss réduite : first doit avoir une position précédente")
+    if bool((positions < first).any()):
+        raise ValueError("Loss réduite : un label supervisé précède first")
+    if first != actual_first:
+        raise ValueError("Loss réduite : first doit être le premier label supervisé")
+    outputs = model(input_ids=batch["input_ids"], attention_mask=batch["attention_mask"],
+                    logits_to_keep=labels.shape[1] - first + 1)
+    logits = outputs.logits
+    loss = torch.nn.functional.cross_entropy(
+        logits[:, :-1].float().reshape(-1, logits.shape[-1]),
+        labels[:, first:].reshape(-1), ignore_index=-100, reduction="mean")
+    del outputs, logits
+    return loss
+
+
+def ensure_trainable_float32(model):
+    """Vérifie et promeut les seuls paramètres entraînables avant création de l'optimiseur."""
+    import torch
+
+    parameters = [p for p in model.parameters() if p.requires_grad]
+    if not parameters:
+        raise ValueError("Aucun paramètre LoRA entraînable")
+    for parameter in parameters:
+        if parameter.dtype != torch.float32:
+            parameter.data = parameter.data.to(dtype=torch.float32)
+    if any(p.dtype != torch.float32 for p in parameters):
+        raise RuntimeError("Paramètres LoRA entraînables float32 requis pour GradScaler.unscale_")
+    return parameters
+
+
+def amp_optimizer_step(loss, parameters, optimizer, scaler, max_grad_norm):
+    """Backprop, unscale, écrête les gradients finis et laisse AMP sauter les débordements.
+
+    scale est l'échelle après update. Un pas est sauté si un gradient après
+    unscale est non fini ou si cette échelle a diminué. Sans AMP, un gradient
+    non fini évite aussi toute application de l'optimiseur.
+    """
+    import torch
+
+    if not bool(torch.isfinite(loss)):
+        raise RuntimeError("Perte non finie ; arrêter et conserver le diagnostic")
+    scale_before = scaler.get_scale()
+    scaler.scale(loss).backward()
+    scaler.unscale_(optimizer)
+    finite = all(bool(torch.isfinite(p.grad).all()) for p in parameters if p.grad is not None)
+    grad_norm = None
+    if finite:
+        norm = torch.nn.utils.clip_grad_norm_(parameters, max_grad_norm)
+        grad_norm = float(norm.item()) if bool(torch.isfinite(norm)) else None
+    if finite or scaler.is_enabled():
+        scaler.step(optimizer)
+    scaler.update()
+    scale = scaler.get_scale()
+    optimizer.zero_grad(set_to_none=True)
+    return {"scale": scale, "skipped": not finite or scale < scale_before, "grad_norm": grad_norm}
+
+
+class OptimizerProgress:
+    """Compte les pas appliqués et sautés, avec arrêt sur débordements persistants."""
+
+    def __init__(self, max_consecutive_skips):
+        """Initialise une limite strictement positive de pas consécutifs sautés."""
+        if not isinstance(max_consecutive_skips, int) or max_consecutive_skips <= 0:
+            raise ValueError("training.max_consecutive_skips doit être un entier positif")
+        self.max_consecutive_skips = max_consecutive_skips
+        self.optimizer_steps = 0
+        self.skipped_steps = 0
+        self.consecutive_skips = 0
+
+    def record(self, skipped):
+        """Enregistre chaque pas après journalisation et refuse la limite de sauts atteinte."""
+        if skipped:
+            self.skipped_steps += 1
+            self.consecutive_skips += 1
+        else:
+            self.optimizer_steps += 1
+            self.consecutive_skips = 0
+        if self.consecutive_skips >= self.max_consecutive_skips:
+            raise RuntimeError(FP16_FAILURE)
+
+    def finish(self):
+        """Refuse une exécution terminée sans aucune mise à jour de l'optimiseur."""
+        if self.optimizer_steps == 0:
+            raise RuntimeError("Aucun pas d'optimiseur appliqué ; " + FP16_FAILURE)
 
 
 def prepare_qlora_text(model, torch):
@@ -48,7 +157,7 @@ def package_versions() -> dict:
 
 
 def main(argv=None):
-    """Entraîne quelques pas de LoRA, enregistre l'adaptateur et les mesures, puis vérifie son rechargement."""
+    """Entraîne LoRA avec loss réduite et AMP suivi, puis sauvegarde et vérifie le rechargement local."""
     parser = argparse.ArgumentParser(description="Essai LoRA court (SCRUM-29).")
     parser.add_argument("--config", type=Path, default=CONFIG)
     parser.add_argument("--steps", type=int, help="Remplace training.steps de la configuration.")
@@ -63,6 +172,11 @@ def main(argv=None):
 
     cfg = yaml.safe_load(args.config.read_text(encoding="utf-8"))
     train = cfg["training"]
+    init_scale = train.get("init_scale", 1024)
+    max_grad_norm = train.get("max_grad_norm", 1.0)
+    progress = OptimizerProgress(train.get("max_consecutive_skips", 8))
+    if not math.isfinite(init_scale) or init_scale <= 0 or not math.isfinite(max_grad_norm) or max_grad_norm <= 0:
+        parser.error("training.init_scale et training.max_grad_norm doivent être finis et positifs")
     steps = args.steps if args.steps is not None else train["steps"]
     base = cfg["base_model"]
     validate_lora_config(cfg["lora"])
@@ -121,7 +235,8 @@ def main(argv=None):
         model = get_peft_model(model, LoraConfig(r=lora["r"], lora_alpha=lora["alpha"], lora_dropout=lora["dropout"],
                                                  target_modules=lora["target_modules"], bias="none", use_dora=False,
                                                  base_model_name_or_path=base["model_id"], revision=base["revision"],
-                                                 task_type="CAUSAL_LM"))
+                                                 task_type="CAUSAL_LM"), autocast_adapter_dtype=True)
+        parameters = ensure_trainable_float32(model)
     load_seconds = time.perf_counter() - start
     if train["gradient_checkpointing"]:
         model.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
@@ -137,10 +252,10 @@ def main(argv=None):
     load_vram_peak = torch.cuda.max_memory_allocated() if device == "cuda" else None
     if device == "cuda":
         torch.cuda.reset_peak_memory_stats()
-    optimizer = torch.optim.AdamW([p for p in model.parameters() if p.requires_grad], lr=train["learning_rate"])
+    optimizer = torch.optim.AdamW(parameters, lr=train["learning_rate"])
     order = list(range(len(encoded)))
     log = []
-    scaler = torch.amp.GradScaler("cuda", enabled=device == "cuda")
+    scaler = torch.amp.GradScaler("cuda", enabled=device == "cuda", init_scale=init_scale)
     model.train()
     with PeakMemory() as train_peak:
         for step in range(steps):
@@ -150,23 +265,20 @@ def main(argv=None):
             t0 = time.perf_counter()
             batch = {k: torch.tensor([v], device=device) for k, v in item.items()}
             with torch.autocast(device_type=device, dtype=torch.float16, enabled=device == "cuda"):
-                loss = model(**batch).loss
-            if not torch.isfinite(loss):
-                raise RuntimeError("Perte non finie ; arrêter et conserver le diagnostic")
-            scaler.scale(loss).backward()
-            scaler.unscale_(optimizer)
-            if any(p.grad is not None and not torch.isfinite(p.grad).all() for p in model.parameters()):
-                raise RuntimeError("Gradient non fini")
-            scaler.step(optimizer)
-            scaler.update()
-            optimizer.zero_grad()
+                loss = supervised_causal_loss(model, batch)
+            amp = amp_optimizer_step(loss, parameters, optimizer, scaler, max_grad_norm)
             if device == "cuda":
                 torch.cuda.synchronize()
             seconds = time.perf_counter() - t0
             log.append({"step": step + 1, "example": examples[order[step % len(order)]]["id"],
-                        "tokens": len(item["input_ids"]), "loss": round(loss.item(), 4), "seconds": round(seconds, 1),
-                        "rss_gb": gb(proc.memory_info().rss)})
+                        "tokens": len(item["input_ids"]), "loss": loss.item(), "seconds": round(seconds, 1),
+                        "rss_gb": gb(proc.memory_info().rss), **amp,
+                        "vram_allocated_gb": gb(torch.cuda.memory_allocated()) if device == "cuda" else None,
+                        "vram_peak_gb": gb(torch.cuda.max_memory_allocated()) if device == "cuda" else None})
             print(json.dumps(log[-1]), flush=True)
+            del loss, batch
+            progress.record(amp["skipped"])
+    progress.finish()
 
     run_dir = new_run_directory(root=Path(cfg.get("runs_dir", ROOT / "eval/runs")), name="lora_essai")
     adapter_dir = ROOT / cfg["adapter_dir"]
@@ -179,7 +291,7 @@ def main(argv=None):
     reload_result = set_peft_model_state_dict(model, reloaded)
     if reload_result.unexpected_keys:
         raise RuntimeError(str(reload_result.unexpected_keys))
-    del model, optimizer
+    del model, optimizer, parameters
     if device == "cuda":
         torch.cuda.empty_cache()
 
@@ -194,6 +306,9 @@ def main(argv=None):
         "vram_peak_load_gb": gb(load_vram_peak) if device == "cuda" else None,
         "checkpoint_loading_info": loading,
         "steps": steps,
+        "optimizer_steps": progress.optimizer_steps,
+        "skipped_steps": progress.skipped_steps,
+        "final_scale": scaler.get_scale(),
         "examples": len(examples),
         "trainable_parameters": trainable,
         "total_parameters": total,
@@ -204,6 +319,7 @@ def main(argv=None):
         "seconds_per_1k_tokens_mean": round(sum(r["seconds"] for r in log) / sum(r["tokens"] for r in log) * 1000, 1),
         "loss_first_mean": round(sum(r["loss"] for r in first) / len(first), 4),
         "loss_last_mean": round(sum(r["loss"] for r in last) / len(last), 4),
+        "loss_mean": round(sum(r["loss"] for r in log) / len(log), 4),
         "loss_window": window,
     }
 

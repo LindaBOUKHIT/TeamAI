@@ -24,6 +24,9 @@ training:
   fp16: true
   bf16: false
   learning_rate: 2.0e-4
+  max_grad_norm: 1.0
+  init_scale: 1024        # limite les débordements initiaux en fp16
+  max_consecutive_skips: 8
   max_tokens: 3072        # un exemple plus long est refusé, jamais tronqué silencieusement
   gradient_checkpointing: true
   torch_threads: 12

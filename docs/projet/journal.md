@@ -454,3 +454,52 @@ identiques. Le transfert NF4 vers le GGUF Q4_0 et la qualité ne sont pas valid�
 
 Usage IA : Codex gpt-6.1-sol supervisé par Claude ; relecture d'Alain à faire ;
 relecture des exemples par Linda à refaire.
+
+## 08/11/2026 — SCRUM-29 : correctifs après l'essai T4 de SCRUM-61 (loss réduite aux positions supervisées, AMP fp16)
+
+Nassim a essayé les vingt exemples train sur une T4 Kaggle (14,56 Gio).
+Deux erreurs ont été constatées :
+
+- `torch.OutOfMemoryError: Tried to allocate 1.97 GiB`, avec 13,34 Gio déjà
+  utilisés : `model(**batch).loss` calculait les logits de toutes les positions
+  pour un vocabulaire de 262 144 tokens, puis la loss les promouvait en float32
+  (environ 2 Gio pour 2 000 tokens).
+- `RuntimeError: Gradient non fini` : après `scaler.unscale_`, le script arrêtait
+  l'essai au lieu de laisser GradScaler sauter le pas et réduire son échelle
+  initiale de 65 536, susceptible de provoquer les premiers débordements fp16.
+
+Correction : le forward ne reçoit plus de labels. Si `first` est le premier
+indice supervisé et `L` la longueur, `logits_to_keep = L - first + 1` conserve
+les positions `first-1 … L-1`. La CE float32 de `logits[:, :-1]` contre
+`labels[:, first:]`, avec `ignore_index=-100` et moyenne des tokens supervisés,
+conserve la loss décalée standard. Les labels masqués au milieu ou à la fin
+restent permis ; une frontière invalide ou l'absence de supervision échoue.
+La référence locale Transformers 5.6.2 a été consultée en lecture seule :
+Gemma applique bien la découpe avant `lm_head` et le softcapping.
+
+La loss non finie reste fatale. Les gradients non finis passent par
+`scaler.step()` puis `scaler.update()`. Un saut est détecté par un gradient non
+fini après unscale ou par une baisse d'échelle après update. Les gradients finis
+sont écrêtés à 1.0 après unscale ; les seuls paramètres LoRA entraînables sont
+vérifiés et promus en float32 si nécessaire. L'échelle initiale configurable
+vaut désormais 1024. Huit sauts consécutifs, ou aucun pas appliqué en fin
+d'essai, déclenchent un échec explicite : « gradients non finis persistants en
+fp16 : l'échelle ne suffit pas, activations hors plage fp16 probables ».
+
+Journal par pas : `scale`, `skipped`, `grad_norm`, `vram_allocated_gb` et
+`vram_peak_gb`. Métriques : `optimizer_steps`, `skipped_steps`, `final_scale`
+et moyennes de loss incluant tous les forwards valides, même si le pas est
+sauté. Le lanceur Kaggle transmet `PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True`
+au sous-processus train sans écraser une valeur utilisateur. Le premier essai
+documenté est `--steps 3`. Base, cibles q_proj/v_proj, r=8, NF4/fp16 et exemples
+restent inchangés.
+
+Tests factices CPU ajoutés pour l'égalité loss/gradients, les frontières, le
+saut isolé suivi d'un pas appliqué, les sauts persistants, la loss non finie,
+les paramètres entraînables float32 et l'environnement du lanceur. Aucun Python
+ni pytest exécuté pour ce correctif ; aucun service externe, opération git,
+chargement de modèle ou essai GPU. **non revalidé sur GPU à ce stade**.
+Restent à contrôler sur T4 : pic VRAM réel, stabilité fp16, pas effectivement
+appliqués et durée, puis sauvegarde/rechargement et conversion réels.
+
+Usage IA : Codex gpt-6.1-sol supervisé par Claude ; relecture d'Alain à faire.

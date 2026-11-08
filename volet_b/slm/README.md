@@ -265,6 +265,14 @@ v16, il n'est pas ajouté au texte du prompt. Le dialogue est rendu par le templ
 Gemma avec `enable_thinking=False`. La perte porte sur le JSON et le marqueur de fin de tour qui le suit immédiatement,
 sans les tokens du prompt ni la suite éventuelle du dialogue. Aucun exemple n'est tronqué.
 
+Depuis le correctif du 08/11, le forward ne reçoit plus `labels`. Pour une séquence
+de longueur `L`, `first` est le premier indice supervisé et
+`logits_to_keep = L - first + 1` : seules les positions `first-1 … L-1` passent
+par `lm_head` et le softcapping. La cross-entropy FP32 compare `logits[:, :-1]`
+à `labels[:, first:]`, ignore `-100` et moyenne les tokens supervisés. Elle garde
+la même définition que la loss décalée complète, sans matérialiser les logits
+du prompt pour le vocabulaire de 262 144 tokens.
+
 Couverture régénérée : **E27 : 2 blocs ; E28 : 2 blocs ; E24 : absent** du train
 du sample (20 blocs E27 et 24 blocs E28 disponibles). Les quatre blocs auparavant
 exclus le restent. Tous les `reviewed_by` sont vides : la relecture antérieure de
@@ -306,8 +314,13 @@ la préparation. Depuis cette racine extraite, dans des cellules de commande :
 python -m volet_b.slm.kaggle_lora_essai --dry-run
 python -m volet_b.slm.kaggle_lora_essai --install
 # Redémarrer le kernel si des bibliothèques avaient déjà été importées.
-python -m volet_b.slm.kaggle_lora_essai --steps 30
+python -m volet_b.slm.kaggle_lora_essai --steps 3
 ```
+
+Commencer par **`--steps 3`** pour vérifier forward, backward et application réelle
+de l'optimiseur. Après lecture du journal, lancer `--steps 30` avec un nouveau
+`--working` si les sorties du premier essai existent. Trois pas laissent GradScaler sauter un premier
+pas en débordement ; si aucun pas n'est appliqué, consulter `skipped` et `scale`.
 
 Le mode `--install` installe puis quitte ; il ne télécharge aucun modèle.
 Les versions de départ sont figées dans `PACKAGES` : torch 2.9.1, Transformers
@@ -327,8 +340,39 @@ exporte immédiatement l'adaptateur seul. Aucun bloc val/test ne sert à la pert
 Pour un lancement direct avec poids déjà en cache :
 
 ```bash
-python -m volet_b.slm.train_lora --device cuda --qlora --offline --steps 30
+python -m volet_b.slm.train_lora --device cuda --qlora --offline --steps 3
 ```
+
+Le sous-processus lancé par le script Kaggle reçoit
+`PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True`, sauf si cette variable est
+déjà définie par l'utilisateur. `--dry-run` expose la commande et cette valeur,
+sans afficher le reste de l'environnement.
+
+Chaque pas affiche `loss`, `scale` (après `scaler.update()`), `skipped`,
+`grad_norm` (norme après unscale, avant écrêtage ; `null` si non finie),
+`vram_allocated_gb` et `vram_peak_gb` (pic cumulé depuis le début de
+l'entraînement, hors chargement ; unités Gio). Les paramètres LoRA entraînables
+sont vérifiés et, si nécessaire, promus en float32 avant création de l'optimiseur.
+Après unscale, les gradients finis sont écrêtés à `training.max_grad_norm: 1.0`.
+Un gradient non fini laisse `GradScaler.step()` sauter le pas et `update()` réduire
+l'échelle. `skipped` vaut vrai si un gradient après unscale est non fini **ou**
+si l'échelle diminue après update. La loss non finie reste immédiatement fatale.
+
+L'échelle initiale `training.init_scale` vaut 1024, pour limiter les débordements
+initiaux. Quelques sauts initiaux peuvent accompagner son adaptation. L'essai
+échoue après `training.max_consecutive_skips: 8` sauts consécutifs, ou à la fin
+si aucun pas d'optimiseur n'a été appliqué. Si tous les pas sont sautés, conserver
+le journal : une échelle qui baisse sans amélioration indique que les activations
+peuvent dépasser la plage fp16. Ne pas prolonger aveuglément le run ; faire relire
+le diagnostic avant de réviser le protocole de précision. Le message est :
+« gradients non finis persistants en fp16 : l'échelle ne suffit pas, activations
+hors plage fp16 probables ».
+
+Les métriques incluent `optimizer_steps`, `skipped_steps`, `final_scale` et
+`loss_mean`. Toutes les moyennes de loss, y compris les fenêtres initiale et
+finale, incluent les forwards valides des pas sautés. Ces correctifs sont
+**non revalidés sur GPU à ce stade** ; les tests factices CPU ont été ajoutés,
+leur exécution reste à faire par Alain.
 
 Sorties Kaggle dans `/kaggle/working/` : `adapter/` (PEFT),
 `gguf/adapter.gguf`, `gguf/meta.json`, `gguf/conversion.log`, `base-config/`,

@@ -28,6 +28,9 @@ def test_gemma_configuration():
     assert cfg["training"]["batch_size"] == 1
     assert cfg["training"]["fp16"] and not cfg["training"]["bf16"]
     assert cfg["training"]["gradient_checkpointing"]
+    assert cfg["training"]["max_grad_norm"] == 1.0
+    assert cfg["training"]["init_scale"] == 1024
+    assert cfg["training"]["max_consecutive_skips"] == 8
     validate_lora_config(cfg["lora"])
 
 
@@ -139,14 +142,36 @@ def test_non_train_refused_even_if_annotation_claims_train(tmp_path, split):
 
 
 def test_kaggle_dry_run_no_side_effects(monkeypatch, tmp_path):
-    """Le plan reste inspectable sans torch, installation, réseau ou création de sorties."""
+    """Le plan expose commande et allocateur sans torch, installation, réseau ou sorties."""
     monkeypatch.setattr(kaggle_lora_essai.subprocess, "run", MagicMock(side_effect=AssertionError("process")))
     monkeypatch.setattr(kaggle_lora_essai.urllib.request, "urlretrieve", MagicMock(side_effect=AssertionError("network")))
-    result = kaggle_lora_essai.main(["--dry-run", "--working", str(tmp_path / "absent")])
+    monkeypatch.delenv("PYTORCH_CUDA_ALLOC_CONF", raising=False)
+    result = kaggle_lora_essai.main(["--dry-run", "--steps", "1", "--working", str(tmp_path / "absent")])
     assert result["llama_cpp_commit"] == convert_gguf.LLAMA_CPP_COMMIT == "0c1e57098"
-    assert result["steps"] == 30
+    assert result["steps"] == 1
+    assert result["training_env"] == {"PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:True"}
+    assert result["training_command"] == [
+        sys.executable, "-m", "volet_b.slm.train_lora", "--config", str(tmp_path / "absent/lora_essai.yaml"),
+        "--steps", "1", "--device", "cuda", "--qlora", "--offline"]
     assert result["revision"] == "476025a01dbf99361c062bbeca3d6a76bb4c4566"
     assert not (tmp_path / "absent").exists()
+
+
+@pytest.mark.parametrize("allocator", [None, "max_split_size_mb:64", ""])
+def test_kaggle_training_environment_preserves_user_choice(allocator, monkeypatch, tmp_path):
+    """L'environnement du train est copié ; le plan expose aussi toute valeur utilisateur conservée."""
+    original = {"PATH": "example-path", "UNCHANGED": "example-value"}
+    if allocator is not None:
+        original["PYTORCH_CUDA_ALLOC_CONF"] = allocator
+        monkeypatch.setenv("PYTORCH_CUDA_ALLOC_CONF", allocator)
+    else:
+        monkeypatch.delenv("PYTORCH_CUDA_ALLOC_CONF", raising=False)
+    snapshot = dict(original)
+    env = kaggle_lora_essai.training_environment(original)
+    expected = "expandable_segments:True" if allocator is None else allocator
+    assert env == {**original, "PYTORCH_CUDA_ALLOC_CONF": expected}
+    assert original == snapshot and env is not original
+    assert kaggle_lora_essai.plan(tmp_path, 1)["training_env"]["PYTORCH_CUDA_ALLOC_CONF"] == expected
 
 
 def test_kaggle_bundle_train_only(tmp_path):
