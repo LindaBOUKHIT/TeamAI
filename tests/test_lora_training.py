@@ -209,3 +209,15 @@ def test_trainable_parameters_promoted_before_optimizer():
     optimizer = torch.optim.SGD(parameters, lr=0.1)
     result = amp_optimizer_step(model.weight.square().sum(), parameters, optimizer, FakeScaler(), 1.0)
     assert result["skipped"] is False
+
+
+def test_loading_info_is_json_serializable():
+    """Transformers 5 renvoie des ensembles dans loading_info : metrics.json doit rester écrivable."""
+    import json
+
+    from volet_b.slm.train_lora import jsonable
+
+    info = {"missing_keys": {"b", "a"}, "unexpected_keys": set(), "error_msgs": [], "mismatched_keys": [("w", object())]}
+    out = json.loads(json.dumps(jsonable(info)))
+    assert out["missing_keys"] == ["a", "b"] and out["unexpected_keys"] == []
+    assert isinstance(out["mismatched_keys"][0][1], str)

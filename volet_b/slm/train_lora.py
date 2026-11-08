@@ -145,6 +145,17 @@ def prepare_qlora_text(model, torch):
     return model
 
 
+def jsonable(value):
+    """Rend les infos de chargement Transformers sérialisables (ensembles triés, objets en texte)."""
+    if isinstance(value, dict):
+        return {str(k): jsonable(v) for k, v in value.items()}
+    if isinstance(value, (set, frozenset)):
+        return sorted(jsonable(v) for v in value)
+    if isinstance(value, (list, tuple)):
+        return [jsonable(v) for v in value]
+    return value if value is None or isinstance(value, (str, int, float, bool)) else str(value)
+
+
 def package_versions() -> dict:
     """Versions des paquets qui influencent l'entraînement (None si absent)."""
     out = {}
@@ -304,7 +315,7 @@ def main(argv=None):
         "qlora_4bit": args.qlora,
         "vram_peak_gb": gb(max(load_vram_peak, torch.cuda.max_memory_allocated())) if device == "cuda" else None,
         "vram_peak_load_gb": gb(load_vram_peak) if device == "cuda" else None,
-        "checkpoint_loading_info": loading,
+        "checkpoint_loading_info": jsonable(loading),
         "steps": steps,
         "optimizer_steps": progress.optimizer_steps,
         "skipped_steps": progress.skipped_steps,
