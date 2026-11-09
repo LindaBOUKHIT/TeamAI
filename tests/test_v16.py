@@ -137,6 +137,50 @@ class FrozenV16Tests(unittest.TestCase):
         self.assertEqual(result['second_response']['text'], normal['text'])
         self.assertTrue(result['ok'])
         self.assertTrue(result['retry_all_checks_success'])
+        self.assertIsNone(result['retry_error'])
+
+    def test_explain_preserves_first_response_when_correction_raises(self):
+        """Un échec du second appel garde le brut et les contrôles de la première réponse."""
+        from volet_b.slm.v16.explain import explain_block
+
+        block = prepared_blocks()[0]
+        loop = load(FIXTURES / 'loop.json')
+        calls = []
+
+        def generate(messages, adapter=None, **options):
+            """Simule une première boucle puis une panne du backend pendant la correction."""
+            calls.append(messages)
+            if len(calls) == 2:
+                raise RuntimeError('correction indisponible')
+            return {**loop, 'seconds': 1.0, 'finish_reason': 'stop', 'prompt_tokens': 2000}
+
+        fake = SimpleNamespace(generate=generate, load_config=lambda: {}, load_backend=lambda *args: None,
+                               v16_context_error=lambda *args: None)
+        with patch.dict(sys.modules, {'volet_b.slm.generate': fake}):
+            result = explain_block(block)
+        expected = runtime.evaluate_response(
+            {'choices': [{'message': {'content': loop['text']}, 'finish_reason': 'stop'}],
+             'usage': {'prompt_tokens': 2000, 'completion_tokens': loop['new_tokens']}},
+            block, runtime.build_prompt(block), 1.0, 1)
+        self.assertEqual(len(calls), 2)
+        self.assertIn('CORRECTION UNIQUE', calls[1][0]['content'])
+        self.assertEqual(result['first_response'], expected)
+        self.assertIsNone(result['second_response'])
+        self.assertEqual(result['text'], loop['text'])
+        for key in ['prompt', 'finish', 'ok', 'errors', 'factual_checks_ok', 'factual_errors',
+                    'review_flags', 'anchor_errors', 'retry_errors', 'network_alerts',
+                    'prompt_tokens', 'new_tokens', 'seconds']:
+            self.assertEqual(result[key], expected[key], key)
+        self.assertEqual(result['attempt_count'], 1)
+        self.assertEqual(result['total_new_tokens'], loop['new_tokens'])
+        self.assertEqual(result['retry_trigger_errors'], expected['retry_errors'])
+        self.assertIsNone(result['retry_skipped_reason'])
+        self.assertEqual(result['retry_error'], 'RuntimeError: correction indisponible')
+        self.assertFalse(result['ok'])
+        self.assertIs(result['retry_anchor_success'], False)
+        self.assertIs(result['retry_trigger_success'], False)
+        self.assertIs(result['retry_all_checks_success'], False)
+        json.dumps(result)
 
     def test_context_guard_preserves_first_response(self):
         """Une correction trop longue est refusée sans perdre la première réponse."""
