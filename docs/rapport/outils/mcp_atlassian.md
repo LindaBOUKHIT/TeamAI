@@ -11,6 +11,7 @@
 - **Ce qui a échoué ou déçu** :
   - Le même compte donne accès à plusieurs sites Atlassian. Une règle locale fixe donc le site et son identifiant pour ce projet, et interdit d'utiliser l'autre connecteur, même pour vérifier un accès.
   - Les actions de l'agent apparaissent dans Jira sous le nom de la personne connectée. L'historique ne distingue pas un commentaire écrit par l'agent d'un commentaire écrit à la main : la traçabilité de l'usage d'IA repose sur le journal.
+  - Automatisations Jira (Linda) : « PR vers dev → En revue » et « PR fusionnée dans dev → Terminé ». La première version rouvrait des tickets déjà terminés et agissait sur des tickets seulement cités dans la PR. Il a fallu ajouter deux conditions : la branche source doit contenir la clé du ticket, et le ticket ne doit pas être déjà terminé.
   - Un statut Jira ne prouve pas qu'un critère de fin est rempli : SCRUM-15 a dû être rouvert le 18/10 après audit, parce que le tableau des environnements restait incomplet.
 - **Ce que la documentation omet** : rien n'empêche l'agent d'agir sur le mauvais site quand plusieurs sont accessibles. Il faut le préciser dans les consignes du projet (`AGENTS.md`).
 - **Comparaison avec l'outil utilisé avant** : le 21/09, le board n'existait pas encore (« board et classeur partagé non créés »). Le gain du connecteur tient à la création en lot des tickets et de leurs liens.
