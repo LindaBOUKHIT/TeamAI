@@ -1,6 +1,7 @@
 """SCRUM-57 : backends, conversion et artefacts C7, sans poids ni conversion réelle."""
 import contextlib
 import json
+import os
 import sys
 from types import SimpleNamespace
 from unittest.mock import MagicMock
@@ -170,9 +171,11 @@ def test_quantization_api_without_conversion(monkeypatch, tmp_path):
     monkeypatch.setitem(sys.modules, "llama_cpp", SimpleNamespace(
         llama_model_quantize_default_params=lambda: params, LLAMA_FTYPE_MOSTLY_Q4_K_M=15,
         llama_model_quantize=quantize))
-    convert.quantize(tmp_path / "f16.gguf", tmp_path / "q4.gguf")
+    source, destination = tmp_path / "source f16.gguf", tmp_path / "destination q4.gguf"
+    convert.quantize(source, destination)
     assert params.ftype == 15
     assert quantize.call_count == 1
+    assert quantize.call_args.args[:2] == (os.fsencode(source), os.fsencode(destination))
 
 
 def test_merge_sequence_without_weights(monkeypatch, tmp_path):
@@ -218,8 +221,23 @@ def test_selection_uses_only_validation_and_no_labels(tmp_path):
         compare.select_blocks(2, sample=tmp_path, splits=tmp_path)
 
 
-def test_comparison_creates_fresh_c7(monkeypatch, tmp_path):
-    """Deux lancements créent chacun les quatre fichiers C7 sans écraser le premier."""
+@pytest.mark.parametrize("n_gpu_layers,gguf_file,quantization", [
+    (None, "model-q4_k_m.gguf", "Q4_K_M"),
+    (0, "model-Q4_0.gguf", "Q4_0"),
+    (-1, "model-q8_0.gguf", "Q8_0"),
+    (8, "model-f16.gguf", "F16"),
+    (0, "model_Q5_K_S.gguf", "Q5_K_S"),
+    (0, "model-Iq2_xxs.gguf", "IQ2_XXS"),
+    (0, "model.gguf", None),
+    (0, "Q4_K_M/model.gguf", None),
+])
+def test_comparison_creates_fresh_c7(monkeypatch, tmp_path, n_gpu_layers, gguf_file, quantization):
+    """C7 conserve les lancements et décrit le device et le GGUF réellement configurés."""
+    cfg = {**slm.load_config(), "gguf_file": gguf_file}
+    cfg.pop("n_gpu_layers", None)
+    if n_gpu_layers is not None:
+        cfg["n_gpu_layers"] = n_gpu_layers
+    monkeypatch.setattr(compare, "load_config", lambda: cfg)
     blocks = [{"block_id": "blk_1", "split": "val", "messages": [{"role": "user", "content": "logs"}]}]
     monkeypatch.setattr(compare, "select_blocks", lambda *args: blocks)
     monkeypatch.setattr(compare, "sha256_file", lambda path: "hash")
@@ -248,14 +266,20 @@ def test_comparison_creates_fresh_c7(monkeypatch, tmp_path):
     for run in runs:
         assert all((run / name).is_file() for name in
                    ("config.json", "predictions.jsonl", "metrics.json", "comparison.md"))
+        config = json.loads((run / "config.json").read_text(encoding="utf-8"))
+        expected_device = "cpu" if n_gpu_layers in (None, 0) else f"cuda (n_gpu_layers={n_gpu_layers})"
+        assert config["device"] == expected_device
+        assert config["quantization"] == {"transformers": None, "llamacpp": quantization}
 
 
-def test_measurement_preserves_invalid_outputs(monkeypatch):
+@pytest.mark.parametrize("gguf_file,quantization", [("model-q8_0.gguf", "Q8_0"), ("model.gguf", None)])
+def test_measurement_preserves_invalid_outputs(monkeypatch, gguf_file, quantization):
     """Une sortie invalide et une erreur restent dans les métriques avec des mesures nulles."""
     monkeypatch.setattr(compare, "load_backend", MagicMock())
     monkeypatch.setattr(compare, "generate", MagicMock(side_effect=[
         {"text": "pas JSON", "new_tokens": 4, "seconds": 2.0}, RuntimeError("échec")]))
-    config = {"generation": slm.load_config(), "adapters": {"llamacpp": None}, "blocks": [
+    config = {"generation": {**slm.load_config(), "gguf_file": gguf_file},
+              "adapters": {"llamacpp": None}, "blocks": [
         {"block_id": f"blk_{i}", "split": "val", "messages": []} for i in (1, 2)]}
     predictions, metrics = compare.measure_backend(config, "llamacpp")
     assert metrics["n"] == metrics["failures"] == 2
@@ -263,6 +287,7 @@ def test_measurement_preserves_invalid_outputs(monkeypatch):
     assert predictions[0]["parsed_response"] is None
     assert predictions[1]["seconds"] is None
     assert metrics["mean_tokens_per_second"] == 2
+    assert metrics["quantization"] == quantization
 
 
 def test_measurement_refuses_non_strict_json(monkeypatch):
