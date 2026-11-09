@@ -241,6 +241,8 @@ def test_comparison_creates_fresh_c7(monkeypatch, tmp_path):
         return SimpleNamespace(returncode=0)
 
     monkeypatch.setattr(compare.subprocess, "run", fake_process)
+    # Sous Linux, platform.platform() appelle `uname -p` via subprocess.run : on le neutralise.
+    monkeypatch.setattr(compare.platform, "platform", lambda: "test")
     for _ in range(2):
         compare.main(["--n", "1", "--backends", "llamacpp"])
     runs = list(tmp_path.iterdir())
