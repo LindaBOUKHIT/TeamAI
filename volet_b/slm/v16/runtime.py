@@ -204,23 +204,28 @@ def run_block(block, infer, persist, can_retry):
     persist(first)
     attempts = [first]
     retry_skipped = None
+    retry_error = None
     if first['retry_errors']:
         correction = repair_prompt(prompt,first['retry_errors'])
         retry_skipped = can_retry(correction)
         if retry_skipped is None:
-            second = infer(block,correction,2)
-            persist(second)
-            attempts.append(second)
+            try:
+                second = infer(block,correction,2)
+            except Exception as exc:
+                retry_error = f'{type(exc).__name__}: {exc}'
+            else:
+                persist(second)
+                attempts.append(second)
     final = attempts[-1]
     return {'version':16,'model':'Gemma 4 E4B QAT','block_id':block['block_id'],'split':block.get('split'),
         'selection_index':block.get('selection_index'),'worker_id':block.get('worker_id'),
         **{k:final[k] for k in ['text','prompt','finish','ok','errors','factual_checks_ok','factual_errors','review_flags','anchor_errors','retry_errors','network_alerts','prompt_tokens','new_tokens']},
         'seconds':sum(a['seconds'] for a in attempts),'total_new_tokens':sum(a['new_tokens'] for a in attempts),
         'attempt_count':len(attempts),'first_response':first,'second_response':attempts[1] if len(attempts)==2 else None,
-        'retry_trigger_errors':first['retry_errors'],'retry_skipped_reason':retry_skipped,
-        'retry_anchor_success':final['ok'] and not final['anchor_errors'] if len(attempts)==2 else None,
-        'retry_trigger_success':final['ok'] and not final['retry_errors'] if len(attempts)==2 else None,
-        'retry_all_checks_success':final['ok'] and final['factual_checks_ok'] if len(attempts)==2 else None}
+        'retry_trigger_errors':first['retry_errors'],'retry_skipped_reason':retry_skipped,'retry_error':retry_error,
+        'retry_anchor_success':False if retry_error is not None else final['ok'] and not final['anchor_errors'] if len(attempts)==2 else None,
+        'retry_trigger_success':False if retry_error is not None else final['ok'] and not final['retry_errors'] if len(attempts)==2 else None,
+        'retry_all_checks_success':False if retry_error is not None else final['ok'] and final['factual_checks_ok'] if len(attempts)==2 else None}
 
 def build_prompt(block):
     """Joint le catalogue fermé au prompt factuel, sans label ni connaissance externe."""
