@@ -1,4 +1,5 @@
 """SCRUM-29 : contrats Gemma/QLoRA, C4, v16 et conversion sans poids ni réseau."""
+import hashlib
 import json
 import re
 import subprocess
@@ -295,3 +296,101 @@ def test_converter_commit_refused(tmp_path):
     (tmp_path / ".git/HEAD").write_text("deadbeef", encoding="ascii")
     with pytest.raises(ValueError, match="épinglé"):
         convert_gguf.verify_converter_revision(tmp_path)
+
+
+@pytest.fixture
+def conversion_case(tmp_path, monkeypatch):
+    """Prépare la conversion avec des doubles, sans convertisseur, poids ni réseau."""
+    cfg = yaml.safe_load(CONFIG.read_text(encoding="utf-8"))["base_model"]
+    source = tmp_path / "adapter"
+    source.mkdir()
+    (source / "adapter_config.json").write_text(json.dumps({
+        "peft_type": "LORA", "base_model_name_or_path": cfg["model_id"],
+        "revision": cfg["revision"], "target_modules": ["q_proj", "v_proj"],
+    }), encoding="utf-8")
+    tools = tmp_path / "converter"
+    tools.mkdir()
+    (tools / "convert_lora_to_gguf.py").write_text("", encoding="utf-8")
+    output_dir = tmp_path / "output"
+    output = output_dir / "adapter.gguf"
+    monkeypatch.setattr(convert_gguf, "verify_converter_revision",
+                        lambda path: convert_gguf.LLAMA_CPP_COMMIT)
+
+    def fake_converter(command):
+        """Produit seulement un fichier factice pour atteindre les contrôles de sortie."""
+        output.write_bytes(b"fake GGUF")
+        return ""
+
+    converter = MagicMock(side_effect=fake_converter)
+    monkeypatch.setattr(convert_gguf, "run_converter", converter)
+    monkeypatch.setattr(convert_gguf, "verify_tensor_coverage", lambda *a: ["fake tensor"])
+    snapshot = MagicMock(side_effect=AssertionError("unexpected snapshot lookup"))
+    monkeypatch.setitem(sys.modules, "huggingface_hub", SimpleNamespace(snapshot_download=snapshot))
+    args = ["adapter", str(source), "--llama-cpp", str(tools), "--output-dir", str(output_dir)]
+    return SimpleNamespace(cfg=cfg, args=args, output=output, output_dir=output_dir,
+                           converter=converter, snapshot=snapshot)
+
+
+@pytest.mark.parametrize("revision", [None, "wrong-revision", "extended-revision"])
+def test_conversion_cached_snapshot_revision_without_manifest(conversion_case, tmp_path, capsys, revision):
+    """Le cache sans manifeste passe uniquement avec le nom exact de la révision figée."""
+    case = conversion_case
+    actual = case.cfg["revision"] if revision is None else (
+        case.cfg["revision"] + "-extra" if revision == "extended-revision" else revision)
+    base = tmp_path / "snapshots" / actual
+    base.mkdir(parents=True)
+    (base / "config.json").write_text('{"model_type": "gemma4"}', encoding="utf-8")
+    assert not (base / "teamai-base.json").exists()
+    case.snapshot.side_effect = None
+    case.snapshot.return_value = str(base)
+    if revision is None:
+        convert_gguf.main(case.args)
+        case.converter.assert_called_once()
+        assert case.converter.call_args.args[0][-2:] == ["--base", str(base)]
+        assert case.output.read_bytes() == b"fake GGUF"
+    else:
+        with pytest.raises(SystemExit) as exc:
+            convert_gguf.main(case.args)
+        assert exc.value.code == 1
+        error = capsys.readouterr().err
+        assert "Snapshot HF incorrect" in error
+        assert "snapshots/" + case.cfg["revision"] in error and str(base) in error
+        case.converter.assert_not_called()
+        assert not case.output_dir.exists()
+    case.snapshot.assert_called_once_with(case.cfg["model_id"], revision=case.cfg["revision"],
+                                          local_files_only=True)
+
+
+@pytest.mark.parametrize("manifest_case", ["valid", "missing", "model_id", "revision", "hash"])
+def test_conversion_explicit_base_requires_valid_manifest(conversion_case, tmp_path, capsys, manifest_case):
+    """--base-config conserve les contrôles du manifeste, de provenance et d'empreinte."""
+    case = conversion_case
+    base = tmp_path / "kaggle-base"
+    base.mkdir()
+    config = base / "config.json"
+    config.write_text('{"model_type": "gemma4"}', encoding="utf-8")
+    manifest = {"model_id": case.cfg["model_id"], "revision": case.cfg["revision"],
+                "config_sha256": hashlib.sha256(config.read_bytes()).hexdigest()}
+    if manifest_case in ("model_id", "revision"):
+        manifest[manifest_case] = "incorrect"
+    elif manifest_case == "hash":
+        manifest["config_sha256"] = "incorrect"
+    if manifest_case != "missing":
+        (base / "teamai-base.json").write_text(json.dumps(manifest), encoding="utf-8")
+    args = case.args + ["--base-config", str(base)]
+    if manifest_case == "valid":
+        convert_gguf.main(args)
+        case.converter.assert_called_once()
+        assert case.converter.call_args.args[0][-2:] == ["--base", str(base)]
+        assert case.output.read_bytes() == b"fake GGUF"
+    else:
+        with pytest.raises(SystemExit) as exc:
+            convert_gguf.main(args)
+        assert exc.value.code == 1
+        error = capsys.readouterr().err
+        message = ("teamai-base.json" if manifest_case == "missing" else
+                   "Configuration de base modifiée" if manifest_case == "hash" else "provenance différente")
+        assert message in error
+        case.converter.assert_not_called()
+        assert not case.output_dir.exists()
+    case.snapshot.assert_not_called()

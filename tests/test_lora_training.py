@@ -115,10 +115,16 @@ class FakeScaler:
         if not self.found_inf:
             optimizer.step()
 
-    def update(self):
+    def get_backoff_factor(self):
+        """Expose le facteur de réduction public de GradScaler."""
+        return 0.5
+
+    def update(self, new_scale=None):
         """Réduit l'échelle en cas de débordement détecté."""
         self.update_calls += 1
-        if self.found_inf:
+        if new_scale is not None:
+            self.current_scale = new_scale
+        elif self.found_inf:
             self.current_scale /= 2
 
 
@@ -221,3 +227,65 @@ def test_loading_info_is_json_serializable():
     out = json.loads(json.dumps(jsonable(info)))
     assert out["missing_keys"] == ["a", "b"] and out["unexpected_keys"] == []
     assert isinstance(out["mismatched_keys"][0][1], str)
+
+
+@pytest.mark.parametrize("value", [float("inf"), float("nan")])
+@pytest.mark.parametrize("enabled", [True, False])
+def test_nonfinite_norm_skipped_then_finite_step_applied(value, enabled, monkeypatch):
+    """Une norme non finie saute sans step, réduit AMP et permet la reprise après nettoyage."""
+    parameter = torch.nn.Parameter(torch.tensor([2.0]))
+    optimizer = torch.optim.SGD([parameter], lr=0.1)
+    scaler = FakeScaler()
+    monkeypatch.setattr(scaler, "is_enabled", lambda: enabled)
+    progress = OptimizerProgress(3)
+    original_clip = torch.nn.utils.clip_grad_norm_
+
+    def nonfinite_norm(parameters, max_norm):
+        """Vérifie les gradients finis déséchelonnés et simule une norme inf ou NaN."""
+        assert all(bool(torch.isfinite(p.grad).all()) for p in parameters)
+        assert parameter.grad.item() == 4.0
+        return torch.tensor(value)
+
+    monkeypatch.setattr(torch.nn.utils, "clip_grad_norm_", nonfinite_norm)
+    result = amp_optimizer_step(parameter.square().sum(), [parameter], optimizer, scaler, 1.0)
+    progress.record(result["skipped"])
+    expected_scale = 512.0 if enabled else 1024.0
+    assert result == {"scale": expected_scale, "skipped": True, "grad_norm": None}
+    assert not scaler.found_inf
+    assert scaler.step_calls == 0
+    assert scaler.update_calls == scaler.unscale_calls == 1
+    assert parameter.item() == 2.0 and parameter.grad is None
+    assert progress.skipped_steps == progress.consecutive_skips == 1
+    assert progress.optimizer_steps == 0
+
+    monkeypatch.setattr(torch.nn.utils, "clip_grad_norm_", original_clip)
+    result = amp_optimizer_step(parameter.square().sum(), [parameter], optimizer, scaler, 1.0)
+    progress.record(result["skipped"])
+    progress.finish()
+    assert result == {"scale": expected_scale, "skipped": False, "grad_norm": 4.0}
+    assert parameter.item() == pytest.approx(1.9, abs=1e-6)
+    assert parameter.grad is None
+    assert scaler.step_calls == 1
+    assert scaler.update_calls == scaler.unscale_calls == 2
+    assert progress.optimizer_steps == progress.skipped_steps == 1
+    assert progress.consecutive_skips == 0
+
+
+@pytest.mark.parametrize("value", [float("inf"), float("nan")])
+def test_nonfinite_norm_consecutive_skips_stop_at_limit(value, monkeypatch):
+    """Les normes non finies comptent dans le même seuil de sauts consécutifs."""
+    parameter = torch.nn.Parameter(torch.tensor([2.0]))
+    optimizer = torch.optim.SGD([parameter], lr=0.1)
+    scaler = FakeScaler()
+    progress = OptimizerProgress(3)
+    monkeypatch.setattr(torch.nn.utils, "clip_grad_norm_", lambda *a, **k: torch.tensor(value))
+    for _ in range(2):
+        result = amp_optimizer_step(parameter.square().sum(), [parameter], optimizer, scaler, 1.0)
+        progress.record(result["skipped"])
+    with pytest.raises(RuntimeError, match="gradients non finis persistants en fp16"):
+        result = amp_optimizer_step(parameter.square().sum(), [parameter], optimizer, scaler, 1.0)
+        progress.record(result["skipped"])
+    assert progress.skipped_steps == progress.consecutive_skips == scaler.update_calls == 3
+    assert progress.optimizer_steps == scaler.step_calls == 0
+    assert scaler.get_scale() == 128.0
+    assert parameter.item() == 2.0 and parameter.grad is None

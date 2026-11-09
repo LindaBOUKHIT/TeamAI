@@ -84,8 +84,8 @@ def amp_optimizer_step(loss, parameters, optimizer, scaler, max_grad_norm):
     """Backprop, unscale, écrête les gradients finis et laisse AMP sauter les débordements.
 
     scale est l'échelle après update. Un pas est sauté si un gradient après
-    unscale est non fini ou si cette échelle a diminué. Sans AMP, un gradient
-    non fini évite aussi toute application de l'optimiseur.
+    unscale ou sa norme est non fini, ou si cette échelle a diminué. Sans AMP,
+    un gradient ou une norme non finis évitent aussi toute application de l'optimiseur.
     """
     import torch
 
@@ -96,12 +96,18 @@ def amp_optimizer_step(loss, parameters, optimizer, scaler, max_grad_norm):
     scaler.unscale_(optimizer)
     finite = all(bool(torch.isfinite(p.grad).all()) for p in parameters if p.grad is not None)
     grad_norm = None
+    norm_overflow = False
     if finite:
         norm = torch.nn.utils.clip_grad_norm_(parameters, max_grad_norm)
-        grad_norm = float(norm.item()) if bool(torch.isfinite(norm)) else None
-    if finite or scaler.is_enabled():
-        scaler.step(optimizer)
-    scaler.update()
+        finite = bool(torch.isfinite(norm))
+        norm_overflow = not finite
+        grad_norm = float(norm.item()) if finite else None
+    if norm_overflow and scaler.is_enabled():
+        scaler.update(new_scale=scale_before * scaler.get_backoff_factor())
+    else:
+        if not norm_overflow and (finite or scaler.is_enabled()):
+            scaler.step(optimizer)
+        scaler.update()
     scale = scaler.get_scale()
     optimizer.zero_grad(set_to_none=True)
     return {"scale": scale, "skipped": not finite or scale < scale_before, "grad_norm": grad_norm}

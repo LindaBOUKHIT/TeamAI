@@ -201,15 +201,17 @@ def main(argv=None):
         commit = verify_converter_revision(tools)
         if args.base_config:
             base = resolve_path(args.base_config)
+            provenance = json.loads((base / "teamai-base.json").read_text(encoding="utf-8"))
+            if provenance.get("model_id") != cfg["model_id"] or not provenance.get("revision", "").startswith(cfg["revision"]):
+                raise ValueError("--base : provenance différente de la base exacte")
+            if hashlib.sha256((base / "config.json").read_bytes()).hexdigest() != provenance.get("config_sha256"):
+                raise ValueError("Configuration de base modifiée")
         else:
             from huggingface_hub import snapshot_download
             base = resolve_path(snapshot_download(cfg["model_id"], revision=cfg["revision"], local_files_only=True))
+            if base.parent.name != "snapshots" or base.name != cfg["revision"]:
+                raise ValueError(f"Snapshot HF incorrect : attendu snapshots/{cfg['revision']}, reçu {base}")
         base_config = json.loads((base / "config.json").read_text(encoding="utf-8"))
-        provenance = json.loads((base / "teamai-base.json").read_text(encoding="utf-8"))
-        if provenance.get("model_id") != cfg["model_id"] or not provenance.get("revision", "").startswith(cfg["revision"]):
-            raise ValueError("--base : provenance différente de la base exacte")
-        if hashlib.sha256((base / "config.json").read_bytes()).hexdigest() != provenance.get("config_sha256"):
-            raise ValueError("Configuration de base modifiée")
         if base_config.get("model_type") not in ("gemma4", "gemma4_text"):
             raise ValueError("Configuration Gemma 4 attendue")
         digest = source_hash(source)
