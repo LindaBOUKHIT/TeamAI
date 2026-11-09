@@ -10,6 +10,7 @@ import statistics
 import subprocess
 import sys
 import time
+from pathlib import Path
 
 from teamai.contracts import validate_answer
 from teamai.paths import ROOT, SAMPLE, SPLITS, resolve_path
@@ -73,6 +74,15 @@ def reject_constant(value):
     raise ValueError(f"Constante JSON interdite : {value}")
 
 
+def gguf_quantization(config):
+    """Lit le type de quantification dans le nom GGUF, sans supposer Q4_K_M."""
+    filename = Path(config.get("gguf_file", "")).name
+    match = re.search(r"(?<![A-Z0-9])(?:Q[2-8]_(?:[01]|K(?:_[SML])?)|"
+                      r"IQ[1-4]_(?:XXS|XS|S|M|NL)|BF16|F16|F32|F64)(?![A-Z0-9_])",
+                      filename, re.IGNORECASE)
+    return match.group().upper() if match else None
+
+
 def measure_backend(config, backend):
     """Mesure un backend dans son processus dédié ; conserve aussi les échecs au dénominateur."""
     if not config["blocks"] or any(block.get("split") != "val" for block in config["blocks"]):
@@ -124,7 +134,7 @@ def measure_backend(config, backend):
                "mean_tokens_per_second": statistics.mean(rates) if rates else None,
                "throughput_measured_n": len(rates), "peak_rss_bytes": peak.peak,
                "load_seconds": load_seconds, "load_error": load_error,
-               "quantization": "Q4_K_M" if backend == "llamacpp" else None,
+               "quantization": gguf_quantization(cfg) if backend == "llamacpp" else None,
                "dtype": "GGUF" if backend == "llamacpp" else "float32"}
     return predictions, metrics
 
@@ -177,6 +187,7 @@ def main(argv=None):
                             capture_output=True, text=True).stdout.strip()
     dirty = subprocess.run(["git", "status", "--porcelain"], cwd=ROOT, check=True,
                            capture_output=True, text=True).stdout.strip()
+    n_gpu_layers = cfg.get("n_gpu_layers", 0)
     config = {"generation": {**cfg, "do_sample": False, "local_files_only": True}, "blocks": blocks,
               "split": "val", "split_sha256": sha256_file(SPLITS / "splits.csv"),
               "sample_sha256": sha256_file(SAMPLE / "Event_traces.csv"),
@@ -186,8 +197,9 @@ def main(argv=None):
               "machine": platform.platform(), "python": platform.python_version(),
               "packages": {**package_versions(), "llama-cpp-python": _version("llama-cpp-python"),
                            "peft": _version("peft"), "gguf": _version("gguf")},
-              "quantization": {"transformers": None, "llamacpp": "Q4_K_M"},
-              "mock": False, "device": "cpu", "rag": None,
+              "quantization": {"transformers": None, "llamacpp": gguf_quantization(cfg)},
+              "mock": False, "device": "cpu" if n_gpu_layers == 0 else f"cuda (n_gpu_layers={n_gpu_layers})",
+              "rag": None,
               "agents": 1, "calls_per_block": 1,
               "memory": "RSS processus indépendant par backend ; octets ; pic échantillonné à 0,2 s, chargement inclus",
               "timing": "Chargement : imports et poids. Génération : prompt inclus ; Transformers hors tokenisation/décodage, llama.cpp chat complet.",
