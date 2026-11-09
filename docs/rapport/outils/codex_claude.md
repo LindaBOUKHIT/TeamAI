@@ -10,7 +10,7 @@
   - SCRUM-29 corrigé après l'essai de Nassim : 155 tests réussis, puis essai T4 réussi (08/11).
   - Le découpage des rôles réduit le contexte de chaque agent : l'un spécifie, l'autre code, et la relecture est séparée de l'écriture.
 - **Ce qui a échoué ou déçu** :
-  - Dans son bac à sable, Codex ne peut pas exécuter Python : il ne lance pas les tests, c'est l'orchestrateur qui le fait.
+  - Dans notre configuration, Codex n'a pas pu exécuter Python : c'est l'orchestrateur qui lance les tests. Ce point dépend du mode de bac à sable : avec `workspace-write` dans un worktree Git, Linda constate que Codex lance bien pytest, à condition d'ajouter `-p no:cacheprovider`, sinon il crée un `.pytest_cache` impossible à supprimer.
   - Codex a écrit des affirmations fausses dans la documentation : « Aucun pytest exécuté » dans le journal alors que les tests avaient tourné, et, pour SCRUM-46, un essai LoRA présenté comme non attesté alors qu'il était consigné. Les deux ont été repérées et corrigées en relecture.
   - Plusieurs paquets Codex installés en même temps ont cassé le script de lancement. Il choisit maintenant la version la plus récente qui contient l'exécutable.
   - Les connecteurs MCP non nécessaires doivent être désactivés au lancement, pour que Codex ne touche à aucune connexion externe.
