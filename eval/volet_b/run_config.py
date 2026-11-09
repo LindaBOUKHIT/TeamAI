@@ -5,6 +5,7 @@ import os
 import platform
 import re
 import statistics
+import subprocess
 import time
 from pathlib import Path
 
@@ -39,18 +40,37 @@ def require_base(config):
         raise ValueError('Configuration attendue : base.')
 
 
+def official_test_hash() -> str:
+    """Lit l'empreinte obligatoire livrée avec le jeu réservé."""
+    if not VOLET_B_TEST_SHA256.is_file():
+        raise FileNotFoundError('eval/volet_b/test.sha256 manquant : il doit être livré avec le jeu réservé (SCRUM-35, PR #36)')
+    reference = VOLET_B_TEST_SHA256.read_text(encoding='utf-8').split()
+    if not reference or not re.fullmatch(r'[0-9a-fA-F]{64}', reference[0]):
+        raise ValueError('test.sha256 : empreinte SHA-256 invalide.')
+    return reference[0].lower()
+
+
 def input_hash(path: Path) -> str:
-    """Vérifie l'entrée et l'empreinte de référence du test officiel si présente."""
+    """Vérifie l'entrée et l'empreinte obligatoire du test officiel."""
     if not path.is_file():
         raise FileNotFoundError(f"Fichier d'exemples C5 absent : {path}. Fournir --data ou attendre SCRUM-35.")
     digest = sha256_file(path)
-    if path.resolve() == VOLET_B_TEST.resolve() and VOLET_B_TEST_SHA256.exists():
-        reference = VOLET_B_TEST_SHA256.read_text(encoding='utf-8').split()
-        if not reference or not re.fullmatch(r'[0-9a-fA-F]{64}', reference[0]):
-            raise ValueError('test.sha256 : empreinte SHA-256 invalide.')
-        if reference[0].lower() != digest:
+    if path.resolve() == VOLET_B_TEST.resolve():
+        if official_test_hash() != digest:
             raise ValueError('SHA-256 du test officiel différent de test.sha256 : exécution refusée.')
     return digest
+
+
+def git_metadata() -> dict:
+    """Relève le commit et les modifications locales, ou note Git indisponible."""
+    try:
+        commit = subprocess.run(['git', 'rev-parse', 'HEAD'], cwd=ROOT, check=True,
+                                capture_output=True, text=True).stdout.strip()
+        status = subprocess.run(['git', 'status', '--porcelain'], cwd=ROOT, check=True,
+                                capture_output=True, text=True).stdout
+    except (OSError, subprocess.SubprocessError) as error:
+        return dict(commit=None, git_dirty=None, commit_note=f'Git indisponible : {error}')
+    return dict(commit=commit, git_dirty=bool(status.strip()), commit_note=None)
 
 
 def predict(example: dict, config: str, retriever=None, adapter: str | None = None) -> dict:
@@ -184,7 +204,7 @@ def metrics(records: list[dict], peak_bytes: int, peak_vram_bytes=None) -> dict:
 
 def run_config(config: str, data: Path = VOLET_B_TEST, limit: int | None = None,
                adapter: str | None = None, run_root: Path = RUNS) -> Path:
-    """Exécute uniquement base v16 et écrit un C7 neuf sans commande git ni publication."""
+    """Exécute uniquement base v16 et écrit un C7 neuf avec provenance Git, sans publication."""
     require_base(config)
     if limit is not None and limit < 1:
         raise ValueError('--limit doit être strictement positif.')
@@ -201,7 +221,7 @@ def run_config(config: str, data: Path = VOLET_B_TEST, limit: int | None = None,
         'model_id': generation['model_id'], 'model_revision': generation['revision'],
         'gguf_repo': generation['gguf_repo'], 'gguf_file': generation['gguf_file'],
         'gguf_revision': generation['gguf_revision'], 'n_ctx': generation['n_ctx'], 'max_new_tokens': 800,
-        'generation': generation, 'commit': None, 'commit_note': 'Aucune opération git ; à renseigner hors script.',
+        'generation': generation, **git_metadata(),
         'agents': 0, 'slm_calls_per_example': '1 ou 2 (correction unique v16)',
         'backend': 'mock' if mock else 'llamacpp', 'quantification': 'Q4_0', 'seed': 42,
         'prompt': 'volet_b/slm/v16/runtime.py::build_prompt', 'prompt_freeze': str(PROMPT_FREEZE.relative_to(ROOT)),
@@ -256,6 +276,8 @@ def update_summary(metric_paths, output: Path = VOLET_B_SUMMARY) -> None:
         if (values['mock'] or values['adapter'] or not values['official_test'] or values['limit'] is not None
                 or not values.get('complete') or values['n'] < 1):
             raise ValueError('Le résumé avant adaptation exige le test officiel complet, sans mock ni adaptateur.')
+        if values.get('input_sha256') != official_test_hash():
+            raise ValueError('SHA-256 du run différent de test.sha256 : publication refusée.')
         fields = ['base', str(values['n'])]
         for key in ('conformity_rate', 'sources_valid_rate', 'abstention_rate', 'latency_mean_seconds',
                     'latency_median_seconds', 'process_peak_rss_bytes'):

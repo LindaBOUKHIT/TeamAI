@@ -14,6 +14,12 @@ from volet_b.slm.generate import MOCK_ANSWER
 @pytest.fixture
 def examples(tmp_path, monkeypatch):
     """Fabrique deux C5 train à partir du sample, avec annotations sentinelles."""
+    monkeypatch.setattr(runner.subprocess, 'run', Mock(side_effect=[
+        subprocess.CompletedProcess([], 0, 'a' * 40 + '\n'),
+        subprocess.CompletedProcess([], 0, ''),
+        subprocess.CompletedProcess([], 0, 'a' * 40 + '\n'),
+        subprocess.CompletedProcess([], 0, ''),
+    ]))
     monkeypatch.setenv('TEAMAI_SLM_MOCK', '1')
     monkeypatch.setattr(slm, 'load_backend', lambda *args: None)
     monkeypatch.setattr(slm, 'v16_context_error', lambda *args: None)
@@ -61,6 +67,7 @@ def test_base_pipeline_and_no_annotation(examples, tmp_path, monkeypatch):
     assert all(r['attempts'][0]['finish_reason'] == 'stop' for r in records)
     cfg = json.loads((first / 'config.json').read_text(encoding='utf-8'))
     freeze = json.loads(runner.PROMPT_FREEZE.read_text(encoding='utf-8'))
+    assert cfg['commit'] == 'a' * 40 and cfg['git_dirty'] is False and cfg['commit_note'] is None
     assert cfg['instruction_sha256'] == freeze['instruction_sha256']
     assert cfg['policy_sha256'] == freeze['policy_sha256']
     assert cfg['gguf_revision'] == runner.load_config()['gguf_revision']
@@ -217,13 +224,17 @@ def test_official_hash_refusal(examples, tmp_path, monkeypatch):
 
 
 @pytest.mark.parametrize('change', [{'config': 'rag1'}, {'mock': True}, {'limit': 1}, {'complete': False},
-                                    {'official_test': False}, {'adapter': 'lora'}, {'n': 0}])
-def test_summary_refuses_ineligible(tmp_path, change):
-    """Refuse RAG, factice, partiel, hors test, vide ou adapté sans altérer le résumé."""
+                                    {'official_test': False}, {'adapter': 'lora'}, {'n': 0},
+                                    {'input_sha256': '0' * 64}, {'input_sha256': None}])
+def test_summary_refuses_ineligible(tmp_path, monkeypatch, change):
+    """Refuse un run inéligible ou une ancienne empreinte sans altérer le résumé."""
+    reference = tmp_path / 'reference.sha256'
+    reference.write_text('a' * 64, encoding='utf-8')
+    monkeypatch.setattr(runner, 'VOLET_B_TEST_SHA256', reference)
     path, output = tmp_path / 'metrics.json', tmp_path / 'resultats.md'
     output.write_text('# Résultats\n\n## Après adaptation\n\nÀ venir.\n', encoding='utf-8')
     values = dict(config='base', mock=False, adapter=None, official_test=True, limit=None, complete=True,
-                  n=2, input_sha256='factice', conformity_rate=1, sources_valid_rate=1, abstention_rate=0,
+                  n=2, input_sha256='a' * 64, conformity_rate=1, sources_valid_rate=1, abstention_rate=0,
                   latency_mean_seconds=1, latency_median_seconds=1, process_peak_rss_bytes=1024)
     runner.write_json(path, values)
     runner.update_summary([path], output)
@@ -302,3 +313,68 @@ def test_hypotheses_empty_group(attention):
     empty = runner.metrics([], peak_bytes=0)
     assert empty['hypotheses_per_block_with_incident'] is None
     assert empty['hypotheses_per_block_without_incident'] is None
+
+
+@pytest.mark.parametrize('status', ['', ' M eval/volet_b/run_config.py\n', '?? nouveau.py\n'])
+def test_git_metadata(status, monkeypatch):
+    """Relève HEAD et distingue dépôt propre, modification et fichier non suivi."""
+    command = Mock(side_effect=[subprocess.CompletedProcess([], 0, 'a' * 40 + '\n'),
+                                subprocess.CompletedProcess([], 0, status)])
+    monkeypatch.setattr(runner.subprocess, 'run', command)
+    assert runner.git_metadata() == dict(commit='a' * 40, git_dirty=bool(status), commit_note=None)
+    assert command.call_args_list == [
+        ((['git', 'rev-parse', 'HEAD'],), dict(cwd=runner.ROOT, check=True, capture_output=True, text=True)),
+        ((['git', 'status', '--porcelain'],), dict(cwd=runner.ROOT, check=True, capture_output=True, text=True)),
+    ]
+
+
+@pytest.mark.parametrize('failure', ['missing', 'head', 'status'])
+def test_git_metadata_unavailable(failure, monkeypatch):
+    """Git absent ou une commande en échec donne des null et une note explicite."""
+    error = FileNotFoundError('git') if failure == 'missing' else subprocess.CalledProcessError(128, 'git')
+    command = Mock(side_effect=error if failure != 'status' else [
+        subprocess.CompletedProcess([], 0, 'a' * 40 + '\n'), error])
+    monkeypatch.setattr(runner.subprocess, 'run', command)
+    values = runner.git_metadata()
+    assert values['commit'] is None and values['git_dirty'] is None
+    assert values['commit_note'].startswith('Git indisponible : ')
+    assert command.call_count == (2 if failure == 'status' else 1)
+
+
+def test_official_hash_missing(examples, tmp_path, monkeypatch):
+    """L'absence de référence officielle bloque avant configuration, modèle ou création de run."""
+    reference = tmp_path / 'absent.sha256'
+    monkeypatch.setattr(runner, 'VOLET_B_TEST', examples)
+    monkeypatch.setattr(runner, 'VOLET_B_TEST_SHA256', reference)
+    forbidden = Mock(side_effect=AssertionError('Aucun chargement'))
+    monkeypatch.setattr(runner, 'load_config', forbidden)
+    with pytest.raises(FileNotFoundError) as error:
+        runner.run_config('base', examples, run_root=tmp_path / 'runs')
+    assert str(error.value) == ('eval/volet_b/test.sha256 manquant : il doit être livré avec le jeu réservé '
+                                '(SCRUM-35, PR #36)')
+    assert not reference.exists() and not (tmp_path / 'runs').exists() and not forbidden.called
+
+
+@pytest.mark.parametrize('reference_text', ['A' * 64 + '  test.jsonl\n', '', 'invalide'])
+def test_official_hash_format(tmp_path, monkeypatch, reference_text):
+    """Accepte une empreinte avec nom de fichier et majuscules, refuse une référence mal formée."""
+    reference = tmp_path / 'reference.sha256'
+    reference.write_text(reference_text, encoding='utf-8')
+    monkeypatch.setattr(runner, 'VOLET_B_TEST_SHA256', reference)
+    if reference_text.startswith('A'):
+        assert runner.official_test_hash() == 'a' * 64
+    else:
+        with pytest.raises(ValueError, match='empreinte SHA-256 invalide'):
+            runner.official_test_hash()
+
+
+def test_summary_refuses_missing_reference(tmp_path, monkeypatch):
+    """Une référence absente interdit aussi la publication et préserve le résumé existant."""
+    monkeypatch.setattr(runner, 'VOLET_B_TEST_SHA256', tmp_path / 'absent.sha256')
+    path, output = tmp_path / 'metrics.json', tmp_path / 'resultats.md'
+    output.write_text('# Résultats\n', encoding='utf-8')
+    runner.write_json(path, dict(config='base', mock=False, adapter=None, official_test=True,
+                                limit=None, complete=True, n=2, input_sha256='a' * 64))
+    with pytest.raises(FileNotFoundError, match='test.sha256 manquant'):
+        runner.update_summary([path], output)
+    assert output.read_text(encoding='utf-8') == '# Résultats\n'
