@@ -20,6 +20,8 @@ def examples(tmp_path, monkeypatch):
         subprocess.CompletedProcess([], 0, 'a' * 40 + '\n'),
         subprocess.CompletedProcess([], 0, ''),
     ]))
+    # Sous Linux, platform.platform() appelle `uname -p` via subprocess.run : on le neutralise.
+    monkeypatch.setattr(runner.platform, 'platform', lambda: 'test')
     monkeypatch.setenv('TEAMAI_SLM_MOCK', '1')
     monkeypatch.setattr(slm, 'load_backend', lambda *args: None)
     monkeypatch.setattr(slm, 'v16_context_error', lambda *args: None)
