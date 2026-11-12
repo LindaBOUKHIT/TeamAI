@@ -330,39 +330,53 @@ def run_final(int8_path: Path) -> None:
     if actual_splits_hash != EXPECTED_SPLITS_SHA:
         raise ValueError("splits.csv non officiel. Test non ouvert pour evaluation.")
 
-    # Verrou de campagne cree AVANT le premier chargement de test. Mode exclusif 'x'.
-    RESULTS.mkdir(parents=True, exist_ok=True)
-    with MARKER.open("x", encoding="utf-8") as dest:
-        json.dump({"ticket": "SCRUM-44", "opened_at_utc": datetime.now(timezone.utc).isoformat(), "git_commit": git_commit(), "fp32_sha256": EXPECTED_FP32_SHA, "int8_sha256": file_sha256(int8_path), "splits_sha256": actual_splits_hash}, dest, indent=2)
-        dest.write("\n")
-
+    # Preparations sans test AVANT le verrou irrevocable : toutes les
+    # dependances, les donnees train et les comptages doivent etre valides.
     from teamai.data.splits import load_split
     import pandas as pd
     from sklearn.linear_model import LogisticRegression
     from sklearn.pipeline import make_pipeline
     from sklearn.preprocessing import StandardScaler
+    import matplotlib
+    matplotlib.use("Agg")
 
     train = load_split("train")
+    if len(train) != 402542 or train["BlockId"].duplicated().any():
+        raise RuntimeError("Split train non conforme. Test NON ouvert.")
+    counts = pd.read_csv(PREPROCESSED / "Event_occurrence_matrix.csv", usecols=["BlockId", *FEATURES])
+    if counts["BlockId"].duplicated().any():
+        raise ValueError("BlockId dupliques dans les comptages. Test NON ouvert.")
+    train_counts = train[["BlockId", "label"]].merge(counts, on="BlockId", how="left", validate="one_to_one")
+    if train_counts[FEATURES].isna().any().any():
+        raise ValueError("Comptages train manquants. Test NON ouvert.")
+    baseline = make_pipeline(StandardScaler(), LogisticRegression(class_weight="balanced", max_iter=1000, random_state=42))
+    baseline.fit(train_counts[FEATURES], train_counts["label"].astype(int))
+    fp32_session = ort_session(MODEL_FP32)
+    int8_session = ort_session(int8_path)
+    FIG_DIR.mkdir(parents=True, exist_ok=True)
+    for model_name in ("baseline", "bilstm_fp32", "bilstm_int8"):
+        for group_name in ("test_complet", "unseen_seq", "sans_3_blocs_exposes"):
+            fig_path = FIG_DIR / f"scrum44_{model_name}_{group_name}_confusion.png"
+            if fig_path.exists():
+                raise FileExistsError(f"Figure deja presente avant ouverture du test : {fig_path}")
+    RESULTS.mkdir(parents=True, exist_ok=True)
+    RUNS.mkdir(parents=True, exist_ok=True)
+    # Le verrou est pose avant le SEUL appel a load_split('test').
+    with MARKER.open("x", encoding="utf-8") as dest:
+        json.dump({"ticket": "SCRUM-44", "opened_at_utc": datetime.now(timezone.utc).isoformat(), "git_commit": git_commit(), "fp32_sha256": EXPECTED_FP32_SHA, "int8_sha256": file_sha256(int8_path), "splits_sha256": actual_splits_hash}, dest, indent=2)
+        dest.write("\n")
+
     test = load_split("test")  # POINT D'OUVERTURE UNIQUE DU TEST OFFICIEL
     if len(test) != 86260 or len(train) != 402542 or test["BlockId"].duplicated().any():
         raise RuntimeError("Effectifs C4 inattendus. Campagne interrompue, ne pas relancer sans revue.")
-    counts = pd.read_csv(PREPROCESSED / "Event_occurrence_matrix.csv", usecols=["BlockId", *FEATURES])
-    if counts["BlockId"].duplicated().any():
-        raise ValueError("BlockId dupliques dans les comptages.")
-    train_counts = train[["BlockId", "label"]].merge(counts, on="BlockId", how="left", validate="one_to_one")
     test_counts = test[["BlockId"]].merge(counts, on="BlockId", how="left", validate="one_to_one")
-    if train_counts[FEATURES].isna().any().any() or test_counts[FEATURES].isna().any().any():
-        raise ValueError("Comptages manquants : evaluation interrompue.")
-
-    baseline = make_pipeline(StandardScaler(), LogisticRegression(class_weight="balanced", max_iter=1000, random_state=42))
-    baseline.fit(train_counts[FEATURES], train_counts["label"].astype(int))
+    if test_counts[FEATURES].isna().any().any():
+        raise ValueError("Comptages test manquants : evaluation interrompue sans nouvelle ouverture.")
     t0 = time.perf_counter()
     baseline_scores = baseline.predict_proba(test_counts[FEATURES])[:, 1]
     baseline_seconds = time.perf_counter() - t0
 
     x = encode_rows(test, events)
-    fp32_session = ort_session(MODEL_FP32)
-    int8_session = ort_session(int8_path)
     fp32_scores, fp32_perf = infer_onnx(fp32_session, x)
     int8_scores, int8_perf = infer_onnx(int8_session, x)
     all_scores = {"baseline": (baseline_scores, 0.5), "bilstm_fp32": (fp32_scores, EXPECTED_THRESHOLD), "bilstm_int8": (int8_scores, EXPECTED_THRESHOLD)}

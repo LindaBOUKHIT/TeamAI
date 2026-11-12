@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SCRUM-44 — Parité Chrome WASM (test figé)</title>
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; margin: 2rem auto; max-width: 780px; padding: 0 1rem; line-height: 1.55; }
+    button, input { font: inherit; margin: .5rem 0; }
+    button { padding: .65rem 1.1rem; cursor: pointer; }
+    pre { background: #f3f4f6; padding: 1rem; overflow-wrap: anywhere; white-space: pre-wrap; border-radius: 8px; }
+    .note { color:#555; }
+  </style>
+</head>
+<body>
+  <h1>SCRUM-44 — Parité navigateur</h1>
+  <p>Compare ONNX Runtime Web (WASM) aux scores Python figés lors de l'unique campagne finale. Le fichier local reste dans le navigateur : il n'est pas envoyé au serveur.</p>
+  <label>Fichier <code>browser_parity_inputs.jsonl</code> : <input id="file" type="file" accept=".jsonl,.txt" /></label>
+  <p><button id="run">Comparer les 86 260 blocs</button></p>
+  <p class="note">Les modèles FP32 et INT8 sont chargés depuis le serveur Vite local. Ne lancez pas à nouveau <code>evaluate.py --run-final</code>.</p>
+  <pre id="output">Prêt.</pre>
+<script type="module">
+import * as ort from 'onnxruntime-web/wasm';
+ort.env.wasm.numThreads = 1;
+const expectedN = 86260;
+const threshold = 0.40814146399497986;
+const button = document.getElementById('run');
+const output = document.getElementById('output');
+const fileInput = document.getElementById('file');
+function log(line) { output.textContent += line + '\n'; }
+function errorMessage(error) { return error?.stack || String(error); }
+async function readRecords(file) {
+  const contents = await file.text();
+  const lines = contents.split(/\r?\n/).filter(line => line.trim());
+  if (lines.length !== expectedN) throw Error(`Effectif inattendu: ${lines.length} au lieu de ${expectedN}`);
+  const records = new Array(lines.length);
+  const seen = new Set();
+  for (let i=0; i<lines.length; i++) {
+    let record;
+    try { record = JSON.parse(lines[i]); } catch (e) { throw Error(`JSON invalide ligne ${i+1}: ${e}`); }
+    if (typeof record.BlockId !== 'string' || seen.has(record.BlockId)) throw Error(`BlockId manquant/dupliqué ligne ${i+1}`);
+    if (!Array.isArray(record.event_ids) || record.event_ids.length !== 50 || !record.event_ids.every(v => Number.isInteger(v) && v>=0 && v<=30)) throw Error(`event_ids invalides ligne ${i+1}`);
+    for (const key of ['p_anomaly_fp32_python', 'p_anomaly_int8_python']) {
+      if (typeof record[key] !== 'number' || !Number.isFinite(record[key]) || record[key] < 0 || record[key] > 1) throw Error(`${key} invalide ligne ${i+1}`);
+    }
+    seen.add(record.BlockId);
+    records[i] = record;
+  }
+  return records;
+}
+async function loadSession(filename) {
+  const base = import.meta.env.BASE_URL;
+  const response = await fetch(`${base}model/${filename}`, { cache:'no-cache' });
+  if (!response.ok) throw Error(`Échec HTTP ${response.status} pour ${filename}`);
+  const buffer = await response.arrayBuffer();
+  const session = await ort.InferenceSession.create(buffer, { executionProviders: ['wasm'] });
+  return {session, size:buffer.byteLength};
+}
+async function compare(name, filename, scoreKey, records) {
+  log(`\n=== ${name} / Chrome WASM ===`);
+  const {session, size} = await loadSession(filename);
+  const batchSize=256;
+  let maxDiff=0, sumDiff=0, changed=0, overTolerance=0, nonFinite=0;
+  const examples=[];
+  const start=performance.now();
+  try {
+    for (let begin=0;begin<records.length;begin+=batchSize) {
+      const end=Math.min(begin+batchSize,records.length);
+      const ids=new BigInt64Array((end-begin)*50);
+      for (let row=begin;row<end;row++) {
+        const data=records[row].event_ids;
+        for(let j=0;j<50;j++) ids[(row-begin)*50+j]=BigInt(data[j]);
+      }
+      const outputMap=await session.run({event_ids:new ort.Tensor('int64',ids,[end-begin,50])});
+      const scores=outputMap.p_anomaly?.data;
+      if(!scores || scores.length!==end-begin) throw Error(`Sortie de forme invalide pour lot ${begin}`);
+      for (let i=0;i<scores.length;i++) {
+        const reference=records[begin+i][scoreKey];
+        const score=Number(scores[i]);
+        if(!Number.isFinite(score)) { nonFinite++; continue; }
+        const diff=Math.abs(score-reference);
+        maxDiff=Math.max(maxDiff,diff);
+        sumDiff+=diff;
+        if(diff>1e-4) overTolerance++;
+        if((score>=threshold)!==(reference>=threshold)) {
+          changed++;
+          if(examples.length<10) examples.push({BlockId:records[begin+i].BlockId,python:reference,chrome:score});
+        }
+      }
+      if((Math.floor(end/10000)!==Math.floor(begin/10000)) || end===records.length) {
+        log(`${end.toLocaleString('fr-FR')}/${records.length.toLocaleString('fr-FR')} blocs`);
+        await new Promise(resolve=>setTimeout(resolve,0));
+      }
+    }
+  } finally { await session.release(); }
+  const durationMs=performance.now()-start;
+  const result={model:name,rows:records.length,model_bytes:size,threshold,max_abs_error:maxDiff,mean_abs_error:sumDiff/records.length,over_1e_4:overTolerance,classification_disagreements:changed,non_finite:nonFinite,inference_ms_including_js_loop:durationMs,approx_blocks_per_second:records.length/(durationMs/1000),differences:examples};
+  log(JSON.stringify(result,null,2));
+  return result;
+}
+button.addEventListener('click',async()=>{
+  button.disabled=true; output.textContent='';
+  try {
+    const file=fileInput.files?.[0];
+    if(!file) throw Error('Choisis browser_parity_inputs.jsonl avant de lancer.');
+    log(`Lecture locale : ${file.name} (${file.size} octets)`);
+    const records=await readRecords(file);
+    log(`Contrôle effectué : ${records.length} blocs, identifiants uniques, 50 événements par bloc.`);
+    const results=[];
+    results.push(await compare('bilstm_fp32','detector.onnx','p_anomaly_fp32_python',records));
+    results.push(await compare('bilstm_int8','detector.int8.onnx','p_anomaly_int8_python',records));
+    log('\nFIN : conserver les résultats dans le rapport SCRUM-44.');
+    window.scrum44BrowserParityResults=results;
+  } catch(e) { log(`\nERREUR : ${errorMessage(e)}`); }
+  finally {button.disabled=false;}
+});
+</script>
+</body>
+</html>
