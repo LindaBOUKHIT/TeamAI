@@ -194,18 +194,111 @@ Source de toutes les lignes : synthèse SCRUM-46 (en relecture, PR [#41](https:/
 
 Les **40/40** copies de faits exactes ne couvrent pas toute la prose. La revue distingue aussi **4** réponses avec hypothèse, parmi **21** blocs avec indice d’incident. Cela ne constitue pas un taux d’erreur. La précision des citations et l’utilité des questions ne sont pas mesurées exhaustivement. Source : SCRUM-46, sections 2.1 et 2.2 (en relecture, PR [#41](https://github.com/LindaBOUKHIT/TeamAI/pull/41)).
 
+
+
 ### 3.3 Données et évaluation
 
-**À rédiger par Nassim.**
+#### 3.3.1 Présentation du jeu de données HDFS
 
-**Éléments attestés à reprendre**
+Le projet utilise le jeu de données **HDFS_v1**, issu de Loghub, qui contient des journaux d'événements du système de fichiers distribué Hadoop Distributed File System (HDFS). L'objectif est d'exploiter ces journaux pour identifier les comportements normaux et anormaux.
 
-- **HDFS_v1.** Présenter la provenance Loghub, les blocs, les labels, le parsing et les séquences d’événements. Distinguer anomalie annotée et cause de panne. Sources : [V0.1, section 2.4](TeamAI_Rapport_SCRUM33_V0.1.pdf) et [contrats C1/C2/C4](../contrats.md).
-- **C4-bloc.** Le protocole de référence est stratifié par label, bloc par bloc : **70/15/15**, seed **42**. Un bloc appartient à un seul split. Les **575 061** blocs ne représentent que **18 373** séquences uniques ; des séquences identiques peuvent donc apparaître entre partitions. Source : [contrats, C4](../contrats.md).
-- **Séquences inédites.** Le champ `unseen_seq` du fichier C4 indique, pour le test, une séquence absente du train ; il vaut faux par convention ailleurs. Les métriques finales doivent présenter le jeu global et ce sous-ensemble. Le champ `unseen` des métriques de validation SCRUM-25 est une analyse distincte à documenter explicitement. Sources : [contrats, C4](../contrats.md) et [métriques SCRUM-25](../../eval/results/SCRUM-25-bilstm-v1/metrics.json).
-- **Réservation des données.** Aucun seuil, prompt, exemple de démonstration ou hyperparamètre ne doit être choisi sur le test. Le label et la réponse attendue ne sont transmis ni au SLM ni au retrieval lors de l’évaluation. Sources : [contrats, C4/C5](../contrats.md) et [guide d’annotation](../volet_b/grille_annotation.md).
-- **Jeu réservé du volet B (SCRUM-35).** Blocs tirés du split test officiel, sans fuite vers le train ou la validation ; en relecture, PR [#36](https://github.com/LindaBOUKHIT/TeamAI/pull/36).
-- **Traçabilité C7.** Présenter configuration, versions, empreintes, effectifs, erreurs, matériel et périmètre des mesures. Conserver les échecs au dénominateur ; une valeur non mesurée reste `null`. Source : [contrats, C7](../contrats.md).
+Les événements sont regroupés selon leur identifiant de bloc (`BlockId`). Chaque bloc constitue une unité d'observation, associée à une séquence chronologique d'événements et à un label binaire : `0` pour un bloc normal et `1` pour un bloc anormal.
+
+Le prétraitement permet de transformer les messages des journaux en **29 types d'événements (E1 à E29)**. Les séquences obtenues préservent l'ordre d'apparition des événements. Pour le modèle BiLSTM, les 50 premiers événements sont encodés numériquement ; les séquences plus courtes sont complétées par du padding.
+
+Il est important de distinguer une **anomalie annotée dans le dataset** d'une cause de panne identifiée. Le label permet d'évaluer la détection, mais ne démontre pas à lui seul la nature ni l'origine d'un incident.
+
+Sources : [contrats C1/C2/C4](../contrats.md), [rapport V0.1](TeamAI_Rapport_SCRUM33_V0.1.pdf).
+
+#### 3.3.2 Audit et préparation des données
+
+Avant l'entraînement des modèles, un travail de préparation est nécessaire pour garantir la cohérence du dataset.
+
+Cette préparation comprend la vérification des identifiants de blocs, l'association des événements à chaque bloc, le contrôle des labels et l'identification des séquences répétées.
+
+Le corpus comporte **575 061 blocs**, mais seulement **18 373 séquences d'événements distinctes**. Cette répétition constitue un point important pour l'interprétation des résultats : des blocs différents peuvent présenter exactement la même séquence, y compris dans des partitions différentes.
+
+L'analyse doit donc distinguer les performances globales des performances sur les séquences absentes de l'entraînement.
+
+Source : [contrat C4](../contrats.md).
+
+#### 3.3.3 Découpage du dataset — protocole C4
+
+Afin de garantir une comparaison commune aux différents modèles, le projet applique un découpage stratifié selon les labels, avec une graine aléatoire fixée à **42**.
+
+| Partition | Proportion | Nombre de blocs |
+|---|---:|---:|
+| Entraînement | 70 % | 402 542 |
+| Validation | 15 % | 86 259 |
+| Test réservé | 15 % | 86 260 |
+| **Total** | **100 %** | **575 061** |
+
+Chaque `BlockId` appartient à une seule partition, ce qui évite qu'un même bloc soit présent simultanément dans l'entraînement et dans l'évaluation.
+
+Cependant, ce découpage par bloc ne garantit pas l'absence de séquences identiques entre partitions.
+
+Le champ `unseen_seq` permet de distinguer, dans le test, les séquences qui n'apparaissent pas dans l'entraînement. Les **1 962 blocs du test** marqués comme inédits constituent ainsi un sous-ensemble destiné à analyser la généralisation du modèle. Les analyses de séquences inédites réalisées auparavant sur la validation sont distinctes de ce champ officiel.
+
+Le test est réservé à l'évaluation finale : il ne doit servir ni à choisir les hyperparamètres, ni à sélectionner un seuil, ni à préparer des exemples publics.
+
+Source : [contrat C4](../contrats.md) et métadonnées officielles `data/splits/splits_meta.json`.
+
+#### 3.3.4 Méthodologie d'évaluation du volet A
+
+L'évaluation du volet A repose sur la comparaison de plusieurs approches de classification binaire.
+
+La première est une **baseline par régression logistique**, utilisant les comptages des événements E1 à E29. Elle fournit une référence simple pour mesurer l'apport d'un modèle séquentiel.
+
+La seconde est un **BiLSTM**, qui exploite l'ordre des événements pour prédire un score d'anomalie. Le modèle est exporté au format ONNX afin de permettre son exécution dans le navigateur avec ONNX Runtime Web.
+
+Les principales métriques retenues sont :
+
+- **Précision de la classe anomalie** : proportion des alertes qui correspondent réellement à des anomalies.
+- **Rappel de la classe anomalie** : proportion des anomalies correctement détectées.
+- **Macro-F1** : moyenne des F1 des deux classes, donnant le même poids à chaque classe.
+- **Matrice de confusion** : répartition entre vrais négatifs (TN), faux positifs (FP), faux négatifs (FN) et vrais positifs (TP).
+
+Une attention particulière est portée aux faux négatifs, qui correspondent à des anomalies non détectées, ainsi qu'aux faux positifs, qui génèrent des alertes injustifiées.
+
+#### 3.3.5 Résultats de validation et choix du seuil
+
+Sur les **86 259 blocs de validation**, les résultats de référence disponibles montrent que le BiLSTM obtient une macro-F1 de **0,9955** avec son seuil initial de `0,99`, contre **0,9897** pour la baseline.
+
+Cette configuration initiale du BiLSTM présente **23 faux positifs et 21 faux négatifs**.
+
+Dans SCRUM-62, le seuil de décision du BiLSTM a ensuite été ajusté sur la validation, sans modifier les poids du modèle. L'objectif était de privilégier la détection des anomalies tout en contrôlant les fausses alertes.
+
+Le seuil retenu est **0,40814146399497986**. Sur la validation globale, il conduit à :
+
+| Métrique | BiLSTM au seuil définitif |
+|---|---:|
+| Précision anomalie | 0,9772 |
+| Rappel anomalie | 0,9996 |
+| Macro-F1 | 0,9939 |
+| Faux positifs | 59 |
+| Faux négatifs | 1 |
+
+Ce réglage réduit le nombre d'anomalies manquées, au prix d'une augmentation du nombre de fausses alertes.
+
+Ces valeurs correspondent **exclusivement à la validation**. Elles ne doivent pas être présentées comme des performances finales sur le test réservé.
+
+Sources : [résultats SCRUM-25](../../eval/results/SCRUM-25-bilstm-v1/metrics.json) et [analyse SCRUM-62](../../eval/results/SCRUM-62_20261023T153242Z_690fcb/analysis.json).
+
+#### 3.3.6 Évaluation du volet B et traçabilité
+
+Le volet B nécessite une évaluation différente, car son objectif n'est pas seulement de classer un bloc, mais de produire une interprétation structurée de ses événements.
+
+Les critères comprennent notamment la fidélité aux faits observés, le respect de la chronologie, la pertinence des références documentaires et la capacité à signaler les informations manquantes.
+
+Un jeu réservé de traces HDFS est préparé dans SCRUM-35 pour évaluer les explications sans utiliser les exemples d'entraînement ou de validation. Ce travail est **en relecture, PR [#36](https://github.com/LindaBOUKHIT/TeamAI/pull/36)**.
+
+Conformément au contrat C5, le label réel et les réponses attendues ne sont pas transmis au modèle de langage ou au système de recherche documentaire lors de l'évaluation.
+
+Le contrat **C7** définit la traçabilité des expériences. Chaque campagne doit conserver les prédictions, les paramètres, les versions, les empreintes des fichiers, les effectifs et les erreurs rencontrées. Les résultats détaillés sont enregistrés dans `eval/runs/`, tandis que les synthèses versionnées sont conservées dans `eval/results/`.
+
+Une mesure non effectuée doit être explicitement signalée, sans être remplacée par une valeur supposée. Cette démarche permet de distinguer les performances réellement observées des hypothèses et des résultats encore en cours de validation.
+
+Sources : [contrats C5/C7](../contrats.md), [grille d'annotation](../volet_b/grille_annotation.md) et [PR SCRUM-35 #36](https://github.com/LindaBOUKHIT/TeamAI/pull/36).
 
 ## 4. Analyse comparative
 
@@ -250,7 +343,51 @@ Les difficultés techniques ont conduit à revoir le matériel cible et la chaî
 
 #### À rédiger par Linda Boukhit (SCRUM-49)
 
-#### À rédiger par Nassim Mezzai (SCRUM-49)
+#### Nassim Mezzai : Retour individuel (SCRUM-49)
+
+Dans le cadre du projet TeamAI, j'ai participé à plusieurs étapes du développement d'un système d'intelligence artificielle, allant de la préparation des données jusqu'à l'entraînement, l'expérimentation et l'évaluation des modèles.
+
+**Préparation et audit des données**
+
+J'ai principalement travaillé sur le jeu de données HDFS, en participant à son audit, au parsing des journaux, à la construction des séquences d'événements et à la préparation des partitions d'entraînement, de validation et de test.
+
+Une difficulté importante a été la présence de nombreuses séquences répétées dans le dataset. Ce travail m'a permis de comprendre les risques de fuite de données et l'importance d'évaluer les modèles sur des séquences inédites afin de mieux mesurer leur capacité de généralisation.
+
+**Entraînement et expérimentation de modèles d'IA**
+
+J'ai développé et entraîné une baseline par régression logistique pour la détection d'anomalies HDFS. Cette première approche a servi de référence pour comparer les performances du modèle BiLSTM développé par l'équipe.
+
+J'ai également participé aux expérimentations d'adaptation d'un modèle de langage, notamment **Gemma 4 E4B avec QLoRA**, en utilisant l'environnement Kaggle et ses ressources GPU NVIDIA T4.
+
+Ces essais m'ont permis d'explorer les principales étapes de l'adaptation d'un modèle préentraîné : préparation des exemples, configuration des paramètres LoRA, quantification NF4, chargement du modèle et lancement des étapes d'entraînement.
+
+J'ai rencontré plusieurs difficultés techniques, notamment des dépassements de mémoire GPU (CUDA Out of Memory), des incompatibilités entre bibliothèques et des gradients non finis pendant l'entraînement. Ces problèmes m'ont amené à examiner la consommation mémoire, le calcul de la fonction de perte et les contraintes de l'entraînement en précision réduite.
+
+Ces expérimentations m'ont appris qu'un entraînement qui démarre correctement n'est pas nécessairement un entraînement réussi, et qu'il faut distinguer la faisabilité technique, la stabilité de l'optimisation et la qualité réelle du modèle obtenu.
+
+**Évaluation et optimisation des modèles**
+
+J'ai également pris en charge l'évaluation comparative du volet A, en confrontant la baseline, le BiLSTM FP32 et sa version quantifiée INT8.
+
+J'ai travaillé sur la génération des métriques de classification, les matrices de confusion, l'analyse des faux positifs et des faux négatifs, ainsi que les vérifications de parité entre ONNX Runtime Python et ONNX Runtime Web.
+
+La quantification INT8 m'a notamment permis d'étudier les compromis entre taille du modèle, vitesse d'inférence et stabilité des prédictions. J'ai aussi réalisé des mesures de chargement et de cache directement dans Chrome.
+
+**Travail collaboratif et outils**
+
+Le projet m'a permis d'approfondir l'utilisation de Python, PyTorch, ONNX Runtime, Kaggle, Git, GitHub et Jira.
+
+L'organisation en branches Git, tickets et Pull Requests m'a appris à mieux documenter les expérimentations et à travailler avec des procédures de relecture.
+
+J'ai également utilisé des assistants d'intelligence artificielle pour m'aider dans certaines étapes de programmation, de diagnostic et de rédaction, tout en vérifiant les propositions à partir des résultats réellement obtenus.
+
+**Bilan personnel**
+
+Ce projet m'a permis de progresser dans trois domaines complémentaires : la préparation de données fiables, l'entraînement et l'adaptation de modèles d'intelligence artificielle, et leur évaluation expérimentale.
+
+J'ai surtout compris qu'obtenir de bonnes performances ne suffit pas. Il faut aussi pouvoir expliquer comment elles ont été obtenues, vérifier la reproductibilité des expériences, identifier les limites des modèles et distinguer les résultats confirmés des hypothèses.
+
+Cette expérience m'a permis de développer une approche plus rigoureuse et critique du machine learning et des modèles de langage, tout en renforçant mes compétences techniques et ma capacité à résoudre des problèmes concrets.
 
 ## 6. Cinq outils novateurs
 
