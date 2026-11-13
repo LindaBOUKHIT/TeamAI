@@ -348,6 +348,13 @@ Comparaison sur cinq blocs `val` du sample (preuve : [`eval/results/SCRUM-57/`](
 Correction associée : `validate_answer` plantait lorsqu'un objet apparaissait dans `sources` (sortie llama.cpp) ; il signale désormais l'erreur sans exception (test ajouté).
 
 
+## 2026-10-26 — SCRUM-38
+
+SCRUM-38 : script des mesures avant adaptation, écrit avec Codex (gpt-6.1-sol), relu par Alain.
+
+Essai réel du 26/10 (pas une mesure) : une trace de calibration du split `train`, vrai SmolLM2 float32 sur CPU, `--limit 1`. En `base`, réponse JSON conforme à C5 (182 tokens, 77 s de génération). En `rag1`, trois passages récupérés, mais le modèle écrit des clés sans guillemets : `invalid_json`, compté comme échec. Mémoire RSS maximale du processus : environ 10,7 Go. Le pipeline complet fonctionne ; le test n'a pas été ouvert.
+
+
 ## 2026-10-27 — SCRUM-63 : passage à Gemma 4 E4B QAT
 
 Correctif de relecture : GPU activé (`n_gpu_layers: -1`) et pré-téléchargement du GGUF documenté.
@@ -378,6 +385,32 @@ et un résumé boucle ; 0,19 hypothèse par bloc avec indice d’incident. Ces r
 ne valident ni une détection par le SLM ni la fidélité globale des explications.
 
 Usage IA : code écrit avec Codex gpt-6.1-sol, supervisé par Claude ; relecture d'Alain à faire.
+
+## 2026-10-27 — SCRUM-38 : mesures base alignées sur le pipeline v16 ; rag1 reporté
+
+Correctif de relecture : hypothèses par bloc rapportées au nombre de blocs du groupe.
+
+`base` reconstruit les faits depuis les lignes brutes C5 et appelle le pipeline
+v16 figé : schéma fermé, contrôles, correction unique et anti-boucle. Aucune
+annotation n'atteint le prompt. Le code `volet_b/slm/v16/` reste inchangé.
+`rag1` est refusé explicitement en attendant une variante v16 + RAG figée
+(SCRUM-42/SCRUM-45) ; le retrieval de Linda reste disponible.
+
+Le C7 conserve les empreintes de consigne et politique v16, la révision GGUF,
+le contexte, le budget, les tentatives et leurs erreurs, arrêts, tokens, temps
+et nombre réel d'appels. Les mesures ajoutent contrat v16, faits exacts,
+références inexistantes, causes réseau sans appui, enquêtes sans incident,
+hypothèses avec/sans incident, anti-boucle et corrections déclenchées/réussies.
+Tous les exemples restent au dénominateur. Le RSS est conservé et la VRAM du PID
+NVIDIA est relevée si disponible, sans dépendance obligatoire.
+
+À exécuter sur le portable de Nassim après fusion de #40, poids déjà présents,
+sans réglage après ouverture du test. Aucun modèle téléchargé ou exécuté,
+aucun service externe ni aucune opération git pendant cette mission.
+
+Suite complète lancée par Alain avec le Python du projet le 27/10 : 108 tests réussis, 5 ignorés, en mode factice.
+
+Usage IA : Codex gpt-6.1-sol supervisé par Claude ; relecture d'Alain à faire.
 
 ## 2026-11-09 — SCRUM-46 : défauts du volet B et feuille de route (version provisoire avant les mesures SCRUM-38)
 Section rédigée dans docs/volet_b/defauts_feuille_de_route.md : périmètre, défauts sourcés, causes probables, priorités et chiffres à compléter après SCRUM-38/45.
