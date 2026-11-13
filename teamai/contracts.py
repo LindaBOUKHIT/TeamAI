@@ -43,7 +43,8 @@ def validate_answer(answer: object, allowed_sources: Iterable[str] | None = None
             errors.append("infos_manquantes : doit expliquer l'abstention")
     if allowed_sources is not None and isinstance(answer.get("sources"), list):
         allowed = set(allowed_sources)
-        unknown = [s for s in answer["sources"] if s not in allowed]
+        # Les sources non textuelles sont déjà signalées plus haut ; ne pas planter sur un objet non hachable.
+        unknown = [s for s in answer["sources"] if isinstance(s, str) and s not in allowed]
         if unknown:
             errors.append(f"sources : identifiants absents des passages fournis {unknown}")
     return errors

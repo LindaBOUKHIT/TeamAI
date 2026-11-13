@@ -53,7 +53,7 @@ node --version
 | Usage | Faisable ? | Pourquoi |
 |---|---|---|
 | Inférence float32 (Transformers, CPU) | Mesurée dans SCRUM-28 | Sur une trace le 08/10 : 0,16 token/s, pic RSS de 9,84 GiB au chargement et 8,00 GiB en génération ; chargement 238 s, 156 tokens en 952,03 s |
-| Inférence 4 bits Q4_K_M (llama.cpp) | Mesurée dans SCRUM-57 | Sur une trace le 06/10 : 1,9 token/s, pic de 2,8 Go, fichier GGUF de 0,98 Go ; backend encore à intégrer à `generate.py` |
+| Inférence 4 bits Q4_K_M (llama.cpp) | Mesurée dans SCRUM-57 | Sur cinq traces de validation le 26/10 : 2,4 token/s, pic RSS de 2,8 GiB, chargement 1,7 s (float32 : 1,5 token/s, 9,9 GiB) ; backend `llamacpp` de `generate.py` |
 | Embeddings + index du RAG | À mesurer | L'inférence du SLM ne valide pas la mémoire ou la latence de la chaîne RAG complète |
 | Entraînement LoRA du 1.7B | Non testé sur cette machine | CPU seul : durée inconnue ; un essai court sur GPU est prévu dans SCRUM-29 |
 

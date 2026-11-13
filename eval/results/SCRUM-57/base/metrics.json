@@ -1,0 +1,33 @@
+{
+  "by_backend": {
+    "transformers": {
+      "n": 5,
+      "conformity": 0.0,
+      "failures": 5,
+      "abstention": 0.0,
+      "mean_tokens_per_second": 1.485394619803171,
+      "throughput_measured_n": 5,
+      "peak_rss_bytes": 10676346880,
+      "load_seconds": 11.441411800013157,
+      "load_error": null,
+      "quantization": null,
+      "dtype": "float32"
+    },
+    "llamacpp": {
+      "n": 5,
+      "conformity": 0.0,
+      "failures": 5,
+      "abstention": 0.4,
+      "mean_tokens_per_second": 2.435281837547858,
+      "throughput_measured_n": 5,
+      "peak_rss_bytes": 3040342016,
+      "load_seconds": 1.6637293999956455,
+      "load_error": null,
+      "quantization": "Q4_K_M",
+      "dtype": "GGUF"
+    }
+  },
+  "protocol": "diagnostic backend + quantification ; aucun score de justesse sémantique",
+  "memory": "RSS processus indépendant par backend ; octets ; pic échantillonné à 0,2 s, chargement inclus",
+  "denominator": 5
+}
