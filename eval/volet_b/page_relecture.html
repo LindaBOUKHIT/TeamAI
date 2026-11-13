@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Relecture SCRUM-35</title>
+<style>
+:root{--bg:#f6f7f9;--panel:#fff;--ink:#1d2330;--muted:#667085;--line:#e3e6ec;--accent:#2f5bd3;--ok:#1f8a4c;--ko:#c2410c;--warn-bg:#fff4e0;--err-bg:#fde8e8;--code:#f1f3f7}
+@media (prefers-color-scheme:dark){:root{--bg:#12151b;--panel:#1a1f27;--ink:#e6e9ef;--muted:#98a2b3;--line:#2b323d;--accent:#7aa2ff;--ok:#4ade80;--ko:#fb923c;--warn-bg:#3a2e14;--err-bg:#3d1c1c;--code:#222833}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+header{position:sticky;top:0;z-index:2;background:var(--panel);border-bottom:1px solid var(--line);padding:10px 16px;display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+header h1{font-size:16px;margin:0 8px 0 0}
+label.inline{display:flex;gap:6px;align-items:center;color:var(--muted)}
+select,input[type=number],input[type=text],textarea,button{font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:4px 8px}
+input[type=number]{width:64px}
+button{cursor:pointer}
+button.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.progress{margin-left:auto;color:var(--muted)}
+.layout{display:grid;grid-template-columns:150px 1fr;min-height:calc(100vh - 56px)}
+nav{border-right:1px solid var(--line);overflow:auto;max-height:calc(100vh - 56px);position:sticky;top:56px;background:var(--panel)}
+nav a{display:flex;justify-content:space-between;padding:4px 10px;color:var(--ink);text-decoration:none;font-family:ui-monospace,Consolas,monospace;font-size:12px}
+nav a.cur{background:var(--code);font-weight:600}
+nav a.hidden{display:none}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--line);align-self:center}
+.dot.oui{background:var(--ok)}.dot.non{background:var(--ko)}.dot.discuter{background:#d4a017}
+main{padding:16px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.case-head{display:flex;flex-wrap:wrap;gap:10px;align-items:baseline}
+.case-head h2{margin:0;font-size:18px}
+.chip{background:var(--code);border-radius:999px;padding:1px 10px;color:var(--muted);font-size:12px}
+.cols{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;min-width:0}
+.card h3{margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+.trace{font-family:ui-monospace,Consolas,monospace;font-size:12px;overflow:auto;max-height:70vh}
+.trace div{white-space:pre;padding:1px 4px;border-radius:3px}
+.trace .WARN{background:var(--warn-bg)}.trace .ERROR,.trace .FATAL{background:var(--err-bg)}
+.trace .ev{display:inline-block;min-width:40px;color:var(--accent);font-weight:600}
+.trace .n{color:var(--muted);display:inline-block;width:26px;text-align:right;margin-right:8px}
+.sec{margin-bottom:12px}.sec:last-child{margin-bottom:0}
+.sec h4{margin:0 0 4px;font-size:13px}
+.sec ul{margin:0;padding-left:18px}.sec p{margin:0 0 4px}
+.sec pre,.sec code{background:var(--code);border-radius:4px;font-family:ui-monospace,Consolas,monospace;font-size:12px}
+.sec pre{padding:6px;overflow:auto;white-space:pre-wrap}
+.sec code{padding:0 3px}
+.empty{color:var(--muted);font-style:italic}
+#pre ul{margin:0;padding-left:18px}#pre p{margin:4px 0 0}
+.pre-alert{border-left:4px solid var(--ko)}.pre-ok{border-left:4px solid var(--ok)}
+nav a .warn{color:var(--ko);font-family:system-ui}
+form{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+fieldset{border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin:0}
+legend{color:var(--muted);font-size:12px;padding:0 4px}
+fieldset label{display:block;margin:3px 0}
+.scores label{display:flex;justify-content:space-between;gap:8px}
+textarea{width:100%;min-height:70px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;grid-column:1/-1}
+.help{color:var(--muted);font-size:12px}
+.cardhead{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}.cardhead h3{margin:0}
+.banner{background:var(--code);border-left:4px solid var(--accent);border-radius:6px;padding:6px 10px;margin-bottom:10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.ed label{display:block;font-weight:600;font-size:13px;margin:10px 0 2px}.ed label:first-child{margin-top:0}
+.ed textarea{min-height:64px}.ed textarea.big{min-height:110px}.ed input[type=text]{width:100%}
+.ed label.chk{font-weight:400}
+nav a .pen{color:var(--accent);font-family:system-ui}
+@media (max-width:900px){.layout{grid-template-columns:1fr}nav{display:none}.cols,form{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Relecture SCRUM-35</h1>
+  <label class="inline">Je suis
+    <select id="who"><option value="">—</option><option>Alain</option><option>Linda</option><option>Bachar</option><option>Nassim</option></select></label>
+  <label class="inline">Mode
+    <select id="mode"><option value="verif">Vérification (mes cas)</option><option value="relec">Relecture (cas d'un autre)</option></select></label>
+  <label class="inline">Cas <input type="number" id="from" min="1" value="1"> à <input type="number" id="to" min="1" value="80"></label>
+  <span class="progress" id="progress"></span>
+  <button id="export" class="primary">Exporter le CSV</button>
+  <button id="exportCorr" type="button" hidden>Exporter mes corrections</button>
+  <label class="inline"><button type="button" id="importBtn">Importer CSV / corrections</button><input type="file" id="import" accept=".csv,.jsonl" hidden></label>
+</header>
+<div class="layout">
+  <nav id="list"></nav>
+  <main>
+    <div class="case-head"><h2 id="cid"></h2><span class="chip" id="cblk"></span><span class="chip" id="clabel"></span><span class="chip" id="cabst"></span>
+      <span class="help">← / → pour naviguer · les saisies sont gardées dans ce navigateur</span></div>
+    <section class="card" id="pre"></section>
+    <div class="cols">
+      <section class="card"><h3>Trace originale</h3><div class="trace" id="trace"></div></section>
+      <section class="card"><div class="cardhead"><h3 id="ansTitle">Corrigé proposé</h3><button id="editBtn" type="button">✏ Corriger ce corrigé</button></div><div id="answer"></div></section>
+    </div>
+    <section class="card">
+      <h3 id="formTitle">Mon verdict</h3>
+      <form id="f" onsubmit="return false">
+        <fieldset><legend>Checklist</legend>
+          <label><input type="checkbox" name="c1"> Faits vérifiés dans les logs</label>
+          <label><input type="checkbox" name="c2"> Résumé fidèle et chronologique</label>
+          <label><input type="checkbox" name="c3"> Abstention justifiée</label>
+          <label><input type="checkbox" name="c4"> Sources C6 vérifiées (ou liste vide correcte)</label>
+        </fieldset>
+        <fieldset class="scores"><legend>Grille (0 insuffisant · 1 partiel · 2 satisfaisant) — facultatif</legend>
+          <label>Exactitude des faits <select name="s_faits"><option></option><option>0</option><option>1</option><option>2</option></select></label>
+          <label>Appui sur les sources <select name="s_sources"><option></option><option>0</option><option>1</option><option>2</option></select></label>
+          <label>Abstention justifiée <select name="s_abst"><option></option><option>0</option><option>1</option><option>2</option></select></label>
+          <label>Utilité <select name="s_util"><option></option><option>0</option><option>1</option><option>2</option></select></label>
+        </fieldset>
+        <fieldset><legend>Verdict</legend>
+          <label><input type="radio" name="verdict" value="oui"> Corrigé juste, je valide</label>
+          <label><input type="radio" name="verdict" value="non"> Corrigé faux ou incomplet (expliquer)</label>
+          <label><input type="radio" name="verdict" value="discuter"> À discuter en équipe</label>
+        </fieldset>
+        <fieldset><legend>Commentaire (obligatoire si « non » ou « à discuter »)</legend>
+          <textarea name="comment" placeholder="Ex. : le fait F2 n'apparaît pas dans la trace ; la ligne 14 est un WARN, pas une erreur."></textarea>
+        </fieldset>
+        <div class="actions"><button id="prev" type="button">← Précédent</button><button id="next" type="button" class="primary">Enregistrer et suivant →</button><span class="help" id="saved"></span></div>
+      </form>
+    </section>
+  </main>
+</div>
+<script>
+const CASES = /*__DATA__*/[];
+const KEY = 'scrum35-relecture-v1';
+let store = {}; try { store = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) {}
+const persist = () => { try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) {} };
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let cur = 0;
+const prefs = (() => { try { return JSON.parse(localStorage.getItem(KEY + '-prefs') || '{}'); } catch (e) { return {}; } })();
+['who','mode','from','to'].forEach(k => { if (prefs[k]) $('#' + k).value = prefs[k]; });
+const savePrefs = () => { try { localStorage.setItem(KEY + '-prefs', JSON.stringify({who:$('#who').value, mode:$('#mode').value, from:$('#from').value, to:$('#to').value})); } catch (e) {} };
+
+function inline(t) { return esc(t).replace(/`([^`]+)`/g, '<code>$1</code>').replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>'); }
+function md(text) {
+  if (!text || !text.trim()) return '<p class="empty">(vide)</p>';
+  const out = []; let list = false, code = false, buf = [];
+  for (const line of text.split('\n')) {
+    if (line.trim().startsWith('```')) { if (code) { out.push('<pre>' + esc(buf.join('\n')) + '</pre>'); buf = []; } else if (list) { out.push('</ul>'); list = false; } code = !code; continue; }
+    if (code) { buf.push(line); continue; }
+    const m = line.match(/^\s*[-*]\s+(.*)/);
+    if (m) { if (!list) { out.push('<ul>'); list = true; } out.push('<li>' + inline(m[1]) + '</li>'); continue; }
+    if (list) { out.push('</ul>'); list = false; }
+    if (line.trim()) out.push('<p>' + inline(line) + '</p>');
+  }
+  if (list) out.push('</ul>');
+  if (code) out.push('<pre>' + esc(buf.join('\n')) + '</pre>');
+  return out.join('');
+}
+function traceHtml(text) {
+  const lines = (text || '').replace(/^```\w*\n?/, '').replace(/\n?```\s*$/, '').split('\n').filter(l => l.trim());
+  return lines.map((l, i) => {
+    const lvl = (l.match(/\b(INFO|WARN|ERROR|FATAL)\b/) || [,''])[1];
+    const m = l.match(/^\[(E\d+)\]\s*(.*)$/);
+    const body = m ? '<span class="ev">' + esc(m[1]) + '</span> ' + esc(m[2]) : esc(l);
+    return '<div class="' + lvl + '"><span class="n">' + (i + 1) + '</span>' + body + '</div>';
+  }).join('');
+}
+const entryKey = (id) => id + '|' + $('#mode').value;
+function inRange(i) { const a = +$('#from').value || 1, b = +$('#to').value || CASES.length; return i + 1 >= a && i + 1 <= b; }
+function renderList() {
+  $('#list').innerHTML = CASES.map((c, i) => {
+    const e = store[c.id + '|' + $('#mode').value];
+    return '<a href="#" data-i="' + i + '" class="' + (i === cur ? 'cur ' : '') + (inRange(i) ? '' : 'hidden') + '">' + esc(c.id) + (checksOf(c).alerts.length ? ' <span class="warn">⚠' + checksOf(c).alerts.length + '</span>' : '') + (store[c.id + '|corr'] ? ' <span class="pen" title="corrigé">✏</span>' : '') + '<span class="dot ' + (e && e.verdict || '') + '"></span></a>';
+  }).join('');
+  const idx = CASES.map((c, i) => i).filter(inRange);
+  const done = idx.filter(i => (store[CASES[i].id + '|' + $('#mode').value] || {}).verdict).length;
+  $('#progress').textContent = done + ' / ' + idx.length + ' traités';
+}
+// precheck:start — portage de precheck() de page_relecture.py (mêmes messages, frontières Unicode)
+const NUM_WORDS = {un:1,une:1,deux:2,trois:3,quatre:4,cinq:5,six:6,sept:7,huit:8,neuf:9,dix:10,onze:11,douze:12,treize:13,quatorze:14,quinze:15,seize:16};
+const WB0 = '(?<![\\p{L}\\p{N}_])', WB1 = '(?![\\p{L}\\p{N}_])';
+const ABSENCE = new RegExp("^\\s*(?:aucune?|absence)" + WB1 + "|^\\s*pas d['’]|n['’](?:apparaît|apparaissent|y a) pas|ne contient (?:aucun|pas)|" + WB0 + 'absente?s?' + WB1, 'iu');
+function precheck(rec, e) {
+  const events = {}; for (const ev of rec.events) events[ev] = (events[ev] || 0) + 1;
+  const trace = rec.trace_lines.join('\n'); const alerts = [], ok = [];
+  const numbersInTrace = (text, where) => { for (const m of text.matchAll(new RegExp('\\d{1,3}(?:\\.\\d{1,3}){3}(?::\\d+)?|' + WB0 + '\\d{3,}' + WB1, 'gu'))) if (!trace.includes(m[0])) alerts.push(where + ' : « ' + m[0] + " » n'apparaît pas dans la trace."); };
+  const reCode = () => new RegExp(WB0 + 'E(\\d{1,2})' + WB1, 'gu');
+  const errorLines = rec.trace_lines.filter(l => new RegExp(WB0 + '(ERROR|FATAL)' + WB1, 'u').test(l) || l.includes('xception')).length;
+  const warnOnly = rec.trace_lines.filter(l => new RegExp(WB0 + 'WARN' + WB1, 'u').test(l)).length;
+  e.faits_observes.forEach((fact, j) => {
+    const where = 'Fait ' + (j + 1); const head = fact.includes(':') ? fact.split(':')[0] : fact;
+    const codes = [...head.matchAll(reCode())].map(m => 'E' + m[1]);
+    if (ABSENCE.test(fact) && !/^\s*E\d{1,2}(?![\p{L}\p{N}_])[^:]*:/u.test(fact)) {
+      const present = codes.filter(x => x in events), low = fact.toLowerCase();
+      if (present.length) alerts.push(where + " : annonce l'absence de " + present.join(', ') + ', pourtant présent(s) dans la trace.');
+      if (/erreur|error|exception/.test(low) && errorLines) alerts.push(where + " : annonce l'absence d'erreur, mais la trace contient " + errorLines + ' ligne(s) ERROR/FATAL/exception.');
+      else if (/avertissement|warn/.test(low) && warnOnly) alerts.push(where + " : annonce l'absence d'avertissement, mais la trace contient " + warnOnly + ' ligne(s) WARN.');
+      else if (!present.length) ok.push(where + ' : absence cohérente avec la trace.');
+      numbersInTrace(fact, where); return;
+    }
+    const missing = codes.filter(x => !(x in events));
+    if (missing.length) alerts.push(where + ' : code(s) ' + missing.join(', ') + ' absent(s) de la trace.');
+    if (!codes.length) alerts.push(where + " : aucun code d'événement cité, à vérifier à la main.");
+    if (codes.length === 1 && codes[0] in events) {
+      const body = fact.includes(':') ? fact.slice(fact.indexOf(':') + 1) : fact; const cnt = events[codes[0]];
+      const m = body.toLowerCase().match(new RegExp(WB0 + '(' + Object.keys(NUM_WORDS).join('|') + '|\\d{1,2})' + WB1, 'u'));
+      if (m) { const n = NUM_WORDS[m[1]] || parseInt(m[1], 10);
+        if (n !== cnt && !((m[1] === 'un' || m[1] === 'une') && cnt >= 1 && !body.includes('plusieurs'))) alerts.push(where + ' : annonce ' + n + ', mais ' + codes[0] + ' apparaît ' + cnt + ' fois dans la trace.');
+        else ok.push(where + ' : effectif ' + codes[0] + ' = ' + cnt + ' cohérent.'); }
+      else if (body.toLowerCase().includes('plusieurs') && cnt < 2) alerts.push(where + ' : « plusieurs » alors que ' + codes[0] + ' apparaît ' + cnt + ' fois.');
+    }
+    numbersInTrace(fact, where);
+  });
+  numbersInTrace(e.resume_evenements, 'Résumé');
+  if (e.abstention && e.hypotheses.length) alerts.push('Abstention vraie mais hypothèses présentes (contraire à C5).');
+  if (e.abstention && !e.infos_manquantes.length) alerts.push('Abstention vraie sans information manquante (contraire à C5).');
+  e.hypotheses.forEach((h, j) => { if (!/pourrai|compatible|possible|peut|suggèr|probabl|semble/.test(h.toLowerCase())) alerts.push('Hypothèse ' + (j + 1) + ' : pas formulée comme une hypothèse (conditionnel absent).'); });
+  const warn = rec.trace_lines.filter(l => new RegExp(WB0 + '(WARN|ERROR|FATAL)' + WB1, 'u').test(l)).length;
+  const txt = (e.resume_evenements + e.faits_observes.join(' ')).toLowerCase();
+  if (warn && !['avertissement', 'warn', 'exception', 'erreur', 'error'].some(w => txt.includes(w))) alerts.push('La trace contient ' + warn + ' ligne(s) WARN/ERROR non mentionnée(s) dans le résumé ni les faits.');
+  return {alerts, ok, n_facts: e.faits_observes.length};
+}
+// precheck:end
+const FIELDS = [['resume_evenements', 'Résumé'], ['faits_observes', 'Faits observés (un par ligne)'], ['hypotheses', 'Hypothèses (une par ligne, au conditionnel)'], ['infos_manquantes', 'Informations manquantes (une par ligne)'], ['sources', 'Sources retenues (une par ligne, vide si aucune)']];
+let editing = false, showOrig = false;
+const corrOf = c => store[c.id + '|corr'];
+const shownExpected = c => corrOf(c) && !showOrig ? corrOf(c).expected : c.expected;
+const checksOf = c => corrOf(c) ? precheck(c, corrOf(c).expected) : (c.checks || {alerts: [], ok: []});
+const bul = xs => xs.map(x => '- ' + x).join('\n');
+function setAbst(c) { $('#cabst').textContent = 'Abstention : ' + (shownExpected(c).abstention ? 'oui' : 'non') + (corrOf(c) && !showOrig ? ' (version corrigée)' : ''); }
+function renderAnswer(c) {
+  const k = corrOf(c);
+  $('#editBtn').hidden = editing;
+  $('#ansTitle').textContent = editing ? 'Correction du corrigé' : (k && !showOrig ? 'Corrigé (version corrigée)' : 'Corrigé proposé');
+  if (editing) return renderEditor(c);
+  const e = shownExpected(c);
+  const banner = k ? '<div class="banner">✏ Corrigé par <strong>' + esc(k.who) + '</strong> le ' + esc(new Date(k.at).toLocaleString('fr-FR')) + ' — motif : ' + esc(k.motif)
+    + ' <button type="button" id="toggleOrig">' + (showOrig ? 'Voir la correction' : "Voir l'original") + '</button> <button type="button" id="delCorr">Supprimer ma correction</button></div>' : '';
+  $('#answer').innerHTML = banner + [['Résumé proposé', e.resume_evenements], ['Faits observés', bul(e.faits_observes)], ['Hypothèses', bul(e.hypotheses)], ['Informations manquantes', bul(e.infos_manquantes)]]
+    .map(x => '<div class="sec"><h4>' + esc(x[0]) + '</h4>' + md(x[1]) + '</div>').join('')
+    + (e.sources.length ? '<div class="sec"><h4>Sources retenues</h4>' + md(bul(e.sources)) + '</div>' : '')
+    + '<div class="sec"><h4>Sources C6 candidates</h4>' + md(c.sections['Sources C6 candidates']) + '</div>';
+  if (k) {
+    $('#toggleOrig').onclick = () => { showOrig = !showOrig; refresh(); };
+    $('#delCorr').onclick = () => { if (confirm('Supprimer ta correction de ' + c.id + ' ? Le corrigé original sera de nouveau affiché.')) { delete store[c.id + '|corr']; persist(); updateCorrBtn(); refresh(); } };
+  }
+}
+function refresh() { const c = CASES[cur]; renderAnswer(c); renderPre(c, shownExpected(c)); setAbst(c); renderList(); }
+function readEditor() {
+  const g = n => $('#ed_' + n).value, lines = n => g(n).split('\n').map(x => x.trim()).filter(Boolean);
+  return {resume_evenements: g('resume_evenements').trim(), faits_observes: lines('faits_observes'), hypotheses: lines('hypotheses'), infos_manquantes: lines('infos_manquantes'), sources: lines('sources'), abstention: $('#ed_abstention').checked};
+}
+function renderEditor(c) {
+  const k = corrOf(c), e = k ? k.expected : c.expected;
+  const cand = (c.sections['Sources C6 candidates'] || '').split('\n').map(x => x.replace(/^\s*-\s*/, '').trim()).filter(Boolean).join(' · ') || '—';
+  $('#answer').innerHTML = '<div class="ed">' + FIELDS.map(([n, lab]) => '<label for="ed_' + n + '">' + esc(lab) + '</label><textarea id="ed_' + n + '"' + (n === 'faits_observes' ? ' class="big"' : '') + '>'
+      + esc(n === 'resume_evenements' ? e[n] : e[n].join('\n')) + '</textarea>' + (n === 'sources' ? '<div class="help">Candidats C6 : ' + inline(cand) + '</div>' : '')).join('')
+    + '<label class="chk"><input type="checkbox" id="ed_abstention"' + (e.abstention ? ' checked' : '') + '> Abstention (la trace ne permet pas de conclure)</label>'
+    + '<label for="ed_motif">Motif de la correction (obligatoire)</label><input type="text" id="ed_motif" value="' + esc(k ? k.motif : '') + '" placeholder="Ex. : code absent de la trace remplacé ; effectif corrigé.">'
+    + '<div class="actions" style="margin-top:10px"><button type="button" class="primary" id="ed_save">Enregistrer la correction</button><button type="button" id="ed_cancel">Annuler</button></div>'
+    + '<p class="help">Le pré-contrôle ci-dessus se recalcule pendant la saisie. Une correction ne vaut pas verdict : donne ensuite ton verdict sur la version corrigée.</p></div>';
+  const live = () => renderPre(c, readEditor());
+  $('#answer').querySelectorAll('textarea,input').forEach(x => x.addEventListener('input', live)); live();
+  $('#ed_cancel').onclick = () => { editing = false; refresh(); };
+  $('#ed_save').onclick = () => {
+    const ex = readEditor(), motif = $('#ed_motif').value.trim();
+    if (!$('#who').value) return alert('Choisis ton nom en haut de la page.');
+    if (!ex.resume_evenements) return alert('Le résumé ne peut pas être vide.');
+    if (!ex.faits_observes.length) return alert('Il faut au moins un fait observé.');
+    if (ex.abstention && (ex.hypotheses.length || !ex.infos_manquantes.length)) return alert('Règle C5 : avec abstention, aucune hypothèse et au moins une information manquante.');
+    if (!motif) return alert('Indique le motif de la correction.');
+    if (JSON.stringify(ex) === JSON.stringify(c.expected)) return alert("La version saisie est identique à l'original : rien à enregistrer.");
+    store[c.id + '|corr'] = {who: $('#who').value, motif, at: Date.now(), expected: ex}; persist();
+    editing = false; showOrig = false; updateCorrBtn(); refresh();
+  };
+}
+function updateCorrBtn() { const n = CASES.filter(c => corrOf(c)).length; $('#exportCorr').hidden = !n; $('#exportCorr').textContent = 'Exporter mes corrections (' + n + ')'; }
+$('#editBtn').onclick = () => { editing = true; showOrig = false; renderAnswer(CASES[cur]); };
+function load() {
+  const c = CASES[cur]; const s = c.sections; editing = false; showOrig = false;
+  $('#cid').textContent = c.id; $('#cblk').textContent = c.block_id;
+  $('#clabel').textContent = 'Label officiel : ' + (c.label === '1' ? '1 (anomalie)' : c.label === '0' ? '0 (normal)' : c.label);
+  $('#trace').innerHTML = traceHtml(s['Trace originale']);
+  setAbst(c);
+  renderAnswer(c);
+  renderPre(c, shownExpected(c));
+  $('#formTitle').textContent = $('#mode').value === 'verif' ? 'Mon verdict (vérification)' : 'Mon verdict (relecture indépendante)';
+  const e = store[entryKey(c.id)] || {}; const f = $('#f');
+  ['c1','c2','c3','c4'].forEach(k => f[k].checked = !!e[k]);
+  ['s_faits','s_sources','s_abst','s_util'].forEach(k => f[k].value = e[k] || '');
+  f.querySelectorAll('input[name=verdict]').forEach(r => r.checked = r.value === e.verdict);
+  f.comment.value = e.comment || ''; $('#saved').textContent = e.at ? 'Enregistré le ' + new Date(e.at).toLocaleString('fr-FR') : '';
+  renderList(); window.scrollTo(0, 0);
+}
+function renderPre(c, exp) {
+  const k = (exp === c.expected) ? (c.checks || precheck(c, exp)) : precheck(c, exp);
+  $('#pre').className = 'card ' + (k.alerts.length ? 'pre-alert' : 'pre-ok');
+  $('#pre').innerHTML = '<h3>Pré-contrôle automatique — aide, pas un verdict</h3>' + (k.alerts.length
+    ? '<ul>' + k.alerts.map(a => '<li>⚠ ' + esc(a) + '</li>').join('') + '</ul><p class="help">Vérifie ces points dans la trace avant de valider.</p>'
+    : '<p>✓ Aucune incohérence mécanique détectée (codes présents, effectifs et nombres retrouvés dans la trace). Reste à juger le sens : résumé, hypothèses, abstention.</p>')
+    + (k.ok.length ? '<p class="help">' + k.ok.map(esc).join(' · ') + '</p>' : '')
+    + (exp !== c.expected ? '<p class="help">Pré-contrôle recalculé sur la version corrigée.</p>' : '');
+}
+function save() {
+  const f = $('#f'), c = CASES[cur];
+  const verdict = (f.querySelector('input[name=verdict]:checked') || {}).value || '';
+  if (!$('#who').value) { alert('Choisis ton nom en haut de la page.'); return false; }
+  if ((verdict === 'non' || verdict === 'discuter') && !f.comment.value.trim()) { alert('Ajoute un commentaire pour expliquer le problème.'); return false; }
+  const e = {who: $('#who').value, verdict, comment: f.comment.value.trim(), at: Date.now()};
+  ['c1','c2','c3','c4'].forEach(k => e[k] = f[k].checked);
+  ['s_faits','s_sources','s_abst','s_util'].forEach(k => e[k] = f[k].value);
+  store[entryKey(c.id)] = e; persist(); return true;
+}
+function move(d) { let i = cur; do { i += d; } while (i >= 0 && i < CASES.length && !inRange(i)); if (i >= 0 && i < CASES.length) { cur = i; load(); } }
+$('#next').onclick = () => {
+  if (!save()) return;
+  const before = cur; move(1);
+  if (cur === before) { load(); $('#saved').textContent = '✓ Enregistré — dernier cas de ta plage. Tu peux exporter le CSV.'; }
+};
+$('#prev').onclick = () => move(-1);
+$('#list').onclick = ev => { const a = ev.target.closest('a'); if (a) { ev.preventDefault(); cur = +a.dataset.i; load(); } };
+['who','mode','from','to'].forEach(k => $('#' + k).addEventListener('change', () => { savePrefs(); if (!inRange(cur)) { cur = Math.max(0, (+$('#from').value || 1) - 1); } load(); }));
+document.addEventListener('keydown', ev => { if (/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) return; if (ev.key === 'ArrowRight') move(1); if (ev.key === 'ArrowLeft') move(-1); });
+
+const csvCell = v => { v = String(v ?? ''); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
+function scoreText(e) { const p = [['F', e.s_faits], ['S', e.s_sources], ['A', e.s_abst], ['U', e.s_util]].filter(x => x[1] !== '' && x[1] != null); return p.length ? 'grille ' + p.map(x => x[0] + x[1]).join(' ') : ''; }
+$('#export').onclick = () => {
+  const head = ['id','block_id','label','annotator','annotation_verifiee','reviewed_by','relecture_validee','commentaire'];
+  const rows = CASES.map(c => {
+    const v = store[c.id + '|verif'] || {}, r = store[c.id + '|relec'] || {};
+    const com = [v.verdict ? [v.who + ' (vérif.)', v.comment, scoreText(v)].filter(Boolean).join(' : ') : '',
+                 r.verdict ? [r.who + ' (relec.)', r.comment, scoreText(r)].filter(Boolean).join(' : ') : '',
+                 corrOf(c) ? 'corrigé par ' + corrOf(c).who + ' : ' + corrOf(c).motif : ''].filter(Boolean).join(' | ');
+    return [c.id, c.block_id, c.label, v.verdict ? v.who : '', v.verdict || '', r.verdict ? r.who : '', r.verdict || '', com];
+  });
+  const csv = [head, ...rows].map(r => r.map(csvCell).join(',')).join('\n') + '\n';
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], {type: 'text/csv'}));
+  a.download = 'validation_humaine_' + ($('#who').value || 'anonyme') + '.csv'; a.click();
+};
+$('#exportCorr').onclick = () => {
+  const out = CASES.filter(c => corrOf(c)).map(c => { const k = corrOf(c);
+    return JSON.stringify({id: c.id, block_id: c.block_id, corrige_par: k.who, date: new Date(k.at).toISOString().slice(0, 10), motif: k.motif, expected: k.expected}); });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([out.join('\n') + '\n'], {type: 'application/x-ndjson'}));
+  a.download = 'corrections_' + ($('#who').value || 'anonyme') + '.jsonl'; a.click();
+};
+$('#importBtn').onclick = () => $('#import').click();
+$('#import').onchange = async ev => {
+  const file = ev.target.files[0]; const text = await file.text(); ev.target.value = '';
+  if (/\.jsonl$/i.test(file.name)) { let n = 0, skip = 0;
+    for (const l of text.split(/\r?\n/).filter(x => x.trim())) { const r = JSON.parse(l); const c = CASES.find(x => x.id === r.id && x.block_id === r.block_id);
+      const e = r.expected, shape = e && typeof e.resume_evenements === 'string' && typeof e.abstention === 'boolean' && ['faits_observes', 'hypotheses', 'infos_manquantes', 'sources'].every(k => Array.isArray(e[k]));
+      if (!c || !shape || store[r.id + '|corr']) { skip++; continue; }
+      store[r.id + '|corr'] = {who: r.corrige_par, motif: r.motif || '', at: Date.parse(r.date) || Date.now(), expected: r.expected}; n++; }
+    persist(); updateCorrBtn(); load(); return alert(n + ' correction(s) importée(s)' + (skip ? ', ' + skip + ' ignorée(s) (cas inconnu, format invalide ou déjà corrigé ici)' : '') + '.'); }
+  const lines = text.replace(/^﻿/, '').split(/\r?\n/).filter(Boolean);
+  const parse = l => { const out = []; let cell = '', q = false; for (let i = 0; i < l.length; i++) { const ch = l[i]; if (q) { if (ch === '"' && l[i+1] === '"') { cell += '"'; i++; } else if (ch === '"') q = false; else cell += ch; } else if (ch === '"') q = true; else if (ch === ',') { out.push(cell); cell = ''; } else cell += ch; } out.push(cell); return out; };
+  const head = parse(lines[0]); let n = 0;
+  for (const l of lines.slice(1)) { const r = Object.fromEntries(parse(l).map((v, i) => [head[i], v]));
+    if (r.annotator && r.annotation_verifiee && !store[r.id + '|verif']) { store[r.id + '|verif'] = {who: r.annotator, verdict: r.annotation_verifiee, comment: r.commentaire || '', at: Date.now()}; n++; }
+    if (r.reviewed_by && r.relecture_validee && !store[r.id + '|relec']) { store[r.id + '|relec'] = {who: r.reviewed_by, verdict: r.relecture_validee, comment: r.commentaire || '', at: Date.now()}; n++; } }
+  persist(); load(); alert(n + ' saisie(s) importée(s) ; les saisies existantes sont conservées.');
+};
+updateCorrBtn(); cur = Math.max(0, (+$('#from').value || 1) - 1); load();
+</script>
+</body>
+</html>
