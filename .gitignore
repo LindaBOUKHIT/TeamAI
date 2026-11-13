@@ -43,3 +43,5 @@ Thumbs.db
 
 # Site compilé — généré par Vite
 volet_a/web/dist/
+# Page locale de relecture SCRUM-35 (contient des données de test)
+eval/volet_b/relecture_locale.html
