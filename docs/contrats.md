@@ -134,7 +134,7 @@ result = generate([{"role": "user", "content": "Consigne puis trace HDFS"}])
 # result : {"text": str, "new_tokens": int, "seconds": float}
 ```
 
-`text` doit être analysé et vérifié par l'orchestrateur avant d'être affiché comme réponse structurée. Le mode `TEAMAI_SLM_MOCK=1` permet de développer les consommateurs sans poids de modèle ; ses résultats sont identifiés comme factices et exclus des évaluations de qualité. Le backend GGUF de SCRUM-57 est encore un banc de mesure séparé (`bench_gguf.py`) : il sera branché derrière `generate()` sans changer cette interface.
+`text` doit être analysé et vérifié par l'orchestrateur avant d'être affiché comme réponse structurée. Le mode `TEAMAI_SLM_MOCK=1` permet de développer les consommateurs sans poids de modèle ; ses résultats sont identifiés comme factices et exclus des évaluations de qualité. Depuis SCRUM-57, `backend: llamacpp` (GGUF Q4_K_M) est disponible derrière `generate()` avec la même interface ; Transformers float32 reste le défaut.
 
 ## C6 — Passage documentaire RAG (corpus → retrieval → agents)
 

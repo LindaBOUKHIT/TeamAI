@@ -1,0 +1,21 @@
+{
+    "ticket": "SCRUM-62",
+    "split": "val",
+    "test_used": false,
+    "verification": "manual_browser_check",
+    "backend": "wasm",
+    "model_source": "cache navigateur",
+    "model_sha256": "ab98e8c45ef398c5c2ad13e05503fd94c5f13453daedda32d61c3ae43611a5ad",
+    "threshold": 0.40814146399497986,
+    "distinct_cases": 10,
+    "batch_sizes_checked": [
+        1,
+        3,
+        10
+    ],
+    "includes_case_at_threshold": true,
+    "max_absolute_error": 5.960464477539063e-8,
+    "label_disagreements": 0,
+    "passed": true,
+    "verified_by": "Bachar Ben Slama"
+}

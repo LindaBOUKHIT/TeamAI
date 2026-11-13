@@ -1,1 +1,1 @@
-"""Outils de preparation et de validation du test Volet B."""
+"""Volet B : mesures des configurations (SCRUM-38) et préparation du jeu de test réservé (SCRUM-35)."""

@@ -23,12 +23,19 @@ def main():
     """Vérifie C3, les scores et les décisions, sans utiliser le test."""
     parser = argparse.ArgumentParser()
     parser.add_argument("--run", type=Path, required=True)
+    parser.add_argument("--threshold", type=float)
+    parser.add_argument("--output-dir", type=Path)
     args = parser.parse_args()
     torch.set_num_threads(4)
 
     run = args.run.resolve()
     export = run / "export"
-    report_path = export / "parity.json"
+    output = args.output_dir.resolve() if args.output_dir else export
+    output.mkdir(parents=True, exist_ok=True)
+    report_path = output / "parity.json"
+
+    if (output / "parity_cases.json").exists():
+        raise FileExistsError("Les cas de parité existent déjà.")
 
     if report_path.exists():
         raise FileExistsError("Ce rapport existe déjà ; il ne sera pas écrasé.")
@@ -86,7 +93,11 @@ def main():
 
     maximum_error = 0.0
     disagreements = 0
-    threshold = meta["threshold"]
+    threshold = (
+        args.threshold if args.threshold is not None else meta["threshold"]
+    )
+    if not np.isfinite(threshold) or not 0 <= threshold <= 1:
+        raise ValueError("Seuil invalide.")
     tolerance = 1e-4
 
     with torch.inference_mode():
@@ -151,7 +162,7 @@ def main():
         json.dumps(report, indent=2, allow_nan=False) + "\n",
         encoding="utf-8",
     )
-    (export / "parity_cases.json").write_text(
+    (output / "parity_cases.json").write_text(
         json.dumps({
             "event_ids": sample.tolist(),
             "p_anomaly": reference,

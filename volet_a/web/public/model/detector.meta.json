@@ -2,16 +2,23 @@
   "contract_version": "v1",
   "model": "bilstm",
   "version": "v1",
-  "threshold": 0.99,
+  "threshold": 0.40814146399497986,
   "max_len": 50,
   "pad_id": 0,
   "unk_id": 30,
   "vocab_sha256": "77b6688a94a0a6a4dbbbdeb1a2d3cb22871b91d874339cf44f986d82928e443a",
   "model_sha256": "ab98e8c45ef398c5c2ad13e05503fd94c5f13453daedda32d61c3ae43611a5ad",
   "splits_sha256": "f504592cb7ac13b8b7e5d532a336b4e3641ec441a863c5efafd164faa2a43f22",
-  "val_macro_f1": 0.9955139190447365,
+  "val_macro_f1": 0.9939476590631313,
   "epoch": 5,
   "run_id": "20261016T184412Z_4f3011f2_bilstm",
   "checkpoint_sha256": "e37b8ade0126f86433c0e76dc8950840877c9ae2bbe4ee9c5f1b393b64fb93fa",
-  "training_git_commit": "1117d070a296605012cdcb1678f7816b4332ed9f"
+  "training_git_commit": "1117d070a296605012cdcb1678f7816b4332ed9f",
+  "threshold_selection": {
+    "ticket": "SCRUM-62",
+    "split": "val",
+    "objective": "max_f1_anomaly_with_fn_at_most_2",
+    "observed_fn": 1,
+    "analysis": "eval/results/SCRUM-62_20261023T153242Z_690fcb/analysis.json"
+  }
 }
