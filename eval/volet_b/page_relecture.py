@@ -8,6 +8,11 @@ La page contient des données de test : elle est ignorée par git et ne doit pas
 
     python -m eval.volet_b.page_relecture
 puis ouvrir eval/volet_b/relecture_locale.html dans un navigateur.
+
+Le bouton « Corriger ce corrigé » de la page produit corrections_<prénom>.jsonl.
+Pour réintégrer ces corrections (contrôle C5, refus des conflits, journal) :
+
+    python -m eval.volet_b.page_relecture --appliquer eval/volet_b/corrections_Alain.jsonl
 """
 import csv
 import json
@@ -97,6 +102,58 @@ def precheck(rec):
 
 
 HERE = EVAL_VOLET_B
+EXPECTED_KEYS = ["resume_evenements", "faits_observes", "hypotheses", "infos_manquantes", "sources", "abstention"]
+CORRECTIONS_LOG_FIELDS = ["id", "block_id", "corrige_par", "date", "motif"]
+
+
+def check_expected(expected, where):
+    """Vérifie la forme d'un corrigé C5 et ses règles d'abstention ; lève ValueError sinon."""
+    if list(expected) != EXPECTED_KEYS:
+        raise ValueError(f"{where} : champs attendus {EXPECTED_KEYS}, reçus {list(expected)}")
+    if not isinstance(expected["resume_evenements"], str) or not expected["resume_evenements"].strip():
+        raise ValueError(f"{where} : résumé vide")
+    for key in EXPECTED_KEYS[1:5]:
+        if not isinstance(expected[key], list) or not all(isinstance(x, str) and x.strip() for x in expected[key]):
+            raise ValueError(f"{where} : {key} doit être une liste de textes non vides")
+    if not expected["faits_observes"]:
+        raise ValueError(f"{where} : au moins un fait observé est requis")
+    if not isinstance(expected["abstention"], bool):
+        raise ValueError(f"{where} : abstention doit être un booléen")
+    if expected["abstention"] and (expected["hypotheses"] or not expected["infos_manquantes"]):
+        raise ValueError(f"{where} : abstention vraie impose hypotheses vide et au moins une info manquante (C5)")
+
+
+def apply_corrections(paths, jsonl_path, log_path):
+    """Réintègre les corrections exportées par la page dans le JSONL source et les journalise."""
+    rows = [json.loads(l) for l in jsonl_path.read_text(encoding="utf-8").splitlines() if l.strip()]
+    by_id = {r["id"]: r for r in rows}
+    seen, log = {}, []
+    for path in paths:
+        for n, line in enumerate(Path(path).read_text(encoding="utf-8").splitlines(), 1):
+            if not line.strip():
+                continue
+            corr = json.loads(line)
+            where = f"{Path(path).name}:{n} ({corr.get('id')})"
+            row = by_id.get(corr.get("id"))
+            if row is None or row["block_id"] != corr.get("block_id"):
+                raise ValueError(f"{where} : identifiant ou bloc inconnu")
+            if corr["id"] in seen:
+                raise ValueError(f"{where} : déjà corrigé dans {seen[corr['id']]}")
+            if not str(corr.get("corrige_par", "")).strip():
+                raise ValueError(f"{where} : auteur de la correction manquant")
+            check_expected(corr["expected"], where)
+            seen[corr["id"]] = where
+            row["expected"] = corr["expected"]
+            log.append({"id": corr["id"], "block_id": corr["block_id"], "corrige_par": corr["corrige_par"],
+                        "date": corr.get("date", ""), "motif": corr.get("motif", "")})
+    jsonl_path.write_text("".join(json.dumps(r) + "\n" for r in rows), encoding="utf-8", newline="\n")
+    new_log = not log_path.exists()
+    with log_path.open("a", encoding="utf-8", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=CORRECTIONS_LOG_FIELDS, lineterminator="\n")
+        if new_log:
+            writer.writeheader()
+        writer.writerows(log)
+    return len(log)
 
 
 def main(argv=None):
@@ -106,7 +163,14 @@ def main(argv=None):
     parser.add_argument("--md", type=Path, default=HERE / "relecture_annotations.md")
     parser.add_argument("--csv", type=Path, default=HERE / "validation_humaine.csv")
     parser.add_argument("--sortie", type=Path, default=HERE / "relecture_locale.html")
+    parser.add_argument("--appliquer", type=Path, nargs="+", metavar="corrections_<prénom>.jsonl",
+                        help="réintègre des corrections exportées par la page dans annotations_travail.jsonl")
     args = parser.parse_args(argv)
+    if args.appliquer:
+        n = apply_corrections(args.appliquer, HERE / "annotations_travail.jsonl", HERE / "corrections_journal.csv")
+        print(f"{n} correction(s) appliquée(s) ; journal : eval/volet_b/corrections_journal.csv."
+              " Régénérer relecture_annotations.md avec preparer_relecture.py.")
+        return
     md, csv_path, out = args.md, args.csv, args.sortie
     cases = parse(md.read_text(encoding="utf-8"))
     with csv_path.open(encoding="utf-8-sig", newline="") as f:
@@ -137,6 +201,8 @@ def main(argv=None):
             c["sections"]["Sources C6 candidates"] = bullets(s.strip() for s in src.split(";") if s.strip())
         c["label"] = str(r["label"])
         c["checks"] = precheck(r)
+        # Données brutes pour le mode « Corriger » (pré-contrôle recalculé dans la page).
+        c["events"], c["trace_lines"], c["expected"] = r["events"], r["trace_lines"], r["expected"]
     print("traces de longueur différente md/jsonl:", mismatch)
     print("cas avec au moins une alerte de pré-contrôle:", sum(1 for c in cases if c["checks"]["alerts"]),
           "| alertes au total:", sum(len(c["checks"]["alerts"]) for c in cases))

@@ -1,5 +1,13 @@
 """Pré-contrôle de la page de relecture SCRUM-35, sur des exemples synthétiques (aucune donnée de test)."""
-from eval.volet_b.page_relecture import parse, precheck
+import csv
+import json
+import shutil
+import subprocess
+
+import pytest
+
+from eval.volet_b.page_relecture import apply_corrections, parse, precheck
+from teamai.paths import EVAL_VOLET_B
 
 
 def record(faits, resume="Le bloc est reçu.", hypotheses=(), infos=(), abstention=False):
@@ -43,3 +51,89 @@ def test_parse_reads_sections_and_meta():
     assert case["id"] == "test-0001" and case["block_id"] == "blk_1"
     assert case["meta"]["Label officiel"] == "0"
     assert case["sections"]["Faits observés"] == "- E5 : réception."
+
+
+def write_jsonl(path, rows):
+    """Écrit des lignes JSON au format du fichier d'annotations."""
+    path.write_text("".join(json.dumps(r) + "\n" for r in rows), encoding="utf-8", newline="\n")
+
+
+def annotations(tmp_path):
+    """Crée un fichier d'annotations synthétique de deux cas."""
+    rows = [dict(record(["E5 : réception."]), id=f"test-000{i}", block_id=f"blk_{i}", label=0) for i in (1, 2)]
+    path = tmp_path / "annotations_travail.jsonl"
+    write_jsonl(path, rows)
+    return path, rows
+
+
+def correction(case_id, block_id, **changes):
+    """Construit une ligne de corrections au format exporté par la page."""
+    expected = dict(record(["E9 : deux réceptions."])["expected"], **changes)
+    return {"id": case_id, "block_id": block_id, "corrige_par": "Alain", "date": "2026-11-13",
+            "motif": "effectif corrigé", "expected": expected}
+
+
+def test_apply_corrections_replaces_expected_and_logs(tmp_path):
+    """Une correction valide remplace le corrigé, garde le reste et alimente le journal."""
+    path, rows = annotations(tmp_path)
+    corr = tmp_path / "corrections_Alain.jsonl"
+    write_jsonl(corr, [correction("test-0002", "blk_2")])
+    log = tmp_path / "corrections_journal.csv"
+    assert apply_corrections([corr], path, log) == 1
+    new = [json.loads(l) for l in path.read_text(encoding="utf-8").splitlines()]
+    assert new[0] == rows[0]
+    assert new[1]["expected"]["faits_observes"] == ["E9 : deux réceptions."]
+    assert {k: v for k, v in new[1].items() if k != "expected"} == {k: v for k, v in rows[1].items() if k != "expected"}
+    assert b"\r\n" not in path.read_bytes()
+    with log.open(encoding="utf-8", newline="") as f:
+        assert [r["id"] for r in csv.DictReader(f)] == ["test-0002"]
+
+
+@pytest.mark.parametrize("bad, message", [
+    ({"block_id": "blk_9"}, "inconnu"),
+    ({"expected": {"resume_evenements": "x"}}, "champs attendus"),
+    ({"abstention": True}, "C5"),
+    ({"corrige_par": ""}, "auteur"),
+])
+def test_apply_corrections_rejects_invalid_lines(tmp_path, bad, message):
+    """Bloc inconnu, champs manquants, règle C5 ou auteur absent bloquent l'application sans rien écrire."""
+    path, _ = annotations(tmp_path)
+    before = path.read_bytes()
+    line = correction("test-0001", "blk_1")
+    if "abstention" in bad:
+        line["expected"]["abstention"] = True
+    else:
+        line.update(bad)
+    corr = tmp_path / "c.jsonl"
+    write_jsonl(corr, [line])
+    with pytest.raises(ValueError, match=message):
+        apply_corrections([corr], path, tmp_path / "journal.csv")
+    assert path.read_bytes() == before
+    assert not (tmp_path / "journal.csv").exists()
+
+
+def test_apply_corrections_refuses_two_files_on_same_case(tmp_path):
+    """Deux fichiers qui corrigent le même cas sont refusés : le conflit se tranche en équipe."""
+    path, _ = annotations(tmp_path)
+    a, b = tmp_path / "corrections_Alain.jsonl", tmp_path / "corrections_Linda.jsonl"
+    write_jsonl(a, [correction("test-0001", "blk_1")])
+    write_jsonl(b, [dict(correction("test-0001", "blk_1"), corrige_par="Linda")])
+    with pytest.raises(ValueError, match="déjà corrigé"):
+        apply_corrections([a, b], path, tmp_path / "journal.csv")
+
+
+@pytest.mark.skipif(shutil.which("node") is None, reason="Node.js absent")
+def test_javascript_precheck_matches_python(tmp_path):
+    """Le pré-contrôle recalculé dans la page donne les mêmes alertes que la version Python."""
+    template = (EVAL_VOLET_B / "page_relecture.html").read_text(encoding="utf-8")
+    js = template[template.index("// precheck:start"):template.index("// precheck:end")]
+    recs = [record(["E9 : deux réceptions de 67108864 octets.", "E4 : un avertissement d'exception vers 10.0.0.1."]),
+            record(["E9 : trois réceptions.", "E26 : enregistrement.", "E5 : réception de 999999 octets.", "réception sans code"]),
+            record(["E9 : plusieurs réceptions.", "E5 : plusieurs réceptions."], hypotheses=["Le disque est plein."], abstention=True),
+            record(["éE9 : code collé à une lettre accentuée."], resume="Bloc reçu par 10.0.0.1:50010.")]
+    script = tmp_path / "check.js"
+    script.write_text(js + "\nconst recs = JSON.parse(require('fs').readFileSync(0, 'utf8'));\n"
+                      "process.stdout.write(JSON.stringify(recs.map(r => precheck(r, r.expected))));\n", encoding="utf-8")
+    out = subprocess.run(["node", str(script)], input=json.dumps(recs), capture_output=True, text=True,
+                         encoding="utf-8", check=True).stdout
+    assert json.loads(out) == [precheck(r) for r in recs]
