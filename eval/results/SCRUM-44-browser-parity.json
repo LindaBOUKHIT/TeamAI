@@ -1,0 +1,26 @@
+﻿{
+  "ticket": "SCRUM-44",
+  "environment": "Chrome / ONNX Runtime Web WASM",
+  "rows": 86260,
+  "threshold": 0.40814146399497986,
+  "fp32": {
+    "model_bytes": 56806,
+    "max_abs_error": 2.384185791015625e-7,
+    "mean_abs_error": 2.6881515136761205e-8,
+    "over_1e_4": 0,
+    "classification_disagreements": 0,
+    "non_finite": 0,
+    "inference_ms_including_js_loop": 13916.10000000149,
+    "approx_blocks_per_second": 6198.575750389173
+  },
+  "int8": {
+    "model_bytes": 22570,
+    "max_abs_error": 0.004140347242355347,
+    "mean_abs_error": 0.0000019392384306449722,
+    "over_1e_4": 216,
+    "classification_disagreements": 0,
+    "non_finite": 0,
+    "inference_ms_including_js_loop": 28712.5,
+    "approx_blocks_per_second": 3004.2664344797563
+  }
+}
