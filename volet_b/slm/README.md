@@ -90,9 +90,10 @@ le module porté exclut l’orchestration Kaggle et ajoute le contrôle autoris�
 
 ## Historique SmolLM2 — SCRUM-28 et SCRUM-57
 
-Les sections ci-dessous décrivent les anciens essais SmolLM2 et leurs commandes.
+Les sections SCRUM-28 et SCRUM-57 ci-dessous décrivent les anciens essais SmolLM2 et leurs commandes.
 Elles ne décrivent pas le modèle actuel. Les configurations C7 archivées restent
 la référence pour leur reproduction ; le YAML actuel ne reproduit pas ces essais.
+La section « Essai LoRA » décrit l'adaptation Gemma actuelle de SCRUM-29.
 
 # Première inférence locale — SCRUM-28
 
@@ -230,3 +231,199 @@ Le fichier C4 `data/splits/splits.csv` doit déjà exister dans ce checkout : le
 Chaque comparaison crée un dossier C7 neuf : `config.json`, `predictions.jsonl`, `metrics.json`, `comparison.md` et résultats intermédiaires des workers. Les backends tournent dans des processus CPU distincts pour séparer la RSS (pic échantillonné à 0,2 s, chargement inclus). Le débit est la moyenne des tokens/s mesurés ; les échecs restent au dénominateur de conformité et d'abstention. Les valeurs non mesurées sont `null`. La conformité C5 et l'abstention ne mesurent pas la justesse : relire les sorties brutes. Le temps de génération inclut le prompt ; Transformers exclut tokenisation/décodage, llama.cpp mesure l'appel chat complet.
 
 Ce diagnostic change à la fois le backend et la quantification. Pour les évaluations comparant base, LoRA, RAG et agents, conserver un unique couple backend/quantification et le consigner au journal. Mesures du 26/10 et lecture : `eval/results/SCRUM-57/README.md` et journal.
+
+## Essai LoRA (SCRUM-29, Gemma 4 E4B QAT)
+
+Cette section remplace l'ancien essai SmolLM2. Entraînement par Nassim sur **une T4
+Kaggle 16 Go** (SCRUM-61), puis inférence sur RTX 3050 6 Go. Les embeddings seuls
+occupent environ 6,5 Gio en BF16 : l'entraînement E4B n'est pas prévu sur 6 Go.
+La faisabilité T4 à 3072 tokens reste à mesurer, sans promesse de tenir en VRAM.
+
+Base d'entraînement : `google/gemma-4-E4B-it-qat-q4_0-unquantized`, poids BF16
+(environ 15,9 Go), révision **`476025a01dbf99361c062bbeca3d6a76bb4c4566`**,
+relevée par Alain sur l'API Hugging Face le 27/10 et conservée dans C7 et dans
+`base-config/teamai-base.json`. La base d'inférence reste le GGUF Q4_0 officiel
+figé dans `configs/generation.yaml` ; ces deux identifiants sont distincts.
+
+`train_lora.py` charge `Gemma4ForCausalLM` avec `Gemma4TextConfig` (Transformers
+5.6.2), sans tours vision/audio. Le chargement refuse des poids texte manquants,
+des dimensions incompatibles ou des clés inattendues hors tours multimodales.
+Sur T4 : FP16, NF4 avec calcul float16, lot 1, checkpointing, r=8 et q_proj/v_proj.
+En fp16 sur T4, vérifier dès les premiers pas que la perte n'est ni NaN ni infinie
+(risque connu des modèles Gemma en fp16) ; arrêter le run sinon.
+La préparation gèle la base sans promouvoir temporairement ses embeddings en FP32
+(ce qui doublerait leur occupation). DoRA, `modules_to_save`, embeddings,
+`lm_head`, `per_layer_model_projection` et `all-linear` sont refusés.
+
+`python -m volet_b.slm.make_seed` régénère vingt brouillons depuis les blocs train
+du sample, avec les fonctions v16 inchangées : même consigne, faits, glossaire,
+chronologie et catalogue de causes. Les réponses copient les faits exacts et ne
+prennent leurs hypothèses que dans les formulations compatibles et référencées.
+Sans indice, les listes d'hypothèses et d'informations manquantes restent vides.
+Le JSON suit `runtime.schema(block)` ; ce schéma reste un paramètre de décodage
+v16, il n'est pas ajouté au texte du prompt. Le dialogue est rendu par le template
+Gemma avec `enable_thinking=False`. La perte porte sur le JSON et le marqueur de fin de tour qui le suit immédiatement,
+sans les tokens du prompt ni la suite éventuelle du dialogue. Aucun exemple n'est tronqué.
+
+Depuis le correctif du 08/11, le forward ne reçoit plus `labels`. Pour une séquence
+de longueur `L`, `first` est le premier indice supervisé et
+`logits_to_keep = L - first + 1` : seules les positions `first-1 … L-1` passent
+par `lm_head` et le softcapping. La cross-entropy FP32 compare `logits[:, :-1]`
+à `labels[:, first:]`, ignore `-100` et moyenne les tokens supervisés. Elle garde
+la même définition que la loss décalée complète, sans matérialiser les logits
+du prompt pour le vocabulaire de 262 144 tokens.
+
+Couverture régénérée : **E27 : 2 blocs ; E28 : 2 blocs ; E24 : absent** du train
+du sample (20 blocs E27 et 24 blocs E28 disponibles). Les quatre blocs auparavant
+exclus le restent. Tous les `reviewed_by` sont vides : la relecture antérieure de
+Linda ne vaut plus. `validate_example()` continue à exiger un relecteur pour une
+annotation validée ; la seule erreur tolérée pour ces brouillons est explicitement
+`reviewed_by : texte non vide attendu`. Les contrôles v16 doivent tous passer.
+
+Le manifeste `data/sample/splits.csv` est extrait du C4 officiel, sans nouveau
+découpage. Sa provenance est décrite dans `data/sample/splits_provenance.json`.
+`prepare_examples()` recoupe chaque bloc avec C4 et les lignes originales du
+sample : déclarer artificiellement `split=train` pour un bloc val/test est refusé.
+Si `data/splits/splits.csv` est présent, il prévaut sur ce sous-ensemble.
+
+### Lancement Kaggle par Nassim
+
+Construire localement l'archive minimale, puis envoyer uniquement `sortie.zip`
+sur Kaggle (jamais le dépôt complet) :
+
+```bash
+python -m volet_b.slm.kaggle_lora_essai --bundle sortie.zip
+```
+
+La liste fermée `CODE_PATHS` de `kaggle_bundle.py` contient le code nécessaire de
+`teamai/` et `volet_b/slm/`, `volet_b/__init__.py`, `pyproject.toml` et la config
+`lora_essai.yaml`. S'y ajoutent uniquement `seed_alain.jsonl` et
+`train_allowlist.json` : identifiants des seuls blocs train utilisés, empreinte
+SHA-256 de `data/splits/splits.csv` source et empreintes des fichiers du bundle.
+La préparation recoupe C4 et reconstruit v16 localement. Si le CSV complet est
+absent, elle utilise le sous-ensemble local avec sa provenance et l'empreinte
+source recoupée avec `splits_meta.json`. Aucun fichier de `data/sample/`, CSV de
+split, log brut séparé ou identifiant val/test n'est empaqueté. Les extraits train
+déjà inclus dans les annotations C5 sont conservés.
+
+Extraire l'archive dans un dossier dédié, par exemple
+`/kaggle/working/teamai-bundle/`, choisir **GPU T4** et activer Internet pour
+la préparation. Depuis cette racine extraite, dans des cellules de commande :
+
+```bash
+python -m volet_b.slm.kaggle_lora_essai --dry-run
+python -m volet_b.slm.kaggle_lora_essai --install
+# Redémarrer le kernel si des bibliothèques avaient déjà été importées.
+python -m volet_b.slm.kaggle_lora_essai --steps 3
+```
+
+Commencer par **`--steps 3`** pour vérifier forward, backward et application réelle
+de l'optimiseur. Après lecture du journal, lancer `--steps 30` avec un nouveau
+`--working` si les sorties du premier essai existent. Trois pas laissent GradScaler sauter un premier
+pas en débordement ; si aucun pas n'est appliqué, consulter `skipped` et `scale`.
+
+Le mode `--install` installe puis quitte ; il ne télécharge aucun modèle.
+Les versions de départ sont figées dans `PACKAGES` : torch 2.9.1, Transformers
+5.6.2, PEFT 0.18.1, Accelerate 1.12.0, bitsandbytes 0.49.2, safetensors 0.7.0,
+gguf 0.19.0, sentencepiece 0.2.1, PyYAML 6.0.3, psutil 7.2.2 et pandas 3.0.3.
+Il ne s'agit pas d'un verrou de toutes les dépendances transitives. La résolution
+de cette pile et sa compatibilité avec le pilote Kaggle restent à vérifier ;
+aucune installation n'a été effectuée pour cette adaptation.
+
+Le lancement vérifie les fichiers extraits et leurs empreintes avant toute
+installation ou téléchargement. Il refuse `data/sample/`, les fichiers hors
+liste blanche et les autorisations non-train. Kaggle ne relit aucun corpus :
+les preuves v16 ont été reconstruites localement avant empaquetage.
+Il télécharge ensuite la base à la révision fixée,
+entraîne avec `--device cuda --qlora --offline`, libère le processus GPU puis
+exporte immédiatement l'adaptateur seul. Aucun bloc val/test ne sert à la perte.
+Pour un lancement direct avec poids déjà en cache :
+
+```bash
+python -m volet_b.slm.train_lora --device cuda --qlora --offline --steps 3
+```
+
+Le sous-processus lancé par le script Kaggle reçoit
+`PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True`, sauf si cette variable est
+déjà définie par l'utilisateur. `--dry-run` expose la commande et cette valeur,
+sans afficher le reste de l'environnement.
+
+Chaque pas affiche `loss`, `scale` (après `scaler.update()`), `skipped`,
+`grad_norm` (norme après unscale, avant écrêtage ; `null` si non finie),
+`vram_allocated_gb` et `vram_peak_gb` (pic cumulé depuis le début de
+l'entraînement, hors chargement ; unités Gio). Les paramètres LoRA entraînables
+sont vérifiés et, si nécessaire, promus en float32 avant création de l'optimiseur.
+Après unscale, les gradients finis sont écrêtés à `training.max_grad_norm: 1.0`.
+Un gradient non fini laisse `GradScaler.step()` sauter le pas et `update()` réduire
+l'échelle. `skipped` vaut vrai si un gradient après unscale est non fini **ou**
+si l'échelle diminue après update. La loss non finie reste immédiatement fatale.
+
+L'échelle initiale `training.init_scale` vaut 1024, pour limiter les débordements
+initiaux. Quelques sauts initiaux peuvent accompagner son adaptation. L'essai
+échoue après `training.max_consecutive_skips: 8` sauts consécutifs, ou à la fin
+si aucun pas d'optimiseur n'a été appliqué. Si tous les pas sont sautés, conserver
+le journal : une échelle qui baisse sans amélioration indique que les activations
+peuvent dépasser la plage fp16. Ne pas prolonger aveuglément le run ; faire relire
+le diagnostic avant de réviser le protocole de précision. Le message est :
+« gradients non finis persistants en fp16 : l'échelle ne suffit pas, activations
+hors plage fp16 probables ».
+
+Les métriques incluent `optimizer_steps`, `skipped_steps`, `final_scale` et
+`loss_mean`. Toutes les moyennes de loss, y compris les fenêtres initiale et
+finale, incluent les forwards valides des pas sautés. Ces correctifs sont
+**non revalidés sur GPU à ce stade** ; les tests factices CPU ont été ajoutés,
+leur exécution reste à faire par Alain.
+
+Sorties Kaggle dans `/kaggle/working/` : `adapter/` (PEFT),
+`gguf/adapter.gguf`, `gguf/meta.json`, `gguf/conversion.log`, `base-config/`,
+`lora_essai.yaml` et `runs/<horodatage>_lora_essai/` (C7 : configuration, versions,
+VRAM maximale chargement/entraînement, durée par pas, pertes et paramètres).
+Une sortie existante est refusée. La vérification finale recharge seulement les
+tenseurs PEFT sauvegardés dans le modèle courant ; elle n'appelle plus `generate()`
+et ne démontre pas une inférence correcte. La perte mesurée sur le train ne mesure
+pas la qualité des explications.
+
+### Conversion et comparaison sur RTX 3050
+
+Convertisseur **`convert_lora_to_gguf.py` au commit `0c1e57098`**, correspondant à
+llama-cpp-python **0.3.36**. Le script Kaggle télécharge une archive de ce commit,
+sans commande Git, et conserve les empreintes des sources. La conversion locale
+accepte aussi un checkout à ce commit, contrôlé par lecture de HEAD uniquement.
+`--base-config` désigne la configuration de la base HF exacte, accompagnée de sa
+provenance et de son empreinte, sans ses poids. Pour convertir un adaptateur déjà
+produit, avec les outils et configurations locaux :
+
+```bash
+python -m volet_b.slm.convert_gguf adapter /chemin/adapter --llama-cpp /chemin/llama.cpp --base-config /chemin/base-config --name essai-gemma --dry-run
+python -m volet_b.slm.convert_gguf adapter /chemin/adapter --llama-cpp /chemin/llama.cpp --base-config /chemin/base-config --name essai-gemma
+```
+
+Tout tenseur source inconnu, paire A/B incomplète, cible ignorée ou tenseur GGUF
+supplémentaire provoque un échec explicite. `meta.json` consigne la couverture
+exacte ; une conversion réussie reste `inference_validated=false`. Le contrôle
+lit uniquement l'adaptateur, jamais les poids de base. La route `merged` reste
+disponible pour les usages historiques mais **n'est pas retenue** : fusion puis
+requantification ne reproduisent pas le GGUF QAT officiel.
+
+Sur le portable, installer llama-cpp-python 0.3.36 avec la roue CUDA adaptée au
+pilote. Comparer les mêmes prompts v16, seed et paramètres, aux échelles 0 et 1 :
+
+```python
+from llama_cpp import Llama
+llm = Llama(model_path="gemma-4-E4B_q4_0-it.gguf", n_ctx=4096,
+            n_gpu_layers=-1, n_batch=128, n_ubatch=128,
+            lora_path="adapter.gguf", lora_scale=1.0, seed=42)
+# Recréer l'instance avec lora_scale=0.0 pour la référence sans effet LoRA.
+# Conserver le template sans thinking et le schéma runtime.schema(block).
+```
+
+L'interface existante `generate()` est conservée. Cette mission ne modifie pas
+son backend. Mesurer VRAM, débits et sorties brutes ; réduire `n_gpu_layers` si
+nécessaire. La résidence complète dans 6 Go, l'effet réel de l'adaptateur et le
+transfert NF4 vers Q4_0 restent à vérifier avec les poids. Le test de qualité
+ultérieur doit utiliser des blocs réservés et conserver les contrôles v16.
+
+Commande de vérification locale sans poids ni réseau : `python -m pytest -q`.
+
+Usage IA : Codex gpt-6.1-sol supervisé par Claude ; relecture d'Alain à faire ;
+relecture des exemples par Linda à refaire.
