@@ -44,6 +44,16 @@ def test_contract_and_warn_rules():
     assert any("WARN/ERROR" in a for a in alerts)
 
 
+def test_absence_facts_are_checked_as_absences():
+    """Un fait d'absence n'exige pas de code ; il est contredit si le code ou l'erreur figure dans la trace."""
+    checks = precheck(record(["E5 : réception.", "Aucun événement E26 n'apparaît dans la trace.",
+                              "E9 : le bloc absent du cache est reçu deux fois."]))
+    assert not any("Fait 2" in a or "Fait 3" in a for a in checks["alerts"])
+    assert any("Fait 2 : absence cohérente" in o for o in checks["ok"])
+    alerts = precheck(record(["Aucun événement E9 n'apparaît.", "Aucun message d'erreur n'apparaît dans la trace."]))["alerts"]
+    assert any("absence de E9, pourtant présent" in a for a in alerts)
+    assert any("absence d'erreur" in a for a in alerts)
+
 def test_parse_reads_sections_and_meta():
     """Le découpage du Markdown retrouve identifiants, métadonnées et sections."""
     md = "# Titre\n\n## test-0001 — blk_1\n\n**Label officiel :** 0\n\n### Trace originale\n\n```text\n[E5] ligne\n```\n\n### Faits observés\n\n- E5 : réception.\n\n---\n"
@@ -130,7 +140,9 @@ def test_javascript_precheck_matches_python(tmp_path):
     recs = [record(["E9 : deux réceptions de 67108864 octets.", "E4 : un avertissement d'exception vers 10.0.0.1."]),
             record(["E9 : trois réceptions.", "E26 : enregistrement.", "E5 : réception de 999999 octets.", "réception sans code"]),
             record(["E9 : plusieurs réceptions.", "E5 : plusieurs réceptions."], hypotheses=["Le disque est plein."], abstention=True),
-            record(["éE9 : code collé à une lettre accentuée."], resume="Bloc reçu par 10.0.0.1:50010.")]
+            record(["éE9 : code collé à une lettre accentuée."], resume="Bloc reçu par 10.0.0.1:50010."),
+            record(["Aucun événement E26 n'apparaît.", "Pas d'avertissement.", "E9 : bloc absent du cache, deux fois.",
+                    "Aucun événement E9 n'apparaît.", "Aucune erreur n'apparaît."])]
     script = tmp_path / "check.js"
     script.write_text(js + "\nconst recs = JSON.parse(require('fs').readFileSync(0, 'utf8'));\n"
                       "process.stdout.write(JSON.stringify(recs.map(r => precheck(r, r.expected))));\n", encoding="utf-8")

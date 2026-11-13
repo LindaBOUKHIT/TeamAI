@@ -49,6 +49,10 @@ def parse(md_text):
 NUM_WORDS = {"un": 1, "une": 1, "deux": 2, "trois": 3, "quatre": 4, "cinq": 5, "six": 6, "sept": 7,
              "huit": 8, "neuf": 9, "dix": 10, "onze": 11, "douze": 12, "treize": 13, "quatorze": 14,
              "quinze": 15, "seize": 16}
+# Faits d'absence (« Aucun événement E9… », « Pas d'erreur… ») : ils ne citent pas un événement présent.
+# Un fait « E5 : … absent … » reste un fait positif sur E5 (le mot décrit le message du log).
+ABSENCE = (r"^\s*(?:aucune?|absence)\b|^\s*pas d['’]|n['’](?:apparaît|apparaissent|y a) pas|ne contient (?:aucun|pas)"
+           r"|\babsente?s?\b")
 
 
 def precheck(rec):
@@ -65,10 +69,26 @@ def precheck(rec):
             if tok not in trace:
                 alerts.append(f"{where} : « {tok} » n'apparaît pas dans la trace.")
 
+    error_lines = sum(1 for l in rec["trace_lines"] if re.search(r"\b(ERROR|FATAL)\b", l) or "xception" in l)
+    warn_only = sum(1 for l in rec["trace_lines"] if re.search(r"\bWARN\b", l))
     for i, fact in enumerate(e["faits_observes"], 1):
         where = f"Fait {i}"
         codes = re.findall(r"\bE(\d{1,2})\b", fact.split(":")[0]) if ":" in fact else re.findall(r"\bE(\d{1,2})\b", fact)
         codes = [f"E{c}" for c in codes]
+        if re.search(ABSENCE, fact, re.I) and not re.match(r"\s*E\d{1,2}\b[^:]*:", fact):
+            # Fait d'absence : le code cité doit être absent, et « aucune erreur » suppose une trace sans erreur.
+            present = [c for c in codes if c in events]
+            low = fact.lower()
+            if present:
+                alerts.append(f"{where} : annonce l'absence de {', '.join(present)}, pourtant présent(s) dans la trace.")
+            if re.search(r"erreur|error|exception", low) and error_lines:
+                alerts.append(f"{where} : annonce l'absence d'erreur, mais la trace contient {error_lines} ligne(s) ERROR/FATAL/exception.")
+            elif re.search(r"avertissement|warn", low) and warn_only:
+                alerts.append(f"{where} : annonce l'absence d'avertissement, mais la trace contient {warn_only} ligne(s) WARN.")
+            elif not present:
+                ok.append(f"{where} : absence cohérente avec la trace.")
+            numbers_in_trace(fact, where)
+            continue
         missing = [c for c in codes if c not in events]
         if missing:
             alerts.append(f"{where} : code(s) {', '.join(missing)} absent(s) de la trace.")

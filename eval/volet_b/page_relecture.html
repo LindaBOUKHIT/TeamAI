@@ -165,14 +165,25 @@ function renderList() {
 // precheck:start — portage de precheck() de page_relecture.py (mêmes messages, frontières Unicode)
 const NUM_WORDS = {un:1,une:1,deux:2,trois:3,quatre:4,cinq:5,six:6,sept:7,huit:8,neuf:9,dix:10,onze:11,douze:12,treize:13,quatorze:14,quinze:15,seize:16};
 const WB0 = '(?<![\\p{L}\\p{N}_])', WB1 = '(?![\\p{L}\\p{N}_])';
+const ABSENCE = new RegExp("^\\s*(?:aucune?|absence)" + WB1 + "|^\\s*pas d['’]|n['’](?:apparaît|apparaissent|y a) pas|ne contient (?:aucun|pas)|" + WB0 + 'absente?s?' + WB1, 'iu');
 function precheck(rec, e) {
   const events = {}; for (const ev of rec.events) events[ev] = (events[ev] || 0) + 1;
   const trace = rec.trace_lines.join('\n'); const alerts = [], ok = [];
   const numbersInTrace = (text, where) => { for (const m of text.matchAll(new RegExp('\\d{1,3}(?:\\.\\d{1,3}){3}(?::\\d+)?|' + WB0 + '\\d{3,}' + WB1, 'gu'))) if (!trace.includes(m[0])) alerts.push(where + ' : « ' + m[0] + " » n'apparaît pas dans la trace."); };
   const reCode = () => new RegExp(WB0 + 'E(\\d{1,2})' + WB1, 'gu');
+  const errorLines = rec.trace_lines.filter(l => new RegExp(WB0 + '(ERROR|FATAL)' + WB1, 'u').test(l) || l.includes('xception')).length;
+  const warnOnly = rec.trace_lines.filter(l => new RegExp(WB0 + 'WARN' + WB1, 'u').test(l)).length;
   e.faits_observes.forEach((fact, j) => {
     const where = 'Fait ' + (j + 1); const head = fact.includes(':') ? fact.split(':')[0] : fact;
     const codes = [...head.matchAll(reCode())].map(m => 'E' + m[1]);
+    if (ABSENCE.test(fact) && !/^\s*E\d{1,2}(?![\p{L}\p{N}_])[^:]*:/u.test(fact)) {
+      const present = codes.filter(x => x in events), low = fact.toLowerCase();
+      if (present.length) alerts.push(where + " : annonce l'absence de " + present.join(', ') + ', pourtant présent(s) dans la trace.');
+      if (/erreur|error|exception/.test(low) && errorLines) alerts.push(where + " : annonce l'absence d'erreur, mais la trace contient " + errorLines + ' ligne(s) ERROR/FATAL/exception.');
+      else if (/avertissement|warn/.test(low) && warnOnly) alerts.push(where + " : annonce l'absence d'avertissement, mais la trace contient " + warnOnly + ' ligne(s) WARN.');
+      else if (!present.length) ok.push(where + ' : absence cohérente avec la trace.');
+      numbersInTrace(fact, where); return;
+    }
     const missing = codes.filter(x => !(x in events));
     if (missing.length) alerts.push(where + ' : code(s) ' + missing.join(', ') + ' absent(s) de la trace.');
     if (!codes.length) alerts.push(where + " : aucun code d'événement cité, à vérifier à la main.");
