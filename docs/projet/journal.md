@@ -97,6 +97,24 @@ Décision : conserver SmolLM2-1.7B-Instruct pour cette première preuve, l'infé
 
 Usage d'assistant : Alain utilise Codex pour l'examen du code et des preuves, les corrections et les tests. Aucune validation de Linda ou fusion n'est attestée. La qualité du modèle et les composants RAG/LoRA restent hors de cette vérification technique.
 
+### 14/10/2026 — Essai LoRA court, chaîne vérifiée sur CPU (SCRUM-29, Alain)
+
+- **Commande** : `python -m volet_b.slm.train_lora --offline --steps 2` · sorties dans `eval/runs/2026-10-14_073337_219673Z_25c752a7_lora_essai/` (non versionné).
+- **Données** : 20 exemples C5 provisoires (`seed_alain.jsonl`, `make_seed.py`) : 10 normaux, 10 anomalies (E7, E20, E28, 2 abstentions), blocs du split train de `data/sample/`, réponses calculées par règles, sans source C6. `reviewed_by` vide jusqu'à relecture.
+- **Réglages** : LoRA r 8, alpha 16, `q_proj`/`v_proj` (1,57 M paramètres entraînables sur 1,71 G), lr 2e-4, batch 1, gradient checkpointing, float32 CPU, 12 threads. Consigne avant les logs ; loss sur la réponse seulement.
+
+| Mesure (i5-1240P, 32 Go, machine chargée par d'autres processus) | Valeur |
+|---|---|
+| Chargement | 10,4 s (modèle en cache) |
+| Pic RSS chargement / entraînement | 9,79 / 8,91 GiB |
+| Pas 1 (579 tokens) / pas 2 (2 056 tokens) | 150 s / 784 s |
+| Loss pas 1 → pas 2 | 1,72 → 1,38 (deux exemples différents : pas une preuve de descente) |
+| Rechargement via `generate(…, adapter=…)` | réussi, 331 s |
+
+- **Constat** : la chaîne complète fonctionne (entraînement, sauvegarde, rechargement), mais 30 pas prendraient environ 4 à 6 h sur ce processeur. La descente de la loss reste à montrer sur l'essai complet.
+- **Décision** : l'essai complet (30 pas) est lancé sur la RTX 3050 6 Go de Nassim (`--device cuda --qlora`), mesures à reporter ici. Kaggle reste l'alternative.
+- **Usage d'assistant** : Alain utilise Claude Code pour écrire `make_seed.py` et `train_lora.py` et lancer la mesure ; les 20 exemples sont générés par règles, sans modèle, et doivent être relus par un humain.
+
 ## Réunions
 
 Aucune réunion renseignée à ce stade. Pour chaque réunion, noter les participants, les points examinés, les décisions, les responsables et les échéances.
@@ -334,3 +352,205 @@ RAG de référence à un agent : trace → requête → passages C6 → `generat
 - **Agent** : `python -m volet_b.agents.single_agent` vérifié de bout en bout en mode factice (`--mock`) ; l'exécution avec le vrai SLM est à faire sur la machine d'Alain (SCRUM-38).
 
 Usage IA : Linda avec Claude Code pour le code du retrieval, de l'agent et des tests, et pour la comparaison des méthodes ; chiffres recalculés par le script `evaluate_retrieval`.
+
+## 2026-10-26 — SCRUM-57 : backend llama.cpp et conversion LoRA → GGUF
+
+Code écrit avec Codex (gpt-6.1-sol), supervisé par Claude ; relecture d'Alain à faire avant fusion. Transformers float32 reste le défaut de `generate()` ; `backend: llamacpp` charge le GGUF officiel Q4_K_M à la révision figée du banc du 06/10, l'adaptateur GGUF étant passé par `lora_path`.
+
+Conversions réelles de l'adaptateur `essai` (llama.cpp cloné au commit `d854d98`) :
+- route b, adaptateur seul : `adapter.gguf` f16 de 3,1 Mo, chargé sur la base Q4_K_M ;
+- route a, fusion PEFT → HF → GGUF f16 → Q4_K_M : 3 264 → 1 005 Mio. Elle exigeait `sentencepiece`, ajouté à l'extra `volet_b_gguf`. Le modèle fusionné se charge et répond à une consigne courte (`{"ok": true}`, 5 tokens en 0,81 s) ; `meta.json` garde `inference_validated: false`, cette vérification n'étant pas une évaluation.
+
+Comparaison sur cinq blocs `val` du sample (preuve : [`eval/results/SCRUM-57/`](../../eval/results/SCRUM-57/README.md)) : llama.cpp Q4_K_M donne environ ×1,6 en débit (2,4 contre 1,5 token/s), un pic RSS de 2,1–2,8 GiB contre 9,3–9,9 GiB et un chargement de 1,7 s contre 11,5 s. Qualité : 0/5 sorties conformes C5 pour les deux backends, avec ou sans adaptateur ; le modèle rend les bonnes clés avec des champs vides. Cette comparaison ne départage donc pas la qualité, et le backend reste confondu avec la quantification. Proposition à valider en équipe : Q4_K_M sous llama.cpp pour la démo ; pour comparer base, LoRA, RAG et agents, un seul couple backend/quantification, à consigner ici.
+
+Correction associée : `validate_answer` plantait lorsqu'un objet apparaissait dans `sources` (sortie llama.cpp) ; il signale désormais l'erreur sans exception (test ajouté).
+
+
+## 2026-10-26 — SCRUM-38
+
+SCRUM-38 : script des mesures avant adaptation, écrit avec Codex (gpt-6.1-sol), relu par Alain.
+
+Essai réel du 26/10 (pas une mesure) : une trace de calibration du split `train`, vrai SmolLM2 float32 sur CPU, `--limit 1`. En `base`, réponse JSON conforme à C5 (182 tokens, 77 s de génération). En `rag1`, trois passages récupérés, mais le modèle écrit des clés sans guillemets : `invalid_json`, compté comme échec. Mémoire RSS maximale du processus : environ 10,7 Go. Le pipeline complet fonctionne ; le test n'a pas été ouvert.
+
+
+## 2026-10-27 — SCRUM-63 : passage à Gemma 4 E4B QAT
+
+Correctif de relecture : GPU activé (`n_gpu_layers: -1`) et pré-téléchargement du GGUF documenté.
+
+Le modèle courant du volet B devient Gemma 4 E4B QAT (GGUF Q4_0), révision
+`4b4a2c1d584be7264f87aac328a1bc739ce81b6c`, sous llama.cpp. Prompt v16 figé,
+contexte 4096, 800 tokens maximum, température 0, seed 42, repeat_penalty 1.0,
+réflexion désactivée. SmolLM2 et ses mesures SCRUM-28/SCRUM-57 restent historiques.
+La machine cible devient le portable de Nassim (Ryzen 5 8645HS, 32 Go, RTX 3050
+Laptop 6 Go) ; versions CUDA/Python et inférence locale à relever par Nassim.
+
+Port de l’extraction des faits via `data.parse_hdfs`, du glossaire restreint aux
+codes présents, de la consigne, du schéma, des listes de causes et contrôles v16,
+avec correction unique et conservation des deux réponses. L’interface existante
+de `generate()` est conservée et transmet désormais le schéma JSON à llama.cpp.
+Seul ajout aux contrôles : répétition en boucle ou budget presque épuisé (95 %),
+qui déclenche la correction unique sans changer le prompt initial.
+
+Tests sans réseau ni GGUF : 40 prompts reconstruits depuis les lignes val,
+40 schémas, consigne et politique vérifiés contre les empreintes originales ;
+cas réel F09 ×130 (783 tokens), cas normal et correction unique couverts.
+Suite complète `python -m pytest -q` exécutée le 27/10 avec le Python du projet : 89 tests réussis, 5 ignorés, sans réseau ni GGUF. Aucun modèle téléchargé ou exécuté, aucun service externe appelé.
+
+[Trace SCRUM-63](../../eval/results/SCRUM-63/README.md) : choix v6–v11,
+réglage v12–v16 et validation unique de 40 nouveaux blocs val. Les contrôles
+formels se maintiennent, mais chronologies et causalités restent parfois fausses,
+et un résumé boucle ; 0,19 hypothèse par bloc avec indice d’incident. Ces résultats
+ne valident ni une détection par le SLM ni la fidélité globale des explications.
+
+Usage IA : code écrit avec Codex gpt-6.1-sol, supervisé par Claude ; relecture d'Alain à faire.
+
+## 2026-10-27 — SCRUM-38 : mesures base alignées sur le pipeline v16 ; rag1 reporté
+
+Correctif de relecture : hypothèses par bloc rapportées au nombre de blocs du groupe.
+
+`base` reconstruit les faits depuis les lignes brutes C5 et appelle le pipeline
+v16 figé : schéma fermé, contrôles, correction unique et anti-boucle. Aucune
+annotation n'atteint le prompt. Le code `volet_b/slm/v16/` reste inchangé.
+`rag1` est refusé explicitement en attendant une variante v16 + RAG figée
+(SCRUM-42/SCRUM-45) ; le retrieval de Linda reste disponible.
+
+Le C7 conserve les empreintes de consigne et politique v16, la révision GGUF,
+le contexte, le budget, les tentatives et leurs erreurs, arrêts, tokens, temps
+et nombre réel d'appels. Les mesures ajoutent contrat v16, faits exacts,
+références inexistantes, causes réseau sans appui, enquêtes sans incident,
+hypothèses avec/sans incident, anti-boucle et corrections déclenchées/réussies.
+Tous les exemples restent au dénominateur. Le RSS est conservé et la VRAM du PID
+NVIDIA est relevée si disponible, sans dépendance obligatoire.
+
+À exécuter sur le portable de Nassim après fusion de #40, poids déjà présents,
+sans réglage après ouverture du test. Aucun modèle téléchargé ou exécuté,
+aucun service externe ni aucune opération git pendant cette mission.
+
+Suite complète lancée par Alain avec le Python du projet le 27/10 : 108 tests réussis, 5 ignorés, en mode factice.
+
+Usage IA : Codex gpt-6.1-sol supervisé par Claude ; relecture d'Alain à faire.
+
+## 27/10/2026 — SCRUM-29 : essai LoRA adapté à Gemma 4 E4B QAT
+
+Correctif de relecture : le token de fin de tour entre dans la perte.
+
+L'essai utilise désormais `google/gemma-4-E4B-it-qat-q4_0-unquantized`,
+révision complète `476025a01dbf99361c062bbeca3d6a76bb4c4566` (relevée sur l'API
+Hugging Face le 27/10), chargé en texte seul via `Gemma4ForCausalLM` et
+`Gemma4TextConfig`, avec Transformers 5.6.2. Configuration T4 Kaggle : FP16,
+QLoRA NF4/calcul float16, batch 1, checkpointing, r=8 sur q_proj/v_proj.
+Les embeddings gelés ne sont pas promus temporairement en FP32. L'entraînement
+sur RTX 3050 6 Go est exclu ; cette carte servira à l'inférence llama.cpp.
+
+Vingt exemples ont été régénérés par `make_seed.py` à partir du sample train et
+du prompt v16 inchangé. Leurs réponses copient les faits et utilisent uniquement
+les hypothèses autorisées et ancrées. La perte masque le prompt et les marqueurs
+de fin de tour pour apprendre seulement le JSON. Couverture : E27 dans 2 blocs,
+E28 dans 2 blocs ; E24 absent du train du sample. Tous les `reviewed_by` sont
+vides : la relecture Linda de l'ancien format ne s'applique plus. Le validateur
+C5 conserve son exigence de relecture ; seule cette erreur explicite est tolérée
+pour ces brouillons. Les contrôles v16 sont exécutés avant l'écriture des exemples.
+
+Le sous-ensemble C4 des 2 000 blocs du sample est versionné avec sa provenance ;
+l'empreinte du CSV officiel source correspond à `splits_meta.json`
+(`f504592cb7ac13b8b7e5d532a336b4e3641ec441a863c5efafd164faa2a43f22`).
+L'entrée d'entraînement est recoupée avec C4, les codes et les lignes sources :
+un bloc val/test est refusé même s'il se déclare train. Aucun nouveau split créé.
+
+La commande locale `python -m volet_b.slm.kaggle_lora_essai --bundle sortie.zip`
+construit l'archive minimale envoyée sur Kaggle, jamais le dépôt complet : code
+nécessaire (`teamai/`, `volet_b/slm/`, initialiseur `volet_b/`), `pyproject.toml`,
+config `lora_essai.yaml`, `seed_alain.jsonl` et `train_allowlist.json`.
+L'autorisation contient uniquement les identifiants train des exemples utilisés,
+l'empreinte du CSV C4 source et les empreintes des fichiers. Aucun fichier de
+`data/sample/`, log brut séparé, CSV de split ni identifiant val/test n'est envoyé.
+Les extraits train inclus dans les annotations sont conservés. Les preuves v16
+sont reconstruites localement ; Kaggle ne lit que cette archive extraite et refuse
+un sample présent, un fichier supplémentaire ou une autorisation non-train.
+
+`kaggle_lora_essai.py` décrit une installation figée, le téléchargement de la base,
+30 pas puis l'export immédiat de l'adaptateur seul dans `/kaggle/working/`.
+Son import et `--dry-run` sont sans installation, poids ou réseau. Conversion au
+commit llama.cpp `0c1e57098`, configuration locale de la base exacte, journal et
+comparaison exhaustive des paires A/B PEFT et GGUF : une cible ignorée fait échouer
+l'export. La fusion historique reste disponible mais n'est pas retenue pour QAT.
+Les sorties C7 conservent VRAM, durée par pas et pertes ; la vérification finale
+porte sur les tenseurs PEFT locaux, sans passer par `generate()`.
+
+Suite complète lancée par Alain avec le Python du projet le 27/10 : 116 tests réussis, 6 ignorés, sans poids ni réseau. Archive Kaggle vérifiée : 18 fichiers, aucun bloc val/test.
+
+À vérifier avec Nassim : résolution des versions figées, chargement texte du
+checkpoint multimodal, frontières du template et budget réel en tokens,
+pertes/gradients finis, VRAM T4, conversion réelle, puis inférence sur RTX 3050
+avec llama-cpp-python 0.3.36 et comparaison `lora_scale=0.0/1.0` à prompts v16
+identiques. Le transfert NF4 vers le GGUF Q4_0 et la qualité ne sont pas validés.
+
+Usage IA : Codex gpt-6.1-sol supervisé par Claude ; relecture d'Alain à faire ;
+relecture des exemples par Linda à refaire.
+
+## 08/11/2026 — SCRUM-29 : correctifs après l'essai T4 de SCRUM-61 (loss réduite aux positions supervisées, AMP fp16)
+
+Nassim a essayé les vingt exemples train sur une T4 Kaggle (14,56 Gio).
+Deux erreurs ont été constatées :
+
+- `torch.OutOfMemoryError: Tried to allocate 1.97 GiB`, avec 13,34 Gio déjà
+  utilisés : `model(**batch).loss` calculait les logits de toutes les positions
+  pour un vocabulaire de 262 144 tokens, puis la loss les promouvait en float32
+  (environ 2 Gio pour 2 000 tokens).
+- `RuntimeError: Gradient non fini` : après `scaler.unscale_`, le script arrêtait
+  l'essai au lieu de laisser GradScaler sauter le pas et réduire son échelle
+  initiale de 65 536, susceptible de provoquer les premiers débordements fp16.
+
+Correction : le forward ne reçoit plus de labels. Si `first` est le premier
+indice supervisé et `L` la longueur, `logits_to_keep = L - first + 1` conserve
+les positions `first-1 … L-1`. La CE float32 de `logits[:, :-1]` contre
+`labels[:, first:]`, avec `ignore_index=-100` et moyenne des tokens supervisés,
+conserve la loss décalée standard. Les labels masqués au milieu ou à la fin
+restent permis ; une frontière invalide ou l'absence de supervision échoue.
+La référence locale Transformers 5.6.2 a été consultée en lecture seule :
+Gemma applique bien la découpe avant `lm_head` et le softcapping.
+
+La loss non finie reste fatale. Les gradients non finis passent par
+`scaler.step()` puis `scaler.update()`. Un saut est détecté par un gradient non
+fini après unscale ou par une baisse d'échelle après update. Les gradients finis
+sont écrêtés à 1.0 après unscale ; les seuls paramètres LoRA entraînables sont
+vérifiés et promus en float32 si nécessaire. L'échelle initiale configurable
+vaut désormais 1024. Huit sauts consécutifs, ou aucun pas appliqué en fin
+d'essai, déclenchent un échec explicite : « gradients non finis persistants en
+fp16 : l'échelle ne suffit pas, activations hors plage fp16 probables ».
+
+Journal par pas : `scale`, `skipped`, `grad_norm`, `vram_allocated_gb` et
+`vram_peak_gb`. Métriques : `optimizer_steps`, `skipped_steps`, `final_scale`
+et moyennes de loss incluant tous les forwards valides, même si le pas est
+sauté. Le lanceur Kaggle transmet `PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True`
+au sous-processus train sans écraser une valeur utilisateur. Le premier essai
+documenté est `--steps 3`. Base, cibles q_proj/v_proj, r=8, NF4/fp16 et exemples
+restent inchangés.
+
+Tests factices CPU ajoutés pour l'égalité loss/gradients, les frontières, le
+saut isolé suivi d'un pas appliqué, les sauts persistants, la loss non finie,
+les paramètres entraînables float32 et l'environnement du lanceur. Suite complète
+lancée par Alain avec le Python du projet : 155 passed, 6 skipped.
+
+Deux correctifs supplémentaires sont apparus sur Kaggle : `torchvision==0.24.1`
+et `torchaudio==2.9.1` figés avec `torch==2.9.1` (sinon l'import de PEFT échoue
+sur `torchvision::nms`), et les infos de chargement Transformers 5 (ensembles)
+rendues sérialisables pour `metrics.json`.
+
+**Essai T4 Kaggle du 08/11/2026** (notebook privé `wsear07/teamai-scrum61-lora`,
+version 3, code au commit `c7947c1`, 20 exemples train seuls, aucun fichier de
+`data/sample/` envoyé) : 30 pas appliqués, 0 sauté, échelle 1024 stable, loss
+moyenne 0,586 sur les 5 premiers pas et 0,052 sur les 5 derniers (exemples
+d'entraînement : faisabilité, pas qualité), 4,9 s par pas, pic VRAM 10,24 Gio
+(8,63 au chargement), 2 269 184 paramètres entraînables. Adaptateur PEFT
+rechargé, puis converti en GGUF F16 (4,5 Mo) avec llama.cpp `0c1e57098` :
+q_proj sur les 42 couches, v_proj sur les couches 0 à 23 (les couches 24 à 41
+partagent le cache KV, `num_kv_shared_layers: 18`, et n'ont pas de v_proj). Inférence avec l'adaptateur sur la
+RTX 3050 non faite (SCRUM-61).
+
+Usage IA : Codex gpt-6.1-sol supervisé par Claude ; relecture d'Alain à faire.
+
+## 2026-11-09 — SCRUM-46 : défauts du volet B et feuille de route (version provisoire avant les mesures SCRUM-38)
+Section rédigée dans docs/volet_b/defauts_feuille_de_route.md : périmètre, défauts sourcés, causes probables, priorités et chiffres à compléter après SCRUM-38/45.
+Lecture seule des preuves val et du code ; aucune donnée test consultée, aucun modèle exécuté, aucun service externe appelé, aucune opération git.
+Usage IA : rédaction Codex gpt-6.1-sol supervisée par Claude ; relecture d'Alain à faire.

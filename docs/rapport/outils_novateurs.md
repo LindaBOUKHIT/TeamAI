@@ -14,12 +14,24 @@
 - **Comparaison avec l'outil utilisé avant** :
 - **Verdict** (on garde / on abandonne, pourquoi) :
 
+## Fiches rédigées
+
+| Fiche | Nature | Auteur |
+|---|---|---|
+| [PEFT / QLoRA sur T4 Kaggle](outils/peft_qlora.md) — **fiche critique** | Bibliothèque | Alain |
+| [llama.cpp / GGUF](outils/llama_cpp.md) | Runtime local | Alain |
+| [Connecteur MCP Atlassian](outils/mcp_atlassian.md) | MCP | Alain (avec les automatisations de Linda) |
+| [Serveur MCP Kaggle](outils/kaggle_mcp.md) | MCP | Alain |
+| [Codex CLI piloté par Claude Code](outils/codex_claude.md) | Agents de code | Alain |
+
 ## Candidats
 
 | Outil | Nature | Qui | Statut |
 |---|---|---|---|
-| Connecteur MCP Atlassian (Jira) via Claude Code | MCP | Alain | En cours — board, sprints, liens de dépendance créés le 06/10 |
+| Connecteur MCP Atlassian (Jira) via Claude Code | MCP | Alain | Fiche rédigée |
 | ONNX Runtime Web | Bibliothèque | Bachar | À démarrer (SCRUM-22) |
-| PEFT / QLoRA | Bibliothèque | Alain | À démarrer (SCRUM-29) |
-| Ollama ou llama.cpp | Runtime local | Alain | À évaluer |
+| PEFT / QLoRA | Bibliothèque | Alain | Fiche rédigée (critique) |
+| Ollama ou llama.cpp | Runtime local | Alain | llama.cpp retenu, fiche rédigée ; Ollama non évalué |
 | Gradio | Bibliothèque UI | Linda | À démarrer |
+| Serveur MCP Kaggle | MCP | Alain | Fiche rédigée |
+| Codex CLI piloté par Claude Code | Agents de code | Alain | Fiche rédigée |

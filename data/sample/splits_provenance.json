@@ -1,0 +1,8 @@
+{
+    "source":  "data/splits/splits.csv",
+    "source_sha256":  "f504592cb7ac13b8b7e5d532a336b4e3641ec441a863c5efafd164faa2a43f22",
+    "source_metadata":  "data/splits/splits_meta.json",
+    "method":  "Subset by exact BlockId of data/sample/Event_traces.csv; no resplitting",
+    "rows":  2000,
+    "extracted_on":  "2026-10-27"
+}
