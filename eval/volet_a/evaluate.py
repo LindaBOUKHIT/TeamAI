@@ -64,6 +64,7 @@ def file_sha256(path: Path) -> str:
 def read_json(path: Path) -> dict:
     """Charge un fichier JSON strict."""
     def reject_constant(value):
+        """Refuse NaN et Infinity, absents du JSON strict."""
         raise ValueError(f"JSON non strict : {value}")
     return json.loads(path.read_text(encoding="utf-8"), parse_constant=reject_constant)
 
