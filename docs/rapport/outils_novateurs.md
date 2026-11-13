@@ -35,3 +35,10 @@
 | Gradio | Bibliothèque UI | Linda | À démarrer |
 | Serveur MCP Kaggle | MCP | Alain | Fiche rédigée |
 | Codex CLI piloté par Claude Code | Agents de code | Alain | Fiche rédigée |
+| Laya (modèle de décision calibré, ModernBERT) | Modèle ouvert | Alain | Essayé (SCRUM-58), non retenu |
+
+## Laya : essai court (SCRUM-58)
+
+Laya (`convaiinnovations/laya`, Apache 2.0) est un encodeur ModernBERT. Il répond en une passe à des questions typées, avec des probabilités qu'il présente comme calibrées. Nous l'avons essayé comme « Système 1 » à côté du SLM : il devait forcer l'abstention quand l'anomalie est ambiguë et écarter les hypothèses peu appuyées. L'installation (`pip install laya`) et l'API `Router.predict` sont simples, et la révision du modèle se fige. Sur CPU, chaque bloc coûte environ 2,3 s et 2,7 GiB de RSS.
+
+En zéro-shot, sur une séquence de templates HDFS, la probabilité d'anomalie ne sépare pas les blocs en échec des blocs normaux. L'AUC vaut 0,47 sur 40 blocs de validation, après choix de la question sur 40 autres blocs. La vérification des hypothèses ne retient pas les deux hypothèses que la relecture humaine juge douteuses. Verdict : intéressant pour des décisions génériques, inadapté sans adaptation à des journaux techniques. Nous ne l'avons pas intégré. Source : `eval/results/SCRUM-58/README.md`.

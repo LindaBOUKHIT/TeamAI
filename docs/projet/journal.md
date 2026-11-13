@@ -554,3 +554,10 @@ Usage IA : Codex gpt-6.1-sol supervisé par Claude ; relecture d'Alain à faire.
 Section rédigée dans docs/volet_b/defauts_feuille_de_route.md : périmètre, défauts sourcés, causes probables, priorités et chiffres à compléter après SCRUM-38/45.
 Lecture seule des preuves val et du code ; aucune donnée test consultée, aucun modèle exécuté, aucun service externe appelé, aucune opération git.
 Usage IA : rédaction Codex gpt-6.1-sol supervisée par Claude ; relecture d'Alain à faire.
+
+## 2026-11-13 — SCRUM-58 : porte Laya (abstention, vérification des hypothèses), expérience optionnelle abandonnée
+Laya (`convaiinnovations/laya`, Apache 2.0, révision `85cc74dd`, paquet 0.4.31) a été appliqué en zéro-shot, sur CPU (portable d'Alain), aux réponses v16 déjà produites sur la validation. Il y a deux cohortes de 40 blocs `val`, avec 10 `Fail` chacune. La question a été choisie sur la cohorte de mise au point (3 variantes), puis appliquée une seule fois à la validation unique, sans réglage après lecture.
+Résultat : AUC de la probabilité d'anomalie entre Fail et Success de 0,47 sur la validation unique (0,37 à 0,55 en mise au point). La porte ajoute 8 abstentions sur 40 sans lien avec le label. Sur les 4 hypothèses, elle garde les 2 que la relecture SCRUM-63 met en cause et en écarte une qui ne l'était pas. Coût : 2,25 s par bloc, pic RSS de 2,65 GiB, 32 s de chargement.
+Décision : porte non intégrée, pas de 5ᵉ configuration pour SCRUM-45. L'adaptation Kaggle n'est pas lancée : sur les labels, elle doublerait le détecteur du volet A ; sur les annotations B, elle demande un jeu relu (SCRUM-36). Détails et métriques : `eval/results/SCRUM-58/README.md`.
+Aucune donnée de test lue ; aucune donnée envoyée à un service externe (seul le téléchargement du modèle depuis Hugging Face).
+Usage IA : code de la porte et des tests écrit par Codex gpt-6.1-sol, puis revu et corrigé par Claude (révision transmise au routeur, état limité à 512 tokens, chargement chronométré à part) ; mesures lancées par Claude ; relecture d'Alain et de Linda à faire.

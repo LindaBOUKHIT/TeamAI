@@ -1,0 +1,12 @@
+# Laya / ModernBERT, licence Apache 2.0
+model: convaiinnovations/laya
+revision: 85cc74ddae6109077ebe2853a9b3077fb6606a78
+# Le checkpoint anglais lit 512 tokens : l'état reste court pour laisser la place aux questions.
+max_chars: 1500
+router_model: english
+anomaly_question: "Does this sequence of log event templates indicate anomalous behavior?"
+hypothesis_question: "Is the following hypothesis supported by the log event templates, without adding unsupported causes? Hypothesis: {hypothesis}"
+# provisoire : à régler sur la validation, jamais sur le test
+abstention_low: 0.35
+abstention_high: 0.65
+hypothesis_min: 0.5
