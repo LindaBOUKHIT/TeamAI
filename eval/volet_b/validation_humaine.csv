@@ -1,24 +1,24 @@
 id,block_id,label,annotator,annotation_verifiee,reviewed_by,relecture_validee,commentaire
-test-0001,blk_686986449611901412,0,,,,,
-test-0002,blk_1292583462119209881,0,,,,,
-test-0003,blk_-4363450704911283441,0,,,,,
-test-0004,blk_1422210367847367358,0,,,,,
-test-0005,blk_-4941825985900076949,0,,,,,
-test-0006,blk_-8329374239364666178,0,,,,,
-test-0007,blk_3781831724064867719,0,,,,,
-test-0008,blk_-7453557116554566888,0,,,,,
-test-0009,blk_7345670855121510431,0,,,,,
-test-0010,blk_-2575947670106144473,0,,,,,
-test-0011,blk_6263807359485750335,0,,,,,
-test-0012,blk_-8023362441095933590,0,,,,,
-test-0013,blk_2090914087051952031,0,,,,,
-test-0014,blk_7842450760472974441,0,,,,,
-test-0015,blk_-3470499101952745743,0,,,,,
-test-0016,blk_2034555571908900806,0,,,,,
-test-0017,blk_-12138228845474377,0,,,,,
-test-0018,blk_5954640055410099815,0,,,,,
-test-0019,blk_-1280277122957483102,0,,,,,
-test-0020,blk_-3469211513507921496,0,,,,,
+test-0001,blk_686986449611901412,0,Alain,oui,,,"Alain (vérif.) : Le résumé est fidèle à la trace. Dans la première phrase, « débuts de réception » serait plus précis, car les lignes E5 indiquent que la réception commence et les lignes E9 confirment ensuite que le bloc a été reçu. : grille F2 S2 A2 U2"
+test-0002,blk_1292583462119209881,0,Alain,oui,,,Alain (vérif.) : grille F2 S2 A2 U2
+test-0003,blk_-4363450704911283441,0,Alain,oui,,,Alain (vérif.) : grille F2 S2 A2 U2
+test-0004,blk_1422210367847367358,0,Alain,oui,,,Alain (vérif.) : grille F2 S2 A2 U2
+test-0005,blk_-4941825985900076949,0,Alain,oui,,,Alain (vérif.) : grille F2 S2 A2 U2
+test-0006,blk_-8329374239364666178,0,Alain,oui,,,Alain (vérif.) : grille F2 S2 A2 U2
+test-0007,blk_3781831724064867719,0,Alain,oui,,,Alain (vérif.) : grille F2 S2 A2 U2
+test-0008,blk_-7453557116554566888,0,Alain,oui,,,Alain (vérif.) : grille F2 S2 A2 U2
+test-0009,blk_7345670855121510431,0,Alain,oui,,,Alain (vérif.) : grille F2 S2 A2 U2
+test-0010,blk_-2575947670106144473,0,Alain,oui,,,Alain (vérif.) : grille F2 S2 A2 U2
+test-0011,blk_6263807359485750335,0,Alain,oui,,,Alain (vérif.) : grille F2 S2 A2 U2
+test-0012,blk_-8023362441095933590,0,Alain,oui,,,Alain (vérif.) : grille F2 S2 A2 U2
+test-0013,blk_2090914087051952031,0,Alain,oui,,,Alain (vérif.) : grille F2 S2 A2 U2
+test-0014,blk_7842450760472974441,0,Alain,oui,,,Alain (vérif.) : grille F2 S2 A2 U2
+test-0015,blk_-3470499101952745743,0,Alain,oui,,,"Alain (vérif.) : Les deux avertissements E4 précèdent le service réussi E3. Le fait E2 peut aussi être précisé, car la trace indique explicitement que la vérification du bloc a réussi. : grille F2 S2 A2 U2"
+test-0016,blk_2034555571908900806,0,Alain,oui,,,Alain (vérif.) : grille F2 S2 A2 U2
+test-0017,blk_-12138228845474377,0,Alain,oui,,,Alain (vérif.) : grille F2 S2 A2 U2
+test-0018,blk_5954640055410099815,0,Alain,oui,,,Alain (vérif.) : grille F2 S2 A2 U2
+test-0019,blk_-1280277122957483102,0,Alain,oui,,,Alain (vérif.) : grille F2 S2 A2 U2
+test-0020,blk_-3469211513507921496,0,Alain,oui,,,Alain (vérif.) : grille F2 S2 A2 U2
 test-0021,blk_5444836772391403403,0,,,,,
 test-0022,blk_2284131606093448390,0,,,,,
 test-0023,blk_-1651189670830362760,0,,,,,
