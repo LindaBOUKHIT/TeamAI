@@ -549,3 +549,8 @@ partagent le cache KV, `num_kv_shared_layers: 18`, et n'ont pas de v_proj). Inf�
 RTX 3050 non faite (SCRUM-61).
 
 Usage IA : Codex gpt-6.1-sol supervisé par Claude ; relecture d'Alain à faire.
+
+## 2026-11-09 — SCRUM-46 : défauts du volet B et feuille de route (version provisoire avant les mesures SCRUM-38)
+Section rédigée dans docs/volet_b/defauts_feuille_de_route.md : périmètre, défauts sourcés, causes probables, priorités et chiffres à compléter après SCRUM-38/45.
+Lecture seule des preuves val et du code ; aucune donnée test consultée, aucun modèle exécuté, aucun service externe appelé, aucune opération git.
+Usage IA : rédaction Codex gpt-6.1-sol supervisée par Claude ; relecture d'Alain à faire.
