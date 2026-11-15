@@ -55,6 +55,31 @@ python -m volet_b.slm.first_inference
 python -m volet_b.app.app          # interface locale
 ```
 
+## Lancer la démo
+
+```bash
+pip install -e ".[volet_b]"
+pip install llama-cpp-python --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu
+python -m volet_b.rag.build_index
+python -m volet_b.app.app
+```
+
+Ouvrir http://127.0.0.1:7860 ; `--port 7861` change le port. L'interface écoute uniquement
+sur `127.0.0.1`, sans partage public. Le modèle GGUF doit être configuré comme décrit dans
+le [README du SLM](slm/README.md).
+
+Pour essayer sans modèle ni index : `python -m volet_b.app.app --mock`. La case « Mode factice »
+permet aussi de changer de mode dans l'interface ; les réponses factices sont signalées.
+Coller des logs ou importer un fichier `.log`/`.txt`, puis choisir 1 ou 3 agents et le modèle
+de base ou adapté (chemin d'adaptateur vide = base). Les deux exemples sont choisis uniquement
+dans la validation officielle de `data/sample`. Tout bloc du split test fait refuser l'entrée
+entière avant appel au modèle ; chaque analyse traite au maximum cinq blocs.
+
+Le CPU est lent ; compter environ 30 s par appel sur T4, et jusqu'à 5 appels par bloc avec
+3 agents. Les ressources sont chargées à la première utilisation puis réutilisées. Les explications
+peuvent être fausses : vérifier les lignes citées. Les réponses invalides ou rejetées restent
+affichées en sortie brute avec leurs erreurs, sans réparation.
+
 ### RAG à un agent (SCRUM-37)
 
 ```bash
