@@ -21,11 +21,16 @@ from volet_b.agents.laya_gate import LayaGate, load_config
 
 
 def checked_path(value, allow_test_name=False):
-    """Refuse les chemins réservés avant ouverture, y compris leurs alias résolus."""
+    """Refuse les chemins réservés avant ouverture, y compris leurs alias résolus.
+
+    Un dossier nommé « test » est toujours refusé ; le nom du fichier ne peut contenir
+    « test » que si allow_test_name est vrai (racine des runs).
+    """
     resolved = paths.resolve_path(value)
     for candidate in (Path(value).expanduser(), resolved):
         parts = [part.casefold() for part in candidate.parts]
-        if ".secrets" in parts or (not allow_test_name and "test" in candidate.name.casefold()) or any(
+        if ".secrets" in parts or "test" in parts[:-1] or (
+                not allow_test_name and "test" in candidate.name.casefold()) or any(
                 a == "eval" and b == "volet_b" for a, b in zip(parts, parts[1:])):
             raise ValueError("Chemin réservé interdit : test, eval/volet_b ou .secrets.")
     if resolved == paths.EVAL_VOLET_B.resolve() or paths.EVAL_VOLET_B.resolve() in resolved.parents:
@@ -168,7 +173,7 @@ def main(argv=None):
             template_path = checked_path(paths.PREPROCESSED / "HDFS.log_templates.csv")
             with template_path.open(encoding="utf-8", newline="") as source:
                 templates = {r["EventId"]: r["EventTemplate"] for r in csv.DictReader(source)}
-        config = load_config(args.config)
+        config = load_config(checked_path(args.config) if args.config else None)
         gate = LayaGate(config, predict=mock_predict if args.mock else None)
         predictions = []
         with PeakRSS() as memory:

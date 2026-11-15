@@ -10,6 +10,19 @@ Expérience optionnelle, menée le 13/11/2026 sur la **validation uniquement**. 
 - Porte (`volet_b/agents/laya_gate.py`) : un appel par bloc. Si la probabilité d'anomalie est dans [0,35 ; 0,65], la porte force l'abstention et déplace les hypothèses dans `infos_manquantes`. Sinon, une hypothèse dont la probabilité d'être appuyée est inférieure à 0,5 est déplacée. La sortie reste conforme à C5.
 - Réglage : la question est choisie sur la cohorte de mise au point seulement (runs 1 à 3). Elle est ensuite appliquée **une seule fois** à la validation unique (run 4), sans aucun ajustement après lecture.
 
+## Régénérer les entrées
+
+Les fichiers `reponses_v16_mise_au_point.jsonl` et `reponses_v16_validation_unique.jsonl` cités dans les `config.json` ne sont pas versionnés. Ils se reconstruisent à partir des sorties Kaggle des runs v16 de SCRUM-63 (blocs `val` uniquement) : le fichier des blocs (`blocs_v16.json` ou `blocs_validation.json`) et le dossier `sortie_v16` qui contient `resultats_worker_0.jsonl` et `resultats_worker_1.jsonl`.
+
+```text
+python -m volet_b.agents.laya_inputs --blocks <blocs_v16.json> --outputs <sortie_v16> --out reponses_v16_mise_au_point.jsonl
+python -m volet_b.agents.laya_measure --responses reponses_v16_mise_au_point.jsonl --n 40
+```
+
+Le script refuse tout bloc hors `val` et écarte les réponses non conformes à C5, avec leur nombre affiché.
+
+Relancé le 16/11/2026 sur ces sorties, il redonne à l'octet près les fichiers utilisés par les runs (40 réponses chacun, aucune écartée). SHA-256 : `df7b6bec05b017f33bbec26ee66492a6c58bbece3bbf09fcb4afe8beb1c0943a` (mise au point) et `c5c532df738b2372676cee7d63040fb4605d781f944dfd37aabc5a62a5c15ddd` (validation unique).
+
 ## Résultats
 
 | Run | Cohorte | Variante | AUC Fail/Success | Abstentions ajoutées | Hypothèses avant → après | Latence moy. / p95 | Pic RSS | Chargement |

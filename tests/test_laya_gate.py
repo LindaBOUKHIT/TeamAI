@@ -12,7 +12,7 @@ import pytest
 from teamai import paths
 from teamai.contracts import validate_answer
 from volet_b.agents.laya_gate import LayaGate, load_config, state_from_events
-from volet_b.agents import laya_measure
+from volet_b.agents import laya_inputs, laya_measure
 
 
 @pytest.fixture
@@ -166,7 +166,8 @@ def test_cli_refuses_split_even_beyond_n(tmp_path, answer, forbidden):
 
 
 @pytest.mark.parametrize("source", ["eval/volet_b/private.jsonl", "EVAL/VOLET_B/private.jsonl",
-                                    "responses_TEST.jsonl", "responses_test_backup.json"])
+                                    "responses_TEST.jsonl", "responses_test_backup.json",
+                                    "test/responses.jsonl", "TEST/responses.jsonl", "data/test/responses.jsonl"])
 def test_cli_refuses_paths_without_opening(source, monkeypatch):
     """Les chemins réservés sont refusés avant toute lecture de leur contenu."""
     def no_read(*args, **kwargs):
@@ -184,6 +185,20 @@ def test_cli_refuses_unsupported_path(tmp_path, answer):
     source = write_responses(tmp_path, answer)
     with pytest.raises(SystemExit) as exc:
         laya_measure.main(["--responses", str(source), "--unsupported", "eval/volet_b/private.json", "--mock"])
+    assert exc.value.code == 2
+
+
+@pytest.mark.parametrize("config", ["eval/volet_b/laya.yaml", "data/test/laya.yaml", ".secrets/laya.yaml"])
+def test_cli_refuses_config_path_without_opening(tmp_path, answer, config, monkeypatch):
+    """La configuration passe par la même barrière avant toute lecture."""
+    source = write_responses(tmp_path, answer)
+    def no_load(*args, **kwargs):
+        """Échoue si la configuration réservée est chargée."""
+        pytest.fail("Une configuration réservée a été lue.")
+
+    monkeypatch.setattr(laya_measure, "load_config", no_load)
+    with pytest.raises(SystemExit) as exc:
+        laya_measure.main(["--responses", str(source), "--config", config, "--mock", "--out", str(tmp_path / "runs")])
     assert exc.value.code == 2
 
 
@@ -230,9 +245,32 @@ def test_optional_psutil(tmp_path, answer, monkeypatch):
     assert metrics["unsupported_before"] is None and metrics["unsupported_after"] is None
 
 
+def test_inputs_rebuilds_val_responses(tmp_path, answer):
+    """Reconstruit les réponses val et écarte une sortie non conforme à C5."""
+    blocks = [{"block_id": f"blk_{i}", "split": "val", "label": "Fail", "selection_index": i,
+               "raw_events": [{"event": "E5"}, {"event": "E9"}]} for i in range(2)]
+    (tmp_path / "blocs.json").write_text(json.dumps(blocks), encoding="utf-8")
+    outputs = tmp_path / "sortie"
+    outputs.mkdir()
+    results = [{"block_id": "blk_0", "split": "val", "text": json.dumps(answer)},
+               {"block_id": "blk_1", "split": "val", "text": "pas du JSON"}]
+    (outputs / "resultats_worker_0.jsonl").write_text("".join(json.dumps(r) + "\n" for r in results), encoding="utf-8")
+    target = tmp_path / "reponses.jsonl"
+    assert laya_inputs.main(["--blocks", str(tmp_path / "blocs.json"), "--outputs", str(outputs), "--out", str(target)]) == 0
+    rows = laya_measure.read_responses(target)
+    assert [r["block_id"] for r in rows] == ["blk_0"] and rows[0]["events"] == ["E5", "E9"]
+
+
+def test_inputs_refuses_non_val_block(answer):
+    """Un bloc hors validation arrête la reconstruction."""
+    block = {"block_id": "blk_0", "split": "test", "label": "Fail", "selection_index": 0, "raw_events": []}
+    with pytest.raises(ValueError):
+        laya_inputs.build_rows([block], [{"block_id": "blk_0", "split": "val", "text": json.dumps(answer)}])
+
+
 def test_new_code_docstrings_and_paths():
     """Vérifie les règles de structure uniquement sur les nouveaux fichiers autorisés."""
-    files = [paths.AGENTS / "laya_gate.py", paths.AGENTS / "laya_measure.py",
+    files = [paths.AGENTS / "laya_gate.py", paths.AGENTS / "laya_measure.py", paths.AGENTS / "laya_inputs.py",
              paths.ROOT / "tests" / "test_laya_gate.py"]
     for path in files:
         source = path.read_text(encoding="utf-8")
