@@ -53,6 +53,28 @@ NUM_WORDS = {"un": 1, "une": 1, "deux": 2, "trois": 3, "quatre": 4, "cinq": 5, "
 # Un fait « E5 : … absent … » reste un fait positif sur E5 (le mot décrit le message du log).
 ABSENCE = (r"^\s*(?:aucune?|absence)\b|^\s*pas d['’]|n['’](?:apparaît|apparaissent|y a) pas|ne contient (?:aucun|pas)"
            r"|\babsente?s?\b")
+# Nombres qui ne sont pas des effectifs : adresses IP (et port), heures, numéros de ligne, décimaux.
+NOISE = (r"\d{1,3}(?:\.\d{1,3}){3}(?::\d+)?|\d{1,2}:\d{2}(?::\d{2})?"
+         r"|\blignes?\s+\d+(?:\s*(?:à|et|-|,)\s*\d+)*|\d+[.,]\d+")
+
+
+def count_tokens(body):
+    """Nombres candidats à un effectif, dans l'ordre, une fois le bruit retiré."""
+    clean = re.sub(NOISE, " ", body.lower())
+    return re.findall(r"\b(" + "|".join(NUM_WORDS) + r"|\d{1,2})\b", clean)
+
+
+def subtotals_match(tokens, count):
+    """Vrai si au moins deux premiers nombres s'additionnent exactement à l'effectif (« 2 depuis A et 1 depuis B »)."""
+    for seq in (tokens, [t for t in tokens if t not in ("un", "une")]):
+        total = 0
+        for k, tok in enumerate(seq):
+            total += NUM_WORDS.get(tok) or int(tok)
+            if k >= 1 and total == count:
+                return True
+            if total > count:
+                break
+    return False
 
 
 def precheck(rec):
@@ -96,13 +118,16 @@ def precheck(rec):
             alerts.append(f"{where} : aucun code d'événement cité, à vérifier à la main.")
         if len(codes) == 1 and codes[0] in events:
             body = fact.split(":", 1)[1] if ":" in fact else fact
-            m = re.search(r"\b(" + "|".join(NUM_WORDS) + r"|\d{1,2})\b", body.lower())
-            if m:
-                n = NUM_WORDS.get(m.group(1)) or int(m.group(1))
-                if n != events[codes[0]] and not (m.group(1) in ("un", "une") and events[codes[0]] >= 1 and "plusieurs" not in body):
-                    alerts.append(f"{where} : annonce {n}, mais {codes[0]} apparaît {events[codes[0]]} fois dans la trace.")
+            tokens = count_tokens(body)
+            if tokens:
+                first, count = tokens[0], events[codes[0]]
+                n = NUM_WORDS.get(first) or int(first)
+                if n == count or (first in ("un", "une") and count >= 1 and "plusieurs" not in body):
+                    ok.append(f"{where} : effectif {codes[0]} = {count} cohérent.")
+                elif subtotals_match(tokens, count):
+                    ok.append(f"{where} : effectif {codes[0]} = {count} cohérent (somme de sous-totaux).")
                 else:
-                    ok.append(f"{where} : effectif {codes[0]} = {events[codes[0]]} cohérent.")
+                    alerts.append(f"{where} : annonce {n}, mais {codes[0]} apparaît {count} fois dans la trace.")
             elif "plusieurs" in body.lower() and events[codes[0]] < 2:
                 alerts.append(f"{where} : « plusieurs » alors que {codes[0]} apparaît {events[codes[0]]} fois.")
         numbers_in_trace(fact, where)

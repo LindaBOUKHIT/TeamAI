@@ -166,6 +166,15 @@ function renderList() {
 const NUM_WORDS = {un:1,une:1,deux:2,trois:3,quatre:4,cinq:5,six:6,sept:7,huit:8,neuf:9,dix:10,onze:11,douze:12,treize:13,quatorze:14,quinze:15,seize:16};
 const WB0 = '(?<![\\p{L}\\p{N}_])', WB1 = '(?![\\p{L}\\p{N}_])';
 const ABSENCE = new RegExp("^\\s*(?:aucune?|absence)" + WB1 + "|^\\s*pas d['’]|n['’](?:apparaît|apparaissent|y a) pas|ne contient (?:aucun|pas)|" + WB0 + 'absente?s?' + WB1, 'iu');
+const NOISE = new RegExp('\\d{1,3}(?:\\.\\d{1,3}){3}(?::\\d+)?|\\d{1,2}:\\d{2}(?::\\d{2})?|' + WB0 + 'lignes?\\s+\\d+(?:\\s*(?:à|et|-|,)\\s*\\d+)*|\\d+[.,]\\d+', 'gu');
+const countTokens = body => [...body.toLowerCase().replace(NOISE, ' ').matchAll(new RegExp(WB0 + '(' + Object.keys(NUM_WORDS).join('|') + '|\\d{1,2})' + WB1, 'gu'))].map(m => m[1]);
+function subtotalsMatch(tokens, count) {
+  for (const seq of [tokens, tokens.filter(t => t !== 'un' && t !== 'une')]) {
+    let total = 0;
+    for (let k = 0; k < seq.length; k++) { total += NUM_WORDS[seq[k]] || parseInt(seq[k], 10); if (k >= 1 && total === count) return true; if (total > count) break; }
+  }
+  return false;
+}
 function precheck(rec, e) {
   const events = {}; for (const ev of rec.events) events[ev] = (events[ev] || 0) + 1;
   const trace = rec.trace_lines.join('\n'); const alerts = [], ok = [];
@@ -189,10 +198,11 @@ function precheck(rec, e) {
     if (!codes.length) alerts.push(where + " : aucun code d'événement cité, à vérifier à la main.");
     if (codes.length === 1 && codes[0] in events) {
       const body = fact.includes(':') ? fact.slice(fact.indexOf(':') + 1) : fact; const cnt = events[codes[0]];
-      const m = body.toLowerCase().match(new RegExp(WB0 + '(' + Object.keys(NUM_WORDS).join('|') + '|\\d{1,2})' + WB1, 'u'));
-      if (m) { const n = NUM_WORDS[m[1]] || parseInt(m[1], 10);
-        if (n !== cnt && !((m[1] === 'un' || m[1] === 'une') && cnt >= 1 && !body.includes('plusieurs'))) alerts.push(where + ' : annonce ' + n + ', mais ' + codes[0] + ' apparaît ' + cnt + ' fois dans la trace.');
-        else ok.push(where + ' : effectif ' + codes[0] + ' = ' + cnt + ' cohérent.'); }
+      const tokens = countTokens(body);
+      if (tokens.length) { const first = tokens[0], n = NUM_WORDS[first] || parseInt(first, 10);
+        if (n === cnt || ((first === 'un' || first === 'une') && cnt >= 1 && !body.includes('plusieurs'))) ok.push(where + ' : effectif ' + codes[0] + ' = ' + cnt + ' cohérent.');
+        else if (subtotalsMatch(tokens, cnt)) ok.push(where + ' : effectif ' + codes[0] + ' = ' + cnt + ' cohérent (somme de sous-totaux).');
+        else alerts.push(where + ' : annonce ' + n + ', mais ' + codes[0] + ' apparaît ' + cnt + ' fois dans la trace.'); }
       else if (body.toLowerCase().includes('plusieurs') && cnt < 2) alerts.push(where + ' : « plusieurs » alors que ' + codes[0] + ' apparaît ' + cnt + ' fois.');
     }
     numbersInTrace(fact, where);

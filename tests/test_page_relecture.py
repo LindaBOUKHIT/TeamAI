@@ -54,6 +54,22 @@ def test_absence_facts_are_checked_as_absences():
     assert any("absence de E9, pourtant présent" in a for a in alerts)
     assert any("absence d'erreur" in a for a in alerts)
 
+def test_ip_time_and_line_numbers_are_not_counts():
+    """Une adresse IP, une heure ou un numéro de ligne n'est pas lu comme un effectif."""
+    checks = precheck(record(["E9 : reçu depuis 10.0.0.1 deux fois.", "E4 : à la ligne 4, une exception vers 10.0.0.1.",
+                              "E5 : réception à 08:30:12."]))
+    assert checks["alerts"] == []
+    assert any("E9 = 2" in ok for ok in checks["ok"]) and any("E4 = 1" in ok for ok in checks["ok"])
+
+
+def test_subtotals_are_accepted_but_wrong_counts_still_flagged():
+    """Des sous-totaux qui s'additionnent à l'effectif passent ; une somme fausse reste signalée."""
+    checks = precheck(record(["E9 : 1 réception de 67108864 octets, puis 1 autre, soit 2."]))
+    assert not any(a.startswith("Fait 1") for a in checks["alerts"]) and any("sous-totaux" in ok for ok in checks["ok"])
+    alerts = precheck(record(["E9 : 1 réception puis 3 autres."]))["alerts"]
+    assert any("annonce 1, mais E9 apparaît 2 fois" in a for a in alerts)
+
+
 def test_parse_reads_sections_and_meta():
     """Le découpage du Markdown retrouve identifiants, métadonnées et sections."""
     md = "# Titre\n\n## test-0001 — blk_1\n\n**Label officiel :** 0\n\n### Trace originale\n\n```text\n[E5] ligne\n```\n\n### Faits observés\n\n- E5 : réception.\n\n---\n"
@@ -142,7 +158,10 @@ def test_javascript_precheck_matches_python(tmp_path):
             record(["E9 : plusieurs réceptions.", "E5 : plusieurs réceptions."], hypotheses=["Le disque est plein."], abstention=True),
             record(["éE9 : code collé à une lettre accentuée."], resume="Bloc reçu par 10.0.0.1:50010."),
             record(["Aucun événement E26 n'apparaît.", "Pas d'avertissement.", "E9 : bloc absent du cache, deux fois.",
-                    "Aucun événement E9 n'apparaît.", "Aucune erreur n'apparaît."])]
+                    "Aucun événement E9 n'apparaît.", "Aucune erreur n'apparaît."]),
+            record(["E9 : reçu depuis 10.0.0.1 deux fois.", "E4 : à la ligne 4, exception.", "E5 : réception à 08:30:12.",
+                    "E9 : 1 réception, puis 1 autre, soit 2.", "E9 : 1 réception puis 3 autres.",
+                    "E9 : un bloc, lignes 2 et 3, reçu 2 fois."])]
     script = tmp_path / "check.js"
     script.write_text(js + "\nconst recs = JSON.parse(require('fs').readFileSync(0, 'utf8'));\n"
                       "process.stdout.write(JSON.stringify(recs.map(r => precheck(r, r.expected))));\n", encoding="utf-8")
