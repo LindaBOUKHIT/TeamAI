@@ -554,3 +554,8 @@ Usage IA : Codex gpt-6.1-sol supervisé par Claude ; relecture d'Alain à faire.
 Section rédigée dans docs/volet_b/defauts_feuille_de_route.md : périmètre, défauts sourcés, causes probables, priorités et chiffres à compléter après SCRUM-38/45.
 Lecture seule des preuves val et du code ; aucune donnée test consultée, aucun modèle exécuté, aucun service externe appelé, aucune opération git.
 Usage IA : rédaction Codex gpt-6.1-sol supervisée par Claude ; relecture d'Alain à faire.
+
+## 2026-11-15 — SCRUM-42 : orchestration à 3 agents (recherche, rédaction, contrôle)
+`volet_b/agents/orchestrator.py` et `roles/{search,writer,checker}.py` : une seule instance du SLM via `generate()`, au plus 5 appels par bloc (recherche 1, rédaction et contrôle 2 fois au plus), une reprise maximum. La rédaction reprend le prompt v16 à l'identique quand aucun passage n'est retenu ; sinon deux phrases fixes sont remplacées et une section DOCUMENTATION est ajoutée (budget 3 000 caractères, `sources` limité aux passages injectés). Les contrôles v16 et C5 sont faits par le code avant tout appel au contrôleur ; la réponse finale n'est jamais réparée. Version 1 agent inchangée.
+Vérifié : 239 tests passent, essai `--mock` sur 5 blocs de validation (3 appels chacun), split test refusé. Aucune donnée test consultée. Mesure avec Gemma sur 5 blocs de validation à faire (machine de Nassim ou Kaggle).
+Usage IA : code Codex gpt-6.1-sol supervisé et relu par Claude ; relecture d'Alain à faire.
