@@ -1,0 +1,4 @@
+id,block_id,corrige_par,date,motif
+test-0056,blk_-2705986310204860977,Bachar,2026-11-14,J'ai juste précisé l’unique occurrence d’E27 visible à la ligne 14 pour éviter que le pré-contrôle confonde le début de l’adresse IP avec un effectif.
+test-0065,blk_-8254791135193474574,Bachar,2026-11-14,Le niveau WARN est indiqué à la ligne 14 de la trace.
+test-0078,blk_-5216731224772621734,Bachar,2026-11-14,J’ai placé les totaux en début de ligne. Le pré-contrôle prenait les sous-totaux pour les effectifs complets.
