@@ -1,0 +1,20 @@
+{
+  "n_blocks": 5,
+  "statuts": {
+    "rejete": 4,
+    "accepte": 1
+  },
+  "calls_mean": 5.0,
+  "calls_max": 5,
+  "n_retries": 5,
+  "c5_valid": 5,
+  "answers_with_sources": 0,
+  "abstentions_effectives": 0,
+  "seconds_total": 432.221121919,
+  "units": {
+    "seconds": "génération SLM, hors chargement, retrieval et contrôles",
+    "answers_with_sources": "réponses au statut accepte citant au moins un passage",
+    "abstentions_effectives": "statut abstention_demandee, ou réponse acceptée avec abstention C5 ; parsed_response garde le texte du rédacteur sans réparation"
+  },
+  "protocol": "train/val uniquement ; mode mock exclu des mesures de qualité"
+}
