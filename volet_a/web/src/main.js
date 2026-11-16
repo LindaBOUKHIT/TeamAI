@@ -1,4 +1,4 @@
-import { loadDetector } from "./model.js";
+import { loadDetector } from "./worker-client.js";
 import { compileVocab, preprocess } from "./preprocess.js";
 import {
     selectRows,
