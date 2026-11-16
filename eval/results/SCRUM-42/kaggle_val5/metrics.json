@@ -1,0 +1,17 @@
+{
+  "n_blocks": 5,
+  "statuts": {
+    "rejete": 4,
+    "accepte": 1
+  },
+  "calls_mean": 4.6,
+  "calls_max": 5,
+  "n_retries": 4,
+  "c5_valid": 5,
+  "answers_with_sources": 0,
+  "seconds_total": 433.218365155,
+  "units": {
+    "seconds": "génération SLM, hors chargement, retrieval et contrôles"
+  },
+  "protocol": "train/val uniquement ; mode mock exclu des mesures de qualité"
+}
