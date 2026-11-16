@@ -75,6 +75,7 @@ def explain_block_three_agents(block, retriever, call_slm, k=5, max_calls=5):
             c5_valid = not errors
             writing_step.update(errors=errors, review_flags=review)
             checked = checker.check(final, block, retrieval['passages'], caller('checker', attempt), checks)
+            retrieval['adjustments'].extend(checked.get('adjustments', []))
             parsed, errors = checked['answer'], checked['errors']
             c5_valid = not checked['code_errors']
             writing_step.update(errors=checked['code_errors'], review_flags=checked['review'])
@@ -86,6 +87,8 @@ def explain_block_three_agents(block, retriever, call_slm, k=5, max_calls=5):
                 break
             if checked['verdict'] == 'abstention':
                 status = 'abstention_demandee'
+                break
+            if checked['verdict'] == 'non_controle':
                 break
             motifs = checked['motifs'] or ['le contrôle demande une correction']
             errors = errors or motifs
@@ -186,9 +189,15 @@ def metrics(records):
                 calls_mean=sum(calls) / len(calls) if calls else None, calls_max=max(calls, default=0),
                 n_retries=sum(r['n_retries'] for r in records), c5_valid=sum(r['c5_valid'] for r in records),
                 answers_with_sources=sum(bool(r['parsed_response'].get('sources')) for r in records
-                                         if isinstance(r['parsed_response'], dict)),
+                                         if r['statut'] == 'accepte' and isinstance(r['parsed_response'], dict)),
+                abstentions_effectives=sum(r['statut'] == 'abstention_demandee' or (
+                    r['statut'] == 'accepte' and isinstance(r['parsed_response'], dict)
+                    and r['parsed_response'].get('abstention') is True) for r in records),
                 seconds_total=sum(r['seconds'] for r in records),
-                units={'seconds': 'génération SLM, hors chargement, retrieval et contrôles'},
+                units={'seconds': 'génération SLM, hors chargement, retrieval et contrôles',
+                       'answers_with_sources': 'réponses au statut accepte citant au moins un passage',
+                       'abstentions_effectives': 'statut abstention_demandee, ou réponse acceptée avec abstention C5 ; '
+                                                 'parsed_response garde le texte du rédacteur sans réparation'},
                 protocol='train/val uniquement ; mode mock exclu des mesures de qualité')
 
 
