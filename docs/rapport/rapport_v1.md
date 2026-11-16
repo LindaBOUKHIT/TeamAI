@@ -173,7 +173,7 @@ La référence et les paraphrases viennent de l’équipe. Les traces répètent
 
 #### Agents spécialisés — SCRUM-42
 
-L’organisation à **trois rôles**, recherche, rédaction et contrôle, est **en cours**. Elle n’est pas livrée à ce jour dans le périmètre de cette V1. Aucun gain ne peut lui être attribué. Source pour les rôles et la planification : [V0.1](TeamAI_Rapport_SCRUM33_V0.1.pdf), section 2.6, et [feuille de route](../projet/feuille_de_route.md), sprint « Agents & évaluation ». Au 09/11, le ticket SCRUM-42 est ouvert et aucune PR n’est déposée.
+L’organisation à **trois rôles**, recherche, rédaction et contrôle, est **en relecture** (PR [#53](https://github.com/LindaBOUKHIT/TeamAI/pull/53)). Un run réel sur un GPU T4, le 16/11, sur 5 blocs de validation, donne **1 réponse acceptée sur 5**, **5/5** conformes au contrat C5 et **aucun passage cité**. Un correctif du contrôleur, mesuré le même jour sur les mêmes blocs, ne change pas ce résultat (`eval/results/SCRUM-42/kaggle_val5/` et `kaggle_val5_v2/`, branche de la PR #53). Ces 5 blocs ne mesurent pas la qualité, et aucun gain n’est établi. Source pour les rôles et la planification : [V0.1](TeamAI_Rapport_SCRUM33_V0.1.pdf), section 2.6, et [feuille de route](../projet/feuille_de_route.md), sprint « Agents & évaluation ».
 
 #### Défauts observés — SCRUM-46
 
@@ -314,7 +314,7 @@ Les mesures n'ont pas le même statut. Les chiffres de test de A viennent de SCR
 
 | Axe | Volet A — BiLSTM, ONNX, navigateur | Volet B — Gemma 4 E4B QAT, prompt v16 | Statut |
 |---|---|---|---|
-| Qualité | Test officiel, BiLSTM FP32 : macro-F1 **0,9938**, **58** fausses alertes et **3** anomalies manquées sur 86 260 blocs ; **0,9714** sur les 1 962 séquences inédites. INT8 identique. | 40 blocs de validation : **40/40** réponses conformes au contrat, **39/40** contrôles factuels passés. La relecture relève **2/40** chronologies fausses, **3/40** causalités non démontrées, **3/40** pseudo-références et **1/40** résumé en boucle. | A : test en relecture ; B : validation |
+| Qualité | Test officiel, BiLSTM FP32 : macro-F1 **0,9938**, **58** fausses alertes et **3** anomalies manquées sur 86 260 blocs ; **0,9714** sur les 1 962 blocs à séquence inédite. INT8 identique. | 40 blocs de validation : **40/40** réponses conformes au contrat, **39/40** contrôles factuels passés. La relecture relève **2/40** chronologies fausses, **3/40** causalités non démontrées, **3/40** pseudo-références et **1/40** résumé en boucle. | A : test en relecture ; B : validation |
 | Latence | **6 198,58** blocs/s sous Chrome WASM (FP32), boucle JavaScript comprise. | **30,624 s** par bloc, correction comprise, sur T4 Kaggle avec llama.cpp, sans LoRA ni RAG. | Protocoles et machines différents |
 | Mémoire | Modèle de **56 806** octets (FP32) et **22 570** octets (INT8). RAM du navigateur non relevée. | RAM et VRAM d'inférence non relevées. Le pic de 10,24 Gio de l'essai LoRA concerne l'entraînement. | Incomplet des deux côtés |
 | Coût | Non mesuré. | Non mesuré. | À mesurer |
@@ -327,7 +327,7 @@ Sources : [comparaison SCRUM-47](../../eval/results/comparaison_a_b.md), section
 
 ### 4.3 Lecture provisoire
 
-D'après ces mesures, A est rapide, léger et précis pour détecter. En revanche, il ne dit pas ce qui s'est passé. B produit un texte lisible et structuré, mais à un coût de calcul bien plus élevé, et avec des erreurs de fidélité qu'une conformité au format ne révèle pas. Les deux volets paraissent donc complémentaires : A signale les blocs suspects, B aide à les lire. Cette lecture reste à confirmer sur le test (SCRUM-45). Une porte de décision calibrée ajoutée à B (Laya, SCRUM-58) n'a apporté aucun signal sur la validation (AUC 0,47) et n'a pas été retenue (PR [#52](https://github.com/LindaBOUKHIT/TeamAI/pull/52)).
+D'après ces mesures, A est rapide, léger et précis pour détecter. En revanche, il ne dit pas ce qui s'est passé. B produit un texte lisible et structuré, mais à un coût de calcul bien plus élevé, et avec des erreurs de fidélité qu'une conformité au format ne révèle pas. Les deux volets paraissent donc complémentaires : A signale les blocs suspects, B aide à les lire. Cette lecture reste à confirmer sur le test (SCRUM-45). Une porte de décision expérimentée en zéro-shot ajoutée à B (Laya, SCRUM-58) n'a apporté aucun signal sur la validation (AUC 0,47) et n'a pas été retenue (PR [#52](https://github.com/LindaBOUKHIT/TeamAI/pull/52)).
 
 ### 4.4 Limites
 
