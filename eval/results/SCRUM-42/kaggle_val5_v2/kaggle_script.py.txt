@@ -1,0 +1,112 @@
+"""SCRUM-42 : mesure réelle de l'orchestration à 3 agents sur 5 blocs de validation (T4, Gemma 4 E4B QAT).
+
+Seules les lignes des 5 blocs val sont envoyées (extrait compressé ci-dessous, SHA-256 vérifié).
+Le dépôt public est cloné en sparse, sans HDFS_sample.log ni Event_traces.csv : aucune trace test n'est téléchargée.
+"""
+import base64, glob, hashlib, os, shutil, site, subprocess, sys, time, urllib.request, zlib
+from pathlib import Path
+
+OUT = Path('/kaggle/working')
+COMMIT = '9712718abfae0a7c1664f17f373473c76110e8e1'
+EXCERPT_SHA256 = '10c98c90a744dd4347e34b12934decd0af09820712ac977e0d94319d0ff2fe47'
+EXCERPT = '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'
+N_LINES = 37941
+WHEEL_NAME = 'llama_cpp_python-0.3.36-py3-none-linux_x86_64.whl'
+WHEEL_SHA256 = 'b89030f400a039434237da3b91bb7ae5d6106cf96735e85d6fb33dd8d35968da'
+WHEEL_URL = ''  # lien signé Kaggle retiré (expire)
+LOG = OUT / 'journal.txt'
+
+
+def note(msg):
+    """Journalise une étape avec l'heure."""
+    line = time.strftime('%H:%M:%S ') + msg
+    print(line, flush=True)
+    with LOG.open('a', encoding='utf-8') as f:
+        f.write(line + '\n')
+
+
+def run(cmd, cwd=None, timeout=1800, env=None):
+    """Lance une commande, journalise sa fin de sortie et arrête le script en cas d'échec."""
+    note('$ ' + ' '.join(cmd))
+    r = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, timeout=timeout, env=env)
+    note((r.stdout + r.stderr)[-4000:])
+    if r.returncode:
+        raise SystemExit(f'échec ({r.returncode}) : {cmd[:3]}')
+    return r.stdout
+
+
+def sha256(path):
+    """Empreinte d'un fichier."""
+    with open(path, 'rb') as f:
+        return hashlib.file_digest(f, 'sha256').hexdigest()
+
+
+def wheel():
+    """Wheel CUDA llama.cpp déjà vérifiée (sortie d'un notebook précédent ou URL), jamais compilée."""
+    for cand in glob.glob('/kaggle/input/**/' + WHEEL_NAME, recursive=True):
+        if sha256(cand) == WHEEL_SHA256:
+            note('wheel trouvée en entrée : ' + cand)
+            return cand
+    target = OUT / 'wheels' / WHEEL_NAME
+    target.parent.mkdir(exist_ok=True)
+    urllib.request.urlretrieve(WHEEL_URL, target)
+    if sha256(target) != WHEEL_SHA256:
+        raise SystemExit('SHA-256 de la wheel incorrect')
+    note('wheel téléchargée et vérifiée')
+    return str(target)
+
+
+def main():
+    """Prépare l'environnement, lance l'orchestrateur et copie le dossier C7 dans les sorties."""
+    raw = zlib.decompress(base64.b64decode(EXCERPT))
+    if hashlib.sha256(raw).hexdigest() != EXCERPT_SHA256:
+        raise SystemExit('extrait val altéré')
+    lines = [''] * N_LINES
+    for row in raw.decode('utf-8').split('\n'):
+        number, text = row.split('\t', 1)
+        lines[int(number) - 1] = text
+    # Numéros de ligne identiques à HDFS_sample.log ; les autres lignes restent vides.
+    (OUT / 'val5.log').write_text('\n'.join(lines) + '\n', encoding='utf-8')
+
+    run([sys.executable, '-m', 'pip', 'install', '-q', '--only-binary=:all:', wheel()])
+    run([sys.executable, '-m', 'pip', 'install', '-q', 'faiss-cpu', 'rank_bm25',
+         'nvidia-cuda-runtime-cu12', 'nvidia-cublas-cu12'])
+    # L'image Kaggle ne fournit plus les bibliothèques CUDA 12 attendues par la wheel.
+    roots = set(site.getsitepackages()) | {p for p in sys.path if p.endswith(('site-packages', 'dist-packages'))}
+    libs = sorted({d for sp in roots for d in glob.glob(sp + '/nvidia/*/lib')})
+    env = {**os.environ, 'LD_LIBRARY_PATH': ':'.join(libs + [os.environ.get('LD_LIBRARY_PATH', '')])}
+    import importlib, importlib.util
+    importlib.invalidate_caches()
+    lib_dir = Path(importlib.util.find_spec('llama_cpp').origin).parent / 'lib'
+    for so in sorted(lib_dir.glob('*.so')):
+        missing = [l for l in run(['ldd', str(so)], env=env).splitlines() if 'not found' in l]
+        note(f'{so.name} : ' + ('; '.join(missing) if missing else 'toutes les dépendances trouvées'))
+    run([sys.executable, '-c', 'import llama_cpp; print("llama_cpp", llama_cpp.__version__)'], env=env)
+    repo = Path('/kaggle/temp/TeamAI')
+    repo.parent.mkdir(parents=True, exist_ok=True)
+    run(['git', 'clone', '--filter=blob:none', '--no-checkout', 'https://github.com/LindaBOUKHIT/TeamAI.git', str(repo)])
+    run(['git', 'sparse-checkout', 'set', '--no-cone', '/*', '!/data/sample/HDFS_sample.log',
+         '!/data/sample/Event_traces.csv'], cwd=repo)
+    run(['git', 'checkout', '-q', COMMIT], cwd=repo)
+    if run(['git', 'rev-parse', 'HEAD'], cwd=repo).strip() != COMMIT:
+        raise SystemExit('commit inattendu')
+    if (repo / 'data/sample/HDFS_sample.log').exists():
+        raise SystemExit('trace complète présente : arrêt')
+
+    from huggingface_hub import hf_hub_download
+    path = hf_hub_download('google/gemma-4-E4B-it-qat-q4_0-gguf', 'gemma-4-E4B_q4_0-it.gguf',
+                           revision='4b4a2c1d584be7264f87aac328a1bc739ce81b6c')
+    note(f'modèle : {path} ({os.path.getsize(path)} octets)')
+    run([sys.executable, '-m', 'volet_b.rag.build_index'], cwd=repo)
+    run(['nvidia-smi', '--query-gpu=name,memory.total,driver_version', '--format=csv'])
+    started = time.time()
+    out = run([sys.executable, '-m', 'volet_b.agents.orchestrator', '--file', str(OUT / 'val5.log')],
+              cwd=repo, timeout=7200, env=env)
+    note(f'durée totale orchestrateur : {time.time() - started:.1f} s')
+    run_dir = Path(out.strip().splitlines()[-1].split('Run : ', 1)[1])
+    shutil.copytree(run_dir, OUT / 'run_scrum42' / run_dir.name)
+    note('copié : ' + run_dir.name)
+
+
+if __name__ == '__main__':
+    main()
