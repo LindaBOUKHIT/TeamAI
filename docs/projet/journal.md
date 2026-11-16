@@ -516,3 +516,7 @@ partagent le cache KV, `num_kv_shared_layers: 18`, et n'ont pas de v_proj). Inf�
 RTX 3050 non faite (SCRUM-61).
 
 Usage IA : Codex gpt-6.1-sol supervisé par Claude ; relecture d'Alain à faire.
+
+## 2026-11-16 — SCRUM-36 : correction du lot de Linda (60 exemples)
+Pré-relecture des 60 brouillons par l'IA (Codex gpt-6.1-sol, contrôlée par Claude) : 56 jugés justes, 4 à corriger (001, 002, 006, 008 : la question supposait la « disparition » d'une entrée BlockInfo, alors que le log dit seulement qu'elle est introuvable). Verdicts pré-remplis par l'IA dans la fiche, puis vérifiés et téléchargés par Linda (`corrections_linda.jsonl`). Résultat : 56 ok, 4 corrigés, 0 rejet ; contrôles `check_lots` : 0 erreur. Relecture croisée humaine à faire (Alain).
+Usage IA : pré-relecture et pré-remplissage des verdicts par l'IA, vérification par Linda — à mentionner dans le taux de correction du README.
