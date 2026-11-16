@@ -197,3 +197,105 @@ Cas de parité navigateur : public/model/parity_cases.json.
 La page spike.html utilise désormais le modèle entraîné et
 parity_cases.json. Les anciens spike_cases.json documentent
 le modèle jouet et ne doivent pas être comparés au nouveau modèle.
+
+
+## SCRUM-62 — Seuil privilégiant le rappel
+
+### Objectif et méthode
+
+Le modèle entraîné dans SCRUM-25 reste inchangé.
+Seul son seuil de classification est ajusté.
+
+L’analyse utilise exclusivement les 86 259 blocs de validation.
+Les identifiants, labels, hashes du modèle, du checkpoint,
+des splits et des prédictions sont vérifiés.
+
+Le script explore les seuils distincts des scores et une grille
+de 0 à 1, incluant des valeurs supérieures à 0,99.
+Il trace précision, rappel et F1 de la classe anomalie.
+
+Les seuils supérieurs à 0,99 complètent la courbe.
+Pour améliorer le rappel, l’analyse considère les seuils inférieurs.
+
+### Choix retenu
+
+Objectif : maximiser le F1 de la classe anomalie avec au maximum
+deux anomalies manquées sur la validation.
+
+Seuil retenu : 0,40814146399497986.
+Il est également optimal avec au maximum une anomalie manquée.
+
+Comparaison globale :
+- Ancien seuil 0,99 : 23 fausses alertes, 21 anomalies manquées.
+- Nouveau seuil : 59 fausses alertes, 1 anomalie manquée.
+- Rappel anomalie : 0,999604.
+- F1 anomalie : 0,988254.
+- Macro-F1 : 0,993948, contre 0,995514 auparavant.
+
+Le nouveau seuil récupère 20 anomalies pour 36 fausses alertes
+supplémentaires. La légère baisse de macro-F1 est acceptée
+pour privilégier le rappel.
+
+Sur les 1 929 séquences inédites :
+- Fausses alertes : 41, contre 19 auparavant.
+- Anomalies manquées : 1, contre 17 auparavant.
+- Rappel anomalie : 0,998131.
+- Macro-F1 : 0,973439, contre 0,976748 auparavant.
+
+Un seuil sans anomalie manquée sur la validation a aussi été étudié :
+environ 0,003134, avec 295 fausses alertes.
+Il n’est pas retenu au regard du compromis observé.
+
+Ces résultats servent au choix du seuil et ne constituent
+pas une évaluation finale indépendante.
+
+### Reproduction
+
+Depuis la racine du dépôt :
+
+    python -m volet_a.training.analyze_threshold --run eval/runs/20261016T184412Z_4f3011f2_bilstm
+
+Les prédictions et le checkpoint du run original sont nécessaires.
+Chaque analyse crée un nouveau dossier dans eval/results/.
+
+Résultats de référence :
+eval/results/SCRUM-62_20261023T153242Z_690fcb/
+
+Ce dossier contient la courbe CSV, la figure, les scores des
+21 anomalies initialement manquées et le rapport d’analyse.
+Le champ metadata_updated du rapport décrit l’état au moment
+de l’analyse, avant la modification ultérieure des métadonnées.
+
+### Vérification de parité
+
+PyTorch / ONNX Runtime Python sur toute la validation :
+- Écart maximal : 1,1921e-7.
+- Aucune différence de classification au nouveau seuil.
+
+Navigateur WASM :
+- Dix cas de validation proches du seuil.
+- Batchs 1, 3 et 10.
+- Cas exactement au seuil inclus.
+- Écart maximal : 5,9605e-8.
+- Aucune différence de classification.
+
+Pour vérifier le navigateur :
+
+    cd volet_a/web
+    npm ci
+    npm run dev
+
+Ouvrir /TeamAI/threshold.html et lancer la vérification.
+Le test lit le seuil des métadonnées et utilise threshold_cases.json.
+
+L’égalité est classée anomalie : score >= threshold.
+La stabilité observée concerne les configurations testées ;
+un changement de backend ou une quantification exige
+une nouvelle vérification, notamment près du seuil.
+
+### Évaluation finale
+
+Aucun test officiel utilisé pour choisir ce seuil.
+L’évaluation finale relève de Nassim dans SCRUM-44,
+après fixation du seuil et de la version du modèle.
+La relecture de SCRUM-62 est assurée par Alain.

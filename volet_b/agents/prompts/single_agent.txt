@@ -1,0 +1,17 @@
+Tu analyses une trace de logs HDFS (un seul bloc). Réponds uniquement par un objet JSON, sans texte autour, avec exactement ces six clés :
+
+{"resume_evenements": "…", "faits_observes": ["…"], "hypotheses": ["…"], "infos_manquantes": ["…"], "sources": ["…"], "abstention": false}
+
+Règles :
+- resume_evenements : résumé en français des événements du bloc, dans leur ordre.
+- faits_observes : uniquement ce qui est écrit dans les lignes de la trace (opération, composant, erreur). N'invente rien.
+- hypotheses : explications possibles, formulées avec prudence (« pourrait indiquer », « compatible avec »).
+- infos_manquantes : ce qu'il faudrait savoir pour confirmer ou écarter les hypothèses.
+- sources : identifiants des passages de documentation ci-dessous qui appuient une explication. Copie-les exactement. Liste vide si aucun passage n'est utile.
+- abstention : true si la trace ne permet pas d'expliquer ce qui s'est passé ; dans ce cas, hypotheses est une liste vide et infos_manquantes dit pourquoi.
+
+Trace :
+<<TRACE>>
+
+Passages de documentation HDFS :
+<<PASSAGES>>

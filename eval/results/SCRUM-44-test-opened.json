@@ -1,0 +1,8 @@
+{
+  "ticket": "SCRUM-44",
+  "opened_at_utc": "2026-11-12T23:01:04.953082+00:00",
+  "git_commit": "132a920fe04a4ae190ea4901cf228ca238f32d44",
+  "fp32_sha256": "ab98e8c45ef398c5c2ad13e05503fd94c5f13453daedda32d61c3ae43611a5ad",
+  "int8_sha256": "15462465548d8c63a6f3217b1df2656da1b452de66118f266440add738ba9ebb",
+  "splits_sha256": "f504592cb7ac13b8b7e5d532a336b4e3641ec441a863c5efafd164faa2a43f22"
+}

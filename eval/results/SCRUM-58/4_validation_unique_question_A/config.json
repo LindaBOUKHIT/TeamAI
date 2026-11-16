@@ -1,0 +1,41 @@
+{
+  "laya": {
+    "model": "convaiinnovations/laya",
+    "revision": "85cc74ddae6109077ebe2853a9b3077fb6606a78",
+    "max_chars": 1500,
+    "router_model": "english",
+    "anomaly_question": "Does this HDFS block event sequence contain an exception, an error, a failed or interrupted transfer, or a deletion of a missing block?",
+    "hypothesis_question": "Is the following hypothesis supported by the log event templates, without adding unsupported causes? Hypothesis: {hypothesis}",
+    "abstention_low": 0.35,
+    "abstention_high": 0.65,
+    "hypothesis_min": 0.5
+  },
+  "revision": "85cc74ddae6109077ebe2853a9b3077fb6606a78",
+  "mock": false,
+  "commit": "5974a44e4af13bdfab9a6f1aaf1f33356a29ced5",
+  "split": "validation",
+  "backend": "laya.Router",
+  "loaded_revision_verified": false,
+  "agents": 1,
+  "calls_per_block": 1,
+  "n": 40,
+  "laya_version": "0.4.31",
+  "input_sha256": {
+    "responses": "c5c532df738b2372676cee7d63040fb4605d781f944dfd37aabc5a62a5c15ddd",
+    "templates": "92e5200c9ddd9c38730d1a983c957e2a36b34cf8bd9434a6eba46932b1c3b1d4"
+  },
+  "machine": {
+    "platform": "Windows-11-10.0.26300-SP0",
+    "processor": "Intel64 Family 6 Model 154 Stepping 3, GenuineIntel",
+    "python": "3.12.10"
+  },
+  "templates": "data/raw/HDFS_v1/preprocessed/HDFS.log_templates.csv",
+  "memory": "RSS échantillonnée toutes les 0,02 s ; octets",
+  "latency": "Appel groupé par bloc, après chargement et échauffement (load_seconds à part)",
+  "config_path": "variante_A_question.yaml",
+  "p95": "Rang supérieur (nearest rank)",
+  "purpose": "validation",
+  "run_id": "2026-11-13_093545_322002Z_a9b5060a_laya_C7",
+  "code_note": "Code de feat/SCRUM-58-laya non encore commité au moment de la mesure ; identique au premier commit de la branche.",
+  "responses_file": "reponses_v16_validation_unique.jsonl (explorations locales, sorties v16 SCRUM-63)"
+}
