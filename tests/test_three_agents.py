@@ -261,3 +261,45 @@ def test_cli_mock_five_validation_blocks(tmp_path, monkeypatch):
     assert config['ticket'] == 'SCRUM-42' and config['agents'] == 3 and config['max_calls'] == 5
     assert set(config['prompts_sha256']) == {'search', 'writer', 'checker'}
     assert config['source']['split'] == 'val' and config['mock']
+
+
+def test_checker_receives_contract_rules(block):
+    """Le contrôleur reçoit les règles du contrat (mesure Kaggle du 16/11) avant la réponse."""
+    slm = FakeSLM()
+    orchestration.explain_block_three_agents(block, FakeRetriever(), slm)
+    prompt = next(p for p, f in slm.calls if 'verdict' in f['schema']['properties'])
+    for rule in ('SÉLECTION de 2 à 5 faits', '[] est valide', 'UNIQUEMENT si une affirmation précise'):
+        assert rule in prompt
+    assert prompt.index('PREUVES DU BLOC') < prompt.index('REPONSE A CONTROLER')
+
+
+def test_checker_context_overflow_makes_no_call(block):
+    """Sans place pour le contrôle, aucun appel n'est fait et la réponse n'est pas acceptée."""
+    slm = FakeSLM()
+    slm.context_error = lambda prompt: 'trop long' if 'REPONSE A CONTROLER' in prompt else None
+    record = orchestration.explain_block_three_agents(block, FakeRetriever(), slm)
+    assert [s['agent'] for s in record['steps']] == ['search', 'writer']
+    assert record['statut'] == 'rejete' and any('contrôle SLM impossible' in e for e in record['errors'])
+    assert [a['reason'] for a in record['adjustments']].count('context_checker') == 1
+
+
+def test_search_context_drops_candidates(block):
+    """La recherche retire des candidats avant l'appel plutôt que de faire échouer generate."""
+    slm = FakeSLM()
+    slm.context_error = lambda prompt: 'trop long' if prompt.count('[doc#section#') > 1 else None
+    record = orchestration.explain_block_three_agents(block, FakeRetriever(), slm)
+    search_prompt = slm.calls[0][0]
+    assert '[doc#section#1]' in search_prompt and '[doc#section#2]' not in search_prompt
+    assert [a['reason'] for a in record['adjustments']].count('context_search') == 2
+    assert record['steps'][0]['agent'] == 'search'
+
+
+def test_metrics_count_effective_abstentions_and_accepted_sources():
+    """Les abstentions demandées comptent ; les sources ne comptent que pour les réponses acceptées."""
+    answer = dict(sources=['doc#1'], abstention=False)
+    records = [dict(statut='accepte', parsed_response=answer, n_calls=3, n_retries=0, c5_valid=True, seconds=1.0),
+               dict(statut='rejete', parsed_response=answer, n_calls=5, n_retries=1, c5_valid=True, seconds=1.0),
+               dict(statut='abstention_demandee', parsed_response=answer, n_calls=3, n_retries=0, c5_valid=True,
+                    seconds=1.0)]
+    metrics = orchestration.metrics(records)
+    assert metrics['answers_with_sources'] == 1 and metrics['abstentions_effectives'] == 1

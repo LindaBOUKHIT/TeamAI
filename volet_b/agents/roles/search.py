@@ -21,8 +21,21 @@ def select_passages(block, retriever, call_slm, k=5):
             'properties': {'passages': {'type': 'array', 'items': {'type': 'string', 'enum': ids},
                                         'maxItems': 2, 'uniqueItems': True},
                            'manque': {'type': 'string', 'maxLength': 240}}}
-    prompt = (PROMPT.read_text(encoding='utf-8').strip() + '\n\nFAITS :\n' + '\n'.join(block['facts'])
-              + '\n\nCANDIDATS :\n' + '\n\n'.join(f"[{p['id']}]\n{p['text'][:500]}" for p in candidates))
+    guard = getattr(call_slm, 'context_error', None)
+    shown = list(candidates)
+    while True:
+        prompt = (PROMPT.read_text(encoding='utf-8').strip() + '\n\nFAITS :\n' + '\n'.join(block['facts'])
+                  + '\n\nCANDIDATS :\n' + '\n\n'.join(f"[{p['id']}]\n{p['text'][:500]}" for p in shown))
+        problem = guard(prompt) if guard else None
+        if not problem:
+            break
+        result['adjustments'].append({'reason': 'context_search', 'id': shown[-1]['id'], 'error': problem})
+        shown.pop()
+        if not shown:
+            # Aucun appel : la rédaction se fera sans passage, comme v16.
+            return result
+    ids = [p['id'] for p in shown]
+    spec['properties']['passages']['items']['enum'] = ids
     out = call_slm(prompt, {'type': 'json_object', 'schema': spec})
     try:
         answer = json.loads(out['text'])

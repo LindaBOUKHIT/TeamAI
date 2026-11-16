@@ -44,10 +44,23 @@ def check(out, block, passages, call_slm, checks=None):
             'properties': {'verdict': {'type': 'string', 'enum': ['accepte', 'corriger', 'abstention']},
                            'motifs': {'type': 'array', 'maxItems': 3,
                                       'items': {'type': 'string', 'maxLength': 240}}}}
-    prompt = (PROMPT.read_text(encoding='utf-8').strip() + '\n\nPREUVES DU BLOC :\n'
-              + build_prompt(block).removeprefix(INSTRUCTION) + '\n\nDOCUMENTATION :\n'
-              + '\n\n'.join(f"[{p['id']}]\n{p['text']}" for p in passages)
-              + '\n\nREPONSE A CONTROLER :\n' + out['text'])
+    shown = list(passages)
+    guard = getattr(call_slm, 'context_error', None)
+    while True:
+        prompt = (PROMPT.read_text(encoding='utf-8').strip() + '\n\nPREUVES DU BLOC :\n'
+                  + build_prompt(block).removeprefix(INSTRUCTION) + '\n\nDOCUMENTATION :\n'
+                  + ('\n\n'.join(f"[{p['id']}]\n{p['text']}" for p in shown) or '(aucun passage fourni)')
+                  + '\n\nREPONSE A CONTROLER :\n' + out['text'])
+        problem = guard(prompt) if guard else None
+        if not problem:
+            break
+        if not shown:
+            # Aucun appel : le contrôle sémantique est impossible, la réponse n'est pas acceptée.
+            result.update(verdict='non_controle', errors=['contrôle SLM impossible : ' + str(problem)], motifs=[])
+            return result
+        result.setdefault('adjustments', []).append({'reason': 'context_checker', 'id': shown[-1]['id'],
+                                                     'error': problem})
+        shown.pop()
     response = call_slm(prompt, {'type': 'json_object', 'schema': spec})
     try:
         verdict = json.loads(response['text'])
