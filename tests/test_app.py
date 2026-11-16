@@ -54,6 +54,7 @@ def forbidden_load(*args):
 def test_limit(monkeypatch):
     """Traite cinq blocs seulement et annonce explicitement la limite."""
     calls = []
+    monkeypatch.setattr(app, "official_splits_available", lambda: True)
     monkeypatch.setattr(app, "demo_split", lambda: {})
     monkeypatch.setattr(app, "get_retriever", lambda mock: None)
     monkeypatch.setattr(app.single_agent, "explain_block", lambda bid, *a, **kw:
@@ -110,3 +111,22 @@ def test_build_interface():
     """Construit l'interface si Gradio est installé, sans lancer de serveur."""
     pytest.importorskip("gradio")
     assert app.build_app(mock=True) is not None
+
+
+def test_unknown_block_refused_without_official_splits(monkeypatch):
+    """Sans data/splits/splits.csv, un bloc absent de l'échantillon est refusé avant tout chargement."""
+    monkeypatch.setattr(app, "official_splits_available", lambda: False)
+    monkeypatch.setattr(app, "demo_split", lambda: {"blk_1": "val"})
+    monkeypatch.setattr(app, "get_retriever", forbidden_load)
+    text = app.analyze("log blk_1\nlog blk_999", mock=True)
+    assert "refusée" in text and app.safe("blk_999") in text and "Aucun appel" in text
+
+
+def test_unknown_block_allowed_with_official_splits(monkeypatch):
+    """Avec le C4 complet, un bloc inconnu (logs hors Loghub) n'est pas refusé."""
+    monkeypatch.setattr(app, "official_splits_available", lambda: True)
+    monkeypatch.setattr(app, "demo_split", lambda: {})
+    monkeypatch.setattr(app, "get_retriever", lambda mock: None)
+    monkeypatch.setattr(app.single_agent, "explain_block", lambda bid, *a, **kw: valid_record())
+    text = app.analyze("log blk_999", configuration="1 agent", mock=True)
+    assert "refusée" not in text

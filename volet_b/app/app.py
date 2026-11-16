@@ -64,9 +64,24 @@ def render_block(record):
 @lru_cache(maxsize=1)
 def demo_split():
     """Lit le split officiel, ou son sous-ensemble livré avec l'échantillon."""
-    if (SPLITS / "splits.csv").exists():
+    if official_splits_available():
         return single_agent.official_split()
     return pd.read_csv(SAMPLE / "splits.csv").set_index("BlockId")["split"]
+
+
+def official_splits_available():
+    """Vrai si data/splits/splits.csv (C4 complet, non versionné) est présent."""
+    return (SPLITS / "splits.csv").exists()
+
+
+def refuse_unknown_blocks(block_ids, split):
+    """Sans le C4 complet, refuse tout bloc absent de l'échantillon : il pourrait appartenir au test."""
+    unknown = sorted(b for b in block_ids if b not in split)
+    if unknown:
+        shown = ", ".join(unknown[:3]) + (" …" if len(unknown) > 3 else "")
+        raise SystemExit(f"{len(unknown)} bloc(s) absent(s) de data/sample/splits.csv ({shown}) : sans "
+                         "data/splits/splits.csv, impossible de vérifier qu'ils ne sont pas dans le split test. "
+                         "Créer ce fichier (voir « Lancer la démo » dans volet_b/README.md).")
 
 
 def choose_examples():
@@ -130,6 +145,8 @@ def analyze(text, configuration="3 agents", model="base", adapter="", mock=False
     try:
         split = demo_split()
         single_agent.refuse_test_blocks(blocks, split)
+        if not official_splits_available():
+            refuse_unknown_blocks(blocks, split)
     except SystemExit as exc:
         return banner + "\n\nAnalyse refusée : " + safe(exc) + " Aucun appel au modèle."
     except (OSError, ValueError) as exc:

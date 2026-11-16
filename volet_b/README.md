@@ -58,15 +58,25 @@ python -m volet_b.app.app          # interface locale
 ## Lancer la démo
 
 ```bash
-pip install -e ".[volet_b]"
-pip install llama-cpp-python --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu
+# 1. Dépendances (llama-cpp-python épinglé en 0.3.36, version de toutes nos mesures)
+pip install -e ".[volet_b,volet_b_gguf]" --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu
+
+# 2. Découpage officiel C4 (data/splits/splits.csv, non versionné) : obligatoire pour que la démo
+#    puisse refuser tout bloc du split test ; sans lui, seuls les blocs de data/sample/ sont acceptés
+python -m data.download_hdfs        # ~180 Mo → data/raw/HDFS_v1/
+python -m data.make_splits          # → data/splits/splits.csv (seed 42, vérifié par splits_meta.json)
+
+# 3. Modèle GGUF (≈ 5,2 Go), OBLIGATOIRE avant la première analyse réelle, révision figée
+python -c "from huggingface_hub import hf_hub_download; hf_hub_download(repo_id='google/gemma-4-E4B-it-qat-q4_0-gguf', filename='gemma-4-E4B_q4_0-it.gguf', revision='4b4a2c1d584be7264f87aac328a1bc739ce81b6c', local_files_only=False)"
+
+# 4. Index RAG, puis lancement
 python -m volet_b.rag.build_index
 python -m volet_b.app.app
 ```
 
 Ouvrir http://127.0.0.1:7860 ; `--port 7861` change le port. L'interface écoute uniquement
-sur `127.0.0.1`, sans partage public. Le modèle GGUF doit être configuré comme décrit dans
-le [README du SLM](slm/README.md).
+sur `127.0.0.1`, sans partage public. Détails du modèle (cache, accès Hugging Face, GPU) :
+[README du SLM](slm/README.md).
 
 Pour essayer sans modèle ni index : `python -m volet_b.app.app --mock`. La case « Mode factice »
 permet aussi de changer de mode dans l'interface ; les réponses factices sont signalées.
