@@ -32,7 +32,7 @@ async function loadModelBytes(meta) {
 
     let cache = null;
     try {
-        if ("caches" in window) {
+        if ("caches" in globalThis) {
             cache = await caches.open(CACHE_NAME);
         }
     } catch (error) {

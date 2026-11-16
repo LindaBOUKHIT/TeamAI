@@ -1,0 +1,311 @@
+<!doctype html>
+<!-- SCRUM-64 : support du point d'avancement, issu du support J3 (SCRUM-32). Flèches pour naviguer, F pour le plein écran, Ctrl+P pour le PDF.
+     Sources des chiffres :
+     volet A : eval/results/volet_a.md (PR #50, en relecture) ;
+     volet B : eval/results/comparaison_a_b.md (PR #47), eval/results/SCRUM-63/README.md, eval/results/SCRUM-42/kaggle_val5/ (PR #53), eval/results/SCRUM-58/README.md (PR #52) ;
+     données : data/splits/splits_meta.json ;
+     pilotage : Jira et GitHub au 16/11/2026. -->
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TeamAI — point d'avancement</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:ital,wght@0,400;0,500;0,700;1,400&family=Kalam:wght@400;700&family=Courier+Prime&display=block" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+  <filter id="rough"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="7"/><feDisplacementMap in="SourceGraphic" scale="5"/></filter>
+</svg>
+<section class="slide cover">
+  <div class="logos">
+    <img src="logo_fges.png" alt="Faculté de Gestion, Économie et Sciences — Université Catholique de Lille">
+    <span class="logo-sep"></span>
+    <img src="logo_edn.png" alt="EDN — École du Numérique">
+  </div>
+  <div class="cover-left">
+    <p class="hand kicker">NLP 2 · M2 Data &amp; IA — point d'avancement</p>
+    <h1>Que nous disent<br>les logs <span class="hl">HDFS</span>&nbsp;?</h1>
+    <p class="lead">Repérer les blocs qui tournent mal, puis expliquer pourquoi&nbsp;: deux approches, une même équipe.</p>
+    <div class="byline">
+      <span class="team-mark">TeamAI</span>
+      <span class="names">Alain Evina · Nassim Mezzai · Bachar Ben Slama · Linda Boukhit</span>
+      <span class="teacher">Enseignant&nbsp;: <b>Adrian Rosari</b></span>
+    </div>
+  </div>
+  <div class="cover-right">
+    <div class="printout">
+      <span class="tape" style="top:-22px;left:38%;transform:rotate(-4deg)"></span>
+      <p class="printout-title">HDFS.log — un bloc, quatre lignes</p>
+      <ol class="log"><li class=""><span class="ln">1</span><code>081110 010451 33 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/randtxt/_temporary/_task_200811092030_0003_m_000269_0/part-00269. blk_-1013481023655112960</code></li>
+<li class=""><span class="ln">2</span><code>081110 010451 5105 INFO dfs.DataNode$DataXceiver: Receiving block blk_-1013481023655112960 src: /10.251.74.134:45275 dest: /10.251.74.134:50010</code></li>
+<li class=""><span class="ln">3</span><code>081110 010451 5109 INFO dfs.DataNode$DataXceiver: Receiving block blk_-1013481023655112960 src: /10.251.74.134:48604 dest: /10.251.74.134:50010</code></li>
+<li class="err"><span class="ln">4</span><code>081110 010454 5105 INFO dfs.DataNode$DataXceiver: writeBlock blk_-1013481023655112960 <mark>received exception java.io.IOException: Could not read from stream</mark></code></li></ol>
+    </div>
+    <p class="hand note-err">là, ça casse.<br>mais pourquoi&nbsp;?</p>
+  </div>
+</section>
+<section class="slide problem">
+  <p class="hand kicker">Le point de départ</p>
+  <h2>Des centaines de milliers de blocs,<br>et quelques pannes <span class="hl">discrètes</span></h2>
+  <div class="stats">
+    <div class="stat"><span class="num">575 061</span><span class="cap">blocs HDFS annotés<br><em>Loghub HDFS_v1, logs de 2008</em></span></div>
+    <div class="stat ringed"><span class="num">2,93 %</span><svg class="circled" viewBox="0 0 300 160" preserveAspectRatio="none" fill="none">
+  <path d="M40 30 C 110 0, 250 6, 286 60 C 312 112, 210 156, 120 150 C 30 144, -4 96, 24 56 C 40 34, 80 22, 120 18"
+        stroke="currentColor" stroke-width="5" stroke-linecap="round" filter="url(#rough)"/>
+</svg><span class="cap">d'anomalies seulement<br><em>16 838 blocs : classes très déséquilibrées</em></span></div>
+    <div class="stat"><span class="num">29</span><span class="cap">types d'événements<br><em>de E1 à E29</em></span></div>
+  </div>
+  <div class="sticky mustard" style="--tilt:-2deg">
+    <p class="hand">Un label «&nbsp;anomalie&nbsp;» dit <u>qu'il</u> y a un problème… jamais <u>pourquoi</u>.</p>
+    <p class="small">C'est toute la raison d'être du volet B.</p>
+  </div>
+  <footer><span>TeamAI · point d'avancement</span><span class="folio">2</span></footer>
+</section>
+<section class="slide twoways">
+  <p class="hand kicker">Notre réponse</p>
+  <h2>Deux façons de lire les mêmes logs</h2>
+  <div class="spread">
+    <article class="page-card left">
+      <p class="tag ocean">Volet A</p>
+      <h3>Le guetteur</h3>
+      <p class="question hand">«&nbsp;Ce bloc est-il normal&nbsp;?&nbsp;»</p>
+      <ul>
+        <li>Un BiLSTM <b>entraîné par nous</b>, exporté en ONNX</li>
+        <li>Il tourne <b>dans le navigateur</b>, sans serveur</li>
+        <li>Site statique <b>en ligne</b>, coût nul (GitHub Pages)</li>
+        <li>Rapide, léger, entièrement maîtrisé</li>
+      </ul>
+    </article>
+    <div class="spine"><span class="hand">les logs<br>bruts</span></div>
+    <article class="page-card right">
+      <p class="tag terracotta">Volet B</p>
+      <h3>L'explicateur</h3>
+      <p class="question hand">«&nbsp;Que s'est-il passé, et pourquoi&nbsp;?&nbsp;»</p>
+      <ul>
+        <li>Gemma 4 E4B QAT <b>en local</b> (4 bits)</li>
+        <li>Faits calculés par le code, prompt figé</li>
+        <li>RAG sur la doc HDFS, puis 3 agents</li>
+        <li>Ou «&nbsp;je ne sais pas&nbsp;»</li>
+      </ul>
+    </article>
+  </div>
+  <p class="foot-line">Sept contrats d'échange (C1 à C7) fixent ce que chaque partie transmet aux autres&nbsp;: traces, vocabulaire, modèle, découpage, réponses, passages, évaluations.</p>
+  <footer><span>TeamAI · point d'avancement</span><span class="folio">3</span></footer>
+</section>
+<section class="slide team">
+  <p class="hand kicker">Qui fait quoi</p>
+  <h2>Quatre personnes, un seul dépôt</h2>
+  <div class="polaroids">
+    <figure class="polaroid" style="--tilt:-2.2deg">
+      <span class="tape" style="top:-18px;left:30%;transform:rotate(3deg)"></span>
+      <div class="portrait" style="background:var(--terracotta)"><span>AE</span></div>
+      <figcaption>
+        <strong>Alain Evina</strong>
+        <span class="hand role">SLM et évaluation</span>
+        <ul><li>Passage à Gemma, prompt v16 figé</li><li>Version 4 bits (llama.cpp)</li><li>Tests, CI, structure du dépôt</li><li>Comparaison A/B et rapport V1</li></ul>
+      </figcaption>
+    </figure>
+<figure class="polaroid" style="--tilt:1.6deg">
+      <span class="tape" style="top:-18px;left:30%;transform:rotate(3deg)"></span>
+      <div class="portrait" style="background:var(--sage)"><span>NM</span></div>
+      <figcaption>
+        <strong>Nassim Mezzai</strong>
+        <span class="hand role">Données et évaluation</span>
+        <ul><li>Audit, parser, découpage</li><li>Baseline de référence</li><li>Test officiel du volet A</li><li>Test réservé du volet B</li></ul>
+      </figcaption>
+    </figure>
+<figure class="polaroid" style="--tilt:-1.2deg">
+      <span class="tape" style="top:-18px;left:30%;transform:rotate(3deg)"></span>
+      <div class="portrait" style="background:var(--ocean)"><span>BB</span></div>
+      <figcaption>
+        <strong>Bachar Ben Slama</strong>
+        <span class="hand role">Volet A et site</span>
+        <ul><li>BiLSTM et export ONNX</li><li>Site&nbsp;: lot, résultats, export CSV</li><li>Seuil revu pour le rappel</li><li>Quantification INT8 (en cours)</li></ul>
+      </figcaption>
+    </figure>
+<figure class="polaroid" style="--tilt:2.4deg">
+      <span class="tape" style="top:-18px;left:30%;transform:rotate(3deg)"></span>
+      <div class="portrait" style="background:var(--plum)"><span>LB</span></div>
+      <figcaption>
+        <strong>Linda Boukhit</strong>
+        <span class="hand role">RAG, agents et organisation</span>
+        <ul><li>Corpus HDFS et grille d'annotation</li><li>RAG à un agent</li><li>3 agents et interface (en cours)</li><li>Pilotage Jira et jalons</li></ul>
+      </figcaption>
+    </figure>
+  </div>
+  <footer><span>TeamAI · point d'avancement</span><span class="folio">4</span></footer>
+</section>
+<section class="slide data">
+  <p class="hand kicker">Les données</p>
+  <h2>Un seul découpage, et on ne triche pas</h2>
+  <div class="ribbon">
+    <div class="seg train" style="flex:402542"><b>Entraînement</b><span>402 542 blocs · 70&nbsp;%</span></div>
+    <div class="seg val" style="flex:86259"><b>Validation</b><span>86 259 · 15&nbsp;%</span></div>
+    <div class="seg test" style="flex:86260"><b>Test</b><span>86 260 · 15&nbsp;%</span><span class="seal">ouvert une fois</span></div>
+  </div>
+  <div class="data-notes">
+    <div class="note-block">
+      <h4>Tiré bloc par bloc</h4>
+      <p>Découpage stratifié (seed 42)&nbsp;: chaque partie garde 2,93 % d'anomalies. Tous les modèles de l'équipe utilisent exactement le même.</p>
+    </div>
+    <div class="sticky blush" style="--tilt:1.5deg">
+      <p class="hand">Seulement 18&nbsp;373 séquences distinctes&nbsp;!</p>
+      <p class="small">Beaucoup de blocs se ressemblent. On donne donc toujours deux scores&nbsp;: sur tout l'ensemble, et sur les <b>séquences jamais vues</b>, qui mesurent la vraie généralisation.</p>
+    </div>
+    <div class="note-block">
+      <h4>Le test ne sert qu'à la fin</h4>
+      <p>Seuil et prompt sont figés sur la validation, puis le test est ouvert une seule fois. Aucune donnée de test ne part sur Kaggle.</p>
+    </div>
+  </div>
+  <footer><span>TeamAI · point d'avancement</span><span class="folio">5</span></footer>
+</section>
+<section class="slide volet-a">
+  <p class="hand kicker">Volet A · test officiel</p>
+  <h2>Le BiLSTM divise par deux<br>les fausses alertes</h2>
+  <div class="volet-a-grid">
+    <div class="chart">
+      <div class="pair">
+    <div class="bars">
+      <div class="bar-col"><span class="value">0,958</span><div class="bar base" style="height:287px"></div><span class="who">baseline</span></div>
+      <div class="bar-col"><span class="value strong">0,971</span><div class="bar ours " style="height:291px"></div><span class="who">BiLSTM</span></div>
+    </div>
+    <h4>Macro-F1 sur les séquences jamais vues</h4>
+    <p class="hand small good">meilleure généralisation</p>
+  </div>
+      <div class="pair">
+    <div class="bars">
+      <div class="bar-col"><span class="value">116</span><div class="bar base" style="height:281px"></div><span class="who">baseline</span></div>
+      <div class="bar-col"><span class="value strong">58</span><div class="bar ours " style="height:141px"></div><span class="who">BiLSTM</span></div>
+    </div>
+    <h4>Fausses alertes (test)</h4>
+    <p class="hand small good">2× moins</p>
+  </div>
+      <div class="pair">
+    <div class="bars">
+      <div class="bar-col"><span class="value">2</span><div class="bar base" style="height:38px"></div><span class="who">baseline</span></div>
+      <div class="bar-col"><span class="value strong">3</span><div class="bar ours worse" style="height:57px"></div><span class="who">BiLSTM</span></div>
+    </div>
+    <h4>Anomalies manquées (test)</h4>
+    <p class="hand small bad">une de plus</p>
+  </div>
+    </div>
+    <aside class="side">
+      <div class="fact"><span class="big">0,994</span><span>macro-F1 sur les 86 260 blocs du test</span></div>
+      <div class="fact"><span class="big">0</span><span>décision différente entre Python et Chrome sur le test</span></div>
+      <div class="fact"><span class="big">6 199</span><span>blocs par seconde dans Chrome (WASM, FP32)</span></div>
+      <p class="hand small">Seuil figé avant le test (0,408), choisi sur la validation pour privilégier le rappel.</p>
+    </aside>
+  </div>
+  <p class="foot-line">Test officiel ouvert une seule fois (SCRUM-44). Résultats en relecture avant fusion.</p>
+  <footer><span>TeamAI · point d'avancement</span><span class="folio">6</span></footer>
+</section>
+<section class="slide volet-b">
+  <p class="hand kicker">Volet B · ce qu'on a appris</p>
+  <h2>Le modèle respecte le format…<br>pas toujours le fond</h2>
+  <ol class="path">
+    <li style="--tilt:-1.5deg"><span class="step">1</span><h4>Changer de modèle</h4><p>SmolLM2 était trop lent et ignorait les WARN. Gemma 4 E4B QAT, en 4 bits avec llama.cpp, le remplace.</p></li>
+    <li style="--tilt:1deg"><span class="step">2</span><h4>Prompt v16 figé</h4><p>40/40 réponses conformes au contrat, 39/40 contrôles factuels passés&nbsp;; 30,6&nbsp;s par bloc sur T4.</p></li>
+    <li style="--tilt:-0.8deg"><span class="step">3</span><h4>Relecture humaine</h4><p>Sur 40 blocs&nbsp;: 2 chronologies fausses, 3 causalités non démontrées, 3 pseudo-références.</p></li>
+    <li style="--tilt:1.4deg"><span class="step">4</span><h4>LoRA et Laya</h4><p>LoRA faisable sur T4 (30 pas), gain non démontré. Porte Laya écartée&nbsp;: AUC 0,47.</p></li>
+    <li style="--tilt:-1.2deg" class="current"><span class="step">5</span><h4>RAG et 3 agents</h4><p>Chaîne complète sur GPU&nbsp;: 1 bloc accepté sur 5. Le contrôleur ignore le contrat&nbsp;: à corriger.</p></li>
+  </ol>
+  <p class="foot-line">Mesures sur la validation uniquement. Le test réservé du volet B (80 cas) est en relecture humaine.</p>
+  <footer><span>TeamAI · point d'avancement</span><span class="folio">7</span></footer>
+</section>
+<section class="slide twoways">
+  <p class="hand kicker">Comparer A et B</p>
+  <h2>Deux tâches, deux coûts</h2>
+  <div class="spread">
+    <article class="page-card left">
+      <p class="tag ocean">Volet A</p>
+      <h3>Détecter</h3>
+      <p class="question hand">rapide et léger</p>
+      <ul>
+        <li>6 199 blocs par seconde dans le navigateur</li>
+        <li>Modèle de 57&nbsp;Ko (FP32)</li>
+        <li>Une classe et un score, <b>aucune cause</b></li>
+        <li>Architecture, données et seuil maîtrisés</li>
+      </ul>
+    </article>
+    <div class="spine"><span class="hand">complé-<br>mentaires</span></div>
+    <article class="page-card right">
+      <p class="tag terracotta">Volet B</p>
+      <h3>Expliquer</h3>
+      <p class="question hand">lisible, mais coûteux</p>
+      <ul>
+        <li>30,6&nbsp;s par bloc sur GPU T4</li>
+        <li>Poids empruntés, encadrés par un contrat fermé</li>
+        <li>Faits, hypothèses, abstention</li>
+        <li>Un bon format ne garantit pas une explication juste</li>
+      </ul>
+    </article>
+  </div>
+  <p class="foot-line">Lecture provisoire&nbsp;: A signale les blocs suspects, B aide à les lire. Machines et protocoles différents&nbsp;: un ordre de grandeur, pas une course.</p>
+  <footer><span>TeamAI · point d'avancement</span><span class="folio">8</span></footer>
+</section>
+<section class="slide method">
+  <p class="hand kicker">Notre façon de travailler</p>
+  <h2>Un ticket, une branche, une relecture</h2>
+  <div class="flow">
+    <span class="node">Ticket</span><span class="link">→</span>
+    <span class="node">Branche</span><span class="link">→</span>
+    <span class="node">Pull request</span><span class="link">→</span>
+    <span class="node accent">Relecture croisée</span><span class="link">→</span>
+    <span class="node">dev</span><span class="link">→</span>
+    <span class="node">main · site en ligne</span>
+  </div>
+  <div class="method-notes">
+    <div class="sticky sage" style="--tilt:-2deg"><p class="hand big-hand">43</p><p class="small">pull requests fusionnées&nbsp;; 53 tickets, dont 29 terminés</p></div>
+    <div class="sticky mustard" style="--tilt:1.5deg"><p class="hand">Tests à chaque PR</p><p class="small">pytest et npm test sur GitHub Actions&nbsp;: contrats, parité JavaScript / Python, test jamais utilisé pour régler.</p></div>
+    <div class="sticky blush" style="--tilt:-1deg"><p class="hand">Un journal honnête</p><p class="small">Chaque mesure garde sa commande, sa machine et ses limites. Les résultats négatifs aussi. L'usage de l'IA y est tracé.</p></div>
+  </div>
+  <footer><span>TeamAI · point d'avancement</span><span class="folio">9</span></footer>
+</section>
+<section class="slide status">
+  <p class="hand kicker">Où on en est</p>
+  <h2>Le point, sans maquillage</h2>
+  <div class="status-grid">
+    <ul class="checklist">
+      <li><svg viewBox="0 0 60 60" fill="none"><rect x="6" y="8" width="46" height="44" rx="4" stroke="var(--ink)" stroke-width="4" filter="url(#rough)"/><path d="M14 30 L26 44 L54 6" stroke="var(--sage-deep)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg><div><b>Site du volet A en ligne</b><span>GitHub Pages, inférence dans le navigateur</span></div></li>
+      <li><svg viewBox="0 0 60 60" fill="none"><rect x="6" y="8" width="46" height="44" rx="4" stroke="var(--ink)" stroke-width="4" filter="url(#rough)"/><path d="M14 30 L26 44 L54 6" stroke="var(--sage-deep)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg><div><b>Volet A mesuré sur le test</b><span>baseline, BiLSTM FP32 et INT8&nbsp;; relecture en cours</span></div></li>
+      <li><svg viewBox="0 0 60 60" fill="none"><rect x="6" y="8" width="46" height="44" rx="4" stroke="var(--ink)" stroke-width="4" filter="url(#rough)"/><path d="M14 30 L26 44 L54 6" stroke="var(--sage-deep)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg><div><b>Volet B figé et mesuré sur la validation</b><span>Gemma 4 E4B QAT, prompt v16</span></div></li>
+      <li><svg viewBox="0 0 60 60" fill="none"><rect x="6" y="8" width="46" height="44" rx="4" stroke="var(--ink)" stroke-width="4" filter="url(#rough)"/><path d="M16 31 C 24 27, 34 35, 44 29" stroke="var(--mustard-deep)" stroke-width="7" stroke-linecap="round"/></svg><div><b>Test réservé du volet B</b><span>80 cas, réponses attendues en relecture humaine</span></div></li>
+      <li><svg viewBox="0 0 60 60" fill="none"><rect x="6" y="8" width="46" height="44" rx="4" stroke="var(--ink)" stroke-width="4" filter="url(#rough)"/><path d="M16 31 C 24 27, 34 35, 44 29" stroke="var(--mustard-deep)" stroke-width="7" stroke-linecap="round"/></svg><div><b>RAG et 3 agents</b><span>chaîne complète sur GPU, contrôleur à corriger</span></div></li>
+      <li><svg viewBox="0 0 60 60" fill="none"><rect x="6" y="8" width="46" height="44" rx="4" stroke="var(--ink)" stroke-width="4" filter="url(#rough)"/><path d="M16 31 C 24 27, 34 35, 44 29" stroke="var(--mustard-deep)" stroke-width="7" stroke-linecap="round"/></svg><div><b>Adaptation LoRA</b><span>faisable sur T4, gain sur la qualité à démontrer</span></div></li>
+    </ul>
+    <div class="status-side">
+      <div class="sticky mustard lesson" style="--tilt:2deg">
+      <p class="hand">Ce qu'on a appris</p>
+      <p class="small">Une réponse au bon format peut être fausse&nbsp;: on contrôle le fond, à la main. Régler sur une cohorte, mesurer sur une autre. Un résultat négatif se documente.</p>
+    </div>
+      <p class="repo"><span class="hand">le code et le site</span><br>github.com/LindaBOUKHIT/TeamAI<br>lindaboukhit.github.io/TeamAI</p>
+    </div>
+  </div>
+  <footer><span>TeamAI · point d'avancement</span><span class="folio">10</span></footer>
+</section>
+<section class="slide next">
+  <p class="hand kicker">Et maintenant</p>
+  <h2>Mesurer B sur le test, puis comparer</h2>
+  <div class="next-grid">
+    <div class="lined">
+      <h3 class="ocean-text">Volet A</h3>
+      <ul><li>Fusionner l'évaluation du test</li><li>Vérifier le modèle INT8 servi</li><li>Figer le site en v1.0</li></ul>
+      <h3 class="terracotta-text">Volet B</h3>
+      <ul><li>Corriger le contrôleur, remesurer les 3 agents</li><li>Évaluer les 4 configurations sur le test réservé</li><li>Rapport V1, puis soutenance du 07/12</li></ul>
+    </div>
+    <div class="right-col">
+      <div class="sticky blush" style="--tilt:-2deg">
+        <p class="hand">Votre avis</p>
+        <p class="small">La comparaison A/B par axes (qualité dans sa tâche, latence, mémoire, coût, contrôle, explicabilité) vous convient-elle&nbsp;?</p>
+      </div>
+      <p class="hand thanks">merci&nbsp;!</p>
+      <p class="sign">Alain, Nassim, Bachar et Linda</p>
+    </div>
+  </div>
+  <footer><span>TeamAI · point d'avancement</span><span class="folio">11</span></footer>
+</section>
+<script src="deck.js"></script>
+</body>
+</html>
