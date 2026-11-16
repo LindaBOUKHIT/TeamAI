@@ -1,0 +1,361 @@
+{
+  "blocks": 40,
+  "abstentions_before": 0,
+  "abstentions_after": 8,
+  "hypotheses_before": 4,
+  "hypotheses_after": 3,
+  "hypotheses_moved": 1,
+  "unsupported_before": null,
+  "unsupported_after": null,
+  "latency_mean_seconds": 2.2520494499913184,
+  "latency_p95_seconds": 3.9811892999568954,
+  "peak_rss_bytes": 2844577792,
+  "load_seconds": 32.06080730003305,
+  "anomaly_probability_by_label": {
+    "Fail": {
+      "n": 10,
+      "mean": 0.68564,
+      "min": 0.1599,
+      "max": 0.9984
+    },
+    "Success": {
+      "n": 30,
+      "mean": 0.78955,
+      "min": 0.4663,
+      "max": 0.9998
+    }
+  },
+  "anomaly_auc_fail_vs_success": 0.47,
+  "per_block": [
+    {
+      "block_id": "blk_8563008442778506631",
+      "label": "Success",
+      "anomaly_probability": 0.9051,
+      "hypothesis_probabilities": [
+        0.8894
+      ],
+      "moved_indices": [],
+      "abstention_added": false
+    },
+    {
+      "block_id": "blk_7969559867057098790",
+      "label": "Success",
+      "anomaly_probability": 0.6901,
+      "hypothesis_probabilities": [],
+      "moved_indices": [],
+      "abstention_added": false
+    },
+    {
+      "block_id": "blk_-7094603536203872751",
+      "label": "Success",
+      "anomaly_probability": 0.9884,
+      "hypothesis_probabilities": [],
+      "moved_indices": [],
+      "abstention_added": false
+    },
+    {
+      "block_id": "blk_6238119262959369931",
+      "label": "Success",
+      "anomaly_probability": 0.7337,
+      "hypothesis_probabilities": [],
+      "moved_indices": [],
+      "abstention_added": false
+    },
+    {
+      "block_id": "blk_-2294591454857120265",
+      "label": "Success",
+      "anomaly_probability": 0.9998,
+      "hypothesis_probabilities": [],
+      "moved_indices": [],
+      "abstention_added": false
+    },
+    {
+      "block_id": "blk_3234830704415668534",
+      "label": "Fail",
+      "anomaly_probability": 0.1599,
+      "hypothesis_probabilities": [],
+      "moved_indices": [],
+      "abstention_added": false
+    },
+    {
+      "block_id": "blk_3380500577009533140",
+      "label": "Success",
+      "anomaly_probability": 0.9822,
+      "hypothesis_probabilities": [],
+      "moved_indices": [],
+      "abstention_added": false
+    },
+    {
+      "block_id": "blk_-7690601479885872291",
+      "label": "Success",
+      "anomaly_probability": 0.6488,
+      "hypothesis_probabilities": [],
+      "moved_indices": [],
+      "abstention_added": true
+    },
+    {
+      "block_id": "blk_274252151018950480",
+      "label": "Success",
+      "anomaly_probability": 0.9556,
+      "hypothesis_probabilities": [],
+      "moved_indices": [],
+      "abstention_added": false
+    },
+    {
+      "block_id": "blk_3545200708377402786",
+      "label": "Fail",
+      "anomaly_probability": 0.8533,
+      "hypothesis_probabilities": [],
+      "moved_indices": [],
+      "abstention_added": false
+    },
+    {
+      "block_id": "blk_2472886951644290247",
+      "label": "Success",
+      "anomaly_probability": 0.9476,
+      "hypothesis_probabilities": [],
+      "moved_indices": [],
+      "abstention_added": false
+    },
+    {
+      "block_id": "blk_6684608247564905008",
+      "label": "Success",
+      "anomaly_probability": 0.6491,
+      "hypothesis_probabilities": [],
+      "moved_indices": [],
+      "abstention_added": true
+    },
+    {
+      "block_id": "blk_-716965666746489738",
+      "label": "Fail",
+      "anomaly_probability": 0.9984,
+      "hypothesis_probabilities": [
+        0.8747
+      ],
+      "moved_indices": [],
+      "abstention_added": false
+    },
+    {
+      "block_id": "blk_-8659536152130781941",
+      "label": "Success",
+      "anomaly_probability": 0.6587,
+      "hypothesis_probabilities": [],
+      "moved_indices": [],
+      "abstention_added": false
+    },
+    {
+      "block_id": "blk_-5810713234927626344",
+      "label": "Success",
+      "anomaly_probability": 0.7913,
+      "hypothesis_probabilities": [],
+      "moved_indices": [],
+      "abstention_added": false
+    },
+    {
+      "block_id": "blk_-2030656996321012999",
+      "label": "Fail",
+      "anomaly_probability": 0.8838,
+      "hypothesis_probabilities": [
+        0.2934
+      ],
+      "moved_indices": [
+        0
+      ],
+      "abstention_added": false
+    },
+    {
+      "block_id": "blk_-5454520278495523870",
+      "label": "Success",
+      "anomaly_probability": 0.9403,
+      "hypothesis_probabilities": [],
+      "moved_indices": [],
+      "abstention_added": false
+    },
+    {
+      "block_id": "blk_-5482068996352233033",
+      "label": "Success",
+      "anomaly_probability": 0.4971,
+      "hypothesis_probabilities": [],
+      "moved_indices": [],
+      "abstention_added": true
+    },
+    {
+      "block_id": "blk_583001972277249605",
+      "label": "Success",
+      "anomaly_probability": 0.8204,
+      "hypothesis_probabilities": [],
+      "moved_indices": [],
+      "abstention_added": false
+    },
+    {
+      "block_id": "blk_9143645567207780279",
+      "label": "Success",
+      "anomaly_probability": 0.6717,
+      "hypothesis_probabilities": [],
+      "moved_indices": [],
+      "abstention_added": false
+    },
+    {
+      "block_id": "blk_-2437316973567833866",
+      "label": "Success",
+      "anomaly_probability": 0.8208,
+      "hypothesis_probabilities": [],
+      "moved_indices": [],
+      "abstention_added": false
+    },
+    {
+      "block_id": "blk_3276209566112807190",
+      "label": "Success",
+      "anomaly_probability": 0.7001,
+      "hypothesis_probabilities": [],
+      "moved_indices": [],
+      "abstention_added": false
+    },
+    {
+      "block_id": "blk_-1667322544212361659",
+      "label": "Success",
+      "anomaly_probability": 0.9658,
+      "hypothesis_probabilities": [],
+      "moved_indices": [],
+      "abstention_added": false
+    },
+    {
+      "block_id": "blk_1483694219884556894",
+      "label": "Fail",
+      "anomaly_probability": 0.1599,
+      "hypothesis_probabilities": [],
+      "moved_indices": [],
+      "abstention_added": false
+    },
+    {
+      "block_id": "blk_6236687718597980422",
+      "label": "Success",
+      "anomaly_probability": 0.9821,
+      "hypothesis_probabilities": [],
+      "moved_indices": [],
+      "abstention_added": false
+    },
+    {
+      "block_id": "blk_-5447929270407533658",
+      "label": "Success",
+      "anomaly_probability": 0.6418,
+      "hypothesis_probabilities": [],
+      "moved_indices": [],
+      "abstention_added": true
+    },
+    {
+      "block_id": "blk_7678500386678969055",
+      "label": "Success",
+      "anomaly_probability": 0.9836,
+      "hypothesis_probabilities": [],
+      "moved_indices": [],
+      "abstention_added": false
+    },
+    {
+      "block_id": "blk_-7491622525336081328",
+      "label": "Success",
+      "anomaly_probability": 0.6901,
+      "hypothesis_probabilities": [],
+      "moved_indices": [],
+      "abstention_added": false
+    },
+    {
+      "block_id": "blk_8746139427503550426",
+      "label": "Fail",
+      "anomaly_probability": 0.8882,
+      "hypothesis_probabilities": [],
+      "moved_indices": [],
+      "abstention_added": false
+    },
+    {
+      "block_id": "blk_1477577312293595754",
+      "label": "Success",
+      "anomaly_probability": 0.7337,
+      "hypothesis_probabilities": [],
+      "moved_indices": [],
+      "abstention_added": false
+    },
+    {
+      "block_id": "blk_283936401871261184",
+      "label": "Success",
+      "anomaly_probability": 0.9231,
+      "hypothesis_probabilities": [],
+      "moved_indices": [],
+      "abstention_added": false
+    },
+    {
+      "block_id": "blk_-4394245410726202579",
+      "label": "Success",
+      "anomaly_probability": 0.6491,
+      "hypothesis_probabilities": [],
+      "moved_indices": [],
+      "abstention_added": true
+    },
+    {
+      "block_id": "blk_3739737135169277699",
+      "label": "Fail",
+      "anomaly_probability": 0.8459,
+      "hypothesis_probabilities": [],
+      "moved_indices": [],
+      "abstention_added": false
+    },
+    {
+      "block_id": "blk_-4144347716568858558",
+      "label": "Success",
+      "anomaly_probability": 0.6491,
+      "hypothesis_probabilities": [],
+      "moved_indices": [],
+      "abstention_added": true
+    },
+    {
+      "block_id": "blk_6203880165140483159",
+      "label": "Success",
+      "anomaly_probability": 0.958,
+      "hypothesis_probabilities": [],
+      "moved_indices": [],
+      "abstention_added": false
+    },
+    {
+      "block_id": "blk_2594753583782275415",
+      "label": "Success",
+      "anomaly_probability": 0.4663,
+      "hypothesis_probabilities": [],
+      "moved_indices": [],
+      "abstention_added": true
+    },
+    {
+      "block_id": "blk_8342213972413455107",
+      "label": "Fail",
+      "anomaly_probability": 0.9428,
+      "hypothesis_probabilities": [
+        0.8859
+      ],
+      "moved_indices": [],
+      "abstention_added": false
+    },
+    {
+      "block_id": "blk_-4350413133248841553",
+      "label": "Fail",
+      "anomaly_probability": 0.2016,
+      "hypothesis_probabilities": [],
+      "moved_indices": [],
+      "abstention_added": false
+    },
+    {
+      "block_id": "blk_6021085871987219132",
+      "label": "Fail",
+      "anomaly_probability": 0.9226,
+      "hypothesis_probabilities": [],
+      "moved_indices": [],
+      "abstention_added": false
+    },
+    {
+      "block_id": "blk_1721611998934064598",
+      "label": "Success",
+      "anomaly_probability": 0.643,
+      "hypothesis_probabilities": [],
+      "moved_indices": [],
+      "abstention_added": true
+    }
+  ]
+}
