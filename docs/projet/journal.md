@@ -578,3 +578,7 @@ Usage IA : correctif écrit et testé par Claude, d'après l'analyse d'Alain.
 ## 2026-11-24 — SCRUM-49 : retour d'expérience de Linda
 `docs/rapport/retour_experience/linda.md` : rôle, axes techniques et collectifs, ce que je ferais autrement, avec les tickets et fichiers qui servent de preuves.
 Usage IA : brouillon rédigé par Claude à partir des réponses de Linda et des faits du dépôt, puis relu et corrigé par Linda (passages retirés ou reformulés à sa demande).
+
+## 2026-11-24 — SCRUM-52 : supports de soutenance (pitch 4 min, présentation 8 min)
+`docs/soutenance/pitch/` (6 slides) et `docs/soutenance/presentation/` (12 slides), repris du style du support d'avancement ; PDF exportés avec Chrome (`pitch.pdf`, `presentation.pdf`). Sources de chaque chiffre en tête des `index.html` ; aucun chiffre du test du volet B, aucune mesure non archivée.
+Usage IA : supports rédigés par Codex (gpt-6.1-sol) à partir des résultats du dépôt ; chiffres contrôlés par Claude (une erreur corrigée : les deux runs SCRUM-42 n'acceptent pas le même bloc) ; à valider par les 4 membres.
