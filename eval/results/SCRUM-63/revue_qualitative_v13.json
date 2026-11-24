@@ -1,0 +1,186 @@
+{
+  "scope": "Relecture qualitative par l'assistant des 20 paires v12/v13 et de leurs preuves ; pas de modèle juge supplémentaire, pas de score de fidélité global, pas de modification des réponses brutes.",
+  "limits": "Les mêmes cas ont servi à ajuster le prompt. Cette revue ne démontre pas la généralisation à des blocs inédits. Les alertes automatiques sont distinctes des constats de relecture.",
+  "cases": [
+    {
+      "row": 1,
+      "gain": "La succession artificielle entre allocation et débuts de réception à la même seconde a disparu.",
+      "remaining": [],
+      "block_id": "blk_6541176395940413472",
+      "v11_row": 22
+    },
+    {
+      "row": 2,
+      "gain": "E28 est décrit sans transformer l'absence de fichier en cause certaine ; les hypothèses de métadonnées/persistance de v12 ont disparu.",
+      "remaining": [
+        "La question sur la suppression « par le NameNode » reste imprécise ; les répétitions de références nuisent à la lecture."
+      ],
+      "block_id": "blk_6114455031210894434",
+      "v11_row": 21
+    },
+    {
+      "row": 3,
+      "gain": "Demande E23 et suppression locale journalisée E21 sont distinguées ; E11 est une fin de traitement.",
+      "remaining": [
+        "Deux demandes d'investigation subsistent sans événement préoccupant."
+      ],
+      "block_id": "blk_173536961076687478",
+      "v11_row": 24
+    },
+    {
+      "row": 4,
+      "gain": "Le WARN BlockInfo absent est décrit avec sa source L01 et sans conclure à un échec global.",
+      "remaining": [
+        "La formulation « n'est plus trouvée » suggère une disparition dont la cause n'est pas établie."
+      ],
+      "block_id": "blk_9028134109367327560",
+      "v11_row": 1
+    },
+    {
+      "row": 5,
+      "gain": "L'affirmation v12 d'une suppression effectuée par le NameNode a disparu ; les quatre exceptions sont correctement comptées.",
+      "remaining": [
+        "Le résumé devient moins complet : le volet suppression est renvoyé aux informations manquantes."
+      ],
+      "block_id": "blk_-5071545702549983038",
+      "v11_row": 2
+    },
+    {
+      "row": 6,
+      "gain": "E23, E21 et E28 sont distingués ; les hypothèses tirées de la fin du PacketResponder ont disparu.",
+      "remaining": [
+        "Les première et troisième demandes d'information sur l'état des réplicas se recouvrent."
+      ],
+      "block_id": "blk_6533449790153807489",
+      "v11_row": 34
+    },
+    {
+      "row": 7,
+      "gain": "Les interruptions fictives du PacketResponder et la suppression finale affirmée dans v12 ont disparu.",
+      "remaining": [
+        "L'allocation est affirmée mais les références F05, F03, F06, F07 désignent E5, E3, E6 et E9. Il fallait citer F12 ou T01 pour E22."
+      ],
+      "block_id": "blk_2360091197416227915",
+      "v11_row": 4
+    },
+    {
+      "row": 8,
+      "gain": "La suppression effectuée par le NameNode est remplacée par des actions locales journalisées à deux instants distincts.",
+      "remaining": [
+        "T01/T02 montrent allocation et début de réception ; « réplication » est une formulation plus large que ces seules références."
+      ],
+      "block_id": "blk_113233588687800113",
+      "v11_row": 5
+    },
+    {
+      "row": 9,
+      "gain": "E11 n'est plus présenté comme une cause d'incident.",
+      "remaining": [
+        "Chronologie incorrecte : le résumé place les suppressions T14/T17 après les demandes T15/T16, alors que T14 (11:32:55) précède T15/T16 (11:36:31).",
+        "La formule « tentative d'erreur inattendue » est maladroite.",
+        "Le retrait préalable du volumeMap est une hypothèse conditionnelle, non un fait établi."
+      ],
+      "block_id": "blk_-378886981407270391",
+      "v11_row": 10
+    },
+    {
+      "row": 10,
+      "gain": "Les causes supposées sont désormais au conditionnel.",
+      "remaining": [
+        "Les mises à jour sont attribuées à T01/T02, qui montrent E5/E22 et non E26.",
+        "La cause réseau n'est étayée par aucun détail précis de L01/L02 ; l'hypothèse sur la fréquence de E28 repose sur une condition non observée.",
+        "Le texte parle de plusieurs blocs alors que l'entrée porte sur un seul bloc.",
+        "L'alerte automatique sur un ordre dans la même seconde est un faux positif : les références L01/L02 sont plus tardives, mais le contrôleur ne lit que les horodatages Txx."
+      ],
+      "block_id": "blk_-7852394220388861643",
+      "v11_row": 19
+    },
+    {
+      "row": 11,
+      "gain": "La demande de suppression du NameNode et le message local ultérieur sont correctement distingués et datés.",
+      "remaining": [],
+      "block_id": "blk_-4732326805048063705",
+      "v11_row": 8
+    },
+    {
+      "row": 12,
+      "gain": "La causalité inventée entre lectures et exceptions a disparu ; E23 reste une demande.",
+      "remaining": [
+        "Les lectures sont affirmées en citant T02 à T09, qui ne contiennent pas E3. Les bonnes preuves sont F04 ou T11/T13."
+      ],
+      "block_id": "blk_5811148074625730796",
+      "v11_row": 11
+    },
+    {
+      "row": 13,
+      "gain": "La suppression accomplie par le NameNode n'est plus affirmée.",
+      "remaining": [
+        "Nouvelle confusion de niveau : les messages E21 T16/T17 deviennent des fichiers « marqués pour suppression », alors qu'ils journalisent Deleting block file.",
+        "Accord « des début d'écriture » incorrect."
+      ],
+      "block_id": "blk_-8999738040142959110",
+      "v11_row": 15
+    },
+    {
+      "row": 14,
+      "gain": "La demande E23 est explicitement décrite ; la conclusion finale vague de v12 a disparu.",
+      "remaining": [
+        "Les lectures sont évoquées avec L01/L02 qui ne prouvent que des exceptions de service ; F03 ou T10/T13 étayent les lectures servies."
+      ],
+      "block_id": "blk_8326439490214464539",
+      "v11_row": 18
+    },
+    {
+      "row": 15,
+      "gain": "Les trois occurrences sont correctement comptées et les questions inutiles ont disparu.",
+      "remaining": [
+        "Le singulier « sur un DataNode » reste ambigu quant au nombre de machines ; ce nombre n'est pas déduit ici."
+      ],
+      "block_id": "blk_3848752053953224466",
+      "v11_row": 23
+    },
+    {
+      "row": 16,
+      "gain": "Les demandes d'investigation sur la fin ordinaire du PacketResponder ont disparu.",
+      "remaining": [
+        "La vérification E2 réussie est omise du résumé, contrairement à v12 ; elle reste présente dans faits_observes."
+      ],
+      "block_id": "blk_-7135930864577838769",
+      "v11_row": 25
+    },
+    {
+      "row": 17,
+      "gain": "La conclusion artificielle par le PacketResponder et la demande d'investigation ont disparu.",
+      "remaining": [
+        "L'ordre début/réception est confirmé par la chronologie, mais la phrase cite uniquement les compteurs F03/F04, qui ne portent pas de dates."
+      ],
+      "block_id": "blk_4867894130013130395",
+      "v11_row": 27
+    },
+    {
+      "row": 18,
+      "gain": "La demande E23 et les messages locaux E21 sont distingués.",
+      "remaining": [
+        "Deux demandes d'investigation persistent sur un bloc sans événement préoccupant."
+      ],
+      "block_id": "blk_7495489835738398625",
+      "v11_row": 31
+    },
+    {
+      "row": 19,
+      "gain": "Les comptes sont exacts et les questions inutiles ont disparu.",
+      "remaining": [
+        "L'ordre début/réception est confirmé par la chronologie, mais les références F03/F04 ne suffisent pas à le prouver."
+      ],
+      "block_id": "blk_-5088951843467853274",
+      "v11_row": 33
+    },
+    {
+      "row": 20,
+      "gain": "La vérification réussie est conservée, avec T10 à la fin de la période observée ; les questions inutiles ont disparu.",
+      "remaining": [],
+      "block_id": "blk_-4973356466019776804",
+      "v11_row": 37
+    }
+  ]
+}

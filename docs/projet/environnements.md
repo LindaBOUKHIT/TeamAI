@@ -4,12 +4,14 @@ Socle commun : Python 3.10+ dans un `.venv` à la racine du dépôt TeamAI, `pip
 
 | Personne | OS | Éditeur | Python | Node | Rôle matériel |
 |---|---|---|---|---|---|
-| Alain | Windows 11 Pro | VS Code 1.121 + Claude Code | 3.12.10 (PyTorch 2.12 CPU) | 24.12.0 | Machine d'inférence du SLM (volet B) |
+| Alain | Windows 11 Pro | VS Code 1.121 + Claude Code | 3.12.10 (PyTorch 2.12 CPU) | 24.12.0 | Ancienne machine d’inférence SmolLM2 (CPU) |
 | Bachar | À renseigner | À renseigner | À renseigner | À renseigner | À confirmer |
 | Linda | Windows 11 Famille Unilingue | VS Code | 3.13.7 | 24.19.0 | Poste de développement |
-| Nassim | Windows 11 | À renseigner | À renseigner | À renseigner | Seul poste avec GPU NVIDIA (RTX 3050 6 Go) : candidat pour l'essai LoRA local |
+| Nassim | Windows 11 | VS Code 1.146.0 (x64) | 3.14.7 | 22.22.0 | Machine cible du SLM Gemma (SCRUM-63) |
 
 Point du 13/10 : les environnements d'Alain et de Linda sont renseignés ; le matériel de Nassim est relevé (versions logicielles à compléter). La ligne de Bachar reste à compléter par l'intéressé dans la PR [#3](https://github.com/LindaBOUKHIT/TeamAI/pull/3). Une version non installée doit être indiquée comme telle, plutôt que laissée vide. La présence d'une ligne ne vaut pas validation collective du choix des machines.
+
+Point du 13/11 : versions de Nassim relevées (transmises le 12/11). Point de vigilance : Python 3.14.7 est plus récent que la version utilisée pour les tests (3.12) ; la disponibilité d'une roue CUDA de llama-cpp-python 0.3.36 pour cette version est à vérifier lors de l'installation (sinon, environnement Python 3.12 dédié). Reste la ligne de Bachar.
 
 ## Machine de Nassim (relevé transmis le 13/10)
 
@@ -20,11 +22,22 @@ Point du 13/10 : les environnements d'Alain et de Linda sont renseignés ; le ma
 | CPU | AMD Ryzen 5 8645HS — 6 cœurs / 12 threads |
 | RAM | 32 Go |
 | GPU / VRAM | NVIDIA GeForce RTX 3050 Laptop GPU — 6 Go |
-| CUDA, Python, Node, éditeur | À renseigner par Nassim |
+| Pilote NVIDIA | 592.82 |
+| CUDA (`nvidia-smi`) | 13.1 — version maximale prise en charge par le pilote, pas forcément un toolkit installé |
+| Python / Node / éditeur | 3.14.7 / 22.22.0 / VS Code 1.146.0 (x64) |
 
 C'est la seule machine de l'équipe avec un GPU NVIDIA. 6 Go de VRAM ne permettent pas d'entraîner SmolLM2-1.7B en précision complète, mais un LoRA sur le modèle chargé en 4 bits (QLoRA, `bitsandbytes`) est plausible : **à tester** dans SCRUM-29, en alternative à Kaggle. Aucune mesure n'a encore été faite sur cette machine.
 
-## Machine cible du SLM (volet B)
+## Machine cible du SLM (volet B) — SCRUM-63, 27/10/2026
+
+Le portable de **Nassim** devient la cible pour Gemma 4 E4B QAT : Ryzen 5 8645HS,
+32 Go de RAM, RTX 3050 Laptop 6 Go, pilote 592.82, CUDA 13.1 selon `nvidia-smi`, Python 3.14.7 (relevé transmis par Nassim le 12/11).
+Aucune inférence Gemma ni mesure de performances n’a été faite sur ce portable
+pour SCRUM-63. La configuration du port est llama.cpp, contexte 4096, réponse
+800 tokens ; le chargeur CPU existant est conservé, l’offload GPU reste à valider.
+Voir la [trace SCRUM-63](../../eval/results/SCRUM-63/README.md).
+
+## Ancienne machine cible — Alain, historique SmolLM2
 
 | Élément | Valeur |
 |---|---|
@@ -48,12 +61,12 @@ python --version
 node --version
 ```
 
-## Ce que cette machine permet
+## Mesures historiques sur la machine d’Alain (SmolLM2)
 
 | Usage | Faisable ? | Pourquoi |
 |---|---|---|
 | Inférence float32 (Transformers, CPU) | Mesurée dans SCRUM-28 | Sur une trace le 08/10 : 0,16 token/s, pic RSS de 9,84 GiB au chargement et 8,00 GiB en génération ; chargement 238 s, 156 tokens en 952,03 s |
-| Inférence 4 bits Q4_K_M (llama.cpp) | Mesurée dans SCRUM-57 | Sur une trace le 06/10 : 1,9 token/s, pic de 2,8 Go, fichier GGUF de 0,98 Go ; backend encore à intégrer à `generate.py` |
+| Inférence 4 bits Q4_K_M (llama.cpp) | Mesurée dans SCRUM-57 | Sur cinq traces de validation le 26/10 : 2,4 token/s, pic RSS de 2,8 GiB, chargement 1,7 s (float32 : 1,5 token/s, 9,9 GiB) ; backend `llamacpp` de `generate.py` |
 | Embeddings + index du RAG | À mesurer | L'inférence du SLM ne valide pas la mémoire ou la latence de la chaîne RAG complète |
 | Entraînement LoRA du 1.7B | Non testé sur cette machine | CPU seul : durée inconnue ; un essai court sur GPU est prévu dans SCRUM-29 |
 
@@ -71,5 +84,6 @@ La PR [#4](https://github.com/LindaBOUKHIT/TeamAI/pull/4) a été approuvée pui
 - [x] Machine d'inférence proposée et premiers essais référencés.
 - [x] Solution d'entraînement proposée, avec essai de faisabilité identifié.
 - [x] Ligne de Linda renseignée dans la PR #3.
-- [ ] Ligne de Bachar renseignée ; versions Python/Node/CUDA de Nassim complétées.
+- [ ] Ligne de Bachar renseignée.
+- [x] Versions Python/Node/CUDA de Nassim complétées (13/11).
 - [ ] Choix des machines confirmé avec le groupe et PR #3 relue par Linda puis fusionnée.

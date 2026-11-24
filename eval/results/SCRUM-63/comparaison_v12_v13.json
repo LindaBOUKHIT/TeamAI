@@ -1,0 +1,54 @@
+{
+  "scope": "Même échantillon exploratoire, déjà utilisé pour ajuster les prompts ; pas une estimation sur données inédites.",
+  "v12": {
+    "responses": 20,
+    "contract_ok": 20,
+    "finish": {
+      "stop": 20
+    },
+    "facts_copied_exactly": 20,
+    "no_unknown_references": 20,
+    "mean_seconds": 28.444,
+    "total_seconds": 568.887,
+    "mean_new_tokens": 317.4,
+    "nonempty_hypotheses": 3,
+    "abstentions": 0,
+    "normal_blocks_with_investigation_questions": 7,
+    "targeted_alerts_not_semantic_score": {
+      "ordre_affirme_entre_evenements_de_la_meme_seconde": 4,
+      "conclusion_finale_a_verifier": 14,
+      "enquete_demandee_sans_indice_incident": 7,
+      "suppression_effectuee_appuyee_sur_demande_E23": 3,
+      "suppression_physique_attribuee_au_NameNode": 4,
+      "fin_PacketResponder_interpretee_comme_incident": 1,
+      "lien_causal_a_verifier": 1,
+      "phrase_du_resume_sans_reference": 1
+    },
+    "runtime_contract_errors": {},
+    "runtime_factual_errors": {
+      "hypothèse sans référence factuelle": 1,
+      "résumé sans référence aux preuves": 1
+    }
+  },
+  "v13": {
+    "responses": 20,
+    "contract_ok": 20,
+    "finish": {
+      "stop": 20
+    },
+    "facts_copied_exactly": 20,
+    "no_unknown_references": 20,
+    "mean_seconds": 28.939,
+    "total_seconds": 578.789,
+    "mean_new_tokens": 317.85,
+    "nonempty_hypotheses": 2,
+    "abstentions": 0,
+    "normal_blocks_with_investigation_questions": 2,
+    "targeted_alerts_not_semantic_score": {
+      "enquete_demandee_sans_indice_incident": 2,
+      "ordre_affirme_entre_evenements_de_la_meme_seconde": 1
+    },
+    "runtime_contract_errors": {},
+    "runtime_factual_errors": {}
+  }
+}

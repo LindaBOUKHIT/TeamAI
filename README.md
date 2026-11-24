@@ -3,7 +3,9 @@
 Projet NLP 2 (M2 IA, FGES) — Alain, Bachar, Linda, Nassim.
 
 - **Volet A — en ligne** : un BiLSTM entraîné par l'équipe classe chaque trace HDFS en normal / anomalie, **dans le navigateur** (ONNX Runtime Web, site statique gratuit).
-- **Volet B — local** : un SLM (SmolLM2-1.7B-Instruct) adapté par LoRA explique une trace en s'appuyant sur la documentation HDFS (RAG), avec une variante à 3 agents.
+- **Volet B — local** : un SLM (Gemma 4 E4B QAT, GGUF Q4_0) explique les preuves calculées d’un bloc avec le prompt v16 figé, sans RAG dans cette référence. Le RAG et les agents restent des variantes distinctes.
+
+Gemma est retenu après les comparaisons exploratoires : 40/40 contrats conformes en v11 contre 22/40 pour Granite. La conformité ne garantit pas la justesse ; [choix, validation et limites](eval/results/SCRUM-63/README.md). SmolLM2 reste historique.
 
 Pilotage : [board Jira SCRUM](https://lindaboukhit04.atlassian.net/jira/software/projects/SCRUM/boards/1) · [classeur de suivi](https://docs.google.com/spreadsheets/d/1W8IjMS2L9-SxDK-FGQvjVIdG9NSwmwVBR8dpT5AitLg/edit?gid=1148275204#gid=1148275204) · [feuille de route](docs/projet/feuille_de_route.md) · [formats d'échange](docs/contrats.md) · [règles de contribution](CONTRIBUTING.md)
 

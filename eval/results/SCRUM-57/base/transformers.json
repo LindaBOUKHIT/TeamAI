@@ -1,0 +1,162 @@
+{
+  "predictions": [
+    {
+      "id": "blk_-5205249637781423478",
+      "block_id": "blk_-5205249637781423478",
+      "split": "val",
+      "backend": "transformers",
+      "raw_text": "{\n  \"resume_evenements\": \"\",\n  \"faits_observes\": \"\",\n  \"hypotheses\": \"\",\n  \"infos_manquantes\": \"\",\n  \"sources\": [],\n  \"abstraction\": true\n}",
+      "parsed_response": {
+        "resume_evenements": "",
+        "faits_observes": "",
+        "hypotheses": "",
+        "infos_manquantes": "",
+        "sources": [],
+        "abstraction": true
+      },
+      "errors": [
+        "resume_evenements : texte non vide attendu",
+        "faits_observes : liste de textes attendue",
+        "hypotheses : liste de textes attendue",
+        "infos_manquantes : liste de textes attendue",
+        "abstention : booléen attendu"
+      ],
+      "conformity": false,
+      "seconds": 37.130856100004166,
+      "new_tokens": 51,
+      "mock": false,
+      "tokens_per_second": 1.3735207144872235
+    },
+    {
+      "id": "blk_-2109567036218931458",
+      "block_id": "blk_-2109567036218931458",
+      "split": "val",
+      "backend": "transformers",
+      "raw_text": "{\n  \"resume_evenements\": \"\",\n  \"faits_observes\": \"\",\n  \"hypotheses\": \"\",\n  \"infos_manquantes\": \"\",\n  \"sources\": [],\n  \"abstraction\": true\n}",
+      "parsed_response": {
+        "resume_evenements": "",
+        "faits_observes": "",
+        "hypotheses": "",
+        "infos_manquantes": "",
+        "sources": [],
+        "abstraction": true
+      },
+      "errors": [
+        "resume_evenements : texte non vide attendu",
+        "faits_observes : liste de textes attendue",
+        "hypotheses : liste de textes attendue",
+        "infos_manquantes : liste de textes attendue",
+        "abstention : booléen attendu"
+      ],
+      "conformity": false,
+      "seconds": 48.75253639998846,
+      "new_tokens": 51,
+      "mock": false,
+      "tokens_per_second": 1.0460994189424793
+    },
+    {
+      "id": "blk_1539372360994626689",
+      "block_id": "blk_1539372360994626689",
+      "split": "val",
+      "backend": "transformers",
+      "raw_text": "{\n  \"resume_evenements\": \"\",\n  \"faits_observes\": \"\",\n  \"hypotheses\": \"\",\n  \"infos_manquantes\": \"\",\n  \"sources\": [],\n  \"abstraction\": true\n}",
+      "parsed_response": {
+        "resume_evenements": "",
+        "faits_observes": "",
+        "hypotheses": "",
+        "infos_manquantes": "",
+        "sources": [],
+        "abstraction": true
+      },
+      "errors": [
+        "resume_evenements : texte non vide attendu",
+        "faits_observes : liste de textes attendue",
+        "hypotheses : liste de textes attendue",
+        "infos_manquantes : liste de textes attendue",
+        "abstention : booléen attendu"
+      ],
+      "conformity": false,
+      "seconds": 44.933661300019594,
+      "new_tokens": 51,
+      "mock": false,
+      "tokens_per_second": 1.1350065524257147
+    },
+    {
+      "id": "blk_-934823916414850441",
+      "block_id": "blk_-934823916414850441",
+      "split": "val",
+      "backend": "transformers",
+      "raw_text": "{\n  \"resume_evenements\": \"\",\n  \"faits_observes\": [],\n  \"hypotheses\": [\n    {\n      \"text\": \"Reçu le block blk_-934823916414850441 de taille 67108864 depuis /10.251.65.237\"\n    },\n    {\n      \"text\": \"Reçu le block blk_-934823916414850441 de taille 67108864 depuis /10.251.65.237\"\n    }\n  ],\n  \"infos_manquantes\": \"\",\n  \"sources\": [],\n  \"abstraction\": true\n}",
+      "parsed_response": {
+        "resume_evenements": "",
+        "faits_observes": [],
+        "hypotheses": [
+          {
+            "text": "Reçu le block blk_-934823916414850441 de taille 67108864 depuis /10.251.65.237"
+          },
+          {
+            "text": "Reçu le block blk_-934823916414850441 de taille 67108864 depuis /10.251.65.237"
+          }
+        ],
+        "infos_manquantes": "",
+        "sources": [],
+        "abstraction": true
+      },
+      "errors": [
+        "resume_evenements : texte non vide attendu",
+        "hypotheses : liste de textes attendue",
+        "infos_manquantes : liste de textes attendue",
+        "abstention : booléen attendu"
+      ],
+      "conformity": false,
+      "seconds": 77.95008989999769,
+      "new_tokens": 183,
+      "mock": false,
+      "tokens_per_second": 2.3476560480529405
+    },
+    {
+      "id": "blk_-8683556509854596383",
+      "block_id": "blk_-8683556509854596383",
+      "split": "val",
+      "backend": "transformers",
+      "raw_text": "{\n  \"resume_evenements\": \"\",\n  \"faits_observes\": [],\n  \"hypotheses\": [],\n  \"infos_manquantes\": \"\",\n  \"sources\": [\n    {\n      \"text\": \"\"\n    }\n  ],\n  \"abstraction\": true,\n  \"inference\": false\n}",
+      "parsed_response": {
+        "resume_evenements": "",
+        "faits_observes": [],
+        "hypotheses": [],
+        "infos_manquantes": "",
+        "sources": [
+          {
+            "text": ""
+          }
+        ],
+        "abstraction": true,
+        "inference": false
+      },
+      "errors": [
+        "resume_evenements : texte non vide attendu",
+        "infos_manquantes : liste de textes attendue",
+        "sources : liste de textes attendue",
+        "abstention : booléen attendu"
+      ],
+      "conformity": false,
+      "seconds": 45.25509019999299,
+      "new_tokens": 69,
+      "mock": false,
+      "tokens_per_second": 1.5246903651074966
+    }
+  ],
+  "metrics": {
+    "n": 5,
+    "conformity": 0.0,
+    "failures": 5,
+    "abstention": 0.0,
+    "mean_tokens_per_second": 1.485394619803171,
+    "throughput_measured_n": 5,
+    "peak_rss_bytes": 10676346880,
+    "load_seconds": 11.441411800013157,
+    "load_error": null,
+    "quantization": null,
+    "dtype": "float32"
+  }
+}

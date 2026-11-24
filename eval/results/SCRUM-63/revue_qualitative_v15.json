@@ -1,0 +1,742 @@
+{
+  "status": "completed",
+  "scope": "Relecture par l’assistant des 40 résumés et hypothèses et des questions ; comparaison avec les preuves et les horodatages. Aucun modèle juge, aucun score global de vérité.",
+  "summary": {
+    "responses_reviewed": 40,
+    "same_second_order_errors_found": 0,
+    "other_chronology_error_cases": [
+      17
+    ],
+    "unsupported_network_hypothesis_cases": [
+      3,
+      5,
+      7,
+      9,
+      11,
+      13,
+      15,
+      19,
+      21,
+      23,
+      25,
+      29,
+      31,
+      33,
+      37,
+      39
+    ],
+    "unsupported_network_hypothesis_response_count": 16,
+    "unnecessary_investigation_cases": [
+      2,
+      4,
+      6,
+      10,
+      12,
+      14,
+      16,
+      18,
+      20,
+      22,
+      24,
+      26,
+      28,
+      30,
+      32,
+      34,
+      36,
+      38
+    ],
+    "unnecessary_investigation_count": 18,
+    "blocks_without_incident_signal": 19,
+    "fabricated_reference_cases": [
+      15,
+      33
+    ],
+    "false_positive_automatic_alerts": [
+      {
+        "case": 36,
+        "alert": "fin_PacketResponder_interpretee_comme_incident",
+        "reason": "Négation explicite non reconnue par l’heuristique v13."
+      }
+    ],
+    "second_attempts": 0,
+    "second_attempt_success_rate": null
+  },
+  "notable_examples": [
+    {
+      "case": 7,
+      "finding": "Causalité non démontrée",
+      "quote": "Des lectures du bloc ont été servies à des clients, générant des avertissements [T10, T13].",
+      "evidence": "T10/T13 sont E3 ; aucun lien causal avec E4 n’est établi."
+    },
+    {
+      "case": 17,
+      "finding": "Ordre contraire à une partie des preuves",
+      "evidence": "T12/E21 10:34:14 < L01/E20 10:38:54 < T14/E21 10:43:18. Le résumé regroupe T12 et T14 après E20."
+    },
+    {
+      "case": 31,
+      "finding": "Suppression présentée comme accomplie",
+      "quote": "des fichiers locaux ont été supprimés [F08]",
+      "evidence": "F08/E21 ne certifie pas à lui seul l’achèvement."
+    },
+    {
+      "case": 35,
+      "finding": "Cause ajoutée sans indice",
+      "quote": "des répliques manquantes ou corrompues",
+      "evidence": "E23 signale une demande ; L01 indique BlockInfo absent, sans corruption."
+    }
+  ],
+  "cases": [
+    {
+      "case": 1,
+      "block_id": "blk_5809931191239895555",
+      "reviewed": true,
+      "automatic_alerts": [],
+      "automatic_factual_errors": [],
+      "manual_findings": [
+        "Les deux hypothèses reformulent des événements déjà observés (E27 et E23) ; elles ne proposent pas de cause supplémentaire."
+      ],
+      "network_hypothesis_without_specific_evidence": false,
+      "unnecessary_investigation_confirmed": false,
+      "same_second_order_error_found": false,
+      "other_chronology_error_found": false
+    },
+    {
+      "case": 2,
+      "block_id": "blk_-7326416392478650425",
+      "reviewed": true,
+      "automatic_alerts": [
+        "enquete_demandee_sans_indice_incident"
+      ],
+      "automatic_factual_errors": [],
+      "manual_findings": [
+        "Demande d’enquête sans indice d’incident, malgré la consigne de liste vide pour ce cas.",
+        "La formulation « journalisés comme supprimés » est moins prudente que la définition E21, qui ne certifie pas l’achèvement."
+      ],
+      "network_hypothesis_without_specific_evidence": false,
+      "unnecessary_investigation_confirmed": true,
+      "same_second_order_error_found": false,
+      "other_chronology_error_found": false
+    },
+    {
+      "case": 3,
+      "block_id": "blk_-3412728853703264676",
+      "reviewed": true,
+      "automatic_alerts": [],
+      "automatic_factual_errors": [],
+      "manual_findings": [
+        "Hypothèse réseau non étayée : les messages E4 indiquent seulement une exception de service, sans détail de cause.",
+        "Les lignes E4 ne fournissent aucun détail permettant de choisir réseau ou indisponibilité du DataNode."
+      ],
+      "network_hypothesis_without_specific_evidence": true,
+      "unnecessary_investigation_confirmed": false,
+      "same_second_order_error_found": false,
+      "other_chronology_error_found": false
+    },
+    {
+      "case": 4,
+      "block_id": "blk_3871505081979665782",
+      "reviewed": true,
+      "automatic_alerts": [
+        "enquete_demandee_sans_indice_incident"
+      ],
+      "automatic_factual_errors": [],
+      "manual_findings": [
+        "Demande d’enquête sans indice d’incident, malgré la consigne de liste vide pour ce cas."
+      ],
+      "network_hypothesis_without_specific_evidence": false,
+      "unnecessary_investigation_confirmed": true,
+      "same_second_order_error_found": false,
+      "other_chronology_error_found": false
+    },
+    {
+      "case": 5,
+      "block_id": "blk_-1876345605821081227",
+      "reviewed": true,
+      "automatic_alerts": [],
+      "automatic_factual_errors": [],
+      "manual_findings": [
+        "Hypothèse réseau non étayée : les messages E4 indiquent seulement une exception de service, sans détail de cause.",
+        "La politique de nettoyage évoquée dans la deuxième hypothèse ne figure pas dans les preuves E23."
+      ],
+      "network_hypothesis_without_specific_evidence": true,
+      "unnecessary_investigation_confirmed": false,
+      "same_second_order_error_found": false,
+      "other_chronology_error_found": false
+    },
+    {
+      "case": 6,
+      "block_id": "blk_6270729741183809671",
+      "reviewed": true,
+      "automatic_alerts": [
+        "enquete_demandee_sans_indice_incident"
+      ],
+      "automatic_factual_errors": [],
+      "manual_findings": [
+        "Demande d’enquête sans indice d’incident, malgré la consigne de liste vide pour ce cas.",
+        "La succession demande E23 puis journalisation E21 est compatible avec les horodatages cités."
+      ],
+      "network_hypothesis_without_specific_evidence": false,
+      "unnecessary_investigation_confirmed": true,
+      "same_second_order_error_found": false,
+      "other_chronology_error_found": false
+    },
+    {
+      "case": 7,
+      "block_id": "blk_6861364042242754579",
+      "reviewed": true,
+      "automatic_alerts": [
+        "lien_causal_a_verifier"
+      ],
+      "automatic_factual_errors": [],
+      "manual_findings": [
+        "Hypothèse réseau non étayée : les messages E4 indiquent seulement une exception de service, sans détail de cause.",
+        "Le résumé relie les lectures E3 aux WARN par « générant » ; les références T10/T13 montrent des lectures servies, sans démontrer cette causalité."
+      ],
+      "network_hypothesis_without_specific_evidence": true,
+      "unnecessary_investigation_confirmed": false,
+      "same_second_order_error_found": false,
+      "other_chronology_error_found": false
+    },
+    {
+      "case": 8,
+      "block_id": "blk_-2197890281206701914",
+      "reviewed": true,
+      "automatic_alerts": [],
+      "automatic_factual_errors": [],
+      "manual_findings": [
+        "Le fait F05 sur la même seconde est utilisé correctement pour énumérer E5 et E22 sans leur imposer d’ordre ; aucune enquête inutile."
+      ],
+      "network_hypothesis_without_specific_evidence": false,
+      "unnecessary_investigation_confirmed": false,
+      "same_second_order_error_found": false,
+      "other_chronology_error_found": false
+    },
+    {
+      "case": 9,
+      "block_id": "blk_-71418885337923132",
+      "reviewed": true,
+      "automatic_alerts": [],
+      "automatic_factual_errors": [],
+      "manual_findings": [
+        "Hypothèse réseau non étayée : les messages E4 indiquent seulement une exception de service, sans détail de cause.",
+        "La seconde hypothèse reformule la définition de E23."
+      ],
+      "network_hypothesis_without_specific_evidence": true,
+      "unnecessary_investigation_confirmed": false,
+      "same_second_order_error_found": false,
+      "other_chronology_error_found": false
+    },
+    {
+      "case": 10,
+      "block_id": "blk_5486735541977305440",
+      "reviewed": true,
+      "automatic_alerts": [
+        "enquete_demandee_sans_indice_incident"
+      ],
+      "automatic_factual_errors": [],
+      "manual_findings": [
+        "Demande d’enquête sans indice d’incident, malgré la consigne de liste vide pour ce cas.",
+        "La question sur la raison des fins de PacketResponder introduit une enquête sans événement préoccupant."
+      ],
+      "network_hypothesis_without_specific_evidence": false,
+      "unnecessary_investigation_confirmed": true,
+      "same_second_order_error_found": false,
+      "other_chronology_error_found": false
+    },
+    {
+      "case": 11,
+      "block_id": "blk_-673857767367889201",
+      "reviewed": true,
+      "automatic_alerts": [],
+      "automatic_factual_errors": [],
+      "manual_findings": [
+        "Hypothèse réseau non étayée : les messages E4 indiquent seulement une exception de service, sans détail de cause.",
+        "La « gestion inappropriée du cycle de vie » ne découle pas d’une demande E23 ; celle-ci est aussi classée atypique dans le résumé sans indice propre."
+      ],
+      "network_hypothesis_without_specific_evidence": true,
+      "unnecessary_investigation_confirmed": false,
+      "same_second_order_error_found": false,
+      "other_chronology_error_found": false
+    },
+    {
+      "case": 12,
+      "block_id": "blk_-6882278779228077054",
+      "reviewed": true,
+      "automatic_alerts": [
+        "enquete_demandee_sans_indice_incident"
+      ],
+      "automatic_factual_errors": [],
+      "manual_findings": [
+        "Demande d’enquête sans indice d’incident, malgré la consigne de liste vide pour ce cas."
+      ],
+      "network_hypothesis_without_specific_evidence": false,
+      "unnecessary_investigation_confirmed": true,
+      "same_second_order_error_found": false,
+      "other_chronology_error_found": false
+    },
+    {
+      "case": 13,
+      "block_id": "blk_-6623096049432513933",
+      "reviewed": true,
+      "automatic_alerts": [],
+      "automatic_factual_errors": [],
+      "manual_findings": [
+        "Hypothèse réseau non étayée : les messages E4 indiquent seulement une exception de service, sans détail de cause.",
+        "La modification d’état supposée pour expliquer le nettoyage n’est pas documentée."
+      ],
+      "network_hypothesis_without_specific_evidence": true,
+      "unnecessary_investigation_confirmed": false,
+      "same_second_order_error_found": false,
+      "other_chronology_error_found": false
+    },
+    {
+      "case": 14,
+      "block_id": "blk_7869923956433750840",
+      "reviewed": true,
+      "automatic_alerts": [
+        "enquete_demandee_sans_indice_incident"
+      ],
+      "automatic_factual_errors": [],
+      "manual_findings": [
+        "Demande d’enquête sans indice d’incident, malgré la consigne de liste vide pour ce cas."
+      ],
+      "network_hypothesis_without_specific_evidence": false,
+      "unnecessary_investigation_confirmed": true,
+      "same_second_order_error_found": false,
+      "other_chronology_error_found": false
+    },
+    {
+      "case": 15,
+      "block_id": "blk_-3578165899288618426",
+      "reviewed": true,
+      "automatic_alerts": [],
+      "automatic_factual_errors": [
+        "références inexistantes : F17,F18"
+      ],
+      "manual_findings": [
+        "Hypothèse réseau non étayée : les messages E4 indiquent seulement une exception de service, sans détail de cause.",
+        "F17 et F18 sont inventées dans le résumé. La limite d’ancrage des hypothèses ne couvre pas ces références du résumé."
+      ],
+      "network_hypothesis_without_specific_evidence": true,
+      "unnecessary_investigation_confirmed": false,
+      "same_second_order_error_found": false,
+      "other_chronology_error_found": false
+    },
+    {
+      "case": 16,
+      "block_id": "blk_6685520562458453481",
+      "reviewed": true,
+      "automatic_alerts": [
+        "enquete_demandee_sans_indice_incident"
+      ],
+      "automatic_factual_errors": [],
+      "manual_findings": [
+        "Demande d’enquête sans indice d’incident, malgré la consigne de liste vide pour ce cas.",
+        "La chronologie générale est compatible avec les traces, mais T01/T02 sont des débuts E5 et une allocation E22, pas les réceptions mentionnées dans la même phrase."
+      ],
+      "network_hypothesis_without_specific_evidence": false,
+      "unnecessary_investigation_confirmed": true,
+      "same_second_order_error_found": false,
+      "other_chronology_error_found": false
+    },
+    {
+      "case": 17,
+      "block_id": "blk_8490580439615020929",
+      "reviewed": true,
+      "automatic_alerts": [],
+      "automatic_factual_errors": [],
+      "manual_findings": [
+        "Le résumé place les suppressions locales T12/T14 après l’erreur E20 de L01. T12 est à 10:34:14, avant L01 à 10:38:54 ; seul T14 est ultérieur, à 10:43:18."
+      ],
+      "network_hypothesis_without_specific_evidence": false,
+      "unnecessary_investigation_confirmed": false,
+      "same_second_order_error_found": false,
+      "other_chronology_error_found": true
+    },
+    {
+      "case": 18,
+      "block_id": "blk_770925084470916407",
+      "reviewed": true,
+      "automatic_alerts": [
+        "enquete_demandee_sans_indice_incident"
+      ],
+      "automatic_factual_errors": [],
+      "manual_findings": [
+        "Demande d’enquête sans indice d’incident, malgré la consigne de liste vide pour ce cas.",
+        "L’allocation T01 à 21:59:42 précède bien les écritures T02/T03 à 21:59:43 ; le mot « suivie » est justifié ici."
+      ],
+      "network_hypothesis_without_specific_evidence": false,
+      "unnecessary_investigation_confirmed": true,
+      "same_second_order_error_found": false,
+      "other_chronology_error_found": false
+    },
+    {
+      "case": 19,
+      "block_id": "blk_-3349289973286267883",
+      "reviewed": true,
+      "automatic_alerts": [],
+      "automatic_factual_errors": [],
+      "manual_findings": [
+        "Hypothèse réseau non étayée : les messages E4 indiquent seulement une exception de service, sans détail de cause.",
+        "Ni le réseau ni la surcharge évoqués dans la seconde hypothèse ne sont documentés par les exceptions E4."
+      ],
+      "network_hypothesis_without_specific_evidence": true,
+      "unnecessary_investigation_confirmed": false,
+      "same_second_order_error_found": false,
+      "other_chronology_error_found": false
+    },
+    {
+      "case": 20,
+      "block_id": "blk_5094143259497688375",
+      "reviewed": true,
+      "automatic_alerts": [
+        "enquete_demandee_sans_indice_incident"
+      ],
+      "automatic_factual_errors": [],
+      "manual_findings": [
+        "Demande d’enquête sans indice d’incident, malgré la consigne de liste vide pour ce cas.",
+        "Les questions sur E11 et le statut final de l’écriture sont injustifiées pour ce bloc sans indice d’incident."
+      ],
+      "network_hypothesis_without_specific_evidence": false,
+      "unnecessary_investigation_confirmed": true,
+      "same_second_order_error_found": false,
+      "other_chronology_error_found": false
+    },
+    {
+      "case": 21,
+      "block_id": "blk_6124078019968307727",
+      "reviewed": true,
+      "automatic_alerts": [],
+      "automatic_factual_errors": [],
+      "manual_findings": [
+        "Hypothèse réseau non étayée : les messages E4 indiquent seulement une exception de service, sans détail de cause.",
+        "La politique de nettoyage ou de cycle de vie demeure une explication générique sans indice spécifique."
+      ],
+      "network_hypothesis_without_specific_evidence": true,
+      "unnecessary_investigation_confirmed": false,
+      "same_second_order_error_found": false,
+      "other_chronology_error_found": false
+    },
+    {
+      "case": 22,
+      "block_id": "blk_281337360704025623",
+      "reviewed": true,
+      "automatic_alerts": [
+        "enquete_demandee_sans_indice_incident"
+      ],
+      "automatic_factual_errors": [],
+      "manual_findings": [
+        "Demande d’enquête sans indice d’incident, malgré la consigne de liste vide pour ce cas.",
+        "La citation F06 (E11) est sans rapport avec la transmission entre DataNodes ; F07/F08/F16 apportent toutefois des preuves de transfert."
+      ],
+      "network_hypothesis_without_specific_evidence": false,
+      "unnecessary_investigation_confirmed": true,
+      "same_second_order_error_found": false,
+      "other_chronology_error_found": false
+    },
+    {
+      "case": 23,
+      "block_id": "blk_7800270577648029182",
+      "reviewed": true,
+      "automatic_alerts": [
+        "conclusion_finale_a_verifier"
+      ],
+      "automatic_factual_errors": [],
+      "manual_findings": [
+        "Hypothèse réseau non étayée : les messages E4 indiquent seulement une exception de service, sans détail de cause.",
+        "Les 15 exceptions sont correctement conservées dans les faits et l’hypothèse malgré six extraits seulement. La suppression comme conséquence des exceptions n’est pas étayée. « Suivi de la suppression » omet la limite du message E21."
+      ],
+      "network_hypothesis_without_specific_evidence": true,
+      "unnecessary_investigation_confirmed": false,
+      "same_second_order_error_found": false,
+      "other_chronology_error_found": false
+    },
+    {
+      "case": 24,
+      "block_id": "blk_-7225661686170202727",
+      "reviewed": true,
+      "automatic_alerts": [
+        "enquete_demandee_sans_indice_incident"
+      ],
+      "automatic_factual_errors": [],
+      "manual_findings": [
+        "Demande d’enquête sans indice d’incident, malgré la consigne de liste vide pour ce cas.",
+        "Les questions demandent notamment si les réplicas restent accessibles après suppression, sans événement préoccupant dans ce bloc."
+      ],
+      "network_hypothesis_without_specific_evidence": false,
+      "unnecessary_investigation_confirmed": true,
+      "same_second_order_error_found": false,
+      "other_chronology_error_found": false
+    },
+    {
+      "case": 25,
+      "block_id": "blk_498931071351273739",
+      "reviewed": true,
+      "automatic_alerts": [],
+      "automatic_factual_errors": [],
+      "manual_findings": [
+        "Hypothèse réseau non étayée : les messages E4 indiquent seulement une exception de service, sans détail de cause.",
+        "La première phrase affirme une allocation mais cite T02/T05/T09 : E5 et E9. L’allocation est présente dans les preuves, mais aurait dû être appuyée par T01 ou F10."
+      ],
+      "network_hypothesis_without_specific_evidence": true,
+      "unnecessary_investigation_confirmed": false,
+      "same_second_order_error_found": false,
+      "other_chronology_error_found": false
+    },
+    {
+      "case": 26,
+      "block_id": "blk_3202203826390057918",
+      "reviewed": true,
+      "automatic_alerts": [
+        "enquete_demandee_sans_indice_incident"
+      ],
+      "automatic_factual_errors": [],
+      "manual_findings": [
+        "Demande d’enquête sans indice d’incident, malgré la consigne de liste vide pour ce cas."
+      ],
+      "network_hypothesis_without_specific_evidence": false,
+      "unnecessary_investigation_confirmed": true,
+      "same_second_order_error_found": false,
+      "other_chronology_error_found": false
+    },
+    {
+      "case": 27,
+      "block_id": "blk_-2525721779588456824",
+      "reviewed": true,
+      "automatic_alerts": [
+        "evenement_atypique_non_reference_dans_resume_E28"
+      ],
+      "automatic_factual_errors": [],
+      "manual_findings": [
+        "E28 est absent du résumé alors qu’il figure dans les faits et les hypothèses. Les hypothèses reformulent les observations. La réplication est affirmée avec F09/F03, qui décrivent allocation et lecture."
+      ],
+      "network_hypothesis_without_specific_evidence": false,
+      "unnecessary_investigation_confirmed": false,
+      "same_second_order_error_found": false,
+      "other_chronology_error_found": false
+    },
+    {
+      "case": 28,
+      "block_id": "blk_5962596299735010625",
+      "reviewed": true,
+      "automatic_alerts": [
+        "enquete_demandee_sans_indice_incident"
+      ],
+      "automatic_factual_errors": [],
+      "manual_findings": [
+        "Demande d’enquête sans indice d’incident, malgré la consigne de liste vide pour ce cas."
+      ],
+      "network_hypothesis_without_specific_evidence": false,
+      "unnecessary_investigation_confirmed": true,
+      "same_second_order_error_found": false,
+      "other_chronology_error_found": false
+    },
+    {
+      "case": 29,
+      "block_id": "blk_5495200848998243328",
+      "reviewed": true,
+      "automatic_alerts": [],
+      "automatic_factual_errors": [],
+      "manual_findings": [
+        "Hypothèse réseau non étayée : les messages E4 indiquent seulement une exception de service, sans détail de cause.",
+        "T11 correspond à une exception E4, pas à une réception ou à une mise à jour de blockMap ; les autres références de la phrase en soutiennent néanmoins le contenu."
+      ],
+      "network_hypothesis_without_specific_evidence": true,
+      "unnecessary_investigation_confirmed": false,
+      "same_second_order_error_found": false,
+      "other_chronology_error_found": false
+    },
+    {
+      "case": 30,
+      "block_id": "blk_-8088126798866012916",
+      "reviewed": true,
+      "automatic_alerts": [
+        "enquete_demandee_sans_indice_incident"
+      ],
+      "automatic_factual_errors": [],
+      "manual_findings": [
+        "Demande d’enquête sans indice d’incident, malgré la consigne de liste vide pour ce cas."
+      ],
+      "network_hypothesis_without_specific_evidence": false,
+      "unnecessary_investigation_confirmed": true,
+      "same_second_order_error_found": false,
+      "other_chronology_error_found": false
+    },
+    {
+      "case": 31,
+      "block_id": "blk_3365693550135486376",
+      "reviewed": true,
+      "automatic_alerts": [
+        "conclusion_finale_a_verifier"
+      ],
+      "automatic_factual_errors": [],
+      "manual_findings": [
+        "Hypothèse réseau non étayée : les messages E4 indiquent seulement une exception de service, sans détail de cause.",
+        "« Des fichiers locaux ont été supprimés » affirme un achèvement que la seule journalisation E21/F08 ne confirme pas."
+      ],
+      "network_hypothesis_without_specific_evidence": true,
+      "unnecessary_investigation_confirmed": false,
+      "same_second_order_error_found": false,
+      "other_chronology_error_found": false
+    },
+    {
+      "case": 32,
+      "block_id": "blk_-182305440626057147",
+      "reviewed": true,
+      "automatic_alerts": [
+        "enquete_demandee_sans_indice_incident"
+      ],
+      "automatic_factual_errors": [],
+      "manual_findings": [
+        "Demande d’enquête sans indice d’incident, malgré la consigne de liste vide pour ce cas.",
+        "La demande d’investigation sur la fin ordinaire de PacketResponder subsiste."
+      ],
+      "network_hypothesis_without_specific_evidence": false,
+      "unnecessary_investigation_confirmed": true,
+      "same_second_order_error_found": false,
+      "other_chronology_error_found": false
+    },
+    {
+      "case": 33,
+      "block_id": "blk_-1988202877309867568",
+      "reviewed": true,
+      "automatic_alerts": [],
+      "automatic_factual_errors": [
+        "références inexistantes : F17"
+      ],
+      "manual_findings": [
+        "Hypothèse réseau non étayée : les messages E4 indiquent seulement une exception de service, sans détail de cause.",
+        "F17 est inventée dans le résumé ; la chronologie demande E23 puis journalisation E21 est en revanche compatible avec les traces."
+      ],
+      "network_hypothesis_without_specific_evidence": true,
+      "unnecessary_investigation_confirmed": false,
+      "same_second_order_error_found": false,
+      "other_chronology_error_found": false
+    },
+    {
+      "case": 34,
+      "block_id": "blk_9019908840879489840",
+      "reviewed": true,
+      "automatic_alerts": [
+        "enquete_demandee_sans_indice_incident"
+      ],
+      "automatic_factual_errors": [],
+      "manual_findings": [
+        "Demande d’enquête sans indice d’incident, malgré la consigne de liste vide pour ce cas.",
+        "L’allocation T01 à 07:47:42 précède les écritures T02/T03 à 07:47:43 ; aucune erreur d’ordre entre mêmes secondes ici."
+      ],
+      "network_hypothesis_without_specific_evidence": false,
+      "unnecessary_investigation_confirmed": true,
+      "same_second_order_error_found": false,
+      "other_chronology_error_found": false
+    },
+    {
+      "case": 35,
+      "block_id": "blk_8520721369739431294",
+      "reviewed": true,
+      "automatic_alerts": [],
+      "automatic_factual_errors": [],
+      "manual_findings": [
+        "La mise à jour de blockMap est citée avec F05/F06 (E11/E20), au lieu de F10/E26. La corruption de répliques supposée dans la seconde hypothèse n’est signalée ni par E23 ni par L01."
+      ],
+      "network_hypothesis_without_specific_evidence": false,
+      "unnecessary_investigation_confirmed": false,
+      "same_second_order_error_found": false,
+      "other_chronology_error_found": false
+    },
+    {
+      "case": 36,
+      "block_id": "blk_-5394320246293156794",
+      "reviewed": true,
+      "automatic_alerts": [
+        "enquete_demandee_sans_indice_incident",
+        "fin_PacketResponder_interpretee_comme_incident"
+      ],
+      "automatic_factual_errors": [],
+      "manual_findings": [
+        "Demande d’enquête sans indice d’incident, malgré la consigne de liste vide pour ce cas.",
+        "Faux positif de l’alerte PacketResponder : la réponse dit explicitement « ne signale pas d’interruption ou d’erreur ». La demande d’enquête inutile est en revanche confirmée."
+      ],
+      "network_hypothesis_without_specific_evidence": false,
+      "unnecessary_investigation_confirmed": true,
+      "same_second_order_error_found": false,
+      "other_chronology_error_found": false
+    },
+    {
+      "case": 37,
+      "block_id": "blk_6989377882518604195",
+      "reviewed": true,
+      "automatic_alerts": [],
+      "automatic_factual_errors": [],
+      "manual_findings": [
+        "Hypothèse réseau non étayée : les messages E4 indiquent seulement une exception de service, sans détail de cause.",
+        "Le caractère obsolète ou non nécessaire du bloc n’est pas indiqué par la seule demande E23."
+      ],
+      "network_hypothesis_without_specific_evidence": true,
+      "unnecessary_investigation_confirmed": false,
+      "same_second_order_error_found": false,
+      "other_chronology_error_found": false
+    },
+    {
+      "case": 38,
+      "block_id": "blk_7551395295149463319",
+      "reviewed": true,
+      "automatic_alerts": [
+        "enquete_demandee_sans_indice_incident"
+      ],
+      "automatic_factual_errors": [],
+      "manual_findings": [
+        "Demande d’enquête sans indice d’incident, malgré la consigne de liste vide pour ce cas.",
+        "Le mot « d’autres » DataNodes n’est pas justifié par F03/F04, qui comptent des occurrences sans établir cette relation entre machines."
+      ],
+      "network_hypothesis_without_specific_evidence": false,
+      "unnecessary_investigation_confirmed": true,
+      "same_second_order_error_found": false,
+      "other_chronology_error_found": false
+    },
+    {
+      "case": 39,
+      "block_id": "blk_-6431128224865365636",
+      "reviewed": true,
+      "automatic_alerts": [],
+      "automatic_factual_errors": [],
+      "manual_findings": [
+        "Hypothèse réseau non étayée : les messages E4 indiquent seulement une exception de service, sans détail de cause.",
+        "La politique de nettoyage proposée reste générique et non documentée."
+      ],
+      "network_hypothesis_without_specific_evidence": true,
+      "unnecessary_investigation_confirmed": false,
+      "same_second_order_error_found": false,
+      "other_chronology_error_found": false
+    },
+    {
+      "case": 40,
+      "block_id": "blk_3036603747764053369",
+      "reviewed": true,
+      "automatic_alerts": [],
+      "automatic_factual_errors": [],
+      "manual_findings": [
+        "Le résumé conserve l’exception de lecture du flux sans choisir une cause réseau ou matérielle. Les hypothèses reformulent toutefois surtout les faits."
+      ],
+      "network_hypothesis_without_specific_evidence": false,
+      "unnecessary_investigation_confirmed": false,
+      "same_second_order_error_found": false,
+      "other_chronology_error_found": false
+    }
+  ],
+  "limitations": [
+    "Comparaison descriptive avec v13 sur d'autres blocs ; pas de preuve causale de l'effet des deux changements.",
+    "Échantillon val du sample local, équilibré selon WARN ; ne représente pas la prévalence du corpus complet.",
+    "E24 absent du tirage, E27 présent dans un bloc et E28 dans trois ; ne pas conclure pour E24.",
+    "Un bloc contient six extraits sur quinze messages atypiques, après accord utilisateur ; les compteurs et la chronologie portent sur toutes ses lignes."
+  ],
+  "conclusion": {
+    "generalization": "Le format et la copie des faits se maintiennent, mais le gain global de qualité observé sur les anciens blocs n’est pas confirmé : enquêtes inutiles et hypothèses génériques sont fréquentes sur ces blocs inédits.",
+    "same_second_change": "Aucune erreur explicite d’ordre entre événements de même seconde relevée sur ces 40 réponses. Résultat encourageant, sans attribution causale possible aux nouveaux faits ; une autre erreur chronologique subsiste.",
+    "anchored_hypotheses_change": "Les 42 hypothèses ont une référence Lxx/Exx existante. Cela assure un ancrage formel, pas un appui sémantique : 16 réponses proposent notamment une cause réseau sans indice précis.",
+    "retry": "Aucune correction n’a été déclenchée. Son taux de réussite est non évaluable, pas de 100 %. Les références inventées des résumés restent hors du déclencheur prévu.",
+    "decision": "La v15 est un essai exploratoire complet ; elle ne constitue pas une amélioration globale validée par rapport à v13."
+  }
+}
