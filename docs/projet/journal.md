@@ -567,6 +567,14 @@ Usage IA : code de la porte et des tests écrit par Codex gpt-6.1-sol, puis revu
 Vérifié : 239 tests passent, essai `--mock` sur 5 blocs de validation (3 appels chacun), split test refusé. Aucune donnée test consultée. Mesure avec Gemma sur 5 blocs de validation à faire (machine de Nassim ou Kaggle).
 Usage IA : code Codex gpt-6.1-sol supervisé et relu par Claude ; relecture d'Alain à faire.
 
+## 2026-11-15 — SCRUM-43 : interface locale du volet B (Gradio)
+`volet_b/app/app.py`, lancé par `python -m volet_b.app.app` (option `--mock` sans modèle), écoute uniquement sur 127.0.0.1. On colle des logs ou on importe un fichier, puis on choisit 1 ou 3 agents et le modèle de base ou adapté. L'interface affiche le résumé, les faits, les hypothèses, les infos manquantes, les passages sources et le journal des étapes. Une réponse non conforme C5 ou rejetée est montrée en sortie brute avec ses erreurs, sans réparation. Tout bloc du split test fait refuser l'entrée avant appel au modèle ; 5 blocs maximum par analyse ; exemples tirés uniquement de la validation. Section « Lancer la démo » ajoutée au README du volet B.
+Vérifié : 250 tests passent ; démo `--mock` pilotée dans un navigateur sur un exemple de validation (3 appels, statut accepte). Démo avec Gemma sur la machine d'Alain à faire (critère de fin).
+Usage IA : code Codex gpt-6.1-sol supervisé et terminé par Claude ; relecture d'Alain à faire.
 ## 2026-11-16 — SCRUM-42 : correctif du contrôleur après la mesure Kaggle d'Alain
 Mesure réelle (Alain, `eval/results/SCRUM-42/kaggle_val5/`) : 1 bloc accepté sur 5, alors que les 5 réponses étaient conformes à C5 ; le contrôleur ne voyait pas le contrat et reprochait surtout des sources vides. Correctif : `checker.txt` rappelle les règles du contrat (sélection de 2 à 5 faits, hypothèses et sources facultatives) et ne demande une correction que pour une affirmation précise non appuyée, en citant la référence. Garde de contexte ajoutée à la recherche et au contrôle : on retire des passages avant l'appel ; sans place pour le contrôle, aucun appel et la réponse n'est pas acceptée (`non_controle`). Métriques : `abstentions_effectives` ajouté, `answers_with_sources` limité aux réponses acceptées. 243 tests passent ; à remesurer sur les 5 mêmes blocs de validation.
 Usage IA : correctif écrit et testé par Claude, d'après l'analyse d'Alain.
+
+## 2026-11-24 — SCRUM-49 : retour d'expérience de Linda
+`docs/rapport/retour_experience/linda.md` : rôle, axes techniques et collectifs, ce que je ferais autrement, avec les tickets et fichiers qui servent de preuves.
+Usage IA : brouillon rédigé par Claude à partir des réponses de Linda et des faits du dépôt, puis relu et corrigé par Linda (passages retirés ou reformulés à sa demande).
