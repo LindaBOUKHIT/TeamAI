@@ -2,6 +2,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
     selectRows,
+    searchRows,
+    sortRows,
     getWarnings,
     makeCsv,
 } from "../src/ui/results.js";
@@ -74,4 +76,20 @@ test("avertissements : signale bloc incomplet, troncature et inconnus", () => {
 test("CSV : un modèle factice ne reçoit pas de label normal", () => {
     const csv = makeCsv([{ ...normal, label: null }], metadata);
     assert.ok(csv.split("\r\n")[1].startsWith('"blk_1","","0.1"'));
+});
+test("recherche : filtre par identifiant sans tenir compte de la casse", () => {
+    const rows = [normal, anomaly];
+    assert.deepEqual(searchRows(rows, " BLK_2 "), [anomaly]);
+    assert.equal(searchRows(rows, "").length, 2);
+    assert.deepEqual(searchRows(rows, "absent"), []);
+});
+
+test("tri : score décroissant, identifiant ou ordre d'origine, sans modifier l'entrée", () => {
+    const third = { ...normal, blockId: "blk_0", score: 0.5 };
+    const rows = [normal, anomaly, third];
+    assert.deepEqual(sortRows(rows, "score-desc").map((r) => r.blockId), ["blk_2", "blk_0", "blk_1"]);
+    assert.deepEqual(sortRows(rows, "id").map((r) => r.blockId), ["blk_0", "blk_1", "blk_2"]);
+    assert.deepEqual(sortRows(rows, "order"), rows);
+    assert.notEqual(sortRows(rows, "order"), rows);
+    assert.deepEqual(rows.map((r) => r.blockId), ["blk_1", "blk_2", "blk_0"]);
 });
