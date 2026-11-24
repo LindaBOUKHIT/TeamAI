@@ -1,0 +1,10 @@
+"""Vérifie la démo SCRUM-43 avec le vrai modèle sur CPU, sur l'exemple de validation avec anomalie."""
+import time
+from volet_b.app import app
+
+anomaly, normal = app.choose_examples()
+print("exemple anomalie :", len(anomaly.splitlines()), "lignes ; normal :", len(normal.splitlines()), "lignes", flush=True)
+t = time.time()
+out = app.analyze(anomaly, configuration="3 agents", model="base", adapter="", mock=False)
+print(f"3 agents : {time.time() - t:.1f} s", flush=True)
+print(out[:3000], flush=True)

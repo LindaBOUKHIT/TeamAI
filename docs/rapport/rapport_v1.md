@@ -204,6 +204,29 @@ La référence et les paraphrases viennent de l’équipe. Les traces répètent
 
 L’organisation à **trois rôles**, recherche, rédaction et contrôle, est fusionnée dans `dev` le 24/11 (PR [#53](https://github.com/LindaBOUKHIT/TeamAI/pull/53)). Un run réel sur un GPU T4, le 16/11, sur 5 blocs de validation, donne **1 réponse acceptée sur 5**, **5/5** conformes au contrat C5 et **aucun passage cité**. Un correctif du contrôleur, mesuré le même jour sur les mêmes blocs, ne change pas ce résultat (`eval/results/SCRUM-42/kaggle_val5/` et `kaggle_val5_v2/`). Ces 5 blocs ne mesurent pas la qualité, et aucun gain n’est établi. Source pour les rôles et la planification : [V0.1](TeamAI_Rapport_SCRUM33_V0.1.pdf), section 2.6, et [feuille de route](../projet/feuille_de_route.md), sprint « Agents & évaluation ».
 
+#### Interface locale — SCRUM-43
+
+La démo Gradio permet de coller des logs ou d’importer un fichier `.log` ou `.txt`. Source : [README, « Lancer la démo »](../../volet_b/README.md#lancer-la-démo).
+Elle propose **1 ou 3 agents**, le modèle de base ou adapté, et un mode factice signalé à l’écran. Source : [README, « Lancer la démo »](../../volet_b/README.md#lancer-la-démo).
+L’affichage présente le résumé, les faits, les hypothèses, les informations manquantes et les sources. Source : [interface](../../volet_b/app/app.py).
+Il présente aussi le journal des étapes et le temps d’exécution. Source : [interface](../../volet_b/app/app.py).
+La réponse structurée est affichée seulement si `validate_answer` ne renvoie aucune erreur ; sinon, la sortie brute et les erreurs restent visibles. Source : [interface](../../volet_b/app/app.py).
+Tout bloc du split test fait refuser l’entrée avant tout appel au modèle. Source : [README, « Lancer la démo »](../../volet_b/README.md#lancer-la-démo).
+Sans `data/splits/splits.csv`, tout bloc absent de l’échantillon est refusé. Source : [interface](../../volet_b/app/app.py).
+Une analyse traite au maximum **5 blocs** ; l’interface écoute uniquement sur `127.0.0.1`, sans partage public. Source : [README, « Lancer la démo »](../../volet_b/README.md#lancer-la-démo).
+Cette interface est fusionnée par la PR [#54](https://github.com/LindaBOUKHIT/TeamAI/pull/54).
+
+#### Jeu d’adaptation annoté — SCRUM-36
+
+Le tirage stratifié retient **240 blocs train/val**, avec la seed **36**. Source : [`make_lots.py`, PR brouillon #64](https://github.com/LindaBOUKHIT/TeamAI/pull/64/files).
+Les blocs déjà vus sont exclus du tirage. Source : [`make_lots.py`, PR brouillon #64](https://github.com/LindaBOUKHIT/TeamAI/pull/64/files).
+Le jeu est réparti en **4 lots de 60**, chacun avec **50 blocs train et 10 val**. Source : PR brouillon [#64](https://github.com/LindaBOUKHIT/TeamAI/pull/64).
+Les brouillons sont rédigés par l’IA, puis contrôlés par `check_lots` selon les règles v16. Source : [`check_lots.py`, PR brouillon #64](https://github.com/LindaBOUKHIT/TeamAI/pull/64/files).
+Une correction humaine est prévue pour chaque lot. Source : PR brouillon [#64](https://github.com/LindaBOUKHIT/TeamAI/pull/64).
+Elle est suivie d’une relecture croisée. Source : PR brouillon [#64](https://github.com/LindaBOUKHIT/TeamAI/pull/64).
+Au **24/11**, le lot de Linda est corrigé : **56 ok et 4 corrigés**. Source : PR brouillon [#64](https://github.com/LindaBOUKHIT/TeamAI/pull/64).
+Les **trois autres lots** sont en cours ; le travail reste dans la PR brouillon [#64](https://github.com/LindaBOUKHIT/TeamAI/pull/64). Source : PR brouillon [#64](https://github.com/LindaBOUKHIT/TeamAI/pull/64).
+
 #### Défauts observés — SCRUM-46
 
 Les comptes ci-dessous portent sur **40 nouveaux blocs de validation**, issus de `data/sample`, après exclusion des blocs déjà connus. Ils concernent la v16 sans RAG et sans adaptation LoRA évaluée. Les défauts peuvent se recouper ; leurs fréquences ne s’additionnent pas. Sources : défauts et feuille de route, sections 1 et 2 (fusionné, PR [#41](https://github.com/LindaBOUKHIT/TeamAI/pull/41)) et trace SCRUM-63, validation unique (fusionné, PR [#40](https://github.com/LindaBOUKHIT/TeamAI/pull/40)).
@@ -387,7 +410,35 @@ Les difficultés techniques ont conduit à revoir le matériel cible et la chaî
 
 #### À rédiger par Bachar Ben Slama (SCRUM-49)
 
-#### À rédiger par Linda Boukhit (SCRUM-49)
+#### Linda Boukhit : retour individuel (SCRUM-49)
+
+Source : [retour_experience/linda.md](retour_experience/linda.md) (fusionné, PR [#61](https://github.com/LindaBOUKHIT/TeamAI/pull/61)).
+
+##### Mon rôle
+
+J'étais la **pilote** de l'équipe : j'ai organisé le projet dans Jira (sprints, tickets, échéances), mis en place le classeur de suivi et le journal d'usage de l'IA (SCRUM-14), préparé les preuves de mi-parcours (SCRUM-17) et relu environ 30 pull requests de l'équipe. Côté technique, j'ai travaillé sur le **volet B** : le corpus documentaire (SCRUM-30), le RAG (SCRUM-37), l'orchestration à 3 agents (SCRUM-42) et l'interface de démonstration (SCRUM-43). J'ai aussi écrit le prétraitement JavaScript du site du volet A (SCRUM-26).
+
+##### Ce que j'ai appris techniquement
+
+- **Le prétraitement des données.** Transformer des lignes de logs en événements E1 à E29 m'a montré qu'un détail compte : le site devait donner exactement le même résultat que Python. Les tests de parité (2 000 blocs sur 2 000 identiques) m'ont appris à **prouver** que deux programmes font la même chose, au lieu de le supposer.
+- **Le fonctionnement d'un RAG.** J'ai compris toute la chaîne : découper une documentation, transformer les passages en vecteurs, chercher par le sens et par les mots-clés, puis donner les passages au modèle. Surtout, j'ai appris qu'il faut **mesurer avant de décider** : j'avais prévu un seuil de pertinence, mais les mesures sur la validation ont montré qu'il retirerait autant de bons passages que de mauvais. Je l'ai donc abandonné et documenté (`eval/results/SCRUM-37/retrieval_val.json`).
+- **Les limites d'un RAG.** La documentation HDFS explique le fonctionnement normal, pas les pannes (`docs/volet_b/corpus_rag.md`). Un RAG ne vaut que ce que vaut son corpus.
+- **L'organisation en agents.** Découper le travail entre une recherche, une rédaction et un contrôle, avec une limite d'appels. La première mesure réelle (`eval/results/SCRUM-42/kaggle_val5/`) a montré que le contrôleur rejetait de bonnes réponses parce qu'il ne connaissait pas les règles : un agent doit recevoir le même contrat que celui qu'il contrôle.
+
+**Ce qui me manque encore :** je dois approfondir l'**évaluation des modèles de langage**. Je sais construire une chaîne RAG et mesurer la recherche, mais juger si une explication générée est vraiment juste reste difficile : il faut une relecture humaine, et je veux apprendre des méthodes plus solides pour le faire.
+
+##### Ce que j'ai appris en équipe
+
+- **Organiser un projet à quatre.** La règle « un ticket, une branche, une PR, une relecture » nous a évité beaucoup d'erreurs, et les contrats C1 à C7 (`docs/contrats.md`) ont permis à chacun d'avancer sans attendre les autres.
+- **Oser dire que je n'ai pas compris.** Au milieu du projet, je me suis rendu compte que je ne comprenais plus bien ce que faisait l'équipe sur le volet B. J'ai pris le temps de tout me faire réexpliquer (le projet, les codes d'événements, le RAG) avant de continuer. Ça m'a permis de mieux piloter ensuite.
+- **Les délais.** Plusieurs de mes tickets ont pris du retard (SCRUM-42 et SCRUM-43, prévus pour le 9 et le 13/11) parce qu'ils dépendaient du passage à Gemma. J'aurais dû **relancer plus tôt** et réajuster le planning dans Jira au lieu de laisser les échéances dépasser.
+- **Déléguer et utiliser l'IA.** J'ai appris à confier des tâches, à l'équipe comme à des outils d'IA, tout en gardant la responsabilité de vérifier (`docs/projet/journal.md`). Par exemple, une relecture automatique a classé un problème comme « bloquant » alors qu'il était mineur : il faut toujours vérifier avant de conclure.
+
+##### Ce que je ferais autrement
+
+- Tenir les **sprints Jira à jour** chaque semaine : fermer les sprints, déplacer les tickets en retard.
+- **Relancer plus tôt** quand une tâche bloque les autres.
+- Garder plus de **temps pour coder moi-même**, pas seulement organiser et vérifier.
 
 #### Nassim Mezzai : Retour individuel (SCRUM-49)
 
