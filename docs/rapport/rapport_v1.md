@@ -302,19 +302,19 @@ Sources : [contrats C5/C7](../contrats.md), [grille d'annotation](../volet_b/gri
 
 ## 4. Analyse comparative
 
-Rédaction : Alain. Cette section synthétise la comparaison SCRUM-47 ([comparaison_a_b.md](../../eval/results/comparaison_a_b.md), en relecture, PR [#47](https://github.com/LindaBOUKHIT/TeamAI/pull/47)), dans son état au 13/11/2026. Chaque chiffre y est rattaché à sa source.
+Rédaction : Alain. Cette section synthétise la comparaison SCRUM-47 ([comparaison_a_b.md](../../eval/results/comparaison_a_b.md), en relecture, PR [#47](https://github.com/LindaBOUKHIT/TeamAI/pull/47)), dans son état au 24/11/2026. Chaque chiffre y est rattaché à sa source.
 
 ### 4.1 Deux tâches différentes
 
 Le volet A détecte : il classe chaque bloc comme normal ou anormal. Le volet B explique : il résume un bloc, cite des faits, formule au besoin des hypothèses ou s'abstient. Une macro-F1 de détection et une qualité d'explication ne se comparent donc pas directement. La comparaison porte sur les axes du sujet : qualité dans sa propre tâche, latence, mémoire, coût, degré de contrôle, explicabilité, dépendance et reproductibilité.
 
-Les mesures n'ont pas le même statut. Les chiffres de test de A viennent de SCRUM-44, encore en relecture (PR [#50](https://github.com/LindaBOUKHIT/TeamAI/pull/50)). Ceux de B portent sur la **validation uniquement** : le test réservé du volet B est en cours de constitution (SCRUM-35) et sera mesuré dans SCRUM-45.
+Les mesures n'ont pas le même statut. Les chiffres de test de A viennent de SCRUM-44, fusionné le 16/11 (PR [#50](https://github.com/LindaBOUKHIT/TeamAI/pull/50)). Ceux de B portent sur la **validation uniquement** : le test réservé du volet B est en cours de constitution (SCRUM-35) et sera mesuré dans SCRUM-45.
 
 ### 4.2 Ce que montrent les mesures disponibles
 
 | Axe | Volet A — BiLSTM, ONNX, navigateur | Volet B — Gemma 4 E4B QAT, prompt v16 | Statut |
 |---|---|---|---|
-| Qualité | Test officiel, BiLSTM FP32 : macro-F1 **0,9938**, **58** fausses alertes et **3** anomalies manquées sur 86 260 blocs ; **0,9714** sur les 1 962 blocs à séquence inédite. INT8 identique. | 40 blocs de validation : **40/40** réponses conformes au contrat, **39/40** contrôles factuels passés. La relecture relève **2/40** chronologies fausses, **3/40** causalités non démontrées, **3/40** pseudo-références et **1/40** résumé en boucle. | A : test en relecture ; B : validation |
+| Qualité | Test officiel, BiLSTM FP32 : macro-F1 **0,9938**, **58** fausses alertes et **3** anomalies manquées sur 86 260 blocs ; **0,9714** sur les 1 962 blocs à séquence inédite. INT8 identique ; le site sert le FP32 (SCRUM-40). | 40 blocs de validation : **40/40** réponses conformes au contrat, **39/40** contrôles factuels passés. La relecture relève **2/40** chronologies fausses, **3/40** causalités non démontrées, **3/40** pseudo-références et **1/40** résumé en boucle. | A : test ; B : validation |
 | Latence | **6 198,58** blocs/s sous Chrome WASM (FP32), boucle JavaScript comprise. | **30,624 s** par bloc, correction comprise, sur T4 Kaggle avec llama.cpp, sans LoRA ni RAG. | Protocoles et machines différents |
 | Mémoire | Modèle de **56 806** octets (FP32) et **22 570** octets (INT8). RAM du navigateur non relevée. | RAM et VRAM d'inférence non relevées. Le pic de 10,24 Gio de l'essai LoRA concerne l'entraînement. | Incomplet des deux côtés |
 | Coût | Non mesuré. | Non mesuré. | À mesurer |
@@ -328,6 +328,8 @@ Sources : [comparaison SCRUM-47](../../eval/results/comparaison_a_b.md), section
 ### 4.3 Lecture provisoire
 
 D'après ces mesures, A est rapide, léger et précis pour détecter. En revanche, il ne dit pas ce qui s'est passé. B produit un texte lisible et structuré, mais à un coût de calcul bien plus élevé, et avec des erreurs de fidélité qu'une conformité au format ne révèle pas. Les deux volets paraissent donc complémentaires : A signale les blocs suspects, B aide à les lire. Cette lecture reste à confirmer sur le test (SCRUM-45). Une porte de décision expérimentée en zéro-shot ajoutée à B (Laya, SCRUM-58) n'a apporté aucun signal sur la validation (AUC 0,47) et n'a pas été retenue (PR [#52](https://github.com/LindaBOUKHIT/TeamAI/pull/52)).
+
+**Perspective : enchaîner A puis B.** Les deux volets ne sont pas combinés dans ce projet : aucune partie de B ne lit le score de A, et chaque volet est évalué seul. Un enchaînement serait pourtant le mode d'emploi naturel. A trierait tous les blocs, puis B n'expliquerait que ceux que A signale. Sur le test, A signale **2 581** blocs (2 523 anomalies détectées et 58 fausses alertes), soit 3,0 % des 86 260 blocs ([volet_a.md](../../eval/results/volet_a.md)). Au rythme mesuré pour B sur la validation (30,6 s par bloc sur T4), expliquer tout le test demanderait environ **734 heures** de GPU, contre environ **22 heures** pour les seuls blocs signalés. Ces ordres de grandeur sont calculés, pas mesurés. Deux précautions s'imposeraient : ne pas transmettre le verdict de A à B, pour qu'il ne justifie pas une décision au lieu de lire la trace, et évaluer la chaîne combinée comme un troisième système, sans réutiliser les mesures de A et B pris séparément.
 
 ### 4.4 Limites
 
@@ -463,7 +465,7 @@ Les perspectives suivantes sont des propositions de la feuille de route des déf
 
 ## Annexe — Sources internes
 
-Les sources marquées « en relecture » viennent de PR non fusionnées dans `dev` au 13/11 ; « fusionné » renvoie à la PR qui les a intégrées.
+Les sources marquées « en relecture » viennent de PR non fusionnées dans `dev` au 24/11 ; « fusionné » renvoie à la PR qui les a intégrées.
 
 | Source | Usage dans le rapport | État documentaire |
 |---|---|---|
@@ -485,8 +487,10 @@ Les sources marquées « en relecture » viennent de PR non fusionnées dans `de
 | `docs/projet/journal.md` (entrées SCRUM-29) | Réglages LoRA, essai T4 et réserve SCRUM-61 | Dev (fusionné, PR [#23](https://github.com/LindaBOUKHIT/TeamAI/pull/23)) |
 | `docs/volet_b/defauts_feuille_de_route.md` | Comptes n/40 et perspectives P0–P3 | Dev (fusionné, PR [#41](https://github.com/LindaBOUKHIT/TeamAI/pull/41)) |
 | `eval/results/comparaison_a_b.md` | Synthèse comparative SCRUM-47 | En relecture, PR [#47](https://github.com/LindaBOUKHIT/TeamAI/pull/47) |
-| `eval/results/volet_a.md` | Test officiel du volet A, SCRUM-44 | En relecture, PR [#50](https://github.com/LindaBOUKHIT/TeamAI/pull/50) |
-| `eval/results/SCRUM-58/README.md` | Essai Laya sur la validation | En relecture, PR [#52](https://github.com/LindaBOUKHIT/TeamAI/pull/52) |
+| `eval/results/volet_a.md` | Test officiel du volet A, SCRUM-44 | Dev (fusionné, PR [#50](https://github.com/LindaBOUKHIT/TeamAI/pull/50)) |
+| `eval/results/SCRUM-58/README.md` | Essai Laya sur la validation | Dev (fusionné, PR [#52](https://github.com/LindaBOUKHIT/TeamAI/pull/52)) |
+| `eval/results/SCRUM-42/kaggle_val5/` et `kaggle_val5_v2/` | Runs réels à 3 agents sur 5 blocs de validation | En relecture, PR [#53](https://github.com/LindaBOUKHIT/TeamAI/pull/53) |
+| `docs/volet_a/optimisation.md` | Modèle servi (FP32) et candidat INT8, SCRUM-40 | Dev (fusionné, PR [#56](https://github.com/LindaBOUKHIT/TeamAI/pull/56)) |
 | `docs/rapport/outils/codex_claude.md` | Fiche d’outil SCRUM-34 | Dev (fusionné, PR [#46](https://github.com/LindaBOUKHIT/TeamAI/pull/46)) |
 | `docs/rapport/outils/kaggle_mcp.md` | Fiche d’outil SCRUM-34 | Dev (fusionné, PR [#45](https://github.com/LindaBOUKHIT/TeamAI/pull/45)) |
 | `docs/rapport/outils/llama_cpp.md` | Fiche d’outil SCRUM-34 | Dev (fusionné, PR [#43](https://github.com/LindaBOUKHIT/TeamAI/pull/43)) |
