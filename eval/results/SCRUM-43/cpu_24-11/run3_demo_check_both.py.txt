@@ -1,0 +1,9 @@
+import time
+from volet_b.app import app
+anomaly, normal = app.choose_examples()
+print("anomalie :", len(anomaly.splitlines()), "lignes", flush=True)
+for conf in ("1 agent", "3 agents"):
+    t = time.time()
+    out = app.analyze(anomaly, configuration=conf, model="base", adapter="", mock=False)
+    print(f"=== {conf} : {time.time() - t:.1f} s", flush=True)
+    print(out[:2500], flush=True)
