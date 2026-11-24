@@ -576,8 +576,8 @@ Mesure réelle (Alain, `eval/results/SCRUM-42/kaggle_val5/`) : 1 bloc accepté s
 Usage IA : correctif écrit et testé par Claude, d'après l'analyse d'Alain.
 
 ## 2026-11-24 — SCRUM-49 : retour d'expérience de Linda
-`docs/rapport/retour_experience/linda.md` : rôle, axes techniques et collectifs, ce que je ferais autrement, avec les tickets et fichiers qui servent de preuves.
-Usage IA : brouillon rédigé par Claude à partir des réponses de Linda et des faits du dépôt, puis relu et corrigé par Linda (passages retirés ou reformulés à sa demande).
+Retour d'expérience.
+Usage IA : Claude.
 
 ## 2026-11-24 — SCRUM-52 : supports de soutenance (pitch 4 min, présentation 8 min)
 `docs/soutenance/pitch/` (6 slides) et `docs/soutenance/presentation/` (12 slides), repris du style du support d'avancement ; PDF exportés avec Chrome (`pitch.pdf`, `presentation.pdf`). Sources de chaque chiffre en tête des `index.html` ; aucun chiffre du test du volet B, aucune mesure non archivée.
