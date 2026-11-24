@@ -86,7 +86,7 @@ Cette répartition est issue du cadrage initial et de la feuille de route ; elle
 | Mi-parcours | 01/10/2026 | Version minimale du volet A et première inférence locale. |
 | J3 | 16/10/2026 | Volet A fonctionnel, adaptation engagée, supports préparés, rapport commencé. |
 | Rapport V1 (interne) | Fin novembre 2026 | Consolidation du PDF et des expériences. |
-| J4 — soutenance | 07/12/2026 | Présentation et démonstration des deux volets. |
+| J4 — soutenance | 30/11/2026 | Présentation et démonstration des deux volets. |
 
 Le jalon de mi-parcours a été déclaré non tenu dans la feuille de route du 6 octobre. Un sprint de rattrapage a donc été planifié. Cette situation doit être décrite sans confondre les objectifs initiaux avec les livrables effectivement disponibles.
 
