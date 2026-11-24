@@ -41,6 +41,7 @@ body { margin: 0; }
 h2 { font-size: 17pt; color: #1e3a8a; margin: 0 0 4mm; padding-bottom: 2mm; border-bottom: 1.5px solid #c7d2fe; break-before: page; }
 h3 { font-size: 13pt; color: #1f2937; margin: 7mm 0 2mm; break-after: avoid; }
 h4 { font-size: 11pt; color: #1f2937; margin: 5mm 0 1.5mm; break-after: avoid; }
+h5 { font-size: 10.5pt; color: #374151; margin: 4mm 0 1mm; break-after: avoid; }
 p, li { text-align: left; orphans: 3; widows: 3; }
 a { color: #1d4ed8; text-decoration: none; }
 code { font: 8.8pt Consolas, "Cascadia Mono", monospace; background: #f3f4f6; padding: 0 2px; border-radius: 3px; overflow-wrap: anywhere; }
