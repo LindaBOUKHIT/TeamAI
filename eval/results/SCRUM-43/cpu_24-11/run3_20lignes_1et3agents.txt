@@ -1,0 +1,73 @@
+anomalie : 20 lignes
+=== 1 agent : 397.6 s
+Démo locale. Les explications sont générées et peuvent être fausses ; vérifiez les lignes citées.
+
+## Bloc blk&#95;8490580439615020929
+
+Statut : rejete · Nombre d'appels : 1
+
+Temps total : 384.84 s
+
+### Sortie brute
+
+````text
+```json
+{
+  "resume_evenements": "Le NameNode a alloué un bloc de données (blk_8490580439615020929) pour le chemin /user/root/sortrand/_temporary/_task_200811092030_0002_r_000042_0/part-00042. Les DataNodes ont commencé à recevoir ce bloc depuis plusieurs sources (10.251.123.1, 10.251.203.166, 10.251.198.33). Une fois les données reçues, le NameNode a mis à jour les cartes de blocs pour enregistrer les DataNodes hôtes. Ensuite, le bloc a été marqué comme invalide pour les DataNodes concernés. Finalement, le système a tenté de supprimer ce bloc de plusieurs emplacements de fichiers sur le DataNode, rencontrant une erreur inattendue lors de la suppression.",
+  "faits_observes": [
+    "081109 234823 32 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/sortrand/_temporary/_task_200811092030_0002_r_000042_0/part-00042. blk_8490580439615020929",
+    "081109 234823 4133 INFO dfs.DataNode$DataXceiver: Receiving block blk_8490580439615020929 src: /10.251.123.1:50841 dest: /10.251.123.1:50010",
+    "081109 234823 4281 INFO dfs.DataNode$DataXceiver: Receiving block blk_8490580439615020929 src: /10.251.123.1:50349 dest: /10.251.123.1:50010",
+    "081109 234823 4342 INFO dfs.DataNode$DataXceiver: Receiving block blk_8490580439615020929 src: /10.251.203.166:55013 dest: /10.251.203.166:50010",
+    "081109 234850 27 INFO dfs.FSNamesystem: BLOCK* NameSystem.addStoredBlock: blockMap updated: 10.251.123.1:50010 is added to blk_8490580439615020929 size 67108864",
+    "081109 234850 30 INFO dfs.FSNamesystem: BLOCK* NameSystem.addStoredBlock: blockMap updated: 10.251.198.33:50010
+````
+
+### Erreurs
+
+- invalid&#95;json : aucun objet JSON dans la sortie
+
+- la réponse doit être un objet JSON, reçu NoneType
+
+- statut de l'enregistrement : rejete
+
+### Journal des étapes
+
+| Agent | Tentative | Verdict | Erreurs | Secondes |
+| --- | --- | --- | --- | --- |
+| single&#95;agent | 1 | rejete | &#91;'invalid&#95;json : aucun objet JSON dans la sortie'&#93; | 381&#46;42 |
+=== 3 agents : 1519.7 s
+Démo locale. Les explications sont générées et peuvent être fausses ; vérifiez les lignes citées.
+
+## Bloc blk&#95;8490580439615020929
+
+Statut : rejete · Nombre d'appels : 5
+
+Temps total : 1519.73 s
+
+### Sortie brute
+
+```text
+{ "resume_evenements": "Des opérations d'écriture et de réplication de blocs ont été observées, incluant l'allocation de blocs par le NameNode [F08] et la réception de réplicas par les DataNodes [F04]. Des événements de suppression ont été enregistrés, notamment une demande de suppression d'un réplica introuvable [F06], qui est corrélé à une erreur de suppression signalant l'absence d'entrée BlockInfo dans volumeMap [L01].", "faits_observes": [ "[F02] Nombre total de lignes WARN : 1.", "[F06] E20 : 1 occurrence(s) ; suppression demandée d'un réplica introuvable sur le DataNode.", "[F07] E21 : 3 occurrence(s) ; le DataNode journalise la suppression du fichier local du bloc (Deleting block file) ; ce message ne confirme pas à lui seul son achèvement ni la suppression de toutes les copies.", "[F13] 2008-11-10 10:31:28 — même seconde : E23, E23, E23 ; ordre non déterminable."], "hypotheses": [], "infos_manquantes": [ "Quelles sont les circonstances exactes de l'erreur de suppression signalée par L01, au-delà de l'absence de BlockInfo dans volumeMap ?", "Quel est l'état final de la suppression du bloc après les événements E21 et E23 ?", "Le message E20 est-il une demande initiée par le NameNode ou par un DataNode ?" ], "sources": [ ], "abstention": false }
+```
+
+### Erreurs
+
+- Le résumé affirme que la demande de suppression &#91;F06&#93; est corrélée à l'erreur &#91;L01&#93;, mais la documentation ne fournit pas de lien direct entre E20 et L01, seulement que E20 est une suppression demandée d'un réplica introuvable &#91;F06&#93;&#46;
+
+- Le résumé mentionne l'allocation de blocs par le NameNode &#91;F08&#93; et la réception de réplicas &#91;F04&#93;, mais ne mentionne pas le contexte de l'écriture &#40;staging/pipelining&#41; décrit dans la documentation&#46;
+
+- Le résumé ne mentionne pas les événements d'écriture observés &#40;E5, E9, E11&#41; qui sont pertinents pour le contexte de réplication&#46;
+
+- statut de l'enregistrement : rejete
+
+### Journal des étapes
+
+| Agent | Tentative | Verdict | Erreurs | Secondes |
+| --- | --- | --- | --- | --- |
+| search | 1 | — | &#91;&#93; | 119&#46;85973210000066 |
+| writer | 1 | — | &#91;&#93; | 339&#46;7391244999999 |
+| checker | 1 | corriger | &#91;&#93; | 291&#46;67308589999993 |
+| writer | 2 | — | &
+
+[exited with code 0]

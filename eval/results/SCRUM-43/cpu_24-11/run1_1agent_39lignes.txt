@@ -1,0 +1,19 @@
+exemple anomalie : 39 lignes ; normal : 25 lignes
+1 agent : 19.8 s
+Démo locale. Les explications sont générées et peuvent être fausses ; vérifiez les lignes citées.
+## Bloc blk&#95;7956543127401791181
+Statut : erreur · Nombre d'appels : None
+Temps total : 6.20 s
+### Sortie brute
+```text
+```
+### Erreurs
+- Analyse impossible : Requested tokens &#40;4329&#41; exceed context window of 4096
+- Nombre d&&#35;x27;appels non mesuré en cas d&&#35;x27;exception&#46;
+- la réponse doit être un objet JSON, reçu NoneType
+- statut de l&&#35;x27;enregistrement : erreur
+### Journal des étapes
+| Agent | Tentative | Verdict | Erreurs | Secondes |
+| --- | --- | --- | --- | --- |
+
+[exited with code 0]

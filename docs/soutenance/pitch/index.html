@@ -1,0 +1,92 @@
+<!doctype html>
+<!-- SCRUM-52 — Pitch, 4 minutes. Sources des chiffres (arrondis à l'affichage) :
+ data/splits/splits_meta.json : 575 061 blocs ; somme des anomalies / total = 2,93 %.
+ docs/rapport/rapport_v1.md, section 3 : E1 à E29, architecture et déploiement A.
+ eval/results/volet_a.md, Metriques : macro-F1 FP32 test complet 0,993846 → 0,994 ;
+ Metriques : macro-F1 FP32 unseen_seq 0,971354 → 0,971.
+ Parite navigateur : 6 198,58 → 6 199 blocs/s Chrome WASM, boucle JavaScript comprise ;
+ machine non relevée dans le résumé, ce débit ne mesure pas le parcours complet.
+ eval/results/SCRUM-63/README.md : v16 et garde-fous ;
+ eval/results/SCRUM-42/kaggle_val5_v2/README.md : trois agents, validation uniquement.
+ Style, navigation, logos et exemple de logs : ../avancement/ (repris sans changement).
+ Les durées ci-dessous sont des repères de prise de parole, pas des mesures. -->
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TeamAI — Pitch · 4 min</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:ital,wght@0,400;0,500;0,700;1,400&family=Kalam:wght@400;700&family=Courier+Prime&display=block" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+  <filter id="rough"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="7"/><feDisplacementMap in="SourceGraphic" scale="5"/></filter>
+</svg>
+<!-- Repère oral : 25 s. -->
+<section class="slide cover">
+  <div class="logos">
+    <img src="logo_fges.png" alt="Faculté de Gestion, Économie et Sciences — Université Catholique de Lille">
+    <span class="logo-sep"></span>
+    <img src="logo_edn.png" alt="EDN — École du Numérique">
+  </div>
+  <div class="cover-left">
+    <p class="hand kicker">NLP 2 · M2 Data &amp; IA — soutenance · pitch</p>
+    <h1>Que nous disent<br>les logs <span class="hl">HDFS</span>&nbsp;?</h1>
+    <p class="lead">Repérer les blocs qui tournent mal, puis expliquer pourquoi&nbsp;: deux approches, une même équipe.</p>
+    <div class="byline">
+      <span class="team-mark">TeamAI</span>
+      <span class="names">Alain Evina · Nassim Mezzai · Bachar Ben Slama · Linda Boukhit</span>
+      <span class="teacher">Enseignant&nbsp;: <b>Adrian Rosari</b></span>
+    </div>
+  </div>
+  <div class="cover-right">
+    <div class="printout">
+      <span class="tape" style="top:-22px;left:38%;transform:rotate(-4deg)"></span>
+      <p class="printout-title">HDFS.log — un bloc, quatre lignes</p>
+      <ol class="log"><li class=""><span class="ln">1</span><code>081110 010451 33 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/randtxt/_temporary/_task_200811092030_0003_m_000269_0/part-00269. blk_-1013481023655112960</code></li>
+<li class=""><span class="ln">2</span><code>081110 010451 5105 INFO dfs.DataNode$DataXceiver: Receiving block blk_-1013481023655112960 src: /10.251.74.134:45275 dest: /10.251.74.134:50010</code></li>
+<li class=""><span class="ln">3</span><code>081110 010451 5109 INFO dfs.DataNode$DataXceiver: Receiving block blk_-1013481023655112960 src: /10.251.74.134:48604 dest: /10.251.74.134:50010</code></li>
+<li class="err"><span class="ln">4</span><code>081110 010454 5105 INFO dfs.DataNode$DataXceiver: writeBlock blk_-1013481023655112960 <mark>received exception java.io.IOException: Could not read from stream</mark></code></li></ol>
+    </div>
+    <p class="hand note-err">là, ça casse.<br>mais pourquoi&nbsp;?</p>
+  </div>
+</section>
+<!-- Repère oral : 45 s. -->
+<section class="slide problem">
+<p class="hand kicker">Le problème</p>
+<h2>Une alerte ne dit pas<br><span class="hl">pourquoi</span></h2>
+<div class="stats"><div class="stat"><span class="num">575 061</span><span class="cap">blocs HDFS annotés</span></div><div class="stat ringed"><span class="num">2,93 %</span><span class="cap">d’anomalies</span></div><div class="stat"><span class="num">?</span><span class="cap">Un label, sans explication</span></div></div><div class="sticky mustard"><p class="hand">Où regarder quand un bloc est suspect ?</p></div>
+<footer><span>TeamAI · Pitch · 4 min</span><span class="folio">2</span></footer>
+</section>
+<!-- Repère oral : 40 s. -->
+<section class="slide twoways">
+<p class="hand kicker">Les utilisateurs visés</p>
+<h2>Aider ceux qui surveillent un cluster</h2>
+<div class="spread"><article class="page-card left"><h3>Équipes d’exploitation</h3><ul><li>Repérer les blocs suspects dans un lot de logs.</li><li>Trier les alertes avant une enquête.</li></ul></article><div class="spine"><span class="hand">un même<br>besoin</span></div><article class="page-card right"><h3>Ingénieurs</h3><ul><li>Relire les faits et les messages du bloc.</li><li>Distinguer une preuve d’une hypothèse.</li></ul></article></div>
+<footer><span>TeamAI · Pitch · 4 min</span><span class="folio">3</span></footer>
+</section>
+<!-- Repère oral : 55 s. -->
+<section class="slide twoways">
+<p class="hand kicker">La solution livrée</p>
+<h2>Détecter, puis aider à comprendre</h2>
+<div class="spread"><article class="page-card left"><h3>A · Le site public</h3><ul><li>BiLSTM dans le navigateur, sans serveur.</li><li>Logs → classe et score.</li><li><b>https://lindaboukhit.github.io/TeamAI</b></li></ul></article><div class="spine"><span class="hand">deux<br>volets</span></div><article class="page-card right"><h3>B · La démo locale</h3><ul><li>Gemma et documentation HDFS.</li><li>Faits calculés, références contrôlées.</li><li>Hypothèses prudentes ou abstention.</li></ul></article></div>
+<footer><span>TeamAI · Pitch · 4 min</span><span class="folio">4</span></footer>
+</section>
+<!-- Repère oral : 45 s. -->
+<section class="slide problem">
+<p class="hand kicker">Trois chiffres clés · volet A</p>
+<h2>Un détecteur mesuré, utilisable sur le web</h2>
+<div class="stats"><div class="stat"><span class="num">0,994</span><span class="cap">macro-F1<br>sur le test officiel</span></div><div class="stat"><span class="num">0,971</span><span class="cap">macro-F1<br>sur les séquences inédites du test</span></div><div class="stat"><span class="num">6 199</span><span class="cap">blocs/s · Chrome WASM FP32<br><em>boucle JavaScript comprise</em></span></div></div><p class="foot-line">Détection A et explication B sont deux tâches distinctes. Débit ponctuel, pas une latence de bout en bout.</p>
+<footer><span>TeamAI · Pitch · 4 min</span><span class="folio">5</span></footer>
+</section>
+<!-- Repère oral : 30 s. -->
+<section class="slide next">
+<p class="hand kicker">Du support à l’usage</p>
+<h2>Place à la <span class="hl">démo</span></h2>
+<div class="spread"><article class="page-card left"><h3>Dans le navigateur</h3><ul><li>Charger des logs.</li><li>Lire les blocs signalés et leur score.</li></ul></article><div class="spine"><span class="hand">environ<br>4 min</span></div><article class="page-card right"><h3>En local · Gradio</h3><ul><li>Ouvrir une explication.</li><li>Vérifier ses faits, ses sources et ses limites.</li></ul></article></div>
+<footer><span>TeamAI · Pitch · 4 min</span><span class="folio">6</span></footer>
+</section>
+<script src="deck.js"></script>
+</body>
+</html>
