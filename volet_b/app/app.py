@@ -18,12 +18,17 @@ from volet_b.slm.v16.facts import prepare_block
 
 BANNER = "Démo locale. Les explications sont générées et peuvent être fausses ; vérifiez les lignes citées."
 LOCK = threading.Lock()
+DEMO_MAX_LINES = 20  # exemple de 39 lignes mesuré le 24/11 : 4329 tokens demandés pour 4096
 
 
 def safe(text):
-    """Échappe le HTML et la syntaxe Markdown provenant des données."""
+    """Échappe le HTML et la syntaxe Markdown provenant des données.
+
+    quote=False : html.escape changerait l'apostrophe en &#x27;, dont le « # » serait échappé
+    une seconde fois et s'afficherait tel quel (« l&&#35;x27;enregistrement »).
+    """
     return re.sub(r"[\\`*_{}\[\]()#+.!|>~-]", lambda m: f"&#{ord(m[0])};",
-                  html.escape(str(text))).replace("\n", " ")
+                  html.escape(str(text), quote=False)).replace("\n", " ")
 
 
 def render_block(record):
@@ -85,7 +90,11 @@ def refuse_unknown_blocks(block_ids, split):
 
 
 def choose_examples():
-    """Choisit deux blocs de validation uniquement, selon leur label d'échantillon."""
+    """Choisit deux blocs de validation uniquement, selon leur label d'échantillon.
+
+    Pour chaque label, le bloc retenu est le plus long qui tient en DEMO_MAX_LINES lignes
+    (le premier rencontré en cas d'égalité) : au-delà, le prompt v16 dépasse son plafond.
+    """
     if not (SAMPLE / "HDFS_sample.log").exists():
         return "", ""
     split = demo_split()
@@ -94,15 +103,15 @@ def choose_examples():
     with (SAMPLE / "Event_traces.csv").open(encoding="utf-8") as stream:
         for row in csv.DictReader(stream):
             bid, label = row["BlockId"], row["Label"]
-            if split.get(bid) != "val" or bid not in blocks or label in chosen:
+            if split.get(bid) != "val" or bid not in blocks or len(blocks[bid]) > DEMO_MAX_LINES:
+                continue
+            if label in chosen and len(chosen[label]) >= len(blocks[bid]):
                 continue
             # Une ligne partagée ne doit pas introduire un autre bloc réservé.
             referenced = single_agent.lines_by_block(blocks[bid])
             if all(split.get(b) == "val" for b in referenced):
-                chosen[label] = "\n".join(blocks[bid])
-            if "Fail" in chosen and "Success" in chosen:
-                break
-    return chosen.get("Fail", ""), chosen.get("Success", "")
+                chosen[label] = blocks[bid]
+    return "\n".join(chosen.get("Fail", [])), "\n".join(chosen.get("Success", []))
 
 
 @lru_cache(maxsize=2)

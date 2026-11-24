@@ -82,6 +82,7 @@ def test_examples_only_val():
     assert all(examples)
     for text in examples:
         assert all(app.demo_split().get(b) == "val" for b in app.single_agent.lines_by_block(text.splitlines()))
+        assert len(text.splitlines()) <= app.DEMO_MAX_LINES  # sinon le prompt v16 dépasse son plafond
 
 
 def test_mock_three_agents(monkeypatch):
