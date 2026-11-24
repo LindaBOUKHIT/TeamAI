@@ -49,7 +49,7 @@ Pas envie de télécharger 1,5 Go de logs ? `data/sample/` contient un échantil
 | Date | Jalon |
 |---|---|
 | 16/10/2026 | J3 — volet A fonctionnel, adaptation engagée, supports, rapport commencé |
-| 07/12/2026 | J4 — soutenance (site en ligne **avant** ce jour) |
+| 30/11/2026 | J4 — soutenance (site en ligne **avant** ce jour) |
 
 ## Données
 

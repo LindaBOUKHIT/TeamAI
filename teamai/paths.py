@@ -33,6 +33,7 @@ SLM_ADAPTERS = SLM / "adapters"
 ANNOTATIONS = VOLET_B / "annotations"
 
 DOCS = ROOT / "docs"
+RAPPORT = DOCS / "rapport"
 
 EVAL = ROOT / "eval"
 EVAL_VOLET_B = EVAL / "volet_b"

@@ -1,0 +1,34 @@
+exemple anomalie : 39 lignes ; normal : 25 lignes
+llama_kv_cache_iswa: using full-size SWA cache (ref: https://github.com/ggml-org/llama.cpp/pull/13194#issuecomment-2868343055)
+llama_kv_cache: the V embeddings have different sizes across layers and FA is not enabled - padding V cache to 1024
+llama_kv_cache: the V embeddings have different sizes across layers and FA is not enabled - padding V cache to 1024
+3 agents : 162.9 s
+Démo locale. Les explications sont générées et peuvent être fausses ; vérifiez les lignes citées.
+
+## Bloc blk&#95;7956543127401791181
+
+Statut : rejete · Nombre d'appels : 1
+
+Temps total : 136.80 s
+
+### Sortie brute
+
+```text
+
+```
+
+### Erreurs
+
+- ValueError: prompt supérieur au plafond v13 de 2900 tokens
+
+- la réponse doit être un objet JSON, reçu NoneType
+
+- statut de l&&#35;x27;enregistrement : rejete
+
+### Journal des étapes
+
+| Agent | Tentative | Verdict | Erreurs | Secondes |
+| --- | --- | --- | --- | --- |
+| search | 1 | — | &#91;&#93; | 132&#46;15403539999988 |
+
+[exited with code 0]
