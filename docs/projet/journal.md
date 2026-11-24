@@ -572,5 +572,5 @@ Mesure réelle (Alain, `eval/results/SCRUM-42/kaggle_val5/`) : 1 bloc accepté s
 Usage IA : correctif écrit et testé par Claude, d'après l'analyse d'Alain.
 
 ## 2026-11-24 — SCRUM-49 : retour d'expérience de Linda
-`docs/rapport/retour_experience/linda.md` : rôle, axes techniques et collectifs, ce que je ferais autrement, avec les tickets et fichiers qui servent de preuves.
-Usage IA : brouillon rédigé par Claude à partir des réponses de Linda et des faits du dépôt, puis relu et corrigé par Linda (passages retirés ou reformulés à sa demande).
+Retour d'expérience.
+Usage IA : Claude.
