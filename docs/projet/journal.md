@@ -579,6 +579,10 @@ Usage IA : correctif écrit et testé par Claude, d'après l'analyse d'Alain.
 `docs/rapport/retour_experience/linda.md` : rôle, axes techniques et collectifs, ce que je ferais autrement, avec les tickets et fichiers qui servent de preuves.
 Usage IA : brouillon rédigé par Claude à partir des réponses de Linda et des faits du dépôt, puis relu et corrigé par Linda (passages retirés ou reformulés à sa demande).
 
+## 2026-11-10 — SCRUM-36 : tirage des 240 blocs et brouillons des 4 lots
+`volet_b/slm/make_lots.py` : tirage stratifié (seed 36) de 240 blocs train/val, hors blocs déjà vus (seed SCRUM-29, mise au point v16) ; 4 lots de 60 (50 train + 10 val). `check_lots.py` applique les contrôles v16 (schéma, faits, références, ancrage des hypothèses, mots de chronologie, doublons) ; `fiche_lot.py` produit une fiche HTML de correction par annotateur.
+Usage IA : brouillons des 240 réponses rédigés par Codex (gpt-6.1-sol) à partir des prompts v16, contrôlés par `check_lots` (0 erreur) ; chaque lot doit être corrigé par un humain puis relu par un autre membre avant d'entrer dans le jeu LoRA.
+
 ## 2026-11-16 — SCRUM-36 : correction du lot de Linda (60 exemples)
 Pré-relecture des 60 brouillons par l'IA (Codex gpt-6.1-sol, contrôlée par Claude) : 56 jugés justes, 4 à corriger (001, 002, 006, 008 : la question supposait la « disparition » d'une entrée BlockInfo, alors que le log dit seulement qu'elle est introuvable). Verdicts pré-remplis par l'IA dans la fiche, puis vérifiés et téléchargés par Linda (`corrections_linda.jsonl`). Résultat : 56 ok, 4 corrigés, 0 rejet ; contrôles `check_lots` : 0 erreur. Relecture croisée humaine à faire (Alain).
 Usage IA : pré-relecture et pré-remplissage des verdicts par l'IA, vérification par Linda — à mentionner dans le taux de correction du README.
