@@ -1,0 +1,32 @@
+"""SCRUM-46 : décompte des blocs de validation selon leur nombre d'événements.
+
+Lancer depuis la racine : python - < eval/results/SCRUM-43/cpu_24-11/longueurs_val.py.txt
+Lit uniquement les blocs du split « val » ; le test n'est pas consulté.
+"""
+import hashlib
+import json
+
+import pandas as pd
+
+from teamai.paths import PREPROCESSED, SPLITS
+
+splits_csv = SPLITS / "splits.csv"
+splits = pd.read_csv(splits_csv)
+val = set(splits.loc[splits.split == "val", "BlockId"])
+traces = pd.read_csv(PREPROCESSED / "Event_traces.csv", usecols=["BlockId", "Label", "Features"])
+traces = traces[traces.BlockId.isin(val)]
+events = traces.Features.str.count(",") + 1
+anomaly = traces.Label == "Fail"
+
+result = {
+    "splits_csv_sha256": hashlib.sha256(splits_csv.read_bytes()).hexdigest(),
+    "n_val_blocks": int(len(traces)),
+    "n_val_anomalies": int(anomaly.sum()),
+    "median_events": float(events.median()),
+    "p90_events": float(events.quantile(0.9)),
+    "above": {
+        str(k): {"blocks": int((events > k).sum()), "anomalies": int(((events > k) & anomaly).sum())}
+        for k in (20, 30, 39, 50)
+    },
+}
+print(json.dumps(result, indent=2))
