@@ -570,3 +570,7 @@ Usage IA : code Codex gpt-6.1-sol supervisé et relu par Claude ; relecture d'Al
 ## 2026-11-16 — SCRUM-42 : correctif du contrôleur après la mesure Kaggle d'Alain
 Mesure réelle (Alain, `eval/results/SCRUM-42/kaggle_val5/`) : 1 bloc accepté sur 5, alors que les 5 réponses étaient conformes à C5 ; le contrôleur ne voyait pas le contrat et reprochait surtout des sources vides. Correctif : `checker.txt` rappelle les règles du contrat (sélection de 2 à 5 faits, hypothèses et sources facultatives) et ne demande une correction que pour une affirmation précise non appuyée, en citant la référence. Garde de contexte ajoutée à la recherche et au contrôle : on retire des passages avant l'appel ; sans place pour le contrôle, aucun appel et la réponse n'est pas acceptée (`non_controle`). Métriques : `abstentions_effectives` ajouté, `answers_with_sources` limité aux réponses acceptées. 243 tests passent ; à remesurer sur les 5 mêmes blocs de validation.
 Usage IA : correctif écrit et testé par Claude, d'après l'analyse d'Alain.
+
+## 2026-11-24 — SCRUM-49 : retour d'expérience de Linda
+`docs/rapport/retour_experience/linda.md` : rôle, axes techniques et collectifs, ce que je ferais autrement, avec les tickets et fichiers qui servent de preuves.
+Usage IA : brouillon rédigé par Claude à partir des réponses de Linda et des faits du dépôt, puis relu et corrigé par Linda (passages retirés ou reformulés à sa demande).
