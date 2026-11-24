@@ -4,175 +4,274 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>TeamAI — Analyse de logs HDFS</title>
-    <style>
-        body {
-            font-family: system-ui, sans-serif;
-            max-width: 1100px;
-            margin: 32px auto;
-            padding: 0 20px;
-            background: #f5f7fb;
-            color: #182235;
-        }
-
-        main {
-            background: white;
-            padding: 28px;
-            border-radius: 14px;
-        }
-
-        h2 {
-            margin-top: 28px;
-        }
-
-        textarea {
-            box-sizing: border-box;
-            width: 100%;
-            min-height: 220px;
-            padding: 12px;
-            font-family: monospace;
-        }
-
-        button,
-        select,
-        input[type="file"] {
-            max-width: 100%;
-            padding: 10px;
-            margin: 8px 0;
-        }
-
-        button {
-            cursor: pointer;
-        }
-
-        button:disabled {
-            cursor: wait;
-        }
-
-        .notice {
-            padding: 14px;
-            background: #fff2cc;
-            border-radius: 8px;
-        }
-
-        #message[data-error="true"] {
-            color: #a31515;
-            font-weight: bold;
-        }
-
-        .table-container {
-            overflow-x: auto;
-            margin-top: 16px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th,
-        td {
-            text-align: left;
-            padding: 10px;
-            border-bottom: 1px solid #dce2eb;
-        }
-
-        th {
-            background: #edf1f7;
-        }
-
-        td:first-child {
-            overflow-wrap: anywhere;
-        }
-
-        .anomaly {
-            background: #fff0ee;
-        }
-    </style>
+    <meta name="description"
+        content="Détection d'anomalies dans les logs HDFS, entièrement dans le navigateur (BiLSTM ONNX).">
+    <meta name="color-scheme" content="light dark">
+    <title>TeamAI — Détecteur HDFS</title>
+    <link rel="icon"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%233b5bfd'/%3E%3Cpath d='M6 19h5l3-8 4 12 3-7h5' fill='none' stroke='white' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+    <link rel="stylesheet" href="./src/style.css">
+    <script>
+        // Thème choisi avant le premier rendu, pour éviter un flash.
+        try {
+            const theme = localStorage.getItem("teamai-theme");
+            if (theme === "light" || theme === "dark") {
+                document.documentElement.dataset.theme = theme;
+            }
+        } catch { /* stockage indisponible : thème du système */ }
+    </script>
 </head>
 
 <body>
-    <main>
-        <h1>TeamAI — Analyse de logs HDFS</h1>
-        <p>
-            Analysez les événements regroupés par bloc HDFS.
-            Le traitement s’effectue dans votre navigateur :
-            vos logs ne sont pas envoyés à un serveur.
-        </p>
+    <a class="skip-link" href="#logs">Aller à la saisie des logs</a>
 
-        <p id="status" role="status">Chargement du modèle…</p>
-        <p id="warning" class="notice" hidden></p>
+    <header class="topbar">
+        <div class="topbar-inner">
+            <div class="brand">
+                <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
+                    <rect width="32" height="32" rx="8" />
+                    <path d="M6 19h5l3-8 4 12 3-7h5" />
+                </svg>
+                <div>
+                    <strong>TeamAI</strong>
+                    <span>Détecteur d'anomalies HDFS</span>
+                </div>
+            </div>
+            <div class="topbar-actions">
+                <p id="status" class="pill" data-state="loading" role="status">
+                    <span class="pill-dot" aria-hidden="true"></span>
+                    <span id="status-text">Chargement du modèle…</span>
+                </p>
+                <button id="theme" class="icon-button" type="button" aria-label="Changer de thème"
+                    title="Changer de thème">
+                    <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="12" cy="12" r="4" />
+                        <path
+                            d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+                    </svg>
+                    <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </header>
 
-        <section aria-labelledby="input-title">
-            <h2 id="input-title">1. Fournir des logs</h2>
-
-            <label for="logs">Collez vos lignes de logs HDFS :</label>
-            <textarea id="logs" spellcheck="false"
-                placeholder="Collez ici les lignes contenant des identifiants blk_…"></textarea>
-
-            <p>
-                <label for="file">Ou importez un fichier texte (.log ou .txt) :</label>
-                <input id="file" type="file" accept=".log,.txt,text/plain" disabled>
+    <main class="page">
+        <section class="hero" aria-labelledby="page-title">
+            <h1 id="page-title">Repérez les blocs HDFS suspects, sans que vos logs quittent votre machine.</h1>
+            <p class="lead">
+                Collez des lignes de logs HDFS, importez un fichier ou partez d'un exemple.
+                Un BiLSTM exécuté dans votre navigateur classe chaque bloc <code>blk_…</code> en normal ou anomalie.
             </p>
-
-            <label for="example">Exemple issu de la validation :</label>
-            <select id="example" disabled>
-                <option value="01_normal.log">Bloc normal</option>
-                <option value="02_anomalie.log">Bloc avec anomalie</option>
-                <option value="03_plusieurs_blocs.log">Plusieurs blocs</option>
-                <option value="04_bloc_incomplet.log">Extrait de bloc incomplet</option>
-                <option value="05_lignes_invalides.log">Lignes invalides</option>
-            </select>
-            <button id="load-example" type="button" disabled>
-                Essayer un exemple
-            </button>
-
-            <p id="source" role="status">Source : saisie libre.</p>
-            <button id="analyze" type="button" disabled>Analyser les logs</button>
+            <ul class="facts" aria-label="Caractéristiques">
+                <li><svg class="fact-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></svg> Traitement 100 % local, aucun envoi</li>
+                <li><svg class="fact-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="5" /><circle cx="12" cy="12" r="1" /></svg> Macro-F1 de 0,99 sur le test officiel</li>
+                <li><svg class="fact-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z" /></svg> Inférence ONNX dans un Web Worker</li>
+            </ul>
         </section>
 
-        <p id="message" role="status" aria-live="polite"></p>
+        <ol class="stepper" aria-label="Étapes">
+            <li data-step="input" data-state="current"><span>1</span> Fournir des logs</li>
+            <li data-step="analyze"><span>2</span> Analyser</li>
+            <li data-step="results"><span>3</span> Lire les résultats</li>
+        </ol>
 
-        <section aria-labelledby="results-title">
-            <h2 id="results-title">2. Résultats par bloc</h2>
+        <p id="warning" class="callout callout-danger" role="alert" hidden></p>
 
-            <p class="notice">
-                Un extrait peut ne contenir qu’une partie des événements d’un bloc.
-                La complétude ne peut pas être garantie à partir des seules lignes
-                fournies. Le score n’est pas une probabilité calibrée.
-            </p>
+        <div class="workspace">
+            <section class="card" aria-labelledby="input-title">
+                <div class="card-head">
+                    <h2 id="input-title"><span class="step-badge" aria-hidden="true">1</span> Fournir des logs</h2>
+                </div>
 
-            <p id="summary" aria-live="polite">Aucune analyse effectuée.</p>
+                <div class="examples" role="group" aria-labelledby="examples-label">
+                    <p id="examples-label" class="field-label">Exemples issus de la validation</p>
+                    <div class="chips">
+                        <button class="chip" type="button" data-example="01_normal.log" disabled>Bloc normal</button>
+                        <button class="chip" type="button" data-example="02_anomalie.log" disabled>Bloc avec
+                            anomalie</button>
+                        <button class="chip" type="button" data-example="03_plusieurs_blocs.log" disabled>Plusieurs
+                            blocs</button>
+                        <button class="chip" type="button" data-example="04_bloc_incomplet.log" disabled>Bloc
+                            incomplet</button>
+                        <button class="chip" type="button" data-example="05_lignes_invalides.log" disabled>Lignes
+                            invalides</button>
+                    </div>
+                </div>
 
-            <label>
-                <input id="anomalies-only" type="checkbox" disabled>
-                Anomalies seulement
-            </label>
-            <button id="export" type="button" disabled>
-                Exporter les résultats affichés en CSV
-            </button>
+                <div id="dropzone" class="dropzone">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M12 16V4m0 0-4 4m4-4 4 4M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
+                    </svg>
+                    <p>
+                        <label for="file" class="link-label">Choisir un fichier</label>
+                        ou le glisser ici
+                        <span class="hint">.log ou .txt, 10 Mo au maximum</span>
+                    </p>
+                    <input id="file" class="visually-hidden" type="file" accept=".log,.txt,text/plain" disabled>
+                </div>
 
-            <p id="result-count"></p>
+                <div class="field">
+                    <div class="field-row">
+                        <label for="logs" class="field-label">Lignes de logs HDFS</label>
+                        <span id="line-count" class="hint" aria-live="polite">0 ligne · 0 bloc repéré</span>
+                    </div>
+                    <textarea id="logs" spellcheck="false" autocomplete="off" disabled
+                        aria-describedby="source shortcut"
+                        placeholder="Collez ici des lignes contenant des identifiants blk_…, par exemple : 081109 203615 148 INFO dfs.DataNode$PacketResponder: PacketResponder 1 for block blk_… terminating"></textarea>
+                    <p id="source" class="hint">Source : saisie libre.</p>
+                </div>
 
-            <div class="table-container">
-                <table>
-                    <caption>Classification des blocs présents dans les logs fournis</caption>
-                    <thead>
-                        <tr>
-                            <th scope="col">Bloc</th>
-                            <th scope="col">Classe</th>
-                            <th scope="col">Score</th>
-                            <th scope="col">Événements reçus</th>
-                            <th scope="col">Tronqués</th>
-                            <th scope="col">Inconnus encodés</th>
-                            <th scope="col">Avertissements</th>
-                        </tr>
-                    </thead>
-                    <tbody id="rows"></tbody>
-                </table>
+                <div class="actions">
+                    <button id="clear" class="button button-ghost" type="button" disabled>Effacer</button>
+                    <button id="analyze" class="button button-primary" type="button" disabled>
+                        <span class="spinner" aria-hidden="true"></span>
+                        <span class="button-label">Analyser les logs</span>
+                    </button>
+                </div>
+                <p id="shortcut" class="hint align-end">Raccourci : <kbd>Ctrl</kbd> + <kbd>Entrée</kbd> dans la zone
+                    de saisie.</p>
+
+                <div class="progress" id="progress-wrap" hidden>
+                    <progress id="progress" max="1" value="0" aria-label="Progression de l'analyse"></progress>
+                </div>
+                <p id="message" class="message" role="status" aria-live="polite"></p>
+            </section>
+
+            <aside class="card card-soft" aria-labelledby="guide-title">
+                <h2 id="guide-title" class="card-title-small">Lire les résultats avec prudence</h2>
+                <ul class="guide">
+                    <li>
+                        <strong>Complétude non garantie.</strong>
+                        Un extrait peut ne contenir qu'une partie des événements d'un bloc :
+                        les lignes fournies ne permettent pas de le vérifier.
+                    </li>
+                    <li>
+                        <strong>Score non calibré.</strong>
+                        Le score n'est pas une probabilité. Un bloc est classé anomalie
+                        quand son score atteint le seuil, repère vertical sur la barre.
+                    </li>
+                    <li>
+                        <strong>50 premiers événements.</strong>
+                        Au-delà, les événements sont tronqués ; un événement hors vocabulaire
+                        est encodé comme inconnu.
+                    </li>
+                    <li>
+                        <strong>Codes rares.</strong>
+                        Dans la séquence dépliée, un code est marqué « rare » s'il n'apparaît
+                        qu'une fois parmi les événements analysés du lot.
+                    </li>
+                </ul>
+            </aside>
+        </div>
+
+        <section id="results" class="card results" aria-labelledby="results-title">
+            <div class="card-head">
+                <h2 id="results-title" tabindex="-1"><span class="step-badge" aria-hidden="true">3</span> Résultats
+                    par bloc</h2>
+            </div>
+
+            <div id="empty" class="empty">
+                <svg viewBox="0 0 48 48" aria-hidden="true">
+                    <rect x="6" y="10" width="36" height="28" rx="4" />
+                    <path d="M12 28h6l3-7 5 11 3-6h7" />
+                </svg>
+                <p>Aucune analyse effectuée.</p>
+                <p class="hint">Chargez un exemple puis lancez l'analyse pour voir les résultats ici.</p>
+            </div>
+
+            <div id="report" hidden>
+                <dl class="kpis">
+                    <div class="kpi">
+                        <dt>Blocs analysés</dt>
+                        <dd id="kpi-blocks">0</dd>
+                    </div>
+                    <div class="kpi kpi-danger" id="kpi-anomalies-card">
+                        <dt>Anomalies</dt>
+                        <dd id="kpi-anomalies">0</dd>
+                    </div>
+                    <div class="kpi">
+                        <dt>Lignes lues</dt>
+                        <dd id="kpi-lines">0</dd>
+                    </div>
+                    <div class="kpi">
+                        <dt>Lignes ignorées</dt>
+                        <dd id="kpi-ignored">0</dd>
+                    </div>
+                    <div class="kpi">
+                        <dt>Inférence</dt>
+                        <dd id="kpi-time">0 ms</dd>
+                    </div>
+                </dl>
+
+                <details class="batch-details">
+                    <summary>Détails du lot</summary>
+                    <p id="summary" aria-live="polite"></p>
+                </details>
+
+                <div class="toolbar">
+                    <label class="switch">
+                        <input id="anomalies-only" type="checkbox" role="switch" disabled>
+                        <span class="switch-track" aria-hidden="true"></span>
+                        Anomalies seulement
+                    </label>
+                    <div class="toolbar-fields">
+                        <label class="search">
+                            <span class="visually-hidden">Filtrer par identifiant de bloc</span>
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <circle cx="11" cy="11" r="7" />
+                                <path d="m20 20-3.5-3.5" />
+                            </svg>
+                            <input id="search" type="search" placeholder="Filtrer par blk_…" autocomplete="off"
+                                disabled>
+                        </label>
+                        <label class="select">
+                            <span class="visually-hidden">Trier les blocs</span>
+                            <select id="sort" disabled>
+                                <option value="score-desc">Score décroissant</option>
+                                <option value="order">Ordre d'apparition</option>
+                                <option value="id">Identifiant</option>
+                            </select>
+                        </label>
+                        <button id="export" class="button button-secondary" type="button" disabled>
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M12 4v12m0 0-4-4m4 4 4-4M4 20h16" />
+                            </svg>
+                            Exporter en CSV
+                        </button>
+                    </div>
+                </div>
+
+                <p id="result-count" class="hint" aria-live="polite"></p>
+
+                <div class="table-container" role="region" aria-label="Tableau des résultats" tabindex="0">
+                    <table>
+                        <caption class="visually-hidden">Classification des blocs présents dans les logs fournis
+                        </caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">Bloc</th>
+                                <th scope="col">Classe</th>
+                                <th scope="col">Score</th>
+                                <th scope="col" class="num">Événements reçus</th>
+                                <th scope="col" class="num">Tronqués</th>
+                                <th scope="col" class="num">Inconnus encodés</th>
+                                <th scope="col">Avertissements</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rows"></tbody>
+                    </table>
+                </div>
+                <p id="no-match" class="empty-inline" hidden>Aucun bloc ne correspond aux filtres.</p>
             </div>
         </section>
     </main>
+
+    <footer class="footer">
+        <p id="model-info">Modèle en cours de chargement.</p>
+        <p>TeamAI · M2 IA, NLP 2 · volet A. Données HDFS (Loghub), usage pédagogique.</p>
+    </footer>
 
     <script type="module" src="./src/main.js"></script>
 </body>

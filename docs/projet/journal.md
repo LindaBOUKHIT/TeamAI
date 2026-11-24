@@ -366,6 +366,13 @@ Comparaison sur cinq blocs `val` du sample (preuve : [`eval/results/SCRUM-57/`](
 Correction associée : `validate_answer` plantait lorsqu'un objet apparaissait dans `sources` (sortie llama.cpp) ; il signale désormais l'erreur sans exception (test ajouté).
 
 
+## 2026-10-26 — SCRUM-38
+
+SCRUM-38 : script des mesures avant adaptation, écrit avec Codex (gpt-6.1-sol), relu par Alain.
+
+Essai réel du 26/10 (pas une mesure) : une trace de calibration du split `train`, vrai SmolLM2 float32 sur CPU, `--limit 1`. En `base`, réponse JSON conforme à C5 (182 tokens, 77 s de génération). En `rag1`, trois passages récupérés, mais le modèle écrit des clés sans guillemets : `invalid_json`, compté comme échec. Mémoire RSS maximale du processus : environ 10,7 Go. Le pipeline complet fonctionne ; le test n'a pas été ouvert.
+
+
 ## 2026-10-27 — SCRUM-63 : passage à Gemma 4 E4B QAT
 
 Correctif de relecture : GPU activé (`n_gpu_layers: -1`) et pré-téléchargement du GGUF documenté.
@@ -396,6 +403,32 @@ et un résumé boucle ; 0,19 hypothèse par bloc avec indice d’incident. Ces r
 ne valident ni une détection par le SLM ni la fidélité globale des explications.
 
 Usage IA : code écrit avec Codex gpt-6.1-sol, supervisé par Claude ; relecture d'Alain à faire.
+
+## 2026-10-27 — SCRUM-38 : mesures base alignées sur le pipeline v16 ; rag1 reporté
+
+Correctif de relecture : hypothèses par bloc rapportées au nombre de blocs du groupe.
+
+`base` reconstruit les faits depuis les lignes brutes C5 et appelle le pipeline
+v16 figé : schéma fermé, contrôles, correction unique et anti-boucle. Aucune
+annotation n'atteint le prompt. Le code `volet_b/slm/v16/` reste inchangé.
+`rag1` est refusé explicitement en attendant une variante v16 + RAG figée
+(SCRUM-42/SCRUM-45) ; le retrieval de Linda reste disponible.
+
+Le C7 conserve les empreintes de consigne et politique v16, la révision GGUF,
+le contexte, le budget, les tentatives et leurs erreurs, arrêts, tokens, temps
+et nombre réel d'appels. Les mesures ajoutent contrat v16, faits exacts,
+références inexistantes, causes réseau sans appui, enquêtes sans incident,
+hypothèses avec/sans incident, anti-boucle et corrections déclenchées/réussies.
+Tous les exemples restent au dénominateur. Le RSS est conservé et la VRAM du PID
+NVIDIA est relevée si disponible, sans dépendance obligatoire.
+
+À exécuter sur le portable de Nassim après fusion de #40, poids déjà présents,
+sans réglage après ouverture du test. Aucun modèle téléchargé ou exécuté,
+aucun service externe ni aucune opération git pendant cette mission.
+
+Suite complète lancée par Alain avec le Python du projet le 27/10 : 108 tests réussis, 5 ignorés, en mode factice.
+
+Usage IA : Codex gpt-6.1-sol supervisé par Claude ; relecture d'Alain à faire.
 
 ## 27/10/2026 — SCRUM-29 : essai LoRA adapté à Gemma 4 E4B QAT
 
@@ -516,6 +549,35 @@ partagent le cache KV, `num_kv_shared_layers: 18`, et n'ont pas de v_proj). Inf�
 RTX 3050 non faite (SCRUM-61).
 
 Usage IA : Codex gpt-6.1-sol supervisé par Claude ; relecture d'Alain à faire.
+
+## 2026-11-09 — SCRUM-46 : défauts du volet B et feuille de route (version provisoire avant les mesures SCRUM-38)
+Section rédigée dans docs/volet_b/defauts_feuille_de_route.md : périmètre, défauts sourcés, causes probables, priorités et chiffres à compléter après SCRUM-38/45.
+Lecture seule des preuves val et du code ; aucune donnée test consultée, aucun modèle exécuté, aucun service externe appelé, aucune opération git.
+Usage IA : rédaction Codex gpt-6.1-sol supervisée par Claude ; relecture d'Alain à faire.
+
+## 2026-11-13 — SCRUM-58 : porte Laya (abstention, vérification des hypothèses), expérience optionnelle abandonnée
+Laya (`convaiinnovations/laya`, Apache 2.0, révision `85cc74dd`, paquet 0.4.31) a été appliqué en zéro-shot, sur CPU (portable d'Alain), aux réponses v16 déjà produites sur la validation. Il y a deux cohortes de 40 blocs `val`, avec 10 `Fail` chacune. La question a été choisie sur la cohorte de mise au point (3 variantes), puis appliquée une seule fois à la validation unique, sans réglage après lecture.
+Résultat : AUC de la probabilité d'anomalie entre Fail et Success de 0,47 sur la validation unique (0,37 à 0,55 en mise au point). La porte ajoute 8 abstentions sur 40 sans lien avec le label. Sur les 4 hypothèses, elle garde les 2 que la relecture SCRUM-63 met en cause et en écarte une qui ne l'était pas. Coût : 2,25 s par bloc, pic RSS de 2,65 GiB, 32 s de chargement.
+Décision : porte non intégrée, pas de 5ᵉ configuration pour SCRUM-45. L'adaptation Kaggle n'est pas lancée : sur les labels, elle doublerait le détecteur du volet A ; sur les annotations B, elle demande un jeu relu (SCRUM-36). Détails et métriques : `eval/results/SCRUM-58/README.md`.
+Aucune donnée de test lue ; aucune donnée envoyée à un service externe (seul le téléchargement du modèle depuis Hugging Face).
+Usage IA : code de la porte et des tests écrit par Codex gpt-6.1-sol, puis revu et corrigé par Claude (révision transmise au routeur, état limité à 512 tokens, chargement chronométré à part) ; mesures lancées par Claude ; relecture d'Alain et de Linda à faire.
+
+## 2026-11-15 — SCRUM-42 : orchestration à 3 agents (recherche, rédaction, contrôle)
+`volet_b/agents/orchestrator.py` et `roles/{search,writer,checker}.py` : une seule instance du SLM via `generate()`, au plus 5 appels par bloc (recherche 1, rédaction et contrôle 2 fois au plus), une reprise maximum. La rédaction reprend le prompt v16 à l'identique quand aucun passage n'est retenu ; sinon deux phrases fixes sont remplacées et une section DOCUMENTATION est ajoutée (budget 3 000 caractères, `sources` limité aux passages injectés). Les contrôles v16 et C5 sont faits par le code avant tout appel au contrôleur ; la réponse finale n'est jamais réparée. Version 1 agent inchangée.
+Vérifié : 239 tests passent, essai `--mock` sur 5 blocs de validation (3 appels chacun), split test refusé. Aucune donnée test consultée. Mesure avec Gemma sur 5 blocs de validation à faire (machine de Nassim ou Kaggle).
+Usage IA : code Codex gpt-6.1-sol supervisé et relu par Claude ; relecture d'Alain à faire.
+
+## 2026-11-15 — SCRUM-43 : interface locale du volet B (Gradio)
+`volet_b/app/app.py`, lancé par `python -m volet_b.app.app` (option `--mock` sans modèle), écoute uniquement sur 127.0.0.1. On colle des logs ou on importe un fichier, puis on choisit 1 ou 3 agents et le modèle de base ou adapté. L'interface affiche le résumé, les faits, les hypothèses, les infos manquantes, les passages sources et le journal des étapes. Une réponse non conforme C5 ou rejetée est montrée en sortie brute avec ses erreurs, sans réparation. Tout bloc du split test fait refuser l'entrée avant appel au modèle ; 5 blocs maximum par analyse ; exemples tirés uniquement de la validation. Section « Lancer la démo » ajoutée au README du volet B.
+Vérifié : 250 tests passent ; démo `--mock` pilotée dans un navigateur sur un exemple de validation (3 appels, statut accepte). Démo avec Gemma sur la machine d'Alain à faire (critère de fin).
+Usage IA : code Codex gpt-6.1-sol supervisé et terminé par Claude ; relecture d'Alain à faire.
+## 2026-11-16 — SCRUM-42 : correctif du contrôleur après la mesure Kaggle d'Alain
+Mesure réelle (Alain, `eval/results/SCRUM-42/kaggle_val5/`) : 1 bloc accepté sur 5, alors que les 5 réponses étaient conformes à C5 ; le contrôleur ne voyait pas le contrat et reprochait surtout des sources vides. Correctif : `checker.txt` rappelle les règles du contrat (sélection de 2 à 5 faits, hypothèses et sources facultatives) et ne demande une correction que pour une affirmation précise non appuyée, en citant la référence. Garde de contexte ajoutée à la recherche et au contrôle : on retire des passages avant l'appel ; sans place pour le contrôle, aucun appel et la réponse n'est pas acceptée (`non_controle`). Métriques : `abstentions_effectives` ajouté, `answers_with_sources` limité aux réponses acceptées. 243 tests passent ; à remesurer sur les 5 mêmes blocs de validation.
+Usage IA : correctif écrit et testé par Claude, d'après l'analyse d'Alain.
+
+## 2026-11-24 — SCRUM-49 : retour d'expérience de Linda
+`docs/rapport/retour_experience/linda.md` : rôle, axes techniques et collectifs, ce que je ferais autrement, avec les tickets et fichiers qui servent de preuves.
+Usage IA : brouillon rédigé par Claude à partir des réponses de Linda et des faits du dépôt, puis relu et corrigé par Linda (passages retirés ou reformulés à sa demande).
 
 ## 2026-11-16 — SCRUM-36 : correction du lot de Linda (60 exemples)
 Pré-relecture des 60 brouillons par l'IA (Codex gpt-6.1-sol, contrôlée par Claude) : 56 jugés justes, 4 à corriger (001, 002, 006, 008 : la question supposait la « disparition » d'une entrée BlockInfo, alors que le log dit seulement qu'elle est introuvable). Verdicts pré-remplis par l'IA dans la fiche, puis vérifiés et téléchargés par Linda (`corrections_linda.jsonl`). Résultat : 56 ok, 4 corrigés, 0 rejet ; contrôles `check_lots` : 0 erreur. Relecture croisée humaine à faire (Alain).

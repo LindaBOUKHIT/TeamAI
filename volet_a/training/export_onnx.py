@@ -17,12 +17,53 @@ def file_hash(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def export_int8(source, output):
+    """Quantifie un export FP32 vérifié dans un dossier candidat neuf."""
+    from onnxruntime import __version__ as ort_version
+    from onnxruntime.quantization import QuantType, quantize_dynamic
+
+    metadata = json.loads(source.with_suffix(".meta.json").read_text(encoding="utf-8"))
+    source_hash = file_hash(source)
+    if source_hash != metadata["model_sha256"]:
+        raise ValueError("Empreinte du modèle FP32 incorrecte.")
+    output.mkdir(parents=True, exist_ok=False)
+    target = output / "detector.onnx"
+    model = onnx.shape_inference.infer_shapes(onnx.load(source))
+    quantize_dynamic(model, target, weight_type=QuantType.QInt8)
+    onnx.checker.check_model(str(target))
+    metadata.pop("val_macro_f1", None)
+    metadata.update({
+        "model_sha256": file_hash(target),
+        "source_model_sha256": source_hash,
+        "quantization": {
+            "mode": "dynamic",
+            "weight_type": "QInt8",
+            "onnxruntime_version": ort_version,
+        },
+    })
+    (output / "detector.meta.json").write_text(
+        json.dumps(metadata, indent=2, allow_nan=False) + "\n",
+        encoding="utf-8",
+    )
+    print(f"Export candidat INT8 : {target} ({target.stat().st_size} octets)")
+
+
 def main():
     """Exporte le checkpoint sélectionné sans modifier le modèle du site."""
     parser = argparse.ArgumentParser()
-    parser.add_argument("--run", type=Path, required=True)
+    inputs = parser.add_mutually_exclusive_group(required=True)
+    inputs.add_argument("--run", type=Path)
+    inputs.add_argument("--int8-from", type=Path)
+    parser.add_argument("--output-dir", type=Path)
     args = parser.parse_args()
 
+    if args.int8_from:
+        if args.output_dir is None:
+            parser.error("--int8-from exige --output-dir.")
+        export_int8(args.int8_from.resolve(), args.output_dir.resolve())
+        return
+    if args.output_dir is not None:
+        parser.error("--output-dir s'utilise avec --int8-from.")
     run = args.run.resolve()
     config = json.loads((run / "config.json").read_text(encoding="utf-8"))
     vocab_path = WEB_PUBLIC / "vocab.json"
