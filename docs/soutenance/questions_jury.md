@@ -56,7 +56,7 @@ Gemma 4 E4B QAT en GGUF 4 bits, exécuté par llama.cpp, contexte de 4 096 token
 Le prompt v16 fournit des faits calculés (événements, chronologie, lignes) et impose une réponse JSON à six champs. Chaque affirmation doit citer un fait, une étape de chronologie ou une ligne. Un contrôle refuse les références inexistantes. Cela réduit les inventions sans les supprimer. Source : [défauts et feuille de route](../volet_b/defauts_feuille_de_route.md).
 
 **16. Quels défauts avez-vous mesurés ?**
-Sur 40 nouveaux blocs de validation : 2 erreurs de chronologie, 3 liens de causalité non étayés, 3 pseudo-références, 1 réponse en boucle. Dans les 16 cas où la cause reste inconnue, aucun résumé ne le dit. Les blocs de plus de 39 événements dépassent la fenêtre de contexte ; ils représentent 4,2 % des anomalies de la validation. Source : [défauts et feuille de route](../volet_b/defauts_feuille_de_route.md).
+Sur 40 nouveaux blocs de validation : 2 erreurs de chronologie, 3 liens de causalité non étayés, 3 pseudo-références, 1 réponse en boucle. Dans les 16 cas où la cause reste inconnue, aucun résumé ne le dit. Les blocs de plus de 39 événements dépassent la fenêtre de contexte ; ils représentent 4,2 % des anomalies de la validation. Sources : [défauts et feuille de route](../volet_b/defauts_feuille_de_route.md) ; pour les traces longues, [mesures CPU du 24/11](../../eval/results/SCRUM-43/cpu_24-11/README.md) et [décompte des longueurs](../../eval/results/SCRUM-43/cpu_24-11/longueurs_val.json) (PR #62).
 
 **17. À quoi sert le RAG ?**
 Il ajoute des passages de la documentation HDFS pour éclairer les événements. Dans les runs à 3 agents, aucune réponse acceptée ne cite de passage : l'apport du RAG n'est pas démontré. Source : [SCRUM-42](../../eval/results/SCRUM-42/kaggle_val5_v2/README.md).
@@ -95,4 +95,4 @@ Le BiLSTM s'entraîne en 6 minutes sur CPU. Pour Gemma et le LoRA, nous avons ut
 ## Démonstrations à savoir refaire
 
 - **Volet A** : ouvrir le site, charger « Plusieurs blocs », analyser, filtrer les anomalies, déplier une séquence, exporter le CSV. Montrer le repère du seuil sur la barre de score.
-- **Volet B** : `python -m volet_b.app.app`, exemple d'anomalie, mode 3 agents. Prévoir plusieurs minutes sur CPU ; garder la vidéo de secours (SCRUM-51) et le mode `--mock` si le modèle ne charge pas.
+- **Volet B** : `python -m volet_b.app.app`, exemple d'anomalie, mode 3 agents. Sur CPU, compter environ 25 minutes par bloc ([mesures du 24/11](../../eval/results/SCRUM-43/cpu_24-11/README.md)) ; garder la vidéo de secours (SCRUM-51) et le mode `--mock` si le modèle ne charge pas.
