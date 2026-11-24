@@ -7,6 +7,9 @@ from volet_b.slm.v16.explain import repetition_errors
 from volet_b.slm.v16.runtime import INSTRUCTION, build_prompt, validate
 
 PROMPT = PROMPTS / 'checker.txt'
+# Erreur de fond détectée par le code : elle déclenche une reprise, mais la réponse reste conforme à C5.
+ORDER_ERROR = ('ordre affirmé entre événements de la même seconde : décrire ces événements '
+               'sans ordre, comme « dans la même seconde »')
 
 
 def code_checks(out, block, passages):
@@ -24,6 +27,8 @@ def code_checks(out, block, passages):
     except (TypeError, ValueError, KeyError) as exc:
         errors.append('réponse incompatible avec v16 : ' + str(exc))
         review = []
+    if 'ordre_affirme_entre_evenements_de_la_meme_seconde' in review:
+        errors.append(ORDER_ERROR)
     if isinstance(answer, dict) and isinstance(answer.get('sources'), list):
         sources = answer['sources']
         if all(isinstance(s, str) for s in sources) and len(sources) != len(set(sources)):
@@ -43,7 +48,7 @@ def check(out, block, passages, call_slm, checks=None):
     spec = {'type': 'object', 'additionalProperties': False, 'required': ['verdict', 'motifs'],
             'properties': {'verdict': {'type': 'string', 'enum': ['accepte', 'corriger', 'abstention']},
                            'motifs': {'type': 'array', 'maxItems': 3,
-                                      'items': {'type': 'string', 'maxLength': 240}}}}
+                                      'items': {'type': 'string', 'maxLength': 400}}}}
     shown = list(passages)
     guard = getattr(call_slm, 'context_error', None)
     while True:
@@ -69,7 +74,7 @@ def check(out, block, passages, call_slm, checks=None):
     if (not isinstance(verdict, dict) or set(verdict) != {'verdict', 'motifs'}
             or verdict.get('verdict') not in ('accepte', 'corriger', 'abstention')
             or not isinstance(verdict.get('motifs'), list) or len(verdict['motifs']) > 3
-            or any(not isinstance(m, str) or len(m) > 240 for m in verdict['motifs'])
+            or any(not isinstance(m, str) or len(m) > 400 for m in verdict['motifs'])
             or response['finish_reason'] != 'stop'):
         result.update(errors=['verdict de contrôle invalide'], motifs=['verdict de contrôle invalide'])
     else:

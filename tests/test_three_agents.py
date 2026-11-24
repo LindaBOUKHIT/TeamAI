@@ -11,7 +11,7 @@ from teamai.paths import SAMPLE
 from volet_b.agents import orchestrator as orchestration
 from volet_b.agents.roles import checker, search, writer
 from volet_b.slm.v16.facts import prepare_block
-from volet_b.slm.v16.runtime import build_prompt
+from volet_b.slm.v16.runtime import build_prompt, validate
 
 FIXTURES = Path(__file__).parent / 'fixtures'
 PASSAGES = [dict(id=f'doc#section#{i}', text=f'Documentation officielle HDFS, passage {i}.',
@@ -104,6 +104,68 @@ def test_always_correct_stops_at_five_calls(block):
     assert record['statut'] == 'rejete' and record['n_calls'] == len(slm.calls) == 5
     assert record['n_retries'] == 1 and record['errors']
     assert record['raw_text'] == slm.writings[-1]
+
+
+def test_same_second_order_skips_checker_then_retries():
+    """Un ordre non établi entraîne une reprise explicite avant toute revue SLM."""
+    lines = [(10, '081109 203518 35 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /f. blk_1'),
+             (20, '081109 203518 143 INFO dfs.DataNode$DataXceiver: Receiving block blk_1 src: /a:1 dest: /a:2')]
+    block = prepare_block('blk_1', lines, compile_templates(FIXTURES / 'preprocessed/HDFS.log_templates.csv'),
+                          split='val')
+
+    def corrupt(answer, index):
+        """Affirme un ordre au premier essai et le retire au second."""
+        connector = 'puis' if index == 0 else 'et, dans la même seconde,'
+        return {**answer, 'resume_evenements': f'Le bloc est alloué [T01] {connector} reçu [T02].'}
+
+    slm = FakeSLM(corrupt=corrupt)
+    record = orchestration.explain_block_three_agents(block, FakeRetriever(), slm)
+    answer = {**json.loads(slm.writings[0]), 'sources': []}
+    contract, factual, review = validate(json.dumps(answer, ensure_ascii=False), block)
+    flag = 'ordre_affirme_entre_evenements_de_la_meme_seconde'
+    assert contract == factual == [] and flag in review
+    assert record['statut'] == 'accepte' and record['n_retries'] == 1
+    assert [s['agent'] for s in record['steps']] == ['search', 'writer', 'writer', 'checker']
+    first = record['steps'][1]
+    assert first['verdict'] == 'corriger' and flag in first['review_flags']
+    assert len(first['errors']) == 1
+    assert 'ordre affirmé entre événements de la même seconde' in first['errors'][0]
+    assert 'dans la même seconde' in first['errors'][0]
+    assert first['errors'][0] in slm.calls[2][0]
+
+
+def test_other_review_flags_still_call_checker(block, monkeypatch):
+    """Les autres alertes de revue restent non bloquantes pour le contrôleur SLM."""
+    flags = ['phrase_du_resume_sans_reference', 'conclusion_finale_a_verifier']
+
+    def validate_with_review(text, block):
+        """Isole les alertes de revue des erreurs contractuelles et factuelles."""
+        return [], [], flags
+
+    monkeypatch.setattr(checker, 'validate', validate_with_review)
+    slm = FakeSLM()
+    record = orchestration.explain_block_three_agents(block, FakeRetriever(), slm)
+    assert record['statut'] == 'accepte' and record['n_calls'] == 3
+    assert record['steps'][1]['review_flags'] == flags
+
+
+@pytest.mark.parametrize('length, valid', [(350, True), (400, True), (401, False)])
+def test_checker_motif_length(block, length, valid):
+    """Le schéma et la validation acceptent les motifs jusqu'à 400 caractères."""
+    prompt, response_format = writer.build_request(block, [])
+    out = orchestration.mock_call_slm(prompt, response_format)
+    motif = '[F01] ' + 'x' * (length - len('[F01] '))
+    calls = []
+
+    def call_slm(prompt, response_format):
+        """Renvoie un motif de longueur contrôlée et conserve le schéma reçu."""
+        calls.append(response_format)
+        return {**out, 'text': json.dumps({'verdict': 'corriger', 'motifs': [motif]})}
+
+    result = checker.check(out, block, [], call_slm)
+    assert calls[0]['schema']['properties']['motifs']['items']['maxLength'] == 400
+    assert result['motifs'] == ([motif] if valid else ['verdict de contrôle invalide'])
+    assert result['errors'] == ([] if valid else ['verdict de contrôle invalide'])
 
 
 @pytest.mark.parametrize('limit', [0, 1, 2, 3, 4])
@@ -268,9 +330,20 @@ def test_checker_receives_contract_rules(block):
     slm = FakeSLM()
     orchestration.explain_block_three_agents(block, FakeRetriever(), slm)
     prompt = next(p for p, f in slm.calls if 'verdict' in f['schema']['properties'])
-    for rule in ('SÉLECTION de 2 à 5 faits', '[] est valide', 'UNIQUEMENT si une affirmation précise'):
+    for rule in ('SÉLECTION de 2 à 5 faits', '[] est valide', 'UNIQUEMENT si une affirmation précise',
+                 'tout [Fxx], [Txx] ou [Lxx] du bloc, pas seulement les faits sélectionnés',
+                 "il n'a pas à reprendre chaque fait sélectionné", 'précision absente des preuves',
+                 'ne précise pas si…', 'une seule phrase courte (200 caractères visés)',
+                 'commence par la référence concernée', 'trois chaînes de 400 caractères'):
         assert rule in prompt
     assert prompt.index('PREUVES DU BLOC') < prompt.index('REPONSE A CONTROLER')
+
+
+def test_writer_requires_relevant_documentation_sources(block):
+    """La rédaction avec RAG impose la citation des passages expliquant une opération."""
+    prompt, _ = writer.build_request(block, PASSAGES[:1])
+    assert 'explique une opération mentionnée dans le résumé doit être cité dans sources' in prompt
+    assert "ne jamais citer un passage pour un événement qu'il n'explique pas" in prompt
 
 
 def test_checker_context_overflow_makes_no_call(block):
@@ -303,3 +376,10 @@ def test_metrics_count_effective_abstentions_and_accepted_sources():
                     seconds=1.0)]
     metrics = orchestration.metrics(records)
     assert metrics['answers_with_sources'] == 1 and metrics['abstentions_effectives'] == 1
+
+
+def test_order_error_keeps_c5_validity():
+    """L'ordre non établi déclenche une reprise sans compter la réponse comme non conforme à C5."""
+    assert checker.ORDER_ERROR.startswith('ordre affirmé')
+    errors = [checker.ORDER_ERROR]
+    assert not [e for e in errors if e != checker.ORDER_ERROR]

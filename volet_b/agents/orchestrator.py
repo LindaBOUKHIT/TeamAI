@@ -72,12 +72,12 @@ def explain_block_three_agents(block, retriever, call_slm, k=5, max_calls=5):
             writing_step = steps[-1]
             checks = checker.code_checks(final, block, retrieval['passages'])
             parsed, errors, review = checks
-            c5_valid = not errors
+            c5_valid = not [e for e in errors if e != checker.ORDER_ERROR]
             writing_step.update(errors=errors, review_flags=review)
             checked = checker.check(final, block, retrieval['passages'], caller('checker', attempt), checks)
             retrieval['adjustments'].extend(checked.get('adjustments', []))
             parsed, errors = checked['answer'], checked['errors']
-            c5_valid = not checked['code_errors']
+            c5_valid = not [e for e in checked['code_errors'] if e != checker.ORDER_ERROR]
             writing_step.update(errors=checked['code_errors'], review_flags=checked['review'])
             steps[-1].update(verdict=checked['verdict'])
             if steps[-1]['agent'] == 'checker':

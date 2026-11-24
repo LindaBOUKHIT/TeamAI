@@ -578,3 +578,7 @@ Usage IA : correctif écrit et testé par Claude, d'après l'analyse d'Alain.
 ## 2026-11-24 — SCRUM-49 : retour d'expérience de Linda
 `docs/rapport/retour_experience/linda.md` : rôle, axes techniques et collectifs, ce que je ferais autrement, avec les tickets et fichiers qui servent de preuves.
 Usage IA : brouillon rédigé par Claude à partir des réponses de Linda et des faits du dépôt, puis relu et corrigé par Linda (passages retirés ou reformulés à sa demande).
+
+## 2026-11-24 — SCRUM-42 (suite) : qualité de la chaîne à 3 agents
+D'après les deux runs Kaggle (1/5 accepté) : l'ordre affirmé entre événements de la même seconde (drapeau v16 existant) déclenche maintenant une reprise par le code, sans appel au contrôleur et sans compter la réponse comme non conforme à C5 ; motifs du contrôleur limités à 400 caractères (une phrase courte qui commence par la référence) au lieu de 240 ; `checker.txt` n'exige plus que le résumé reprenne chaque fait sélectionné ni une précision absente des preuves ; `writer.txt` demande de citer un passage qui explique une opération mentionnée. Prompt v16 sans passage inchangé. 302 tests passent. À mesurer sur GPU sur d'autres blocs val que les 5 de réglage.
+Usage IA : modifications écrites par Codex (gpt-6.1-sol), relues, corrigées (séparation erreur de fond / conformité C5) et testées par Claude.
