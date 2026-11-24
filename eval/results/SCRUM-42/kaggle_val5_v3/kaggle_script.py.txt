@@ -1,0 +1,120 @@
+"""SCRUM-42 (PR #67) : 3 agents après correctifs, sur 5 nouveaux blocs val (seed 7) puis les 5 blocs de réglage (T4, Gemma 4 E4B QAT).
+
+Seules les lignes de blocs val sont utilisées : extrait seed 7 compressé ci-dessous, extrait de réglage lu dans le script v2 du dépôt ; SHA-256 vérifiés.
+Le dépôt public est cloné en sparse, sans HDFS_sample.log ni Event_traces.csv : aucune trace test n'est téléchargée.
+"""
+import base64, glob, hashlib, os, re, shutil, site, subprocess, sys, time, urllib.request, zlib
+from pathlib import Path
+
+OUT = Path('/kaggle/working')
+COMMIT = '2be514d1163d8e67d5b3e667fe955f1da83186d4'
+SEED7_SHA256 = 'faa1d33ce967e9f2f108f1d726d3b19916af07bbe02fcf040f138429a4eafac7'
+SEED7 = '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'
+REGLAGE_SHA256 = '10c98c90a744dd4347e34b12934decd0af09820712ac977e0d94319d0ff2fe47'
+REGLAGE_SOURCE = 'eval/results/SCRUM-42/kaggle_val5_v2/kaggle_script.py.txt'
+N_LINES = 37941
+WHEEL_NAME = 'llama_cpp_python-0.3.36-py3-none-linux_x86_64.whl'
+WHEEL_SHA256 = 'b89030f400a039434237da3b91bb7ae5d6106cf96735e85d6fb33dd8d35968da'
+WHEEL_URL = ''  # lien signé Kaggle retiré (expire)
+LOG = OUT / 'journal.txt'
+
+
+def note(msg):
+    """Journalise une étape avec l'heure."""
+    line = time.strftime('%H:%M:%S ') + msg
+    print(line, flush=True)
+    with LOG.open('a', encoding='utf-8') as f:
+        f.write(line + '\n')
+
+
+def run(cmd, cwd=None, timeout=1800, env=None):
+    """Lance une commande, journalise sa fin de sortie et arrête le script en cas d'échec."""
+    note('$ ' + ' '.join(cmd))
+    r = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, timeout=timeout, env=env)
+    note((r.stdout + r.stderr)[-4000:])
+    if r.returncode:
+        raise SystemExit(f'échec ({r.returncode}) : {cmd[:3]}')
+    return r.stdout
+
+
+def sha256(path):
+    """Empreinte d'un fichier."""
+    with open(path, 'rb') as f:
+        return hashlib.file_digest(f, 'sha256').hexdigest()
+
+
+def wheel():
+    """Wheel CUDA llama.cpp déjà vérifiée (sortie d'un notebook précédent), jamais compilée."""
+    target = OUT / 'wheels' / WHEEL_NAME
+    target.parent.mkdir(exist_ok=True)
+    urllib.request.urlretrieve(WHEEL_URL, target)
+    if sha256(target) != WHEEL_SHA256:
+        raise SystemExit('SHA-256 de la wheel incorrect')
+    note('wheel téléchargée et vérifiée')
+    return str(target)
+
+
+def write_log(name, excerpt, digest):
+    """Décode un extrait val, vérifie son empreinte et l'écrit avec les numéros de ligne d'origine."""
+    raw = zlib.decompress(base64.b64decode(excerpt))
+    if hashlib.sha256(raw).hexdigest() != digest:
+        raise SystemExit('extrait val altéré : ' + name)
+    lines = [''] * N_LINES
+    for row in raw.decode('utf-8').split('\n'):
+        number, text = row.split('\t', 1)
+        lines[int(number) - 1] = text
+    path = OUT / f'val5_{name}.log'
+    path.write_text('\n'.join(lines) + '\n', encoding='utf-8')
+    note(f'{name} : extrait vérifié, blocs ' + ', '.join(sorted(set(re.findall(r'blk_-?\d+', raw.decode())))))
+    return path
+
+
+def main():
+    """Prépare l'environnement, lance l'orchestrateur sur les deux cohortes et copie les dossiers C7."""
+    repo = Path('/kaggle/temp/TeamAI')
+    repo.parent.mkdir(parents=True, exist_ok=True)
+    run(['git', 'clone', '--filter=blob:none', '--no-checkout', 'https://github.com/LindaBOUKHIT/TeamAI.git', str(repo)])
+    run(['git', 'sparse-checkout', 'set', '--no-cone', '/*', '!/data/sample/HDFS_sample.log',
+         '!/data/sample/Event_traces.csv'], cwd=repo)
+    run(['git', 'checkout', '-q', COMMIT], cwd=repo)
+    if run(['git', 'rev-parse', 'HEAD'], cwd=repo).strip() != COMMIT:
+        raise SystemExit('commit inattendu')
+    if (repo / 'data/sample/HDFS_sample.log').exists():
+        raise SystemExit('trace complète présente : arrêt')
+    v2 = (repo / REGLAGE_SOURCE).read_text(encoding='utf-8')
+    cohorts = {'seed7': write_log('seed7', SEED7, SEED7_SHA256),
+               'reglage': write_log('reglage', re.search(r"EXCERPT = '([^']+)'", v2).group(1), REGLAGE_SHA256)}
+
+    run([sys.executable, '-m', 'pip', 'install', '-q', '--only-binary=:all:', wheel()])
+    run([sys.executable, '-m', 'pip', 'install', '-q', 'faiss-cpu', 'rank_bm25',
+         'nvidia-cuda-runtime-cu12', 'nvidia-cublas-cu12'])
+    # L'image Kaggle ne fournit plus les bibliothèques CUDA 12 attendues par la wheel.
+    roots = set(site.getsitepackages()) | {p for p in sys.path if p.endswith(('site-packages', 'dist-packages'))}
+    libs = sorted({d for sp in roots for d in glob.glob(sp + '/nvidia/*/lib')})
+    env = {**os.environ, 'LD_LIBRARY_PATH': ':'.join(libs + [os.environ.get('LD_LIBRARY_PATH', '')])}
+    import importlib, importlib.util
+    importlib.invalidate_caches()
+    lib_dir = Path(importlib.util.find_spec('llama_cpp').origin).parent / 'lib'
+    for so in sorted(lib_dir.glob('*.so')):
+        missing = [l for l in run(['ldd', str(so)], env=env).splitlines() if 'not found' in l]
+        note(f'{so.name} : ' + ('; '.join(missing) if missing else 'toutes les dépendances trouvées'))
+    run([sys.executable, '-c', 'import llama_cpp; print("llama_cpp", llama_cpp.__version__)'], env=env)
+
+    from huggingface_hub import hf_hub_download
+    path = hf_hub_download('google/gemma-4-E4B-it-qat-q4_0-gguf', 'gemma-4-E4B_q4_0-it.gguf',
+                           revision='4b4a2c1d584be7264f87aac328a1bc739ce81b6c')
+    note(f'modèle : {path} ({os.path.getsize(path)} octets)')
+    run([sys.executable, '-m', 'volet_b.rag.build_index'], cwd=repo)
+    run(['nvidia-smi', '--query-gpu=name,memory.total,driver_version', '--format=csv'])
+    for name, log in cohorts.items():
+        started = time.time()
+        out = run([sys.executable, '-m', 'volet_b.agents.orchestrator', '--file', str(log)],
+                  cwd=repo, timeout=7200, env=env)
+        note(f'{name} : durée totale orchestrateur : {time.time() - started:.1f} s')
+        run_dir = Path(out.strip().splitlines()[-1].split('Run : ', 1)[1])
+        shutil.copytree(run_dir, OUT / 'run_scrum42' / name / run_dir.name)
+        note('copié : ' + name + '/' + run_dir.name)
+
+
+if __name__ == '__main__':
+    main()

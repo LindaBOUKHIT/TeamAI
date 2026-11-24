@@ -586,3 +586,11 @@ Usage IA : supports rédigés par Codex (gpt-6.1-sol) à partir des résultats d
 ## 2026-11-24 — SCRUM-48 : date de soutenance et PDF du rapport
 Soutenance le lundi 30/11 (et non le 07/12) : date corrigée dans le README, la feuille de route et le rapport (§2.2). Les documents d'archive et de cadrage gardent la date d'origine. PDF du rapport régénéré avec les ajouts de la #65 (27 pages).
 Usage IA : modifications faites par Claude à la demande d'Alain.
+
+## 2026-11-24 — SCRUM-42 (suite) : qualité de la chaîne à 3 agents
+D'après les deux runs Kaggle (1/5 accepté) : l'ordre affirmé entre événements de la même seconde (drapeau v16 existant) déclenche maintenant une reprise par le code, sans appel au contrôleur et sans compter la réponse comme non conforme à C5 ; motifs du contrôleur limités à 400 caractères (une phrase courte qui commence par la référence) au lieu de 240 ; `checker.txt` n'exige plus que le résumé reprenne chaque fait sélectionné ni une précision absente des preuves ; `writer.txt` demande de citer un passage qui explique une opération mentionnée. Prompt v16 sans passage inchangé. 302 tests passent. À mesurer sur GPU sur d'autres blocs val que les 5 de réglage.
+Usage IA : modifications écrites par Codex (gpt-6.1-sol), relues, corrigées (séparation erreur de fond / conformité C5) et testées par Claude.
+
+## 2026-11-24 — SCRUM-42 : mesure GPU des correctifs de la PR #67
+Run Kaggle (T4) sur 5 nouveaux blocs `val` (seed 7) et sur les 5 blocs de réglage : 10/10 réponses conformes à C5, mais 0 acceptée (contre 1/5 au run 2). Motifs complets, passages cités dans 3 réponses finales sur 10, une reprise par le drapeau d'ordre. Le contrôleur rejette des réponses sans erreur visible et manque des ordres affirmés (« a débuté par … suivi par »). Pas de réglage avant la soutenance. Détails : `eval/results/SCRUM-42/kaggle_val5_v3/README.md`.
+Usage IA : run lancé et analysé par Claude, à la demande d'Alain ; seules des lignes de blocs `val` ont été envoyées.
