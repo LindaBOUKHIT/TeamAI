@@ -5,7 +5,7 @@ Détection et aide à l’interprétation d’anomalies dans les journaux HDFS
 Master 2 Data & Intelligence Artificielle  
 Alain Evina · Bachar Ben Slama · Linda Boukhit · Nassim Mezzai
 
-**Version 1 — brouillon de travail, mis à jour le 13/11/2026**
+**Version 1 — brouillon de travail, mis à jour le 24/11/2026**
 
 Les sections marquées « À rédiger » sont attendues des personnes nommées. Les contenus issus de PR non fusionnées sont signalés « en relecture, PR #n ». Ce document ne vaut pas validation collective.
 
@@ -124,9 +124,36 @@ Chaque expérience doit documenter la date, le responsable, le code, les donnée
 
 ### 3.1 Volet A — classification et application web
 
-**À rédiger par Bachar.**
+**Rédaction : Alain, à partir des sources du dépôt, à la place de la section attendue de Bachar. À relire par Bachar.**
 
-**Éléments attestés à reprendre**
+**Chaîne de traitement.** Les lignes de logs sont regroupées par identifiant de bloc `blk_…`. Chaque ligne est associée à l'un des 29 modèles d'événements HDFS (E1 à E29). Le vocabulaire compte 31 indices : 0 pour le remplissage, 30 pour un événement inconnu. Le modèle lit les **50 premiers** événements de chaque bloc ; au-delà, ils sont tronqués et le site le signale. Le même prétraitement est écrit en Python pour l'entraînement et en JavaScript pour le site, et des cas de parité le vérifient. Sources : `volet_a/training/dataset.py`, `volet_a/web/src/preprocess.js`, `volet_a/web/public/model/parity_cases.json`.
+
+**Modèle (SCRUM-25).** Un embedding de dimension 16 alimente un LSTM bidirectionnel de 32 unités par sens. Les sorties sont moyennées sur les seules positions réelles, puis une couche linéaire et une sigmoïde donnent un score `p_anomaly` entre 0 et 1. L'entraînement dure 5 époques, avec des lots de 512, un taux d'apprentissage de 0,001 et la graine 42. Il prend environ 6 minutes sur CPU, validation comprise. Le modèle est exporté en ONNX selon le contrat C3 : entrée `event_ids` de forme [lot, 50], sortie `p_anomaly` de forme [lot]. Le fichier FP32 pèse **56 806 octets**. Sources : `volet_a/training/bilstm.py`, `volet_a/training/train.py`, [métriques SCRUM-25](../../eval/results/SCRUM-25-bilstm-v1/metrics.json), [contrats](../contrats.md).
+
+**Seuil (SCRUM-62).** Le seuil **0,4081** a été choisi sur la validation pour ne manquer presque aucune anomalie, au prix de fausses alertes supplémentaires (§3.3.5). Il est figé depuis et appliqué tel quel sur le test.
+
+**Test officiel (SCRUM-44).** Le test est ouvert une seule fois, sur **86 260** blocs, avec le seuil figé.
+
+| Modèle | Population | Macro-F1 | Fausses alertes | Anomalies manquées |
+|---|---|---:|---:|---:|
+| Baseline (régression logistique) | Test complet | 0,9882 | 116 | 2 |
+| BiLSTM FP32 | Test complet | **0,9938** | **58** | 3 |
+| Baseline | 1 962 blocs à séquence inédite | 0,9576 | 67 | 2 |
+| BiLSTM FP32 | 1 962 blocs à séquence inédite | **0,9714** | **43** | 3 |
+
+Le BiLSTM divise par deux les fausses alertes sur le test complet, pour une anomalie manquée de plus. Les versions FP32 et INT8 prennent exactement les mêmes décisions. Le candidat INT8 de 21 564 octets rangé avec le site (SCRUM-40) n'est pas le fichier de 22 570 octets que SCRUM-44 a évalué, et la commande qui a produit ce dernier n'est pas consignée. Avant le test officiel, un fichier de résultats de la baseline contenait déjà des mesures sur le test (12/10). Ce précédent est déclaré ; il n'a pas servi au réglage. Source : [évaluation finale du volet A](../../eval/results/volet_a.md).
+
+**Application web.** Le site est statique, construit avec Vite et publié sur GitHub Pages. Tout le calcul se fait dans le navigateur : les logs ne sont envoyés à aucun serveur.
+
+- **Inférence (SCRUM-40).** ONNX Runtime Web en WASM, dans un Web Worker, par lots de 64 blocs : la page reste réactive pendant l'analyse. Le modèle est gardé dans le cache du navigateur. Le site sert le FP32 : le candidat INT8 gagne surtout en taille (62 % de moins) et n'est pas le fichier évalué ([optimisation](../volet_a/optimisation.md)).
+- **Parité navigateur (SCRUM-44).** Sous Chrome, les 86 260 scores du test ont été recalculés et comparés aux scores Python sauvegardés, sans rouvrir le test : **0** décision divergente, écart maximal **2,4 × 10⁻⁷** en FP32. Le débit mesuré est d'environ **6 200 blocs par seconde**, boucle JavaScript comprise.
+- **Usage (SCRUM-27, SCRUM-41).** Collage de logs, import d'un fichier de 10 Mo au plus ou exemples tirés de la validation. Le tableau donne, pour chaque bloc, la classe, le score, le nombre d'événements, les troncatures et les événements inconnus. Un filtre garde les anomalies. L'export CSV reprend le seuil et l'empreinte du modèle, et neutralise les cellules qui ressembleraient à des formules. La séquence de chaque bloc se déplie, et les codes rares dans le lot sont signalés.
+- **Avertissements affichés.** La complétude d'un bloc ne peut pas être vérifiée à partir d'un extrait, et le score n'est pas une probabilité calibrée.
+- **Ergonomie (SCRUM-65, en relecture, PR [#59](https://github.com/LindaBOUKHIT/TeamAI/pull/59)).** Parcours en trois étapes, bilan chiffré du lot, score affiché avec le seuil, recherche et tri des blocs, affichage en cartes sur mobile, thème clair et sombre.
+
+**Limites.** Trois anomalies restent manquées sur le test, toutes à séquence inédite ; l'analyse de 10 erreurs repose sur les 50 premiers événements, pas encore sur les logs bruts. Le site ne détecte que des blocs HDFS au format attendu. Il n'explique pas ses décisions : c'est le rôle du volet B.
+
+**Repères de validation, conservés pour l'historique**
 
 - **SCRUM-24 — baseline.** Régression logistique. Les résultats de référence publiés par Nassim sont repris dans `eval/results/SCRUM-25-bilstm-v1/metrics.json`, champ `baseline_reference`. Sur la validation globale : macro-F1 **0,9897**, précision anomalie **0,9608**, rappel anomalie **1,0000**, **103** fausses alertes et **0** anomalie manquée. Sur les **1 929** blocs de validation à séquence inédite : macro-F1 **0,9618**. La baseline n’a pas été réentraînée pour cette comparaison. Source : [métriques SCRUM-25](../../eval/results/SCRUM-25-bilstm-v1/metrics.json).
 - **SCRUM-25 — métriques de VALIDATION.** Au seuil **0,9900**, sur **86 259** blocs : macro-F1 **0,9955**, précision anomalie **0,9909**, rappel anomalie **0,9917**, **23** fausses alertes et **21** anomalies manquées. Sur les **1 929** blocs à séquence inédite : macro-F1 **0,9767**, précision anomalie **0,9646**, rappel anomalie **0,9682**. Source : `eval/results/SCRUM-25-bilstm-v1/metrics.json`, champs `validation`, `unseen` et `threshold`.
@@ -173,7 +200,7 @@ La référence et les paraphrases viennent de l’équipe. Les traces répètent
 
 #### Agents spécialisés — SCRUM-42
 
-L’organisation à **trois rôles**, recherche, rédaction et contrôle, est **en relecture** (PR [#53](https://github.com/LindaBOUKHIT/TeamAI/pull/53)). Un run réel sur un GPU T4, le 16/11, sur 5 blocs de validation, donne **1 réponse acceptée sur 5**, **5/5** conformes au contrat C5 et **aucun passage cité**. Un correctif du contrôleur, mesuré le même jour sur les mêmes blocs, ne change pas ce résultat (`eval/results/SCRUM-42/kaggle_val5/` et `kaggle_val5_v2/`, branche de la PR #53). Ces 5 blocs ne mesurent pas la qualité, et aucun gain n’est établi. Source pour les rôles et la planification : [V0.1](TeamAI_Rapport_SCRUM33_V0.1.pdf), section 2.6, et [feuille de route](../projet/feuille_de_route.md), sprint « Agents & évaluation ».
+L’organisation à **trois rôles**, recherche, rédaction et contrôle, est fusionnée dans `dev` le 24/11 (PR [#53](https://github.com/LindaBOUKHIT/TeamAI/pull/53)). Un run réel sur un GPU T4, le 16/11, sur 5 blocs de validation, donne **1 réponse acceptée sur 5**, **5/5** conformes au contrat C5 et **aucun passage cité**. Un correctif du contrôleur, mesuré le même jour sur les mêmes blocs, ne change pas ce résultat (`eval/results/SCRUM-42/kaggle_val5/` et `kaggle_val5_v2/`). Ces 5 blocs ne mesurent pas la qualité, et aucun gain n’est établi. Source pour les rôles et la planification : [V0.1](TeamAI_Rapport_SCRUM33_V0.1.pdf), section 2.6, et [feuille de route](../projet/feuille_de_route.md), sprint « Agents & évaluation ».
 
 #### Défauts observés — SCRUM-46
 
@@ -280,7 +307,7 @@ Le seuil retenu est **0,40814146399497986**. Sur la validation globale, il condu
 
 Ce réglage réduit le nombre d'anomalies manquées, au prix d'une augmentation du nombre de fausses alertes.
 
-Ces valeurs correspondent **exclusivement à la validation**. Elles ne doivent pas être présentées comme des performances finales sur le test réservé.
+Ces valeurs correspondent **exclusivement à la validation**. Elles ne doivent pas être présentées comme des performances finales sur le test réservé. Les résultats du test officiel figurent au §3.1.
 
 Sources : [résultats SCRUM-25](../../eval/results/SCRUM-25-bilstm-v1/metrics.json) et [analyse SCRUM-62](../../eval/results/SCRUM-62_20261023T153242Z_690fcb/analysis.json).
 
@@ -489,7 +516,7 @@ Les sources marquées « en relecture » viennent de PR non fusionnées dans `de
 | `eval/results/comparaison_a_b.md` | Synthèse comparative SCRUM-47 | En relecture, PR [#47](https://github.com/LindaBOUKHIT/TeamAI/pull/47) |
 | `eval/results/volet_a.md` | Test officiel du volet A, SCRUM-44 | Dev (fusionné, PR [#50](https://github.com/LindaBOUKHIT/TeamAI/pull/50)) |
 | `eval/results/SCRUM-58/README.md` | Essai Laya sur la validation | Dev (fusionné, PR [#52](https://github.com/LindaBOUKHIT/TeamAI/pull/52)) |
-| `eval/results/SCRUM-42/kaggle_val5/` et `kaggle_val5_v2/` | Runs réels à 3 agents sur 5 blocs de validation | En relecture, PR [#53](https://github.com/LindaBOUKHIT/TeamAI/pull/53) |
+| `eval/results/SCRUM-42/kaggle_val5/` et `kaggle_val5_v2/` | Runs réels à 3 agents sur 5 blocs de validation | Dev (fusionné, PR [#53](https://github.com/LindaBOUKHIT/TeamAI/pull/53)) |
 | `docs/volet_a/optimisation.md` | Modèle servi (FP32) et candidat INT8, SCRUM-40 | Dev (fusionné, PR [#56](https://github.com/LindaBOUKHIT/TeamAI/pull/56)) |
 | `docs/rapport/outils/codex_claude.md` | Fiche d’outil SCRUM-34 | Dev (fusionné, PR [#46](https://github.com/LindaBOUKHIT/TeamAI/pull/46)) |
 | `docs/rapport/outils/kaggle_mcp.md` | Fiche d’outil SCRUM-34 | Dev (fusionné, PR [#45](https://github.com/LindaBOUKHIT/TeamAI/pull/45)) |
