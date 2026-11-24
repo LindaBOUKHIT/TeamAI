@@ -204,6 +204,29 @@ La référence et les paraphrases viennent de l’équipe. Les traces répètent
 
 L’organisation à **trois rôles**, recherche, rédaction et contrôle, est fusionnée dans `dev` le 24/11 (PR [#53](https://github.com/LindaBOUKHIT/TeamAI/pull/53)). Un run réel sur un GPU T4, le 16/11, sur 5 blocs de validation, donne **1 réponse acceptée sur 5**, **5/5** conformes au contrat C5 et **aucun passage cité**. Un correctif du contrôleur, mesuré le même jour sur les mêmes blocs, ne change pas ce résultat (`eval/results/SCRUM-42/kaggle_val5/` et `kaggle_val5_v2/`). Ces 5 blocs ne mesurent pas la qualité, et aucun gain n’est établi. Source pour les rôles et la planification : [V0.1](TeamAI_Rapport_SCRUM33_V0.1.pdf), section 2.6, et [feuille de route](../projet/feuille_de_route.md), sprint « Agents & évaluation ».
 
+#### Interface locale — SCRUM-43
+
+La démo Gradio permet de coller des logs ou d’importer un fichier `.log` ou `.txt`. Source : [README, « Lancer la démo »](../../volet_b/README.md#lancer-la-démo).
+Elle propose **1 ou 3 agents**, le modèle de base ou adapté, et un mode factice signalé à l’écran. Source : [README, « Lancer la démo »](../../volet_b/README.md#lancer-la-démo).
+L’affichage présente le résumé, les faits, les hypothèses, les informations manquantes et les sources. Source : [interface](../../volet_b/app/app.py).
+Il présente aussi le journal des étapes et le temps d’exécution. Source : [interface](../../volet_b/app/app.py).
+La réponse structurée est affichée seulement si `validate_answer` ne renvoie aucune erreur ; sinon, la sortie brute et les erreurs restent visibles. Source : [interface](../../volet_b/app/app.py).
+Tout bloc du split test fait refuser l’entrée avant tout appel au modèle. Source : [README, « Lancer la démo »](../../volet_b/README.md#lancer-la-démo).
+Sans `data/splits/splits.csv`, tout bloc absent de l’échantillon est refusé. Source : [interface](../../volet_b/app/app.py).
+Une analyse traite au maximum **5 blocs** ; l’interface écoute uniquement sur `127.0.0.1`, sans partage public. Source : [README, « Lancer la démo »](../../volet_b/README.md#lancer-la-démo).
+Cette interface est fusionnée par la PR [#54](https://github.com/LindaBOUKHIT/TeamAI/pull/54).
+
+#### Jeu d’adaptation annoté — SCRUM-36
+
+Le tirage stratifié retient **240 blocs train/val**, avec la seed **36**. Source : [`make_lots.py`, PR brouillon #64](https://github.com/LindaBOUKHIT/TeamAI/pull/64/files).
+Les blocs déjà vus sont exclus du tirage. Source : [`make_lots.py`, PR brouillon #64](https://github.com/LindaBOUKHIT/TeamAI/pull/64/files).
+Le jeu est réparti en **4 lots de 60**, chacun avec **50 blocs train et 10 val**. Source : PR brouillon [#64](https://github.com/LindaBOUKHIT/TeamAI/pull/64).
+Les brouillons sont rédigés par l’IA, puis contrôlés par `check_lots` selon les règles v16. Source : [`check_lots.py`, PR brouillon #64](https://github.com/LindaBOUKHIT/TeamAI/pull/64/files).
+Une correction humaine est prévue pour chaque lot. Source : PR brouillon [#64](https://github.com/LindaBOUKHIT/TeamAI/pull/64).
+Elle est suivie d’une relecture croisée. Source : PR brouillon [#64](https://github.com/LindaBOUKHIT/TeamAI/pull/64).
+Au **24/11**, le lot de Linda est corrigé : **56 ok et 4 corrigés**. Source : PR brouillon [#64](https://github.com/LindaBOUKHIT/TeamAI/pull/64).
+Les **trois autres lots** sont en cours ; le travail reste dans la PR brouillon [#64](https://github.com/LindaBOUKHIT/TeamAI/pull/64). Source : PR brouillon [#64](https://github.com/LindaBOUKHIT/TeamAI/pull/64).
+
 #### Défauts observés — SCRUM-46
 
 Les comptes ci-dessous portent sur **40 nouveaux blocs de validation**, issus de `data/sample`, après exclusion des blocs déjà connus. Ils concernent la v16 sans RAG et sans adaptation LoRA évaluée. Les défauts peuvent se recouper ; leurs fréquences ne s’additionnent pas. Sources : défauts et feuille de route, sections 1 et 2 (fusionné, PR [#41](https://github.com/LindaBOUKHIT/TeamAI/pull/41)) et trace SCRUM-63, validation unique (fusionné, PR [#40](https://github.com/LindaBOUKHIT/TeamAI/pull/40)).
