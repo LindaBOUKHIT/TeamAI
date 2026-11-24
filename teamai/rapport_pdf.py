@@ -1,6 +1,6 @@
 """SCRUM-48 : génère le PDF du rapport à partir de rapport_v1.md.
 
-Usage : python docs/rapport/build_pdf.py [--out docs/rapport/TeamAI_Rapport_V1.pdf]
+Usage, depuis la racine : python -m teamai.rapport_pdf [--out docs/rapport/TeamAI_Rapport_V1.pdf]
 
 Le Markdown est converti en HTML (paquet `markdown`), puis imprimé en PDF par
 Microsoft Edge ou Chrome sans interface. Les liens relatifs vers le dépôt sont
@@ -16,8 +16,8 @@ from pathlib import Path
 
 import markdown
 
-HERE = Path(__file__).resolve().parent
-ROOT = HERE.parent.parent
+from teamai.paths import RAPPORT as HERE, ROOT, resolve_path
+
 REPO_URL = "https://github.com/LindaBOUKHIT/TeamAI/blob/dev/"
 
 BROWSERS = [
@@ -60,6 +60,7 @@ blockquote { margin: 3mm 0; padding: 2mm 4mm; border-left: 3px solid #c7d2fe; co
 
 
 def find_browser():
+    """Renvoie le premier navigateur Chromium disponible pour imprimer le PDF."""
     for candidate in BROWSERS:
         path = shutil.which(candidate) or (candidate if os.path.exists(candidate) else None)
         if path:
@@ -70,6 +71,7 @@ def find_browser():
 def rewrite_links(html):
     """Liens relatifs vers le dépôt -> GitHub ; les images restent locales."""
     def repl(match):
+        """Réécrit un lien relatif s'il désigne un fichier du dépôt."""
         href = match.group(1)
         if re.match(r"^(https?:|mailto:|#)", href):
             return match.group(0)
@@ -106,6 +108,7 @@ def split_cover(text):
 
 
 def build(out):
+    """Convertit rapport_v1.md en PDF à l'emplacement out."""
     text = (HERE / "rapport_v1.md").read_text(encoding="utf-8")
     cover, body = split_cover(text)
     md = markdown.Markdown(extensions=["tables", "toc", "sane_lists", "attr_list"],
@@ -136,4 +139,4 @@ def build(out):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--out", type=Path, default=HERE / "TeamAI_Rapport_V1.pdf")
-    build(parser.parse_args().out.resolve())
+    build(resolve_path(parser.parse_args().out))
