@@ -141,6 +141,8 @@ Chaque expérience doit documenter la date, le responsable, le code, les donnée
 | Baseline | 1 962 blocs à séquence inédite | 0,9576 | 67 | 2 |
 | BiLSTM FP32 | 1 962 blocs à séquence inédite | **0,9714** | **43** | 3 |
 
+![Matrice de confusion du BiLSTM FP32 sur le test complet : 83 676 vrais négatifs, 58 fausses alertes, 3 anomalies manquées, 2 523 anomalies détectées](figures/scrum44_bilstm_fp32_test_complet_confusion.png)
+
 Le BiLSTM divise par deux les fausses alertes sur le test complet, pour une anomalie manquée de plus. Les versions FP32 et INT8 prennent exactement les mêmes décisions. Le candidat INT8 de 21 564 octets rangé avec le site (SCRUM-40) n'est pas le fichier de 22 570 octets que SCRUM-44 a évalué, et la commande qui a produit ce dernier n'est pas consignée. Avant le test officiel, un fichier de résultats de la baseline contenait déjà des mesures sur le test (12/10). Ce précédent est déclaré ; il n'a pas servi au réglage. Source : [évaluation finale du volet A](../../eval/results/volet_a.md).
 
 **Application web.** Le site est statique, construit avec Vite et publié sur GitHub Pages. Tout le calcul se fait dans le navigateur : les logs ne sont envoyés à aucun serveur.
