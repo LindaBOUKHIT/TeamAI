@@ -29,8 +29,15 @@ export function getWarnings(row) {
     return warnings.join(" ; ");
 }
 
-export function renderRows(tbody, rows) {
+export function renderRows(tbody, rows, population = rows) {
     const fragment = document.createDocumentFragment();
+
+    const counts = new Map();
+    for (const row of population) {
+        for (const event of row.events ?? []) {
+            counts.set(event, (counts.get(event) ?? 0) + 1);
+        }
+    }
 
     for (const row of rows) {
         const tr = document.createElement("tr");
@@ -54,6 +61,22 @@ export function renderRows(tbody, rows) {
             tr.appendChild(td);
         }
 
+        if (row.events?.length) {
+            const details = document.createElement("details");
+            const summary = document.createElement("summary");
+            summary.textContent = "Voir la séquence";
+            details.appendChild(summary);
+            const sequence = document.createElement("ol");
+            sequence.className = "event-sequence";
+            for (const event of row.events) {
+                const item = document.createElement("li");
+                item.textContent = counts.get(event) === 1 && event !== "UNK"
+                    ? `${event} (rare)` : event;
+                sequence.appendChild(item);
+            }
+            details.appendChild(sequence);
+            tr.firstElementChild.appendChild(details);
+        }
         fragment.appendChild(tr);
     }
 

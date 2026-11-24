@@ -1,4 +1,4 @@
-import { loadDetector } from "./model.js";
+import { loadDetector } from "./worker-client.js";
 import { compileVocab, preprocess } from "./preprocess.js";
 import {
     selectRows,
@@ -48,7 +48,7 @@ function refreshTable() {
     const displayed = selectRows(
         rows, elements["anomalies-only"].checked
     );
-    renderRows(elements.rows, displayed);
+    renderRows(elements.rows, displayed, rows);
     elements["result-count"].textContent =
         `${displayed.length} bloc(s) affiché(s) sur ${rows.length}.`;
     updateControls();
@@ -154,6 +154,7 @@ elements.analyze.addEventListener("click", async () => {
                     truncated: block.truncated,
                     unknown: block.unknown,
                     incompleteExample,
+                    events: block.events.slice(0, compiled.max_len),
                     score,
                     label: detector.isToy
                         ? null
