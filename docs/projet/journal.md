@@ -582,3 +582,7 @@ Usage IA : brouillon rédigé par Claude à partir des réponses de Linda et des
 ## 2026-11-24 — SCRUM-52 : supports de soutenance (pitch 4 min, présentation 8 min)
 `docs/soutenance/pitch/` (6 slides) et `docs/soutenance/presentation/` (12 slides), repris du style du support d'avancement ; PDF exportés avec Chrome (`pitch.pdf`, `presentation.pdf`). Sources de chaque chiffre en tête des `index.html` ; aucun chiffre du test du volet B, aucune mesure non archivée.
 Usage IA : supports rédigés par Codex (gpt-6.1-sol) à partir des résultats du dépôt ; chiffres contrôlés par Claude (une erreur corrigée : les deux runs SCRUM-42 n'acceptent pas le même bloc) ; à valider par les 4 membres.
+
+## 2026-11-24 — SCRUM-48 : date de soutenance et PDF du rapport
+Soutenance le lundi 30/11 (et non le 07/12) : date corrigée dans le README, la feuille de route et le rapport (§2.2). Les documents d'archive et de cadrage gardent la date d'origine. PDF du rapport régénéré avec les ajouts de la #65 (27 pages).
+Usage IA : modifications faites par Claude à la demande d'Alain.
