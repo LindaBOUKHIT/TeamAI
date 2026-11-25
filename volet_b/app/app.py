@@ -1,4 +1,4 @@
-"""Interface locale : traces HDFS, explications contrôlées et journal des agents."""
+"""Interface locale : traces HDFS, explications contrôlées, journal des agents et questions sur la documentation."""
 import argparse
 import csv
 import html
@@ -13,7 +13,7 @@ import pandas as pd
 from data.parse_hdfs import compile_templates
 from teamai.contracts import validate_answer
 from teamai.paths import SAMPLE, SPLITS, resolve_path
-from volet_b.agents import orchestrator, single_agent
+from volet_b.agents import doc_chat, orchestrator, single_agent
 from volet_b.slm.v16.facts import prepare_block
 
 BANNER = "Démo locale. Les explications sont générées et peuvent être fausses ; vérifiez les lignes citées."
@@ -201,6 +201,67 @@ def analyze(text, configuration="3 agents", model="base", adapter="", mock=False
     return "\n\n".join(output)
 
 
+CHAT_INTRO = ("Posez une question sur le fonctionnement de HDFS ou sur un événement Exx. La réponse cite les passages "
+              "de la documentation indexée (guides Apache HDFS 1.2.1, templates Loghub) ou s'abstient quand ils ne "
+              "couvrent pas la question. La dernière analyse de l'onglet précédent sert de contexte, jamais de source. "
+              "Fonction de démonstration : sa qualité n'a pas été mesurée.")
+CHAT_EXAMPLES = ("Que signifie l'événement E23 ?", "Comment HDFS détecte-t-il qu'un DataNode est en panne ?",
+                 "Que se passe-t-il quand une réplique d'un bloc est perdue ?")
+
+
+def source_line(passage):
+    """Une source citée : document, section et lien officiel quand il est sûr."""
+    label = f"{safe(passage['doc'])}, {safe(passage['section'])}"
+    url = str(passage.get("source_url") or "")
+    if re.fullmatch(r"https://[\w./#%-]+", url):
+        return f"- [{label}]({url})"
+    return f"- {label}"
+
+
+def render_reply(record):
+    """Rend la réponse contrôlée, ses sources, la requête lancée et les passages consultés."""
+    if record["status"] == "vide":
+        return ""
+    by_id = {p["id"]: p for p in record["passages"]}
+    consulted = ", ".join(safe(p["id"]) for p in record["passages"]) or "aucun"
+    trace = f"_Requête : {safe(record['query'])} · passages consultés : {consulted}_"
+    if record["status"] == "refusée":
+        return "Réponse refusée par le contrôle : " + safe(" ; ".join(record["errors"])) + ".\n\n" + trace
+    answer = record["answer"]
+    if answer["abstention"]:
+        return "**Abstention.** " + safe(answer["reponse"]) + "\n\n" + trace
+    return "\n".join([safe(answer["reponse"]), "", "**Sources**",
+                      *[source_line(by_id[s]) for s in answer["sources"]], "", trace])
+
+
+def chat(question, history, analysis="", model="base", adapter="", mock=False):
+    """Ajoute au fil la question et sa réponse sourcée ; vide la zone de saisie."""
+    history = list(history or [])
+    question = (question or "").strip()
+    if not question:
+        return history, ""
+    adapter = str(resolve_path(adapter.strip())) if model == "adapté" and adapter.strip() else None
+    previous_turns = [{**m, "content": html.unescape(str(m.get("content") or ""))} for m in history]
+    with LOCK:
+        previous = os.environ.get("TEAMAI_SLM_MOCK")
+        os.environ["TEAMAI_SLM_MOCK"] = "1" if mock else "0"
+        try:
+            caller = doc_chat.mock_call_slm if mock else get_caller(adapter)
+            record = doc_chat.ask(question, previous_turns, get_retriever(mock), caller,
+                                  analysis=html.unescape(analysis or ""))
+            reply = render_reply(record)
+        except Exception as exc:
+            reply = "Réponse impossible : " + safe(exc)
+        finally:
+            if previous is None:
+                os.environ.pop("TEAMAI_SLM_MOCK", None)
+            else:
+                os.environ["TEAMAI_SLM_MOCK"] = previous
+    if mock:
+        reply += "\n\n**Mode factice actif (sans modèle).**"
+    return history + [{"role": "user", "content": question}, {"role": "assistant", "content": reply}], ""
+
+
 def import_logs(path):
     """Lit un fichier de logs importé depuis le composant local."""
     return resolve_path(path).read_text(encoding="utf-8", errors="replace") if path else ""
@@ -213,20 +274,34 @@ def build_app(mock=False):
     anomaly, normal = choose_examples()
     with gr.Blocks(title="TeamAI — Volet B") as app:
         gr.Markdown(BANNER)
-        text = gr.Textbox(label="Lignes de logs HDFS brutes", lines=12)
-        file = gr.File(label="Importer un fichier .log/.txt", file_types=[".log", ".txt"], type="filepath")
-        file.change(import_logs, file, text)
-        configuration = gr.Radio(["1 agent", "3 agents"], value="3 agents", label="Configuration")
-        model = gr.Radio(["base", "adapté"], value="base", label="Modèle")
-        adapter = gr.Textbox(label="Chemin d'adaptateur (vide = base)")
-        mock_mode = gr.Checkbox(value=mock, label="Mode factice (sans modèle)")
-        mock_notice = gr.Markdown("Mode factice actif (sans modèle)." if mock else "")
-        mock_mode.change(mock_message, mock_mode, mock_notice)
-        gr.Button("Exemple val avec indice d'anomalie").click(example_anomaly, gr.State(anomaly), text)
-        gr.Button("Exemple val normal").click(example_normal, gr.State(normal), text)
-        run = gr.Button("Analyser", variant="primary")
-        result = gr.Markdown(sanitize_html=True)
-        run.click(analyze, [text, configuration, model, adapter, mock_mode], result, concurrency_limit=1)
+        with gr.Tab("Analyse de traces"):
+            text = gr.Textbox(label="Lignes de logs HDFS brutes", lines=12)
+            file = gr.File(label="Importer un fichier .log/.txt", file_types=[".log", ".txt"], type="filepath")
+            file.change(import_logs, file, text)
+            configuration = gr.Radio(["1 agent", "3 agents"], value="3 agents", label="Configuration")
+            model = gr.Radio(["base", "adapté"], value="base", label="Modèle")
+            adapter = gr.Textbox(label="Chemin d'adaptateur (vide = base)")
+            mock_mode = gr.Checkbox(value=mock, label="Mode factice (sans modèle)")
+            mock_notice = gr.Markdown("Mode factice actif (sans modèle)." if mock else "")
+            mock_mode.change(mock_message, mock_mode, mock_notice)
+            gr.Button("Exemple val avec indice d'anomalie").click(example_anomaly, gr.State(anomaly), text)
+            gr.Button("Exemple val normal").click(example_normal, gr.State(normal), text)
+            run = gr.Button("Analyser", variant="primary")
+            result = gr.Markdown(sanitize_html=True)
+            run.click(analyze, [text, configuration, model, adapter, mock_mode], result, concurrency_limit=1)
+        with gr.Tab("Questions sur HDFS"):
+            gr.Markdown(CHAT_INTRO)
+            thread = gr.Chatbot(type="messages", label="Assistant documentaire HDFS", height=420, allow_tags=False,
+                                sanitize_html=True)
+            question = gr.Textbox(label="Votre question", placeholder=CHAT_EXAMPLES[0])
+            with gr.Row():
+                send = gr.Button("Envoyer", variant="primary")
+                gr.ClearButton([thread, question], value="Effacer le fil")
+            inputs = [question, thread, result, model, adapter, mock_mode]
+            send.click(chat, inputs, [thread, question], concurrency_limit=1)
+            question.submit(chat, inputs, [thread, question], concurrency_limit=1)
+            for example in CHAT_EXAMPLES:
+                gr.Button(example, size="sm").click(lambda e=example: e, None, question)
     return app
 
 

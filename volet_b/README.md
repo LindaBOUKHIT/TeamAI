@@ -26,6 +26,7 @@ volet_b/
 ├── agents/                                                      Linda
 │   ├── single_agent.py         Référence : résumé → retrieval → réponse C5      SCRUM-37
 │   ├── orchestrator.py         3 agents, 1 reprise max, ≤ 5 appels              SCRUM-42
+│   ├── doc_chat.py             Questions-réponses sourcées sur la doc HDFS       SCRUM-68
 │   ├── roles/                  search.py, writer.py, checker.py
 │   ├── prompts/                Un fichier .txt par rôle (versionnés, jamais réglés sur le test)
 │   └── validate.py             Contrôle par code : JSON valide, sources existantes
@@ -89,6 +90,16 @@ Le CPU est lent ; compter environ 30 s par appel sur T4, et jusqu'à 5 appels pa
 3 agents. Les ressources sont chargées à la première utilisation puis réutilisées. Les explications
 peuvent être fausses : vérifier les lignes citées. Les réponses invalides ou rejetées restent
 affichées en sortie brute avec leurs erreurs, sans réparation.
+
+### Onglet « Questions sur HDFS » (SCRUM-68)
+
+Le second onglet de la démo répond aux questions sur le fonctionnement de HDFS ou sur un événement Exx.
+Pour chaque question, le modèle écrit d'abord une requête de recherche en anglais (langue du corpus),
+le retriever hybride de SCRUM-37 renvoie les passages, et un code Exx cité ajoute son template Loghub.
+Le modèle répond ensuite en français. Le schéma limite `sources` aux passages fournis, et le code
+refuse toute réponse non sourcée. Sans passage utile, la réponse est une abstention explicite.
+La dernière analyse de l'onglet précédent sert de contexte, jamais de source. C'est une fonction de démonstration : elle ne fait
+pas partie des 4 configurations évaluées et sa qualité n'a pas été mesurée sous protocole figé.
 
 ### RAG à un agent (SCRUM-37)
 
