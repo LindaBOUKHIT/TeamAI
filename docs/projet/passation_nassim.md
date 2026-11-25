@@ -4,7 +4,7 @@ Ce qui reste à faire sur tes tickets et que toi seul peux faire : ta machine, t
 
 | # | Quoi | Ticket | Prérequis | Durée estimée |
 |---|---|---|---|---|
-| 1 | Mesure de l'adaptateur sur la RTX 3050 | SCRUM-61, étapes 1 et 5 | `adapter_r8_qv.gguf` transmis par Alain | 30 min, téléchargement compris |
+| 1 | Mesure de l'adaptateur sur la RTX 3050 | SCRUM-61, étapes 1 et 5 | aucun (adaptateur dans le dépôt) | 30 min, téléchargement compris |
 | 2 | Double annotation à l'aveugle | SCRUM-45 | fiches générées après les runs LoRA | quelques heures |
 | 3 | Préparer l'oral sur tes tickets | SCRUM-35, 38, 39, 45, 61 | aucun | 1 h de lecture |
 
@@ -21,7 +21,7 @@ python -m pip install -e ".[volet_b_gguf]"
 python -m pip install --upgrade --force-reinstall --no-cache-dir --only-binary=llama-cpp-python llama-cpp-python==0.3.36 --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cu124
 ```
 
-**Adaptateur.** Le réglage retenu par SCRUM-39 est `r8_qv` : `adapter_r8_qv.gguf` (4 547 904 octets), transmis par Alain, car les poids ne sont pas dans le dépôt. SHA-256 : `52ff1ba7ca6833846b2148dba4c86dc0d5a646a6d582eaa8b2d0d6444559db7b` (voir `eval/results/SCRUM-39/kaggle_final/README.md`).
+**Adaptateur.** Le réglage retenu par SCRUM-39 est `r8_qv`. Il est versionné dans le dépôt : `eval/results/SCRUM-39/kaggle_final/adapter_r8_qv.gguf` (4 547 904 octets, SHA-256 `52ff1ba7ca6833846b2148dba4c86dc0d5a646a6d582eaa8b2d0d6444559db7b`).
 
 **Mesure**, en une commande depuis la racine du dépôt :
 

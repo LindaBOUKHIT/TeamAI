@@ -18,7 +18,7 @@ Seul l'adaptateur est converti en GGUF, avec llama.cpp au commit `0c1e57098`, en
 | `r8_qv` (retenu) | 4 547 904 octets | `52ff1ba7ca6833846b2148dba4c86dc0d5a646a6d582eaa8b2d0d6444559db7b` |
 | `r16_qkvo` | 18 172 224 octets | `8ab427b91f4927e0db222689631172ac797d3a3b6f11c9bb59f2bfb964545638` |
 
-Les poids ne sont pas versionnés (`*.gguf` et `*.safetensors` sont dans `.gitignore`). Ils restent dans les sorties du notebook Kaggle et doivent être vérifiés par leur SHA-256 avant usage.
+L'adaptateur retenu est versionné ici : `adapter_r8_qv.gguf`, 4,5 Mo. C'est le seul GGUF exclu de la règle `*.gguf` de `.gitignore`. Les autres poids, `r16_qkvo` et les `adapter_model.safetensors`, restent dans les sorties du notebook Kaggle. Vérifier le SHA-256 avant usage.
 
 ## Sélection sur val (40 exemples, pipeline v16 à 1 agent)
 
@@ -42,5 +42,6 @@ Les poids ne sont pas versionnés (`*.gguf` et `*.safetensors` sont dans `.gitig
 
 - `lora/` : configurations des essais, provenance de la base, `meta.json` et `conversion.log` de chaque export GGUF, runs d'entraînement (`metrics.json`, `train_log.jsonl`).
 - `val/<base|r8_qv|r16_qkvo>/` : runs C7 sur val.
+- `adapter_r8_qv.gguf` : adaptateur retenu, à passer à `--adapter`.
 - `selection.json` : sortie de la règle de sélection.
 - `journal.txt`, `sorties.txt` : journal du notebook.
