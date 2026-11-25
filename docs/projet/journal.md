@@ -594,3 +594,7 @@ Usage IA : modifications écrites par Codex (gpt-6.1-sol), relues, corrigées (s
 ## 2026-11-24 — SCRUM-42 : mesure GPU des correctifs de la PR #67
 Run Kaggle (T4) sur 5 nouveaux blocs `val` (seed 7) et sur les 5 blocs de réglage : 10/10 réponses conformes à C5, mais 0 acceptée (contre 1/5 au run 2). Motifs complets, passages cités dans 3 réponses finales sur 10, une reprise par le drapeau d'ordre. Le contrôleur rejette des réponses sans erreur visible et manque des ordres affirmés (« a débuté par … suivi par »). Pas de réglage avant la soutenance. Détails : `eval/results/SCRUM-42/kaggle_val5_v3/README.md`.
 Usage IA : run lancé et analysé par Claude, à la demande d'Alain ; seules des lignes de blocs `val` ont été envoyées.
+
+## 2026-11-25 — SCRUM-66 : troisième mesure SCRUM-42 reportée dans les supports
+Rapport §3.2 et tableau des preuves, slide 7 de la présentation, questions 17 et 18 du jury : ajout du run du 24/11 après la PR #67 (0/10 accepté, 10/10 conformes C5, passages cités 3/10). PDF du rapport et de la présentation régénérés.
+Usage IA : modifications rédigées par Claude à partir de `eval/results/SCRUM-42/kaggle_val5_v3/README.md`.

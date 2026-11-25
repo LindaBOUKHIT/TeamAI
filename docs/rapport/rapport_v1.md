@@ -202,7 +202,7 @@ La référence et les paraphrases viennent de l’équipe. Les traces répètent
 
 #### Agents spécialisés — SCRUM-42
 
-L’organisation à **trois rôles**, recherche, rédaction et contrôle, est fusionnée dans `dev` le 24/11 (PR [#53](https://github.com/LindaBOUKHIT/TeamAI/pull/53)). Un run réel sur un GPU T4, le 16/11, sur 5 blocs de validation, donne **1 réponse acceptée sur 5**, **5/5** conformes au contrat C5 et **aucun passage cité**. Un correctif du contrôleur, mesuré le même jour sur les mêmes blocs, ne change pas ce résultat (`eval/results/SCRUM-42/kaggle_val5/` et `kaggle_val5_v2/`). Ces 5 blocs ne mesurent pas la qualité, et aucun gain n’est établi. Source pour les rôles et la planification : [V0.1](TeamAI_Rapport_SCRUM33_V0.1.pdf), section 2.6, et [feuille de route](../projet/feuille_de_route.md), sprint « Agents & évaluation ».
+L’organisation à **trois rôles**, recherche, rédaction et contrôle, est fusionnée dans `dev` le 24/11 (PR [#53](https://github.com/LindaBOUKHIT/TeamAI/pull/53)). Un run réel sur un GPU T4, le 16/11, sur 5 blocs de validation, donne **1 réponse acceptée sur 5**, **5/5** conformes au contrat C5 et **aucun passage cité**. Un correctif du contrôleur, mesuré le même jour sur les mêmes blocs, ne change pas ce résultat (`eval/results/SCRUM-42/kaggle_val5/` et `kaggle_val5_v2/`). Une troisième mesure, le 24/11, après les correctifs de la PR [#67](https://github.com/LindaBOUKHIT/TeamAI/pull/67), porte sur ces 5 blocs et sur 5 nouveaux blocs de validation : **0 réponse acceptée sur 10**, **10/10** conformes au contrat C5, des passages cités dans **3 réponses sur 10** et des motifs du contrôleur complets. Le contrôleur devient le goulot : il rejette aussi des réponses sans erreur visible et laisse passer des ordres affirmés (`eval/results/SCRUM-42/kaggle_val5_v3/`). Ces blocs ne mesurent pas la qualité, et aucun gain n’est établi. Source pour les rôles et la planification : [V0.1](TeamAI_Rapport_SCRUM33_V0.1.pdf), section 2.6, et [feuille de route](../projet/feuille_de_route.md), sprint « Agents & évaluation ».
 
 #### Interface locale — SCRUM-43
 
@@ -570,6 +570,7 @@ Les sources marquées « en relecture » viennent de PR non fusionnées dans `de
 | `eval/results/volet_a.md` | Test officiel du volet A, SCRUM-44 | Dev (fusionné, PR [#50](https://github.com/LindaBOUKHIT/TeamAI/pull/50)) |
 | `eval/results/SCRUM-58/README.md` | Essai Laya sur la validation | Dev (fusionné, PR [#52](https://github.com/LindaBOUKHIT/TeamAI/pull/52)) |
 | `eval/results/SCRUM-42/kaggle_val5/` et `kaggle_val5_v2/` | Runs réels à 3 agents sur 5 blocs de validation | Dev (fusionné, PR [#53](https://github.com/LindaBOUKHIT/TeamAI/pull/53)) |
+| `eval/results/SCRUM-42/kaggle_val5_v3/` | Troisième run à 3 agents, après correctifs, sur 10 blocs de validation | Dev (fusionné, PR [#67](https://github.com/LindaBOUKHIT/TeamAI/pull/67)) |
 | `docs/volet_a/optimisation.md` | Modèle servi (FP32) et candidat INT8, SCRUM-40 | Dev (fusionné, PR [#56](https://github.com/LindaBOUKHIT/TeamAI/pull/56)) |
 | `docs/rapport/outils/codex_claude.md` | Fiche d’outil SCRUM-34 | Dev (fusionné, PR [#46](https://github.com/LindaBOUKHIT/TeamAI/pull/46)) |
 | `docs/rapport/outils/kaggle_mcp.md` | Fiche d’outil SCRUM-34 | Dev (fusionné, PR [#45](https://github.com/LindaBOUKHIT/TeamAI/pull/45)) |

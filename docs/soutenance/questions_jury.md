@@ -59,10 +59,10 @@ Le prompt v16 fournit des faits calculés (événements, chronologie, lignes) et
 Sur 40 nouveaux blocs de validation : 2 erreurs de chronologie, 3 liens de causalité non étayés, 3 pseudo-références, 1 réponse en boucle. Dans les 16 cas où la cause reste inconnue, aucun résumé ne le dit. Les blocs de plus de 39 événements dépassent la fenêtre de contexte ; ils représentent 4,2 % des anomalies de la validation. Sources : [défauts et feuille de route](../volet_b/defauts_feuille_de_route.md) ; pour les traces longues, [mesures CPU du 24/11](../../eval/results/SCRUM-43/cpu_24-11/README.md) et [décompte des longueurs](../../eval/results/SCRUM-43/cpu_24-11/longueurs_val.json) (PR #62).
 
 **17. À quoi sert le RAG ?**
-Il ajoute des passages de la documentation HDFS pour éclairer les événements. Dans les runs à 3 agents, aucune réponse acceptée ne cite de passage : l'apport du RAG n'est pas démontré. Source : [SCRUM-42](../../eval/results/SCRUM-42/kaggle_val5_v2/README.md).
+Il ajoute des passages de la documentation HDFS pour éclairer les événements. Dans le dernier run à 3 agents, 3 réponses sur 10 citent un passage, mais aucune n'est acceptée : l'apport du RAG n'est pas démontré. Source : [SCRUM-42](../../eval/results/SCRUM-42/kaggle_val5_v3/README.md).
 
 **18. Pourquoi trois agents ?**
-Pour séparer la recherche des passages, la rédaction et le contrôle. Sur 5 blocs de validation, 1 réponse est acceptée sur 5, avec environ 86 s de génération par bloc sur un T4. C'est un essai de fonctionnement, pas une mesure de qualité. Source : [SCRUM-42](../../eval/results/SCRUM-42/kaggle_val5_v2/README.md).
+Pour séparer la recherche des passages, la rédaction et le contrôle. Les deux premiers runs, sur 5 blocs de validation, acceptent 1 réponse sur 5, avec environ 86 s de génération par bloc sur un T4. Après correctifs, le troisième, sur 10 blocs, n'en accepte aucune, mais les 10 sont conformes au contrat : le contrôleur est trop strict et manque des ordres affirmés. C'est un essai de fonctionnement, pas une mesure de qualité. Source : [SCRUM-42](../../eval/results/SCRUM-42/kaggle_val5_v3/README.md).
 
 **19. Et le LoRA ?**
 La faisabilité est établie : un essai QLoRA de 30 pas sur un T4 Kaggle, puis la conversion de l'adaptateur en GGUF. L'inférence avec l'adaptateur et l'entraînement complet ne sont pas faits ; aucun gain n'est donc établi. Source : [rapport, §3.2](../rapport/rapport_v1.md).
