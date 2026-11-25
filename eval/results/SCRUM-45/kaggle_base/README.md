@@ -31,6 +31,20 @@ Run Kaggle `wsear07/teamai-scrum45-base-test` le 25/11/2026, sur un Tesla T4 15 
   Le rédacteur a proposé une hypothèse dans 22 brouillons sur 150, mais aucune ne figure dans une réponse acceptée. Aucune réponse acceptée ne cite de passage : `answers_with_sources` vaut 0.
 - **Protocole.** Ces chiffres sont mesurés sur le test : aucun prompt ni seuil n'est modifié après les avoir vus. Les configurations 3 et 4 (adaptateur LoRA) suivront la sélection SCRUM-39, au même protocole.
 
+## Relecture des sorties 3 agents
+
+Relecture des 146 passages du contrôleur, dont 137 demandent une correction. Les motifs ont été triés par mots-clés.
+
+- **Ordre des événements (48 passages).** Dans 33 cas, le brouillon affirme bien un ordre (« a débuté par », « suivi de », « ultérieurs ») entre des événements que les faits déclarent de la même seconde : le rejet est justifié. Dans les 15 autres, le brouillon ne contient aucun mot d'ordre.
+- **Omissions (36 passages).** Le contrôleur exige de reprendre un compte d'occurrences, une heure ou une ligne Lxx, alors que le contrat ne le demande pas. Il se contredit parfois. Sur test-0006, il demande d'abord de préciser l'ordre temporel, puis rejette la version qui le précise.
+- **Autres motifs (79 passages).**
+  - Les plus fréquents opposent deux formulations proches, par exemple « écriture de réplicas » et « début d'écriture d'un réplica ».
+  - D'autres reprochent au résumé une réserve que le fait Fxx contient lui-même (test-0044).
+  - Quelques-uns sont fondés, comme un pluriel tiré d'une seule occurrence (test-0060).
+- **Réponses acceptées.** Les 9 réponses acceptées portent toutes sur des blocs sans incident.
+- **Recherche.** L'agent de recherche ne renvoie que 4 passages distincts sur les 80 cas, surtout `replication-pipelining#1` (68 fois) et `staging#1` (62 fois). Le rédacteur cite une source dans 23 brouillons sur 150.
+- **Comparaison avec 1 agent.** 35 résumés sur 80 du mode 1 agent contiennent aussi des mots d'ordre. Certains se trompent d'ordre, par exemple test-0012 : « suivi de l'allocation du bloc ». Les contrôles automatiques v16 ne repèrent pas ce type d'erreur, donc les 79/80 acceptées du mode 1 agent ne disent rien de l'exactitude du résumé. C'est la double annotation humaine qui tranchera.
+
 ## Fichiers
 
 - `runs/<config>/<run>/` : `config.json`, `metrics.json` et `predictions.jsonl` (format C7).
