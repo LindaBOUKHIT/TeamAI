@@ -37,3 +37,13 @@ def test_relecteur_identique_a_l_annotateur_bloque_le_gel():
     rows[1]["reviewed_by"] = "Linda"
     validation["test-0002"]["reviewed_by"] = "Linda"
     assert problems(rows, validation) == ["test-0002 : reviewed_by : le relecteur doit être différent de l'annotateur"]
+
+
+def test_sans_relecture_croisee_marque_sans_inventer_de_nom():
+    """Un cas vérifié mais non relu reçoit NON_RELU ; un cas non vérifié reste bloquant."""
+    from eval.volet_b.figer_test import NON_RELU, accept_without_review
+    rows = [{"id": "a", "reviewed_by": ""}, {"id": "b", "reviewed_by": ""}]
+    validation = {"a": {"annotation_verifiee": "oui", "reviewed_by": "", "relecture_validee": ""},
+                  "b": {"annotation_verifiee": "", "reviewed_by": "", "relecture_validee": ""}}
+    assert accept_without_review(rows, validation) == ["a"]
+    assert rows[0]["reviewed_by"] == NON_RELU and rows[1]["reviewed_by"] == ""
