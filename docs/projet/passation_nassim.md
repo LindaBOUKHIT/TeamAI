@@ -26,7 +26,7 @@ python -m pip install --upgrade --force-reinstall --no-cache-dir --only-binary=l
 **Mesure**, en une commande depuis la racine du dépôt :
 
 ```powershell
-python -m volet_b.slm.verif_machine --adapter C:\chemin\adapter.gguf --sha256 52ff1ba7ca6833846b2148dba4c86dc0d5a646a6d582eaa8b2d0d6444559db7b
+python -m volet_b.slm.verif_machine --adapter eval\results\SCRUM-39\kaggle_final\adapter_r8_qv.gguf --sha256 52ff1ba7ca6833846b2148dba4c86dc0d5a646a6d582eaa8b2d0d6444559db7b
 ```
 
 Le script :
