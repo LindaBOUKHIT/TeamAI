@@ -1,0 +1,163 @@
+10:52:31 $ git clone -q https://github.com/LindaBOUKHIT/TeamAI.git /kaggle/temp/TeamAI
+10:52:33 
+10:52:33 $ git checkout -q faabb47f454b1b47bfc138de840d83ce957cb187
+10:52:33 
+10:53:01 $ /usr/bin/python3 -m pip install -q --only-binary=:all: /kaggle/working/wheels/llama_cpp_python-0.3.36-py3-none-linux_x86_64.whl
+10:53:07 
+10:53:07 $ /usr/bin/python3 -m pip install -q faiss-cpu rank_bm25 nvidia-cuda-runtime-cu12 nvidia-cublas-cu12
+10:53:13 
+10:53:48 $ /usr/bin/python3 -m volet_b.rag.build_index
+10:54:36 51 passages encodés (BAAI/bge-small-en-v1.5@5c38ec7c405ec4b44b94cc5a9bb96e735b38267a, dim 384)
+Index : /kaggle/temp/TeamAI/volet_b/rag/index/index.faiss
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 2727.75it/s]
+
+10:54:36 $ nvidia-smi --query-gpu=name,memory.total,driver_version --format=csv
+10:54:36 name, memory.total [MiB], driver_version
+Tesla T4, 15360 MiB, 580.178.04
+Tesla T4, 15360 MiB, 580.178.04
+
+10:54:36 $ /usr/bin/python3 -m eval.volet_b.run_eval --config base_1agent
+11:31:49 rme, 1 appel(s)
+[19/80] test-0019 : conforme, 1 appel(s)
+[20/80] test-0020 : conforme, 1 appel(s)
+[21/80] test-0021 : conforme, 1 appel(s)
+[22/80] test-0022 : conforme, 1 appel(s)
+[23/80] test-0023 : conforme, 1 appel(s)
+[24/80] test-0024 : conforme, 1 appel(s)
+[25/80] test-0025 : conforme, 1 appel(s)
+[26/80] test-0026 : conforme, 1 appel(s)
+[27/80] test-0027 : conforme, 1 appel(s)
+[28/80] test-0028 : conforme, 1 appel(s)
+[29/80] test-0029 : conforme, 1 appel(s)
+[30/80] test-0030 : conforme, 1 appel(s)
+[31/80] test-0031 : conforme, 1 appel(s)
+[32/80] test-0032 : conforme, 1 appel(s)
+[33/80] test-0033 : conforme, 1 appel(s)
+[34/80] test-0034 : conforme, 1 appel(s)
+[35/80] test-0035 : conforme, 1 appel(s)
+[36/80] test-0036 : conforme, 1 appel(s)
+[37/80] test-0037 : conforme, 1 appel(s)
+[38/80] test-0038 : conforme, 1 appel(s)
+[39/80] test-0039 : conforme, 1 appel(s)
+[40/80] test-0040 : conforme, 2 appel(s)
+[41/80] test-0041 : conforme, 1 appel(s)
+[42/80] test-0042 : conforme, 1 appel(s)
+[43/80] test-0043 : conforme, 1 appel(s)
+[44/80] test-0044 : conforme, 1 appel(s)
+[45/80] test-0045 : conforme, 1 appel(s)
+[46/80] test-0046 : conforme, 1 appel(s)
+[47/80] test-0047 : conforme, 1 appel(s)
+[48/80] test-0048 : conforme, 1 appel(s)
+[49/80] test-0049 : conforme, 1 appel(s)
+[50/80] test-0050 : conforme, 1 appel(s)
+[51/80] test-0051 : conforme, 1 appel(s)
+[52/80] test-0052 : conforme, 1 appel(s)
+[53/80] test-0053 : conforme, 1 appel(s)
+[54/80] test-0054 : conforme, 1 appel(s)
+[55/80] test-0055 : conforme, 1 appel(s)
+[56/80] test-0056 : conforme, 1 appel(s)
+[57/80] test-0057 : conforme, 1 appel(s)
+[58/80] test-0058 : conforme, 1 appel(s)
+[59/80] test-0059 : conforme, 1 appel(s)
+[60/80] test-0060 : conforme, 1 appel(s)
+[61/80] test-0061 : conforme, 1 appel(s)
+[62/80] test-0062 : conforme, 1 appel(s)
+[63/80] test-0063 : conforme, 1 appel(s)
+[64/80] test-0064 : conforme, 1 appel(s)
+[65/80] test-0065 : conforme, 1 appel(s)
+[66/80] test-0066 : conforme, 1 appel(s)
+[67/80] test-0067 : conforme, 1 appel(s)
+[68/80] test-0068 : conforme, 1 appel(s)
+[69/80] test-0069 : conforme, 1 appel(s)
+[70/80] test-0070 : conforme, 1 appel(s)
+[71/80] test-0071 : conforme, 1 appel(s)
+[72/80] test-0072 : conforme, 1 appel(s)
+[73/80] test-0073 : conforme, 1 appel(s)
+[74/80] test-0074 : conforme, 1 appel(s)
+[75/80] test-0075 : conforme, 1 appel(s)
+[76/80] test-0076 : conforme, 1 appel(s)
+[77/80] test-0077 : conforme, 1 appel(s)
+[78/80] test-0078 : conforme, 1 appel(s)
+[79/80] test-0079 : conforme, 1 appel(s)
+[80/80] test-0080 : conforme, 1 appel(s)
+Run : /kaggle/temp/TeamAI/eval/runs/2026-11-25_105441_437715Z_3e29c258_base_1agent
+llama_kv_cache_iswa: using full-size SWA cache (ref: https://github.com/ggml-org/llama.cpp/pull/13194#issuecomment-2868343055)
+llama_kv_cache: the V embeddings have different sizes across layers and FA is not enabled - padding V cache to 1024
+llama_kv_cache: the V embeddings have different sizes across layers and FA is not enabled - padding V cache to 1024
+
+11:31:49 base_1agent : code 0, durée 2233.6 s
+11:31:49 copié : base_1agent
+11:31:49 $ /usr/bin/python3 -m eval.volet_b.run_eval --config base_3agents
+13:24:28 5 appel(s)
+[22/80] test-0022 : conforme, 5 appel(s)
+[23/80] test-0023 : conforme, 4 appel(s)
+[24/80] test-0024 : conforme, 5 appel(s)
+[25/80] test-0025 : conforme, 4 appel(s)
+[26/80] test-0026 : conforme, 5 appel(s)
+[27/80] test-0027 : conforme, 5 appel(s)
+[28/80] test-0028 : conforme, 5 appel(s)
+[29/80] test-0029 : conforme, 4 appel(s)
+[30/80] test-0030 : conforme, 4 appel(s)
+[31/80] test-0031 : conforme, 5 appel(s)
+[32/80] test-0032 : conforme, 5 appel(s)
+[33/80] test-0033 : conforme, 5 appel(s)
+[34/80] test-0034 : conforme, 5 appel(s)
+[35/80] test-0035 : conforme, 5 appel(s)
+[36/80] test-0036 : conforme, 5 appel(s)
+[37/80] test-0037 : conforme, 5 appel(s)
+[38/80] test-0038 : conforme, 5 appel(s)
+[39/80] test-0039 : conforme, 5 appel(s)
+[40/80] test-0040 : conforme, 5 appel(s)
+[41/80] test-0041 : conforme, 5 appel(s)
+[42/80] test-0042 : conforme, 5 appel(s)
+[43/80] test-0043 : conforme, 5 appel(s)
+[44/80] test-0044 : conforme, 5 appel(s)
+[45/80] test-0045 : conforme, 5 appel(s)
+[46/80] test-0046 : conforme, 5 appel(s)
+[47/80] test-0047 : conforme, 5 appel(s)
+[48/80] test-0048 : conforme, 5 appel(s)
+[49/80] test-0049 : conforme, 5 appel(s)
+[50/80] test-0050 : conforme, 3 appel(s)
+[51/80] test-0051 : conforme, 3 appel(s)
+[52/80] test-0052 : conforme, 5 appel(s)
+[53/80] test-0053 : conforme, 5 appel(s)
+[54/80] test-0054 : conforme, 5 appel(s)
+[55/80] test-0055 : conforme, 3 appel(s)
+[56/80] test-0056 : conforme, 5 appel(s)
+[57/80] test-0057 : conforme, 5 appel(s)
+[58/80] test-0058 : conforme, 5 appel(s)
+[59/80] test-0059 : conforme, 5 appel(s)
+[60/80] test-0060 : conforme, 5 appel(s)
+[61/80] test-0061 : conforme, 3 appel(s)
+[62/80] test-0062 : conforme, 5 appel(s)
+[63/80] test-0063 : conforme, 3 appel(s)
+[64/80] test-0064 : conforme, 3 appel(s)
+[65/80] test-0065 : conforme, 5 appel(s)
+[66/80] test-0066 : conforme, 5 appel(s)
+[67/80] test-0067 : conforme, 5 appel(s)
+[68/80] test-0068 : conforme, 5 appel(s)
+[69/80] test-0069 : conforme, 5 appel(s)
+[70/80] test-0070 : conforme, 5 appel(s)
+[71/80] test-0071 : conforme, 3 appel(s)
+[72/80] test-0072 : conforme, 5 appel(s)
+[73/80] test-0073 : conforme, 5 appel(s)
+[74/80] test-0074 : conforme, 5 appel(s)
+[75/80] test-0075 : conforme, 5 appel(s)
+[76/80] test-0076 : conforme, 3 appel(s)
+[77/80] test-0077 : conforme, 5 appel(s)
+[78/80] test-0078 : conforme, 5 appel(s)
+[79/80] test-0079 : conforme, 5 appel(s)
+[80/80] test-0080 : conforme, 5 appel(s)
+Run : /kaggle/temp/TeamAI/eval/runs/2026-11-25_113202_804321Z_f1fb6b37_base_3agents
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 2735.06it/s]
+llama_kv_cache_iswa: using full-size SWA cache (ref: https://github.com/ggml-org/llama.cpp/pull/13194#issuecomment-2868343055)
+llama_kv_cache: the V embeddings have different sizes across layers and FA is not enabled - padding V cache to 1024
+llama_kv_cache: the V embeddings have different sizes across layers and FA is not enabled - padding V cache to 1024
+
+13:24:28 base_3agents : code 0, durée 6758.6 s
+13:24:28 copié : base_3agents
