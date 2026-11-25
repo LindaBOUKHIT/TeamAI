@@ -10,8 +10,9 @@ import time
 from pathlib import Path
 
 from data.parse_hdfs import compile_templates
-from teamai.contracts import validate_example
-from teamai.paths import ROOT, RUNS, SAMPLE, PREPROCESSED, VOLET_B_SUMMARY, VOLET_B_TEST, VOLET_B_TEST_SHA256
+from teamai.contracts import SPLITS, validate_example
+from teamai.paths import (ROOT, RUNS, SAMPLE, PREPROCESSED, VOLET_B_PROMPT_FREEZE, VOLET_B_SUMMARY, VOLET_B_TEST,
+                          VOLET_B_TEST_SHA256)
 from volet_b.agents.validate import check_answer
 from volet_b.slm.first_inference import PeakMemory, new_run_directory, sha256_file
 from volet_b.slm.generate import GENERATION_OBSERVER, load_config
@@ -21,7 +22,7 @@ from volet_b.slm.v16.policy import unknown_reference_errors, network_alert_detai
 from eval.volet_b.gpu_memory import PeakVRAM
 
 RAG_DEFERRED = 'rag1 reporté : pas de variante v16 + RAG figée ; voir SCRUM-42/SCRUM-45'
-PROMPT_FREEZE = ROOT / 'eval/results/SCRUM-63/prompt_freeze.json'
+PROMPT_FREEZE = VOLET_B_PROMPT_FREEZE
 TEMPLATES = PREPROCESSED / 'HDFS.log_templates.csv'
 if not TEMPLATES.is_file():
     TEMPLATES = ROOT / 'tests/fixtures/preprocessed/HDFS.log_templates.csv'
@@ -73,8 +74,28 @@ def git_metadata() -> dict:
     return dict(commit=commit, git_dirty=bool(status.strip()), commit_note=None)
 
 
-def predict(example: dict, config: str, retriever=None, adapter: str | None = None) -> dict:
-    """Construit les preuves brutes, appelle explain_block et conserve chaque tentative, même échouée."""
+def input_errors(example) -> list[str]:
+    """Contrôle les seuls champs d'entrée utiles au modèle, sans exiger d'annotation."""
+    if not isinstance(example, dict):
+        return [f"l'exemple doit être un objet JSON, reçu {type(example).__name__}"]
+    errors = [f'{key} : texte non vide attendu' for key in ('id', 'block_id')
+              if not isinstance(example.get(key), str) or not example.get(key)]
+    if not str(example.get('block_id', '')).startswith('blk_'):
+        errors.append('block_id : doit commencer par blk_')
+    if example.get('split') not in SPLITS:
+        errors.append(f'split : une valeur parmi {sorted(SPLITS)} attendue')
+    lines = example.get('trace_lines')
+    if not isinstance(lines, list) or not lines or not all(isinstance(v, str) for v in lines):
+        errors.append('trace_lines : liste de textes non vide attendue')
+    return errors
+
+
+def predict(example: dict, config: str, retriever=None, adapter: str | None = None,
+            check_annotations: bool = True) -> dict:
+    """Construit les preuves brutes, appelle explain_block et conserve chaque tentative, même échouée.
+
+    check_annotations=False remplace validate_example par input_errors (entrées figées sans réponse attendue).
+    """
     require_base(config)
     record = dict(id=example.get('id'), block_id=example.get('block_id'), split=example.get('split'),
                   raw_text=None, parsed_response=None, errors=[], passages=[], seconds=None,
@@ -106,7 +127,7 @@ def predict(example: dict, config: str, retriever=None, adapter: str | None = No
 
     token = GENERATION_OBSERVER.set(observe)
     try:
-        errors = validate_example(example)
+        errors = validate_example(example) if check_annotations else input_errors(example)
         if errors:
             record['errors'] = [f'input : {error}' for error in errors]
             return record
