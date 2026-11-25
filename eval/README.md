@@ -10,6 +10,7 @@ eval/
 ├── volet_b/
 │   ├── test.jsonl              Jeu de test RÉSERVÉ (C5), figé et hashé avant tout réglage           SCRUM-35
 │   ├── test.sha256
+│   ├── figer_test.py           Contrôle C5 et validation humaine, puis écrit test.jsonl et test.sha256   SCRUM-35
 │   ├── run_config.py           Mesure base via v16 (SCRUM-38) → runs/                            SCRUM-38 / SCRUM-45
 │   ├── grille.md               Grille d'évaluation humaine (lien vers docs/volet_b/grille_annotation.md)
 │   └── double_annotation.csv   Notes des 2 annotateurs + arbitrage                                SCRUM-45
@@ -96,59 +97,65 @@ automatiquement. Les tests fabriqués de `tests/test_run_config.py` traversent v
 avec une génération simulée, dont une boucle et une correction, sans modèle ni
 réseau. Les tests d'empreintes de `tests/test_v16.py` restent inchangés.
 
-## SCRUM-35 — Préparation du jeu de test du volet B
+## SCRUM-35 : jeu de test réservé du volet B
 
-### Objectif
+### Contenu
 
-Constituer un jeu de test HDFS réservé pour évaluer les explications du volet B au format C5, avec des références documentaires C6 vérifiables.
+`test.jsonl` contient 80 exemples C5 du split officiel `test` de SCRUM-20, un par ligne,
+dans l'ordre de `test-0001` à `test-0080` (UTF-8, fins de ligne LF, accents non échappés).
+Chaque ligne reprend `id`, `block_id`, `split`, `trace_lines`, `events` et `label` tels que
+sélectionnés par `prepare_test.py`, puis `expected`, `annotator` et `reviewed_by`.
 
-### Constitution du jeu
+- 40 traces normales et 40 anomalies, toutes distinctes. L'échantillon est équilibré
+  volontairement : il ne représente pas la prévalence réelle des anomalies dans HDFS.
+- Les quatre blocs de test déjà exposés sont exclus.
+- 10 abstentions, chacune expliquée par au moins une information manquante : `test-0011`
+  (normale, quinze exceptions E4 sans détail) et 9 anomalies dont la trace s'arrête après
+  l'allocation et un début de réception (`test-0050`, `0051`, `0055`, `0061`, `0063`,
+  `0064`, `0071`, `0076`, `0077`).
+- Aucune hypothèse ni source C6 : les explications décrivent la trace sans affirmation
+  documentaire, et les listes vides sont conformes à C5.
 
-- Source : split officiel `test` de SCRUM-20.
-- Sélection : 80 traces HDFS distinctes.
-- Répartition : 40 traces normales et 40 anomalies.
-- Échantillonnage équilibré volontairement : il ne représente pas la prévalence réelle des anomalies dans HDFS.
-- Exclusion des quatre blocs de test déjà exposés, afin de limiter les risques de fuite.
-- Conservation des lignes de logs et des événements associés.
+### Vérification et relecture
 
-### Annotations
+| Cas | Vérification (`annotator`) | Relecture (`reviewed_by`) |
+|---|---|---|
+| `test-0001` à `test-0020` | Alain | à faire |
+| `test-0021` à `test-0040` | Linda | Alain |
+| `test-0041` à `test-0060` | Bachar | Alain |
+| `test-0061` à `test-0080` | Alain | Bachar |
 
-Chaque exemple contient :
-- Un identifiant et un identifiant de bloc HDFS.
-- Les lignes de logs et les événements.
-- Le label officiel.
-- Une explication C5 : résumé, faits observés, hypothèses, informations manquantes, sources C6 et décision d'abstention.
-- Les identifiants de l'annotateur et du relecteur.
+Chaque cas est contrôlé contre `trace_lines` : effectifs d'événements, heures, ordre,
+destinataires et formulations qui affirment plus que la trace (achèvement, causalité,
+chronologie). Une ligne `Deleting block` atteste une suppression journalisée, pas son
+achèvement ; une ligne E23 inscrit le bloc dans un ensemble d'invalidation.
 
-Les explications actuellement préparées sont des **brouillons non validés**.
+32 corrections sont reportées dans `annotations_travail.jsonl` avec `page_relecture.py --appliquer`
+et journalisées dans `corrections_journal.csv` : 3 de Bachar (`corrections_Bachar.jsonl`) et
+29 d'Alain (`corrections_Alain.jsonl`). Les verdicts, grilles et motifs figurent dans
+`validation_humaine.csv`. Les champs `id`, `block_id`, `split`, `label`, `trace_lines` et
+`events` sont identiques à ceux de la sélection initiale.
 
-### Contrôles réalisés
+Les fichiers de double annotation (30 traces, `double_annotation.csv`) restent vierges.
 
-- 80 fiches présentes.
-- 40 normales et 40 anomalies.
-- 10 abstentions provisoires.
-- 51 passages documentaires C6 disponibles.
-- Contrôle structurel : 0 erreur.
-- 160 avertissements attendus : annotateurs et relecteurs non renseignés.
+### Gel et empreinte
 
-Ces contrôles ne prouvent pas l'exactitude des explications.
+`python -m eval.volet_b.figer_test` écrit `test.jsonl` et `test.sha256`
+(`<sha256>  test.jsonl`) seulement si les 80 cas respectent C5 (`validate_example`) et sont
+vérifiés puis relus par deux personnes distinctes dans `validation_humaine.csv`.
+`--controler` fait le même contrôle sans rien écrire.
 
-### Double annotation et relecture
+`run_config.py` lit le premier mot de `test.sha256`, recalcule le SHA-256 de `test.jsonl`
+et refuse toute exécution ou publication en cas d'écart. `tests/test_fichiers_du_depot.py`
+vérifie C5 sur le fichier figé et l'absence de ses blocs dans les annotations d'adaptation.
+Toute modification après le gel change l'empreinte.
 
-- 30 traces sélectionnées : 15 normales et 15 anomalies.
-- Deux fichiers vierges préparés pour une annotation indépendante.
-- Les réponses doivent être produites séparément, puis comparées.
-- Les désaccords doivent être arbitrés.
-- Les 80 annotations doivent être relues par une personne différente de leur annotateur.
+Le jeu de test ne sert jamais à l'entraînement, à l'adaptation LoRA, au réglage des prompts
+ni à l'optimisation du RAG.
 
-La double annotation et la relecture humaine restent à réaliser.
+### État
 
-### Gel du jeu de test
-
-Les fichiers définitifs `eval/volet_b/test.jsonl` et `eval/volet_b/test.sha256` seront produits uniquement après validation des annotations.
-
-Le jeu de test ne doit jamais servir à l'entraînement, à l'adaptation LoRA, au réglage des prompts ou à l'optimisation du RAG.
-
-### État de livraison
-
-Préparation technique réalisée. Jeu de test définitif non encore validé ni figé.
+La relecture croisée de `test-0001` à `test-0020` manque : C5 impose un relecteur distinct
+d'Alain et aucun n'est désigné. `figer_test` refuse donc d'écrire `test.jsonl` et
+`test.sha256`. Une fois la relecture faite, le relecteur est renseigné dans
+`validation_humaine.csv` et `annotations_travail.jsonl`, puis la commande est relancée.
