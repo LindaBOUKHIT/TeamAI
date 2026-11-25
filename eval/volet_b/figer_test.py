@@ -6,10 +6,6 @@ sans relecture, si un nom manque ou si validate_example (C5) signale une erreur.
 
     python -m eval.volet_b.figer_test              # contrôle puis écrit test.jsonl et test.sha256
     python -m eval.volet_b.figer_test --controler  # contrôle seulement, n'écrit rien
-    python -m eval.volet_b.figer_test --sans-relecture-croisee  # gel décidé sans relecture croisée
-
-Avec --sans-relecture-croisee, un cas vérifié par son annotateur mais jamais relu par une autre personne
-est accepté : reviewed_by vaut NON_RELU, jamais un nom inventé, et la liste de ces cas est affichée.
 
 Le jeu de test ne sert jamais à l'entraînement ni au réglage.
 """
@@ -23,21 +19,6 @@ from teamai.paths import EVAL_VOLET_B, VOLET_B_TEST, VOLET_B_TEST_SHA256
 
 SOURCE = EVAL_VOLET_B / "annotations_travail.jsonl"
 VALIDATION = EVAL_VOLET_B / "validation_humaine.csv"
-
-
-NON_RELU = "non relu (relecture croisée non faite)"
-
-
-def accept_without_review(rows, validation):
-    """Marque NON_RELU les cas vérifiés sans relecture croisée ; renvoie leurs identifiants."""
-    marked = []
-    for r in rows:
-        v = validation.get(r.get("id"))
-        if v and v["annotation_verifiee"] == "oui" and not v["reviewed_by"] and not r.get("reviewed_by"):
-            r["reviewed_by"] = v["reviewed_by"] = NON_RELU
-            v["relecture_validee"] = "oui"
-            marked.append(r["id"])
-    return marked
 
 
 def problems(rows, validation):
@@ -72,15 +53,10 @@ def main(argv=None):
     """Contrôle les annotations et, sauf --controler, écrit le jeu figé et son empreinte."""
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--controler", action="store_true", help="contrôle sans écrire")
-    parser.add_argument("--sans-relecture-croisee", action="store_true",
-                        help="accepte les cas vérifiés mais non relus, marqués NON_RELU")
     args = parser.parse_args(argv)
     rows = [json.loads(line) for line in SOURCE.read_text(encoding="utf-8").splitlines() if line.strip()]
     with VALIDATION.open(encoding="utf-8", newline="") as f:
         validation = {row["id"]: row for row in csv.DictReader(f)}
-    if args.sans_relecture_croisee:
-        marked = accept_without_review(rows, validation)
-        print(f"{len(marked)} cas sans relecture croisée, marqués « {NON_RELU} » : {', '.join(marked)}")
     found = problems(rows, validation)
     for p in found:
         print("BLOQUANT :", p)
