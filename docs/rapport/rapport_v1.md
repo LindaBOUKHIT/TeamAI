@@ -5,11 +5,9 @@ Détection et aide à l’interprétation d’anomalies dans les journaux HDFS
 Master 2 Data & Intelligence Artificielle  
 Alain Evina · Bachar Ben Slama · Linda Boukhit · Nassim Mezzai
 
-**Version 1 — brouillon de travail, mis à jour le 24/11/2026**
+**Version 1 — 25/11/2026**
 
-Les sections marquées « À rédiger » sont attendues des personnes nommées. Les contenus issus de PR non fusionnées sont signalés « en relecture, PR #n ». Ce document ne vaut pas validation collective.
-
-Les chapitres 1 et 2 reprennent le texte du V0.1 de Linda (SCRUM-33), avec remise en forme et actualisations factuelles signalées. Source de ces deux chapitres : [rapport V0.1](TeamAI_Rapport_SCRUM33_V0.1.pdf). Les sources des ajouts sont précisées à leur emplacement. Les résultats finaux et les validations collectives restent à compléter.
+Les chapitres 1 et 2 reprennent le texte du V0.1 de Linda (SCRUM-33), avec remise en forme et actualisations factuelles. Source de ces deux chapitres : [rapport V0.1](TeamAI_Rapport_SCRUM33_V0.1.pdf). Chaque chiffre des chapitres suivants est rattaché à sa source, et les contenus issus de PR non fusionnées sont signalés « en relecture, PR #n ».
 
 ## 1. Introduction et cadrage du projet
 
@@ -218,14 +216,7 @@ Cette interface est fusionnée par la PR [#54](https://github.com/LindaBOUKHIT/T
 
 #### Jeu d’adaptation annoté — SCRUM-36
 
-Le tirage stratifié retient **240 blocs train/val**, avec la seed **36**. Source : [`make_lots.py`, PR brouillon #64](https://github.com/LindaBOUKHIT/TeamAI/pull/64/files).
-Les blocs déjà vus sont exclus du tirage. Source : [`make_lots.py`, PR brouillon #64](https://github.com/LindaBOUKHIT/TeamAI/pull/64/files).
-Le jeu est réparti en **4 lots de 60**, chacun avec **50 blocs train et 10 val**. Source : PR brouillon [#64](https://github.com/LindaBOUKHIT/TeamAI/pull/64).
-Les brouillons sont rédigés, puis contrôlés par `check_lots` selon les règles v16. Source : [`check_lots.py`, PR brouillon #64](https://github.com/LindaBOUKHIT/TeamAI/pull/64/files).
-Une correction humaine est prévue pour chaque lot. Source : PR brouillon [#64](https://github.com/LindaBOUKHIT/TeamAI/pull/64).
-Elle est suivie d’une relecture croisée. Source : PR brouillon [#64](https://github.com/LindaBOUKHIT/TeamAI/pull/64).
-Au **24/11**, le lot de Linda est corrigé : **56 ok et 4 corrigés**. Source : PR brouillon [#64](https://github.com/LindaBOUKHIT/TeamAI/pull/64).
-Les **trois autres lots** sont en cours ; le travail reste dans la PR brouillon [#64](https://github.com/LindaBOUKHIT/TeamAI/pull/64). Source : PR brouillon [#64](https://github.com/LindaBOUKHIT/TeamAI/pull/64).
+Le tirage stratifié retient **240 blocs train/val** (seed **36**), hors blocs déjà vus, répartis en **4 lots de 60** (50 train et 10 val). Chaque brouillon est contrôlé par `check_lots` selon les règles v16, puis corrigé par un membre de l’équipe : **104 exemples sur 240** ont été modifiés (43,3 %), de 17 % à 100 % selon le lot. Le lot de Linda a en plus été relu par Alain (**13 corrections**). Les corrections portent surtout sur des destinataires multiples présentés au singulier, des présupposés dans les questions et des événements attribués au mauvais côté de l’échange. Le jeu final compte **200 exemples train** et **40 val** (`volet_b/annotations/train.jsonl` et `val.jsonl`), régénérables à l’identique par `merge_lots`, qui refuse tout doublon et tout bloc du test. Sources : [`volet_b/annotations/README.md`](../../volet_b/annotations/README.md) et PR [#64](https://github.com/LindaBOUKHIT/TeamAI/pull/64), en relecture.
 
 #### Défauts observés — SCRUM-46
 
@@ -404,7 +395,34 @@ Les difficultés techniques ont conduit à revoir le matériel cible et la chaî
 
 ### 5.2 Retours individuels
 
-#### À rédiger par Alain Evina (SCRUM-49)
+#### Alain Evina : retour individuel (SCRUM-49)
+
+Source : [retour_experience/alain.md](retour_experience/alain.md).
+
+##### Mon rôle
+
+J'ai mis en place le socle commun du dépôt : arborescence, contrats d'échange C1 à C7, règles de contribution, tests automatisés et intégration continue, structure en paquets et chemins centralisés (SCRUM-13, 55, 56, 59 et 60). J'ai construit le board Jira et préparé les supports de la revue J3 (SCRUM-32). Ce travail se voit peu dans les résultats, mais il a permis à chacun de brancher son code sur les mêmes formats et de faire relire chaque PR sur une CI commune.
+
+Sur le volet B, j'étais chargé du SLM. La première inférence de SmolLM2-1.7B sur ma machine (SCRUM-28) a montré qu'il était trop lent et qu'il ignorait les lignes WARN. Nous avons choisi Gemma 4 E4B QAT, exécuté avec llama.cpp (SCRUM-57 et 63). J'ai mené les itérations du prompt jusqu'à la v16 figée, sur des blocs de validation uniquement, avec des faits calculés par le code et un contrat de réponse vérifié. J'ai écrit la chaîne d'adaptation LoRA (SCRUM-29), le banc d'évaluation du volet B (SCRUM-38 et 45), la comparaison des deux volets et la V1 du rapport (SCRUM-47 et 48).
+
+##### Ce que j'ai appris techniquement
+
+- **Le format ne garantit pas le fond.** Une réponse conforme au schéma peut inverser une chronologie ou affirmer une causalité que la trace ne montre pas (SCRUM-46). Il faut des contrôles sur le contenu, et une relecture humaine.
+- **Séparer réglage et évaluation.** Pour Laya (SCRUM-58), choisir la question sur une cohorte de validation puis la mesurer une seule fois sur une autre m'a évité de conclure sur un résultat favorable de mise au point : l'AUC finale vaut 0,47 et la porte n'a pas été intégrée.
+- **La mémoire décide de l'architecture.** L'entraînement LoRA de Gemma ne tient pas sur 6 Go : les tables d'embeddings pèsent à elles seules environ 6,5 Gio. D'où la voie retenue, entraînement sur T4 puis adaptateur seul converti en GGUF et appliqué sur le modèle quantifié.
+
+##### Ce que j'ai appris en équipe
+
+- **Un outil d'aide doit être testé comme du code.** Le pré-contrôle que j'avais écrit pour la relecture du test réservé (SCRUM-35) produisait des faux positifs, que Bachar a dû contourner. Je l'ai corrigé après coup ; il aurait fallu le tester sur des cas connus avant de le diffuser.
+- **Un ticket fermé n'est pas un travail fini.** SCRUM-38 a été fermé automatiquement à la fusion de son script alors que les mesures restaient à faire. Depuis, je vérifie le critère de fin avant chaque clôture.
+
+##### Ce que je ferais autrement
+
+Le jalon de mi-parcours a été manqué et l'adaptation complète du volet B est arrivée tard. Je figerais plus tôt le modèle et le jeu de test réservé, pour que l'entraînement et les mesures avant/après ne dépendent pas des dernières semaines. Je réduirais aussi le nombre d'itérations du prompt au profit d'un jeu d'exemples relus plus tôt.
+
+##### Bilan personnel
+
+Ce projet m'a appris à piloter un travail d'équipe autant qu'à développer : découper en tickets, faire relire, tracer les décisions. Sur le plan technique, je retiens la séparation stricte entre réglage et évaluation, et le fait qu'un résultat négatif bien documenté a autant de valeur qu'un gain.
 
 #### À rédiger par Bachar Ben Slama (SCRUM-49)
 
@@ -533,7 +551,11 @@ Fiche : [outils/peft_qlora.md](outils/peft_qlora.md) (fusionné, PR [#42](https:
 
 ## 7. Conclusion et perspectives
 
-**À rédiger après SCRUM-44/45.**
+Le projet a confronté deux régimes techniques sur les mêmes journaux HDFS. Le volet A, un BiLSTM entraîné par l’équipe et servi dans le navigateur, détecte les blocs anormaux avec une macro-F1 de **0,9938** sur les 86 260 blocs du test officiel, et **0,9714** sur les séquences inédites, à plus de 6 000 blocs par seconde sans serveur. Le volet B, Gemma 4 E4B QAT encadré par un prompt figé, un schéma fermé et des faits calculés, produit des explications structurées et sourcées, au prix d’environ 30 s par bloc sur GPU et d’erreurs de fidélité qu’aucune conformité au format ne révèle.
+
+Trois enseignements dépassent ce projet. D’abord, la maîtrise de bout en bout du volet A rend chaque décision vérifiable, mais elle ne dit rien de la cause ; un modèle emprunté explique, mais il faut l’encadrer par du code pour qu’il reste fidèle à la trace. Ensuite, la séparation stricte entre réglage et évaluation a protégé les conclusions : le seuil de A, le prompt v16 et la porte Laya ont été choisis sur la validation, et le test n’a été ouvert qu’une fois. Enfin, plusieurs résultats sont négatifs et documentés comme tels : la porte Laya (AUC 0,47), la chaîne à trois agents qui n’accepte aucune réponse sur les dix blocs du dernier run, et la difficulté du modèle à formuler des hypothèses appuyées.
+
+Les deux volets sont complémentaires plutôt que concurrents : A trie, B aide à lire. Leur enchaînement, décrit en 4.3, ramènerait le coût de B à environ 3 % des blocs, à condition de l’évaluer comme un système à part entière.
 
 Les perspectives suivantes sont des propositions de la feuille de route des défauts, section 4 (fusionné, PR [#41](https://github.com/LindaBOUKHIT/TeamAI/pull/41)), et non des résultats acquis :
 
