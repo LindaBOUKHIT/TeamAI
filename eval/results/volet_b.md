@@ -27,6 +27,6 @@ Runs Kaggle sur T4 du 25/11/2026, avec le code du commit `faabb47`. Adaptateur `
   - 5 réponses acceptées citent un passage de la documentation, contre 0.
   - La recherche ne renvoie toujours que 4 passages distincts sur les 80 cas.
 - **Aucune hypothèse sur un bloc sans incident**, dans aucune configuration, et aucune référence inconnue.
-- **Mémoire GPU.** Le pic reste entre 4,3 et 4,4 Gio dans les 4 configurations : l'adaptateur ajoute moins de 10 Mio.
+- **Mémoire GPU.** Le pic reste entre 4 314 et 4 330 Mio dans les 4 configurations : l'adaptateur ajoute moins de 10 Mio.
 
 Ces mesures automatiques portent sur la forme et sur l'appui des réponses, pas sur leur justesse. La justesse sera mesurée par la double annotation à l'aveugle (30 cas × 4 configurations, `eval/volet_b/double_annotation/`).
