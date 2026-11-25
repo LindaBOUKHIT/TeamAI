@@ -3,9 +3,8 @@
 Chaque chiffre affiché ici renvoie à une mesure ou à un fichier du dépôt ; aucune qualité non mesurée
 n'est annoncée. Le texte reste lisible en thème clair comme en thème sombre.
 """
-from pathlib import Path
+from teamai.paths import APP_ASSETS as ASSETS
 
-ASSETS = Path(__file__).parent / "assets"
 AVATARS = (str(ASSETS / "utilisateur.svg"), str(ASSETS / "vigie.svg"))
 FONT = ["Inter", "Segoe UI", "system-ui", "sans-serif"]
 MONO = ["JetBrains Mono", "Cascadia Code", "Consolas", "monospace"]
