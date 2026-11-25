@@ -30,11 +30,11 @@ def test_merge_ne_modifie_pas_le_socle():
 def test_selection_ordre_des_criteres():
     """Contrat valide, puis hypothèses, puis erreurs d'appui, puis ordre déclaré."""
     metrics = {
-        "r8_qv": {"v16_contract_valid": 30, "hypotheses_per_block_with_incident": 0.2, "unknown_references": 0, "unsupported_network": 0},
-        "r16_qkvo": {"v16_contract_valid": 31, "hypotheses_per_block_with_incident": 0.1, "unknown_references": 2, "unsupported_network": 1},
+        "r8_qv": {"accepted": 30, "hypotheses_per_block_with_incident": 0.2, "unknown_references": 0, "unsupported_network": 0},
+        "r16_qkvo": {"accepted": 31, "hypotheses_per_block_with_incident": 0.1, "unknown_references": 2, "unsupported_network": 1},
     }
     assert select(metrics)["selected"] == "r16_qkvo"
-    metrics["r8_qv"]["v16_contract_valid"] = 31
+    metrics["r8_qv"]["accepted"] = 31
     assert select(metrics)["selected"] == "r8_qv"
     metrics["r8_qv"]["hypotheses_per_block_with_incident"] = 0.1
     assert select(metrics)["selected"] == "r8_qv"  # moins d'erreurs d'appui

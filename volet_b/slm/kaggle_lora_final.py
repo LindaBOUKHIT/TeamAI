@@ -48,7 +48,7 @@ def selection_key(metrics):
     """Clé de tri de la règle écrite : contrat valide, hypothèses appuyées, puis moins d'erreurs d'appui."""
     hypotheses = metrics.get("hypotheses_per_block_with_incident")
     errors = sum(metrics.get(key, 0) or 0 for key in SUPPORT_KEYS)
-    return (metrics["v16_contract_valid"], -1.0 if hypotheses is None else hypotheses, -errors)
+    return (metrics["accepted"], -1.0 if hypotheses is None else hypotheses, -errors)
 
 
 def select(named_metrics):
@@ -58,7 +58,7 @@ def select(named_metrics):
     ranked = sorted(named_metrics.items(), key=lambda item: selection_key(item[1]), reverse=True)
     best = ranked[0][0]
     return {"selected": best, "ranking": [{"essai": name, "key": list(selection_key(m))} for name, m in ranked],
-            "rule": "v16_contract_valid max, puis hypotheses_per_block_with_incident max, "
+            "rule": "accepted (contrat v16 final valide) max, puis hypotheses_per_block_with_incident max, "
                     "puis unknown_references + unsupported_network min ; val uniquement"}
 
 

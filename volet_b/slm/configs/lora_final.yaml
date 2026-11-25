@@ -42,9 +42,9 @@ essais:
     training: {learning_rate: 1.0e-4}
 
 # Sélection sur les 40 exemples val, pipeline v16 à 1 agent, adaptateur GGUF sur le GGUF QAT q4_0.
-# Critères dans l'ordre : réponses au contrat v16 valide (max), hypothèses par bloc avec incident (max),
+# Critères dans l'ordre : réponses acceptées, c'est-à-dire au contrat v16 final valide (max), hypothèses par bloc avec incident (max),
 # références inconnues + causes réseau sans appui (min). Le test n'intervient jamais dans ce choix.
 selection:
   split: val
   config: lora_1agent
-  criteres: [v16_contract_valid, hypotheses_per_block_with_incident, -erreurs_appui]
+  criteres: [accepted, hypotheses_per_block_with_incident, -erreurs_appui]
