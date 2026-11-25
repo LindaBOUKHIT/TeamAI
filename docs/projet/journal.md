@@ -597,4 +597,4 @@ Usage IA : run lancé et analysé par Claude, à la demande d'Alain ; seules des
 
 ## 2026-11-25 — SCRUM-66 : troisième mesure SCRUM-42 reportée dans les supports
 Rapport §3.2 et tableau des preuves, slide 7 de la présentation, questions 17 et 18 du jury : ajout du run du 24/11 après la PR #67 (0/10 accepté, 10/10 conformes C5, passages cités 3/10). PDF du rapport et de la présentation régénérés.
-Usage IA : modifications rédigées par Claude à partir de `eval/results/SCRUM-42/kaggle_val5_v3/README.md`.
+Usage IA : Claude.
