@@ -207,6 +207,9 @@ CHAT_EXAMPLES = ("Que signifie l'événement E23 ?", "Comment HDFS détecte-t-il
                  "Que faut-il vérifier pour le dernier bloc analysé ?")
 
 
+LABEL = re.compile(r"\s*\[P\d+(?:\s*,\s*P\d+)*\]")  # étiquettes de passage du prompt, déjà listées en Sources
+
+
 def source_line(passage):
     """Une source citée : document, section et lien officiel quand il est sûr."""
     label = f"{safe(passage['doc'])}, {safe(passage['section'])}"
@@ -226,9 +229,11 @@ def render_reply(record):
     if record["status"] == "refusée":
         return "Réponse refusée par le contrôle : " + safe(" ; ".join(record["errors"])) + ".\n\n" + trace
     answer = record["answer"]
+    text = LABEL.sub("", answer["reponse"]).strip()
     if answer["abstention"]:
-        return "**Abstention.** " + safe(answer["reponse"]) + "\n\n" + trace
-    return "\n".join([safe(answer["reponse"]), "", "**Sources**",
+        detail = f" {safe(text)}" if " " in text and text != doc_chat.ABSTENTION else ""
+        return f"**Abstention.** {doc_chat.ABSTENTION}{detail}\n\n{trace}"
+    return "\n".join([safe(text), "", "**Sources**",
                       *[source_line(by_id[s]) for s in answer["sources"]], "", trace])
 
 

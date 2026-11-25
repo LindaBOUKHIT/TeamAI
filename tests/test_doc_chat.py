@@ -110,7 +110,24 @@ def test_app_chat_mock_cites_official_link():
     assert "**Sources**" in history[1]["content"] and "](https://hadoop.apache.org/" in history[1]["content"]
     assert app.chat("   ", history, mock=True) == (history, "")
 
+
 def test_string_limits_stay_within_validated_grammar_size():
     """Un maxLength au-delà de 750 fait planter la grammaire llama.cpp (segfault observé avec 1200)."""
     spec = doc_chat.answer_spec(["P1", "P2"])
     assert spec["properties"]["reponse"]["maxLength"] <= 750
+
+
+def test_render_hides_labels_and_bare_abstention():
+    """Les étiquettes [Pn] restent hors du texte ; une abstention sans phrase affiche le message standard."""
+    passage = {"id": "loghub-templates#E23", "doc": "Loghub", "section": "E23", "text": "t",
+               "source_url": "https://github.com/logpai/loghub"}
+    base = dict(query="q", passages=[passage], errors=[])
+    sourced = app.render_reply({**base, "status": "sourcée", "answer": {
+        "reponse": "Le bloc est invalidé [P1].", "sources": [passage["id"]], "abstention": False}})
+    assert "P1" not in sourced and sourced.startswith(app.safe("Le bloc est invalidé.") + "\n")
+    bare = app.render_reply({**base, "status": "abstention", "answer": {
+        "reponse": "abstention", "sources": [], "abstention": True}})
+    assert bare.startswith(f"**Abstention.** {doc_chat.ABSTENTION}\n")
+    reason = app.render_reply({**base, "status": "abstention", "answer": {
+        "reponse": "Aucun passage ne traite ce cas.", "sources": [], "abstention": True}})
+    assert reason.startswith(f"**Abstention.** {doc_chat.ABSTENTION} {app.safe('Aucun passage ne traite ce cas.')}")
