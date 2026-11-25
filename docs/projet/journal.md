@@ -594,3 +594,6 @@ Usage IA : modifications écrites par Codex (gpt-6.1-sol), relues, corrigées (s
 ## 2026-11-24 — SCRUM-42 : mesure GPU des correctifs de la PR #67
 Run Kaggle (T4) sur 5 nouveaux blocs `val` (seed 7) et sur les 5 blocs de réglage : 10/10 réponses conformes à C5, mais 0 acceptée (contre 1/5 au run 2). Motifs complets, passages cités dans 3 réponses finales sur 10, une reprise par le drapeau d'ordre. Le contrôleur rejette des réponses sans erreur visible et manque des ordres affirmés (« a débuté par … suivi par »). Pas de réglage avant la soutenance. Détails : `eval/results/SCRUM-42/kaggle_val5_v3/README.md`.
 Usage IA : run lancé et analysé par Claude, à la demande d'Alain ; seules des lignes de blocs `val` ont été envoyées.
+
+## 2026-11-25 — SCRUM-53 : fiche de révision du code pour la soutenance (Alain)
+`docs/soutenance/revision_code.md` : pour chaque module (`teamai/`, `data/`, `volet_a/`, `volet_b/slm`, `v16`, `rag`, `agents`, `app`, `eval/`), rôle, commande, mécanisme clé, chiffres du dépôt avec leur fichier source et questions probables du jury. Parcours de bout en bout recalculé sur l'exemple de validation `02_anomalie.log` : séquence E22, E5, E5, E7, score 0,99999 au seuil 0,408, faits et hypothèse autorisée de la v16. Aucun chiffre du test du volet B : renvoi à `eval/results/volet_b.md` (SCRUM-45). Suite de tests : 302 réussis, 6 ignorés.
