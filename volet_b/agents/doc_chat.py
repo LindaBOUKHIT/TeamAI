@@ -21,7 +21,9 @@ K = 4
 HISTORY_TURNS = 3
 ANALYSIS_CHARS = 1500
 QUESTION_CHARS = 600
-ANSWER_CHARS = 1200
+# maxLength devient une grammaire imbriquée dans llama.cpp : 1200 fait planter le chargement (segfault sur T4,
+# 25/11) ; 750 est la plus grande valeur déjà validée par v16 sur les 80 cas de test.
+ANSWER_CHARS = 750
 LOGHUB_URL = "https://github.com/logpai/loghub/tree/master/HDFS"
 EVENT_CODE = re.compile(r"\bE([1-9]|[12][0-9])\b")
 ABSTENTION = "La documentation indexée ne couvre pas cette question."

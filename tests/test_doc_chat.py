@@ -109,3 +109,8 @@ def test_app_chat_mock_cites_official_link():
     assert cleared == "" and [m["role"] for m in history] == ["user", "assistant"]
     assert "**Sources**" in history[1]["content"] and "](https://hadoop.apache.org/" in history[1]["content"]
     assert app.chat("   ", history, mock=True) == (history, "")
+
+def test_string_limits_stay_within_validated_grammar_size():
+    """Un maxLength au-delà de 750 fait planter la grammaire llama.cpp (segfault observé avec 1200)."""
+    spec = doc_chat.answer_spec(["P1", "P2"])
+    assert spec["properties"]["reponse"]["maxLength"] <= 750
