@@ -589,4 +589,4 @@ Usage IA : pré-relecture et pré-remplissage des verdicts par l'IA, vérificati
 
 ## 2026-11-24 — SCRUM-36 : relecture croisée du lot de Linda (Alain)
 Relecture des 60 exemples de Linda : 47 ok, 13 corrigés, 0 rejet (`relecture_linda.jsonl`, motifs dans `relecture_linda.md`). Les corrections précisent surtout des destinataires multiples présentés au singulier et retirent des présupposés des questions (008, 010, 012, 015, 018, 019, 026, 027, 030, 048, 052, 053, 056). `lot_linda.jsonl` reprend ces réponses, avec `annotator: linda` et `reviewed_by: alain` ; contrôles `check_lots` : 0 erreur.
-Usage IA : pré-relecture indépendante par Codex et par des agents Claude, puis deux passes Astra (gpt-6-astra) à l'aveugle sur la version corrigée (59/60 ok chacune, 048 signalé). Décision finale d'Alain : les 12 corrections de Codex et celle de 048.
+Usage IA : Codex, Claude.
