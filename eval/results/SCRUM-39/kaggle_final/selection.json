@@ -1,0 +1,22 @@
+{
+  "selected": "r8_qv",
+  "ranking": [
+    {
+      "essai": "r8_qv",
+      "key": [
+        39,
+        0.42857142857142855,
+        0
+      ]
+    },
+    {
+      "essai": "r16_qkvo",
+      "key": [
+        39,
+        0.42857142857142855,
+        0
+      ]
+    }
+  ],
+  "rule": "accepted (contrat v16 final valide) max, puis hypotheses_per_block_with_incident max, puis unknown_references + unsupported_network min ; val uniquement"
+}
