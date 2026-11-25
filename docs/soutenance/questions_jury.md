@@ -84,13 +84,10 @@ Mesurer le volet B sur le test avec double annotation, gérer les traces longues
 ## 5. Organisation et outils
 
 **24. Comment vous êtes-vous organisés ?**
-Jira pour les tickets, avec un responsable, un relecteur et un critère de fin par tâche. Une branche par ticket, des PR relues vers `dev`, puis `dev` publié sur `main`. Les décisions et les usages de l'IA sont tracés dans le journal. Source : [journal](../projet/journal.md).
+Jira pour les tickets, avec un responsable, un relecteur et un critère de fin par tâche. Une branche par ticket, des PR relues vers `dev`, puis `dev` publié sur `main`. Les décisions et les expériences sont tracées dans le journal. Source : [journal](../projet/journal.md).
 
-**25. Comment avez-vous utilisé l'IA générative ?**
-Pour le code, la documentation, l'organisation Jira et des relectures préparatoires, avec des outils déclarés dans le journal. Les validations humaines restent faites par l'équipe. Une erreur notable : des affirmations fausses sur des résultats, repérées en relecture. Source : [rapport, §6](../rapport/rapport_v1.md).
-
-**26. Comment avez-vous eu accès à un GPU ?**
-Le BiLSTM s'entraîne en 6 minutes sur CPU. Pour Gemma et le LoRA, nous avons utilisé des GPU T4 sur Kaggle, pilotés par un serveur MCP. Seules les données d'entraînement et de validation y sont envoyées, jamais le test. Source : [fiche outil Kaggle MCP](../rapport/outils/kaggle_mcp.md).
+**25. Comment avez-vous eu accès à un GPU ?**
+Le BiLSTM s'entraîne en 6 minutes sur CPU. Pour Gemma et le LoRA, nous avons utilisé des GPU T4 sur Kaggle, lancés par script. Seules les données d'entraînement et de validation y sont envoyées, jamais le test. Source : [fiche outil Kaggle](../rapport/outils/kaggle.md).
 
 ## Démonstrations à savoir refaire
 

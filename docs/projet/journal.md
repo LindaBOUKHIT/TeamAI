@@ -598,3 +598,6 @@ Usage IA : run lancé et analysé par Claude, à la demande d'Alain ; seules des
 ## 2026-11-25 — SCRUM-66 : troisième mesure SCRUM-42 reportée dans les supports
 Rapport §3.2 et tableau des preuves, slide 7 de la présentation, questions 17 et 18 du jury : ajout du run du 24/11 après la PR #67 (0/10 accepté, 10/10 conformes C5, passages cités 3/10). PDF du rapport et de la présentation régénérés.
 Usage IA : Claude.
+
+## 2026-11-25 — SCRUM-67 : section « Cinq outils novateurs » recentrée
+Rapport §6 : Laya (essai argumenté, SCRUM-58), notebooks Kaggle T4, llama.cpp / GGUF, Jira et ses automatisations, PEFT / QLoRA, avec une fiche chacun dans `docs/rapport/outils/` (`laya.md` ajoutée, `kaggle.md` et `jira.md` réécrites). Passages de pilotage allégés (§2.3, §4, retours d'expérience), question 25 du jury retirée et question 26 renumérotée. Tableaux de `outils_novateurs.md` et annexe des sources mis à jour ; PDF du rapport régénéré (28 pages).

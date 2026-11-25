@@ -94,7 +94,7 @@ Le jalon de mi-parcours a été déclaré non tenu dans la feuille de route du 6
 
 L’équipe utilise Jira pour structurer les tâches en epics et sprints, avec responsable, relecteur et critère de fin. Le dépôt GitHub TeamAI conserve les scripts, la documentation et les preuves expérimentales. La branche main est destinée à la production ; dev sert à l’intégration ; les travaux sont développés sur des branches dédiées aux tickets et soumis par Pull Request.
 
-Les décisions et les usages d’assistants IA sont consignés dans docs/projet/journal.md. La feuille de route rappelle que Jira constitue la source de vérité pour l’état des tâches. Le journal consulté ne contient pas encore de compte rendu de réunion attesté : les pratiques collectives devront donc être documentées avec précision plutôt que supposées.
+Les décisions et les expériences sont consignées dans docs/projet/journal.md. La feuille de route rappelle que Jira constitue la source de vérité pour l’état des tâches. Le journal consulté ne contient pas encore de compte rendu de réunion attesté : les pratiques collectives devront donc être documentées avec précision plutôt que supposées.
 
 ### 2.4 Préparation du corpus HDFS
 
@@ -221,7 +221,7 @@ Cette interface est fusionnée par la PR [#54](https://github.com/LindaBOUKHIT/T
 Le tirage stratifié retient **240 blocs train/val**, avec la seed **36**. Source : [`make_lots.py`, PR brouillon #64](https://github.com/LindaBOUKHIT/TeamAI/pull/64/files).
 Les blocs déjà vus sont exclus du tirage. Source : [`make_lots.py`, PR brouillon #64](https://github.com/LindaBOUKHIT/TeamAI/pull/64/files).
 Le jeu est réparti en **4 lots de 60**, chacun avec **50 blocs train et 10 val**. Source : PR brouillon [#64](https://github.com/LindaBOUKHIT/TeamAI/pull/64).
-Les brouillons sont rédigés par l’IA, puis contrôlés par `check_lots` selon les règles v16. Source : [`check_lots.py`, PR brouillon #64](https://github.com/LindaBOUKHIT/TeamAI/pull/64/files).
+Les brouillons sont rédigés, puis contrôlés par `check_lots` selon les règles v16. Source : [`check_lots.py`, PR brouillon #64](https://github.com/LindaBOUKHIT/TeamAI/pull/64/files).
 Une correction humaine est prévue pour chaque lot. Source : PR brouillon [#64](https://github.com/LindaBOUKHIT/TeamAI/pull/64).
 Elle est suivie d’une relecture croisée. Source : PR brouillon [#64](https://github.com/LindaBOUKHIT/TeamAI/pull/64).
 Au **24/11**, le lot de Linda est corrigé : **56 ok et 4 corrigés**. Source : PR brouillon [#64](https://github.com/LindaBOUKHIT/TeamAI/pull/64).
@@ -400,8 +400,6 @@ Jira, les branches et les PR donnent une structure au suivi. La règle associe u
 
 Les apports SCRUM-63, SCRUM-29 et SCRUM-46 sont fusionnés dans `dev`, mais leurs entrées de journal indiquent encore une relecture d’Alain à faire. Les exemples LoRA régénérés demandent aussi une nouvelle relecture par Linda. Ces mentions constituent des attentes ; elles ne sont pas des avis attribués aux intéressés. Sources : journal SCRUM-46 (fusionné, PR [#41](https://github.com/LindaBOUKHIT/TeamAI/pull/41)) et journal SCRUM-29 (fusionné, PR [#23](https://github.com/LindaBOUKHIT/TeamAI/pull/23)).
 
-Les assistants IA ont participé au cadrage, à l’organisation Jira, au code, à la documentation et aux relectures préparatoires. Le journal déclare les usages de Codex et de Claude Code par Alain, Linda et Bachar, avec des vérifications et des limites propres à chaque entrée. Cette déclaration ne remplace pas une relecture humaine et n’autorise pas à attribuer une validation collective. Source : [journal, usages des assistants IA et expériences](../projet/journal.md).
-
 Les difficultés techniques ont conduit à revoir le matériel cible et la chaîne d’adaptation. Les erreurs mémoire et fp16 de l’essai LoRA ont été consignées avant les correctifs et l’essai T4 abouti. La baisse de loss sur le train reste séparée du gain de qualité à établir. Aucun écart chiffré entre estimation et temps réel de travail n’est établi dans les entrées utilisées ici ; le rapport n’en déduit pas de bilan de productivité. Source : journal SCRUM-29, entrées du 27/10 et du 08/11/2026 (fusionné, PR [#23](https://github.com/LindaBOUKHIT/TeamAI/pull/23)).
 
 ### 5.2 Retours individuels
@@ -416,7 +414,7 @@ Source : [retour_experience/linda.md](retour_experience/linda.md) (fusionné, PR
 
 ##### Mon rôle
 
-J'étais la **pilote** de l'équipe : j'ai organisé le projet dans Jira (sprints, tickets, échéances), mis en place le classeur de suivi et le journal d'usage de l'IA (SCRUM-14), préparé les preuves de mi-parcours (SCRUM-17) et relu environ 30 pull requests de l'équipe. Côté technique, j'ai travaillé sur le **volet B** : le corpus documentaire (SCRUM-30), le RAG (SCRUM-37), l'orchestration à 3 agents (SCRUM-42) et l'interface de démonstration (SCRUM-43). J'ai aussi écrit le prétraitement JavaScript du site du volet A (SCRUM-26).
+J'étais la **pilote** de l'équipe : j'ai organisé le projet dans Jira (sprints, tickets, échéances), mis en place le classeur de suivi et le journal du projet (SCRUM-14), préparé les preuves de mi-parcours (SCRUM-17) et relu environ 30 pull requests de l'équipe. Côté technique, j'ai travaillé sur le **volet B** : le corpus documentaire (SCRUM-30), le RAG (SCRUM-37), l'orchestration à 3 agents (SCRUM-42) et l'interface de démonstration (SCRUM-43). J'ai aussi écrit le prétraitement JavaScript du site du volet A (SCRUM-26).
 
 ##### Ce que j'ai appris techniquement
 
@@ -432,7 +430,7 @@ J'étais la **pilote** de l'équipe : j'ai organisé le projet dans Jira (sprint
 - **Organiser un projet à quatre.** La règle « un ticket, une branche, une PR, une relecture » nous a évité beaucoup d'erreurs, et les contrats C1 à C7 (`docs/contrats.md`) ont permis à chacun d'avancer sans attendre les autres.
 - **Oser dire que je n'ai pas compris.** Au milieu du projet, je me suis rendu compte que je ne comprenais plus bien ce que faisait l'équipe sur le volet B. J'ai pris le temps de tout me faire réexpliquer (le projet, les codes d'événements, le RAG) avant de continuer. Ça m'a permis de mieux piloter ensuite.
 - **Les délais.** Plusieurs de mes tickets ont pris du retard (SCRUM-42 et SCRUM-43, prévus pour le 9 et le 13/11) parce qu'ils dépendaient du passage à Gemma. J'aurais dû **relancer plus tôt** et réajuster le planning dans Jira au lieu de laisser les échéances dépasser.
-- **Déléguer et utiliser l'IA.** J'ai appris à confier des tâches, à l'équipe comme à des outils d'IA, tout en gardant la responsabilité de vérifier (`docs/projet/journal.md`). Par exemple, une relecture automatique a classé un problème comme « bloquant » alors qu'il était mineur : il faut toujours vérifier avant de conclure.
+- **Déléguer.** J'ai appris à confier des tâches tout en gardant la responsabilité de vérifier (`docs/projet/journal.md`). Par exemple, une relecture a classé un problème comme « bloquant » alors qu'il était mineur : il faut toujours vérifier avant de conclure.
 
 ##### Ce que je ferais autrement
 
@@ -476,8 +474,6 @@ Le projet m'a permis d'approfondir l'utilisation de Python, PyTorch, ONNX Runtim
 
 L'organisation en branches Git, tickets et Pull Requests m'a appris à mieux documenter les expérimentations et à travailler avec des procédures de relecture.
 
-J'ai également utilisé des assistants d'intelligence artificielle pour m'aider dans certaines étapes de programmation, de diagnostic et de rédaction, tout en vérifiant les propositions à partir des résultats réellement obtenus.
-
 **Bilan personnel**
 
 Ce projet m'a permis de progresser dans trois domaines complémentaires : la préparation de données fiables, l'entraînement et l'adaptation de modèles d'intelligence artificielle, et leur évaluation expérimentale.
@@ -488,24 +484,25 @@ Cette expérience m'a permis de développer une approche plus rigoureuse et crit
 
 ## 6. Cinq outils novateurs
 
-Rédaction de la synthèse : Alain. Les fiches complètes sont dans `docs/rapport/outils/` (SCRUM-34, PR #42 à #46).
+Rédaction de la synthèse : Alain. Les fiches complètes sont dans `docs/rapport/outils/` (SCRUM-34 et SCRUM-67).
 
-### 6.1 Codex CLI piloté par Claude Code
+### 6.1 Laya — essai argumenté d’un modèle ouvert
 
-Le tandem sert à spécifier, écrire et relire le code et la documentation.  
-Le découpage des rôles et les missions écrites ont structuré le travail d’Alain.  
-L’échec principal est la production d’affirmations documentaires fausses sur les résultats, repérées en relecture.  
-Le verdict de la fiche est de garder le tandem pour le code, avec vérification de chaque résultat avant son entrée dans le journal.  
-Fiche : [outils/codex_claude.md](outils/codex_claude.md) (fusionné, PR [#46](https://github.com/LindaBOUKHIT/TeamAI/pull/46)).
+Laya est un encodeur ModernBERT qui répond à des questions typées avec des probabilités présentées comme calibrées.  
+Nous l’avons essayé comme porte d’abstention et de tri des hypothèses, à côté du SLM, sur la validation uniquement.  
+L’installation et l’API sont simples ; le coût mesuré est d’environ 2,3 s par bloc et 2,7 GiB de RSS sur CPU.  
+En zéro-shot, la probabilité d’anomalie ne sépare pas les blocs en échec des blocs normaux : AUC 0,47 sur 40 blocs, le niveau du hasard.  
+Le verdict est l’abandon : sans adaptation, Laya ajoute un coût sans apporter de signal sur des journaux techniques.  
+Fiche : [outils/laya.md](outils/laya.md) ; résultats : `eval/results/SCRUM-58/README.md` (fusionné, PR [#52](https://github.com/LindaBOUKHIT/TeamAI/pull/52)).
 
-### 6.2 Serveur MCP Kaggle
+### 6.2 Notebooks Kaggle sur GPU T4
 
-Le serveur sert à lancer et suivre les essais GPU, puis à récupérer adaptateur, métriques et journaux.  
+La plateforme sert à lancer et suivre les essais GPU, puis à récupérer adaptateur, métriques et journaux.  
 Il a permis de diagnostiquer les erreurs et de récupérer les sorties de l’essai LoRA.  
-La CLI refusait l’accès ; l’envoi d’une archive dans le contexte de l’agent était aussi trop volumineux.  
+La CLI refusait l’accès sur un poste ; joindre le code au script sous forme d’archive était aussi trop lourd.  
 La solution décrite utilise des fichiers au commit figé avec empreintes ; les fins de ligne ont dû être maîtrisées.  
-Le verdict est de garder cet outil pour les essais GPU courts, avec une limite liée à l’accès aux fichiers d’un dépôt privé.  
-Fiche : [outils/kaggle_mcp.md](outils/kaggle_mcp.md) (fusionné, PR [#45](https://github.com/LindaBOUKHIT/TeamAI/pull/45)).
+Le verdict est de garder Kaggle pour les essais GPU courts, avec une limite liée à l’accès aux fichiers d’un dépôt privé.  
+Fiche : [outils/kaggle.md](outils/kaggle.md) (première version fusionnée, PR [#45](https://github.com/LindaBOUKHIT/TeamAI/pull/45)).
 
 ### 6.3 llama.cpp / GGUF
 
@@ -516,13 +513,14 @@ La sensibilité à l’ordre du prompt et à la charge de la machine limite auss
 Le verdict est de garder llama.cpp, avec vérification locale de l’inférence et de l’adaptateur encore attendue.  
 Fiche : [outils/llama_cpp.md](outils/llama_cpp.md) (fusionné, PR [#43](https://github.com/LindaBOUKHIT/TeamAI/pull/43)).
 
-### 6.4 Connecteur MCP Atlassian
+### 6.4 Jira Cloud, automatisations et intégration GitHub
 
-Le connecteur sert à créer et suivre les tickets, les dépendances et les transitions Jira.  
-La création du board et la préparation de relectures sont documentées pour Alain et Linda.  
-La difficulté principale est la traçabilité : les actions de l’agent apparaissent sous le compte connecté, et un statut ne prouve pas le critère de fin.  
-Le verdict est de garder le connecteur avec un site fixé, un commentaire par changement réel et une vérification avant clôture.  
-Fiche : [outils/mcp_atlassian.md](outils/mcp_atlassian.md) (fusionné, PR [#44](https://github.com/LindaBOUKHIT/TeamAI/pull/44)).
+L’application sert à créer et suivre les tickets, les dépendances et les transitions, reliées aux branches et PR GitHub.  
+Le board complet (7 epics, 5 sprints, tickets avec responsable, relecteur et critère de fin) a été créé en une séance le 06/10.  
+La première version des automatisations rouvrait des tickets terminés et agissait sur des tickets seulement cités dans une PR.  
+Une fusion ne prouve pas le critère de fin : SCRUM-38 a été fermé à la fusion de son script, puis rouvert.  
+Le verdict est de garder Jira, avec des automatisations limitées au ticket de la branche et une vérification avant clôture.  
+Fiche : [outils/jira.md](outils/jira.md) (première version fusionnée, PR [#44](https://github.com/LindaBOUKHIT/TeamAI/pull/44)).
 
 ### 6.5 PEFT / QLoRA — critique argumentée
 
@@ -551,7 +549,7 @@ Les sources marquées « en relecture » viennent de PR non fusionnées dans `de
 |---|---|---|
 | [Rapport V0.1](TeamAI_Rapport_SCRUM33_V0.1.pdf) | Reprise des chapitres 1 et 2 | PDF de Linda, SCRUM-33 |
 | [docs/rapport/plan.md](plan.md) | Structure et attendus | Dev |
-| [docs/projet/journal.md](../projet/journal.md) | Expériences, usages IA, relectures et organisation | Dev |
+| [docs/projet/journal.md](../projet/journal.md) | Expériences, décisions, relectures et organisation | Dev |
 | [docs/contrats.md](../contrats.md) | Formats, C4-bloc, C5, C6 et C7 | Dev ; propositions et validations à distinguer |
 | [docs/projet/environnements.md](../projet/environnements.md) | Relevé matériel ; contexte historique | Dev ; cible actualisée par SCRUM-63 |
 | [docs/projet/feuille_de_route.md](../projet/feuille_de_route.md) | Jalons, rattrapage, responsabilités et dépendances | Dev ; objectifs planifiés |
@@ -572,8 +570,8 @@ Les sources marquées « en relecture » viennent de PR non fusionnées dans `de
 | `eval/results/SCRUM-42/kaggle_val5/` et `kaggle_val5_v2/` | Runs réels à 3 agents sur 5 blocs de validation | Dev (fusionné, PR [#53](https://github.com/LindaBOUKHIT/TeamAI/pull/53)) |
 | `eval/results/SCRUM-42/kaggle_val5_v3/` | Troisième run à 3 agents, après correctifs, sur 10 blocs de validation | Dev (fusionné, PR [#67](https://github.com/LindaBOUKHIT/TeamAI/pull/67)) |
 | `docs/volet_a/optimisation.md` | Modèle servi (FP32) et candidat INT8, SCRUM-40 | Dev (fusionné, PR [#56](https://github.com/LindaBOUKHIT/TeamAI/pull/56)) |
-| `docs/rapport/outils/codex_claude.md` | Fiche d’outil SCRUM-34 | Dev (fusionné, PR [#46](https://github.com/LindaBOUKHIT/TeamAI/pull/46)) |
-| `docs/rapport/outils/kaggle_mcp.md` | Fiche d’outil SCRUM-34 | Dev (fusionné, PR [#45](https://github.com/LindaBOUKHIT/TeamAI/pull/45)) |
+| `docs/rapport/outils/laya.md` | Fiche d’outil SCRUM-67 | SCRUM-67 |
+| `docs/rapport/outils/kaggle.md` | Fiche d’outil SCRUM-34, revue SCRUM-67 | SCRUM-67 |
 | `docs/rapport/outils/llama_cpp.md` | Fiche d’outil SCRUM-34 | Dev (fusionné, PR [#43](https://github.com/LindaBOUKHIT/TeamAI/pull/43)) |
-| `docs/rapport/outils/mcp_atlassian.md` | Fiche d’outil SCRUM-34 | Dev (fusionné, PR [#44](https://github.com/LindaBOUKHIT/TeamAI/pull/44)) |
+| `docs/rapport/outils/jira.md` | Fiche d’outil SCRUM-34, revue SCRUM-67 | SCRUM-67 |
 | `docs/rapport/outils/peft_qlora.md` | Critique argumentée SCRUM-34 | Dev (fusionné, PR [#42](https://github.com/LindaBOUKHIT/TeamAI/pull/42)) |

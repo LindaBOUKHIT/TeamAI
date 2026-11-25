@@ -1,0 +1,22 @@
+# Jira Cloud, automatisations et intégration GitHub — application de suivi
+
+- **Utilisé par / pour** :
+  - Alain : création et suivi du board (epics, sprints, tâches, liens de dépendance), commentaires et transitions de tickets.
+  - Linda : automatisations « PR vers dev → En revue » et « PR fusionnée dans dev → Terminé » (13/10), suivi des échéances.
+  - Toute l'équipe : panneau « Développement » des tickets, qui affiche les branches et PR GitHub dont le nom contient la clé du ticket.
+- **Temps d'appropriation constaté** : le board complet a été créé en une séance le 06/10. Le temps passé en heures n'a pas été relevé.
+- **Ce qui a marché** :
+  - Le 06/10 : 7 epics, 5 sprints alignés sur les jalons, tickets SCRUM-5 à SCRUM-55 avec responsable, relecteur, critère de fin et dépendances.
+  - La convention de branche `feat/SCRUM-<n>-<slug>` relie chaque PR à son ticket.
+  - Ensuite : un commentaire par changement réel, et des transitions automatiques à l'ouverture et à la fusion des PR.
+- **Ce qui a échoué ou déçu** :
+  - Un nouveau ticket arrive dans « En cours de revue » au lieu de « À faire » : il faut le déplacer à la main.
+  - La première version des automatisations rouvrait des tickets déjà terminés et agissait sur des tickets seulement cités dans la PR. Il a fallu ajouter deux conditions : la branche source doit contenir la clé du ticket, et le ticket ne doit pas être déjà terminé.
+  - Une fusion ne prouve pas qu'un critère de fin est rempli : SCRUM-38 a été fermé automatiquement à la fusion de son script (PR #38, 13/11) alors que les mesures restaient à faire, et il a fallu le rouvrir. De même, SCRUM-15 a été rouvert le 18/10 après audit, parce que le tableau des environnements restait incomplet.
+  - Le même compte donne accès à plusieurs sites Atlassian : le site et son identifiant sont fixés dans les consignes du projet pour éviter d'agir sur le mauvais.
+- **Ce que la documentation omet** : sans condition sur la branche source, l'automatisation « PR fusionnée → Terminé » s'applique à tout ticket cité dans la PR.
+- **Comparaison avec l'outil utilisé avant** : le 21/09, le board n'existait pas encore (« board et classeur partagé non créés »). Le gain tient à la création en lot des tickets et de leurs liens, puis au lien automatique entre tickets et PR.
+- **Verdict** : on garde Jira et ses automatisations, avec trois garde-fous :
+  - une automatisation limitée au ticket de la branche source ;
+  - un seul commentaire par changement réel ;
+  - avant de fermer un ticket, une vérification du statut contre son critère de fin.
