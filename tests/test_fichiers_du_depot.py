@@ -11,6 +11,7 @@ from teamai.contracts import leaked_blocks, load_jsonl, validate_example
 ANNOTATIONS = sorted(paths.ANNOTATIONS.glob("*.jsonl"))
 TEST_SET = paths.EVAL / "volet_b" / "test.jsonl"
 SPLITS_CSV = paths.SPLITS / "splits.csv"
+UNREVIEWED_ALLOWED = {"seed_alain.jsonl", "train.jsonl", "val.jsonl"}
 
 
 @pytest.mark.parametrize("path", ANNOTATIONS, ids=lambda p: p.name)
@@ -18,8 +19,9 @@ def test_annotations_respectent_C5(path):
     """Chaque exemple de volet_b/annotations/*.jsonl respecte C5."""
     for n, example in enumerate(load_jsonl(path), start=1):
         errors = validate_example(example)
-        # Ces brouillons régénérés n'héritent pas de la relecture de l'ancien format.
-        if path.name == "seed_alain.jsonl" and example.get("reviewed_by") == "":
+        # Ces brouillons régénérés n'héritent pas de la relecture de l'ancien format ;
+        # dans train/val, seuls les lots sans relecture croisée gardent reviewed_by vide.
+        if path.name in UNREVIEWED_ALLOWED and example.get("reviewed_by") == "":
             assert errors == ["reviewed_by : texte non vide attendu"]
         else:
             assert errors == [], f"{path.name}, exemple n°{n} ({example.get('id')})"

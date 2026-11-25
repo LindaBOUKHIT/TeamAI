@@ -60,15 +60,19 @@ def schema_errors(answer, block):
     return errors
 
 
-def prepare_examples(examples, splits_path=None):
+def prepare_examples(examples, splits_path=None, split="train"):
     """Vérifie l'archive Kaggle ou reconstruit localement chaque prompt depuis le sample.
 
     En mode archive, ne lit que les exemples et leur autorisation C4 train.
     Seule l'absence volontaire de relecture est tolérée pour ces brouillons ;
     le contrat C5 des annotations relues conserve sa règle habituelle.
+    `split="val"` applique les mêmes contrôles au jeu de validation : chaque
+    exemple doit alors être val dans l'annotation et dans C4 ; test est refusé.
     """
     from volet_b.slm.kaggle_bundle import MANIFEST, validate_bundle
 
+    if split not in ("train", "val"):
+        raise ValueError(f"split {split} interdit pour l'adaptation (C4)")
     if (ROOT / MANIFEST).exists() or str(ROOT).startswith("/kaggle/"):
         bundled = validate_bundle(ROOT)
         if examples != bundled:
@@ -79,14 +83,14 @@ def prepare_examples(examples, splits_path=None):
     from volet_b.slm.v16.runtime import build_prompt, validate
 
     if not examples:
-        raise ValueError("Aucun exemple train")
+        raise ValueError(f"Aucun exemple {split}")
     splits = read_splits(splits_path)
     wanted = {ex["block_id"] for ex in examples}
     if len(wanted) != len(examples):
         raise ValueError("Blocs dupliqués")
     for ex in examples:
-        if ex.get("split") != "train" or splits.get(ex["block_id"]) != "train":
-            raise ValueError(f"{ex['block_id']} : split train obligatoire (C4)")
+        if ex.get("split") != split or splits.get(ex["block_id"]) != split:
+            raise ValueError(f"{ex['block_id']} : split {split} obligatoire (C4)")
         errors = validate_example(ex)
         if ex.get("reviewed_by") == "":
             errors = [e for e in errors if e != "reviewed_by : texte non vide attendu"]
@@ -100,7 +104,7 @@ def prepare_examples(examples, splits_path=None):
     templates = compile_templates(SAMPLE / "HDFS.log_templates.csv")
     blocks = []
     for ex in examples:
-        block = prepare_block(ex["block_id"], lines[ex["block_id"]], templates, split="train")
+        block = prepare_block(ex["block_id"], lines[ex["block_id"]], templates, split=split)
         if ex["trace_lines"] != [raw for _, raw in lines[ex["block_id"]]] or ex["events"] != [e["event"] for e in block["raw_events"]]:
             raise ValueError("Trace ou codes différents du sample")
         if ex.get("prompt") != build_prompt(block):
