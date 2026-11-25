@@ -22,7 +22,7 @@ import yaml
 
 from teamai.contracts import load_jsonl
 from teamai.paths import ROOT
-from volet_b.slm.first_inference import PeakMemory, gb, new_run_directory
+from volet_b.slm.first_inference import PeakMemory, gb, new_run_directory, sha256_file
 from volet_b.slm.lora_data import encode_example, prepare_examples, validate_lora_config
 
 CONFIG = ROOT / "volet_b" / "slm" / "configs" / "lora_essai.yaml"
@@ -297,7 +297,7 @@ def main(argv=None):
             progress.record(amp["skipped"])
     progress.finish()
 
-    run_dir = new_run_directory(root=Path(cfg.get("runs_dir", ROOT / "eval/runs")), name="lora_essai")
+    run_dir = new_run_directory(root=Path(cfg.get("runs_dir", ROOT / "eval/runs")), name=cfg.get("run_name", "lora_essai"))
     adapter_dir = ROOT / cfg["adapter_dir"]
     model.save_pretrained(adapter_dir, save_embedding_layers=False)
     # Vérification locale des tenseurs PEFT sauvegardés, sans génération ni base supplémentaire.
@@ -346,8 +346,10 @@ def main(argv=None):
     config = {**cfg, "steps": steps, "base_model": base, "packages": package_versions(),
               "python": platform.python_version(),
               "machine": f"{platform.processor()} · {gb(psutil.virtual_memory().total)} GiB RAM",
-              "purpose": "hardware_feasibility_not_quality", "loss_scope": "loss mesurée sur les exemples d'entraînement",
-              "annotations_review_status": "Linda must review regenerated v16 examples"}
+              "purpose": cfg.get("purpose", "hardware_feasibility_not_quality"),
+              "loss_scope": "loss mesurée sur les exemples d'entraînement",
+              "data_sha256": sha256_file(ROOT / cfg["data"]),
+              "annotations_review_status": cfg.get("annotations_review_status", "Linda must review regenerated v16 examples")}
     (run_dir / "train_log.jsonl").write_text("".join(json.dumps(r) + "\n" for r in log), encoding="utf-8")
     (run_dir / "metrics.json").write_text(json.dumps(metrics, indent=2, ensure_ascii=False), encoding="utf-8")
     (run_dir / "config.json").write_text(json.dumps(config, indent=2, ensure_ascii=False), encoding="utf-8")
