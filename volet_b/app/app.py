@@ -14,6 +14,7 @@ from data.parse_hdfs import compile_templates
 from teamai.contracts import validate_answer
 from teamai.paths import SAMPLE, SPLITS, resolve_path
 from volet_b.agents import doc_chat, orchestrator, single_agent
+from volet_b.app import ui
 from volet_b.slm.v16.facts import prepare_block
 
 BANNER = "Démo locale. Les explications sont générées et peuvent être fausses ; vérifiez les lignes citées."
@@ -31,6 +32,9 @@ def safe(text):
                   html.escape(str(text), quote=False)).replace("\n", " ")
 
 
+STATUS_ICONS = {"accepte": "✅", "abstention_demandee": "⏸️", "rejete": "⛔", "erreur": "⚠️"}
+
+
 def render_block(record):
     """Rend un enregistrement sans réparer sa réponse ni exécuter son contenu."""
     passages = record.get("passages", [])
@@ -40,7 +44,8 @@ def render_block(record):
     status = record.get("statut", "rejete" if errors else "accepte")
     if status not in ("accepte", "abstention_demandee"):
         errors.append(f"statut de l'enregistrement : {status}")
-    parts = [f"## Bloc {safe(record['id'])}",
+    icon = STATUS_ICONS.get(status, "⚠️")
+    parts = [f"## {icon} Bloc {safe(record['id'])}",
              f"Statut : {safe(status)} · Nombre d'appels : {record.get('n_calls', 1)}",
              f"Temps total : {record.get('total_seconds', record.get('seconds', 0)):.2f} s"]
     if errors:
@@ -201,12 +206,9 @@ def analyze(text, configuration="3 agents", model="base", adapter="", mock=False
     return "\n\n".join(output)
 
 
-CHAT_INTRO = ("Posez une question sur le fonctionnement de HDFS ou sur un événement Exx. La réponse cite les passages "
-              "de la documentation indexée (guides Apache HDFS 1.2.1, templates Loghub) ou s'abstient quand ils ne "
-              "couvrent pas la question. La dernière analyse de l'onglet précédent sert de contexte, jamais de source. "
-              "Fonction de démonstration : sa qualité n'a pas été mesurée.")
 CHAT_EXAMPLES = ("Que signifie l'événement E23 ?", "Comment HDFS détecte-t-il qu'un DataNode est en panne ?",
-                 "Que se passe-t-il quand une réplique d'un bloc est perdue ?")
+                 "Que se passe-t-il quand une réplique d'un bloc est perdue ?",
+                 "Que faut-il vérifier pour le dernier bloc analysé ?")
 
 
 def source_line(passage):
@@ -247,8 +249,9 @@ def chat(question, history, analysis="", model="base", adapter="", mock=False):
         os.environ["TEAMAI_SLM_MOCK"] = "1" if mock else "0"
         try:
             caller = doc_chat.mock_call_slm if mock else get_caller(adapter)
-            record = doc_chat.ask(question, previous_turns, get_retriever(mock), caller,
-                                  analysis=html.unescape(analysis or ""))
+            # Seule une sortie d'analyse (qui commence par le bandeau) sert de contexte, pas l'accueil.
+            context = html.unescape(analysis) if (analysis or "").startswith(BANNER) else ""
+            record = doc_chat.ask(question, previous_turns, get_retriever(mock), caller, analysis=context)
             reply = render_reply(record)
         except Exception as exc:
             reply = "Réponse impossible : " + safe(exc)
@@ -268,40 +271,68 @@ def import_logs(path):
 
 
 def build_app(mock=False):
-    """Construit l'interface en important Gradio uniquement à la demande."""
+    """Construit l'interface « Vigie » en important Gradio uniquement à la demande."""
     import gradio as gr
 
     anomaly, normal = choose_examples()
-    with gr.Blocks(title="TeamAI — Volet B") as app:
-        gr.Markdown(BANNER)
-        with gr.Tab("Analyse de traces"):
-            text = gr.Textbox(label="Lignes de logs HDFS brutes", lines=12)
-            file = gr.File(label="Importer un fichier .log/.txt", file_types=[".log", ".txt"], type="filepath")
-            file.change(import_logs, file, text)
-            configuration = gr.Radio(["1 agent", "3 agents"], value="3 agents", label="Configuration")
-            model = gr.Radio(["base", "adapté"], value="base", label="Modèle")
-            adapter = gr.Textbox(label="Chemin d'adaptateur (vide = base)")
-            mock_mode = gr.Checkbox(value=mock, label="Mode factice (sans modèle)")
+    with gr.Blocks(title="Vigie · l'assistant qui lit vos logs HDFS", theme=ui.theme(), css=ui.CSS) as app:
+        gr.HTML(ui.HEADER)
+        with gr.Accordion("⚙️ Réglages du moteur", open=False):
+            with gr.Row():
+                configuration = gr.Radio(["1 agent", "3 agents"], value="3 agents", label="Architecture",
+                                         info="3 agents : recherche documentaire, rédaction puis contrôle.")
+                model = gr.Radio(["base", "adapté"], value="base", label="Modèle",
+                                 info="Adapté : Gemma 4 avec l'adaptateur LoRA de l'équipe.")
+            with gr.Row():
+                adapter = gr.Textbox(label="Chemin de l'adaptateur GGUF", placeholder="vide = modèle de base")
+                mock_mode = gr.Checkbox(value=mock, label="Mode factice (sans modèle)",
+                                        info="Pour découvrir l'interface sans charger le modèle.")
             mock_notice = gr.Markdown("Mode factice actif (sans modèle)." if mock else "")
             mock_mode.change(mock_message, mock_mode, mock_notice)
-            gr.Button("Exemple val avec indice d'anomalie").click(example_anomaly, gr.State(anomaly), text)
-            gr.Button("Exemple val normal").click(example_normal, gr.State(normal), text)
-            run = gr.Button("Analyser", variant="primary")
-            result = gr.Markdown(sanitize_html=True)
-            run.click(analyze, [text, configuration, model, adapter, mock_mode], result, concurrency_limit=1)
-        with gr.Tab("Questions sur HDFS"):
-            gr.Markdown(CHAT_INTRO)
-            thread = gr.Chatbot(type="messages", label="Assistant documentaire HDFS", height=420, allow_tags=False,
-                                sanitize_html=True)
-            question = gr.Textbox(label="Votre question", placeholder=CHAT_EXAMPLES[0])
-            with gr.Row():
-                send = gr.Button("Envoyer", variant="primary")
-                gr.ClearButton([thread, question], value="Effacer le fil")
-            inputs = [question, thread, result, model, adapter, mock_mode]
-            send.click(chat, inputs, [thread, question], concurrency_limit=1)
-            question.submit(chat, inputs, [thread, question], concurrency_limit=1)
-            for example in CHAT_EXAMPLES:
-                gr.Button(example, size="sm").click(lambda e=example: e, None, question)
+        with gr.Tabs(elem_classes="vg-tabs"):
+            with gr.Tab("🔎 Analyser une trace"):
+                with gr.Row(equal_height=False):
+                    with gr.Column(scale=5, min_width=320):
+                        text = gr.Textbox(label="Logs HDFS bruts", lines=16, max_lines=24, elem_classes="vg-logs",
+                                          placeholder="081109 203615 148 INFO dfs.DataNode$PacketResponder: "
+                                                      "PacketResponder 1 for block blk_… terminating")
+                        with gr.Row():
+                            gr.Button("⚠️ Exemple : bloc anormal", size="sm", elem_classes="vg-chip").click(
+                                example_anomaly, gr.State(anomaly), text)
+                            gr.Button("✅ Exemple : bloc normal", size="sm", elem_classes="vg-chip").click(
+                                example_normal, gr.State(normal), text)
+                        file = gr.File(label="… ou importer un fichier .log / .txt", file_types=[".log", ".txt"],
+                                       type="filepath")
+                        file.change(import_logs, file, text)
+                        run = gr.Button("Analyser la trace", variant="primary", elem_classes="vg-cta")
+                    with gr.Column(scale=7, min_width=360):
+                        with gr.Group(elem_classes="vg-panel"):
+                            result = gr.Markdown(ui.RESULT_EMPTY, sanitize_html=True, elem_classes="vg-result",
+                                                 padding=True)
+                run.click(analyze, [text, configuration, model, adapter, mock_mode], result, concurrency_limit=1)
+            with gr.Tab("💬 Demander à la doc"):
+                with gr.Row(equal_height=False):
+                    with gr.Column(scale=8, min_width=360):
+                        thread = gr.Chatbot(type="messages", height=470, allow_tags=False, sanitize_html=True,
+                                            show_label=False, avatar_images=ui.AVATARS,
+                                            placeholder=ui.CHAT_PLACEHOLDER, show_copy_button=True)
+                        with gr.Row(equal_height=True):
+                            question = gr.Textbox(show_label=False, placeholder="Posez votre question sur HDFS…",
+                                                  scale=6, container=False, autofocus=False)
+                            send = gr.Button("Envoyer ➤", variant="primary", scale=1, min_width=110)
+                    with gr.Column(scale=4, min_width=260):
+                        gr.Markdown("**Essayez**")
+                        for example in CHAT_EXAMPLES:
+                            gr.Button(example, size="sm", elem_classes="vg-chip").click(
+                                lambda e=example: e, None, question)
+                        gr.ClearButton([thread, question], value="🧹 Nouvelle conversation", size="sm")
+                        gr.HTML(ui.COVERAGE)
+                inputs = [question, thread, result, model, adapter, mock_mode]
+                send.click(chat, inputs, [thread, question], concurrency_limit=1)
+                question.submit(chat, inputs, [thread, question], concurrency_limit=1)
+            with gr.Tab("🧭 Comment ça marche"):
+                gr.HTML(ui.HOW_IT_WORKS)
+        gr.HTML(ui.FOOTER)
     return app
 
 
