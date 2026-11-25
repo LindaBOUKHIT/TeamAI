@@ -11,6 +11,15 @@ SAMPLE_SPLITS = SAMPLE / "splits.csv"
 SAFE_TARGETS = {"q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"}
 
 
+class TooLongExample(ValueError):
+    """Exemple dont le dialogue tokenisé dépasse max_tokens ; il n'est jamais tronqué."""
+
+    def __init__(self, example_id, tokens, max_tokens):
+        """Garde l'identifiant et la longueur pour le compte rendu du run."""
+        super().__init__(f"{example_id} : {tokens} tokens > max_tokens {max_tokens}")
+        self.example_id, self.tokens = example_id, tokens
+
+
 def validate_lora_config(config):
     """Refuse toute cible ou option sans conversion LoRA sûre dans llama.cpp."""
     targets = config.get("target_modules")
@@ -148,7 +157,27 @@ def encode_example(example, tokenizer, max_tokens):
             or ids[:len(through_end)] != through_end):
         raise ValueError("Frontière JSON incompatible avec la tokenisation")
     if len(ids) > max_tokens:
-        raise ValueError(f"{example['id']} : {len(ids)} tokens > max_tokens {max_tokens}")
+        raise TooLongExample(example["id"], len(ids), max_tokens)
     labels = [-100] * len(ids)
     labels[len(prompt_ids):len(through_end)] = ids[len(prompt_ids):len(through_end)]
     return {"input_ids": ids, "attention_mask": [1] * len(ids), "labels": labels}
+
+
+def encode_examples(examples, tokenizer, max_tokens, too_long="error"):
+    """Encode tous les exemples ; avec too_long="exclude", écarte entiers ceux qui dépassent et les liste."""
+    if too_long not in ("error", "exclude"):
+        raise ValueError("too_long : error ou exclude")
+    kept, encoded, excluded = [], [], []
+    for example in examples:
+        try:
+            item = encode_example(example, tokenizer, max_tokens)
+        except TooLongExample as error:
+            if too_long == "error":
+                raise
+            excluded.append({"id": error.example_id, "tokens": error.tokens})
+            continue
+        kept.append(example)
+        encoded.append(item)
+    if not encoded:
+        raise ValueError("Aucun exemple sous max_tokens")
+    return kept, encoded, excluded

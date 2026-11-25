@@ -30,6 +30,7 @@ training:
   init_scale: 1024
   max_consecutive_skips: 8
   max_tokens: 4096        # n_ctx de l'inférence ; un exemple plus long est refusé, jamais tronqué
+  too_long: exclude       # un tel exemple est écarté entier et listé dans metrics.json (examples_excluded_too_long)
   gradient_checkpointing: true
   torch_threads: 4
 
