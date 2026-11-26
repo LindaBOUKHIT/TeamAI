@@ -5,11 +5,9 @@ Détection et aide à l’interprétation d’anomalies dans les journaux HDFS
 Master 2 Data & Intelligence Artificielle  
 Alain Evina · Bachar Ben Slama · Linda Boukhit · Nassim Mezzai
 
-**Version 1 — brouillon de travail, mis à jour le 24/11/2026**
+**Version 1 — 25/11/2026**
 
-Les sections marquées « À rédiger » sont attendues des personnes nommées. Les contenus issus de PR non fusionnées sont signalés « en relecture, PR #n ». Ce document ne vaut pas validation collective.
-
-Les chapitres 1 et 2 reprennent le texte du V0.1 de Linda (SCRUM-33), avec remise en forme et actualisations factuelles signalées. Source de ces deux chapitres : [rapport V0.1](TeamAI_Rapport_SCRUM33_V0.1.pdf). Les sources des ajouts sont précisées à leur emplacement. Les résultats finaux et les validations collectives restent à compléter.
+Les chapitres 1 et 2 reprennent le texte du V0.1 de Linda (SCRUM-33), avec remise en forme et actualisations factuelles. Source de ces deux chapitres : [rapport V0.1](TeamAI_Rapport_SCRUM33_V0.1.pdf). Chaque chiffre des chapitres suivants est rattaché à sa source, et les contenus issus de PR non fusionnées sont signalés « en relecture, PR #n ».
 
 ## 1. Introduction et cadrage du projet
 
@@ -112,7 +110,7 @@ Une baseline par régression logistique est documentée dans SCRUM-24. Un essai 
 
 Le volet B commence par une inférence locale avec SmolLM2-1.7B-Instruct, puis examine la quantification, l’adaptation LoRA, l’intégration du RAG et l’intérêt d’agents de recherche, rédaction et contrôle. Les comparaisons prévues doivent utiliser des jeux réservés et un protocole comparable, en mesurant notamment la fidélité aux faits, la pertinence des sources, l’abstention, la latence et la mémoire.
 
-Actualisation : le modèle courant devient Gemma 4 E4B QAT sous llama.cpp (SCRUM-63), avec la machine de Nassim pour cible ; l’essai d’entraînement LoRA a abouti sur T4 Kaggle, tandis que l’inférence avec adaptateur sur RTX 3050 reste à faire (SCRUM-29/61). Sources : trace SCRUM-63 (fusionné, PR [#40](https://github.com/LindaBOUKHIT/TeamAI/pull/40)) et journal SCRUM-29, entrée du 08/11/2026 (fusionné, PR [#23](https://github.com/LindaBOUKHIT/TeamAI/pull/23)).
+Actualisation : le modèle courant devient Gemma 4 E4B QAT sous llama.cpp (SCRUM-63), avec la machine de Nassim pour cible ; l’adaptateur LoRA complet a été entraîné sur T4 Kaggle puis appliqué au modèle quantifié, et les quatre configurations (base ou LoRA, 1 ou 3 agents) ont été mesurées sur le test réservé (SCRUM-39 et SCRUM-45, 3.3.6). L’inférence sur la RTX 3050 reste à mesurer. Sources : trace SCRUM-63 (fusionné, PR [#40](https://github.com/LindaBOUKHIT/TeamAI/pull/40)) et journal SCRUM-29, entrée du 08/11/2026 (fusionné, PR [#23](https://github.com/LindaBOUKHIT/TeamAI/pull/23)).
 
 Les premières expériences montrent des temps de génération élevés sur CPU et des interprétations incomplètes ou inventées. Un essai GGUF 4 bits a réduit la mémoire observée et amélioré le débit dans une configuration donnée, mais le journal précise que ces mesures ne constituent pas une comparaison contrôlée. Les conclusions devront être confirmées sur plusieurs traces.
 
@@ -124,7 +122,7 @@ Chaque expérience doit documenter la date, le responsable, le code, les donnée
 
 ### 3.1 Volet A — classification et application web
 
-**Rédaction : Alain, à partir des sources du dépôt, à la place de la section attendue de Bachar. À relire par Bachar.**
+**Rédaction : Alain, à partir des sources du dépôt. Relecture et corrections : Bachar Ben Slama.**
 
 **Chaîne de traitement.** Les lignes de logs sont regroupées par identifiant de bloc `blk_…`. Chaque ligne est associée à l'un des 29 modèles d'événements HDFS (E1 à E29). Le vocabulaire compte 31 indices : 0 pour le remplissage, 30 pour un événement inconnu. Le modèle lit les **50 premiers** événements de chaque bloc ; au-delà, ils sont tronqués et le site le signale. Le même prétraitement est écrit en Python pour l'entraînement et en JavaScript pour le site, et des cas de parité le vérifient. Sources : `volet_a/training/dataset.py`, `volet_a/web/src/preprocess.js`, `volet_a/web/public/model/parity_cases.json`.
 
@@ -132,7 +130,7 @@ Chaque expérience doit documenter la date, le responsable, le code, les donnée
 
 **Seuil (SCRUM-62).** Le seuil **0,4081** a été choisi sur la validation pour ne manquer presque aucune anomalie, au prix de fausses alertes supplémentaires (§3.3.5). Il est figé depuis et appliqué tel quel sur le test.
 
-**Test officiel (SCRUM-44).** Le test est ouvert une seule fois, sur **86 260** blocs, avec le seuil figé.
+**Test officiel (SCRUM-44).** Cette campagne finale évalue **86 260 blocs** avec le seuil figé. Une évaluation antérieure de la baseline sur le test est déclarée ci-dessous.
 
 | Modèle | Population | Macro-F1 | Fausses alertes | Anomalies manquées |
 |---|---|---:|---:|---:|
@@ -148,7 +146,7 @@ Le BiLSTM divise par deux les fausses alertes sur le test complet, pour une anom
 **Application web.** Le site est statique, construit avec Vite et publié sur GitHub Pages. Tout le calcul se fait dans le navigateur : les logs ne sont envoyés à aucun serveur.
 
 - **Inférence (SCRUM-40).** ONNX Runtime Web en WASM, dans un Web Worker, par lots de 64 blocs : la page reste réactive pendant l'analyse. Le modèle est gardé dans le cache du navigateur. Le site sert le FP32 : le candidat INT8 gagne surtout en taille (62 % de moins) et n'est pas le fichier évalué ([optimisation](../volet_a/optimisation.md)).
-- **Parité navigateur (SCRUM-44).** Sous Chrome, les 86 260 scores du test ont été recalculés et comparés aux scores Python sauvegardés, sans rouvrir le test : **0** décision divergente, écart maximal **2,4 × 10⁻⁷** en FP32. Le débit mesuré est d'environ **6 200 blocs par seconde**, boucle JavaScript comprise.
+- **Parité navigateur (SCRUM-44).** Sous Chrome, les **86 260 scores du test** ont été recalculés et comparés aux scores Python sauvegardés, sans ajuster le modèle ni le seuil : **0** décision divergente, écart maximal **2,4 × 10⁻⁷** en FP32. Le débit mesuré est d'environ **6 200 blocs par seconde**, boucle JavaScript comprise.
 - **Usage (SCRUM-27, SCRUM-41).** Collage de logs, import d'un fichier de 10 Mo au plus ou exemples tirés de la validation. Le tableau donne, pour chaque bloc, la classe, le score, le nombre d'événements, les troncatures et les événements inconnus. Un filtre garde les anomalies. L'export CSV reprend le seuil et l'empreinte du modèle, et neutralise les cellules qui ressembleraient à des formules. La séquence de chaque bloc se déplie, et les codes rares dans le lot sont signalés.
 - **Avertissements affichés.** La complétude d'un bloc ne peut pas être vérifiée à partir d'un extrait, et le score n'est pas une probabilité calibrée.
 - **Ergonomie (SCRUM-65, en relecture, PR [#59](https://github.com/LindaBOUKHIT/TeamAI/pull/59)).** Parcours en trois étapes, bilan chiffré du lot, score affiché avec le seuil, recherche et tri des blocs, affichage en cartes sur mobile, thème clair et sombre.
@@ -160,7 +158,7 @@ Le BiLSTM divise par deux les fausses alertes sur le test complet, pour une anom
 - **SCRUM-24 — baseline.** Régression logistique. Les résultats de référence publiés par Nassim sont repris dans `eval/results/SCRUM-25-bilstm-v1/metrics.json`, champ `baseline_reference`. Sur la validation globale : macro-F1 **0,9897**, précision anomalie **0,9608**, rappel anomalie **1,0000**, **103** fausses alertes et **0** anomalie manquée. Sur les **1 929** blocs de validation à séquence inédite : macro-F1 **0,9618**. La baseline n’a pas été réentraînée pour cette comparaison. Source : [métriques SCRUM-25](../../eval/results/SCRUM-25-bilstm-v1/metrics.json).
 - **SCRUM-25 — métriques de VALIDATION.** Au seuil **0,9900**, sur **86 259** blocs : macro-F1 **0,9955**, précision anomalie **0,9909**, rappel anomalie **0,9917**, **23** fausses alertes et **21** anomalies manquées. Sur les **1 929** blocs à séquence inédite : macro-F1 **0,9767**, précision anomalie **0,9646**, rappel anomalie **0,9682**. Source : `eval/results/SCRUM-25-bilstm-v1/metrics.json`, champs `validation`, `unseen` et `threshold`.
 - **SCRUM-62 — seuil orienté rappel.** Sans changer les poids, le candidat **0,4081** donne sur la validation globale **1** anomalie manquée et **59** fausses alertes ; rappel anomalie **0,9996**, F1 anomalie **0,9883**, macro-F1 **0,9939**. Sur la validation inédite : **1** anomalie manquée, **41** fausses alertes, rappel **0,9981**, macro-F1 **0,9734**. Source : [analyse du seuil](../../eval/results/SCRUM-62_20261023T153242Z_690fcb/analysis.json), `candidates.max_fn_1.all_validation` et `candidates.max_fn_1.unseen`. Les seuils affichés ici sont arrondis ; les valeurs exactes restent dans le JSON.
-- **SCRUM-62 — vérification navigateur.** WASM, modèle issu du cache, **10** cas distincts, batchs **1, 3 et 10**, **0** désaccord de classe ; vérification attribuée à Bachar dans `verified_by`. Source : [relevé navigateur](../../eval/results/SCRUM-62_20261023T153242Z_690fcb/browser_check.json). Ce relevé ne mesure ni latence ni mémoire. L’analyse porte `metadata_updated: false`, alors que le journal annonce des métadonnées actualisées : la version finale et son seuil doivent être identifiés pour SCRUM-44. Sources : même dossier, `analysis.json`, et [journal, entrée SCRUM-62](../projet/journal.md).
+- **SCRUM-62 — vérification navigateur.** WASM, modèle issu du cache, **10** cas distincts, batchs **1, 3 et 10**, **0** désaccord de classe ; vérification attribuée à Bachar dans `verified_by`. Source : [relevé navigateur](../../eval/results/SCRUM-62_20261023T153242Z_690fcb/browser_check.json). Ce relevé ne mesure ni latence ni mémoire. L’analyse initiale a été produite sans modifier les métadonnées (`metadata_updated: false`). Le seuil a ensuite été mis à jour séparément dans `detector.meta.json`, puis vérifié en Python et dans le navigateur. Sources : même dossier, `analysis.json`, et [journal, entrée SCRUM-62](../projet/journal.md).
 
 ### 3.2 Volet B — interprétation locale
 
@@ -184,13 +182,13 @@ Ces mesures restent historiques ; les différences de backend, quantification et
 
 #### Adaptation LoRA — SCRUM-29/61
 
-L’essai courant charge `google/gemma-4-E4B-it-qat-q4_0-unquantized`, révision `476025a01dbf99361c062bbeca3d6a76bb4c4566`, en texte seul. Les réglages sont QLoRA NF4, calcul fp16, batch **1**, gradient checkpointing et rang **8** sur `q_proj`/`v_proj`. Les **20** exemples proviennent du train et du prompt v16. Leur relecture reste à refaire : les champs `reviewed_by` sont vides. Source : journal SCRUM-29, entrée du 27/10/2026 (fusionné, PR [#23](https://github.com/LindaBOUKHIT/TeamAI/pull/23)).
+Le premier essai charge `google/gemma-4-E4B-it-qat-q4_0-unquantized`, révision `476025a01dbf99361c062bbeca3d6a76bb4c4566`, en texte seul. Les réglages sont QLoRA NF4, calcul fp16, batch **1**, gradient checkpointing et rang **8** sur `q_proj`/`v_proj`. Les **20** exemples proviennent du train et du prompt v16. Leur relecture reste à refaire : les champs `reviewed_by` sont vides. Source : journal SCRUM-29, entrée du 27/10/2026 (fusionné, PR [#23](https://github.com/LindaBOUKHIT/TeamAI/pull/23)).
 
 Les premiers essais T4 ont rencontré un dépassement mémoire et des gradients non finis. Les corrections portent sur la loss du suffixe supervisé et la gestion de GradScaler. Les versions de bibliothèques ont aussi dû être alignées. Le journal du **08/11/2026** décrit ensuite l’essai Kaggle au commit `c7947c1` : **30** pas appliqués, **0** sauté, échelle **1024** stable, loss moyenne **0,586** sur les **5** premiers pas et **0,052** sur les **5** derniers. Le coût est de **4,9 s/pas**, avec un pic VRAM de **10,24 Gio**, dont **8,63 Gio** au chargement, et **2 269 184** paramètres entraînables. Ces pertes concernent les exemples d’entraînement. Elles attestent une faisabilité, sans établir la qualité des explications. Source : journal SCRUM-29, essai T4 du 08/11/2026 (fusionné, PR [#23](https://github.com/LindaBOUKHIT/TeamAI/pull/23)).
 
 L’adaptateur PEFT a été rechargé puis converti en GGUF F16 de **4,5 Mo** avec llama.cpp au commit `0c1e57098`. La conversion couvre `q_proj` sur **42** couches et `v_proj` sur les couches **0 à 23** ; les **18** dernières partagent le cache KV et n’ont pas de `v_proj`. Source : même entrée du journal SCRUM-29 (fusionné, PR [#23](https://github.com/LindaBOUKHIT/TeamAI/pull/23)).
 
-Le transfert de l’adaptation entraînée en NF4 vers la base d’inférence GGUF Q4_0 reste une réserve. L’inférence avec l’adaptateur sur la RTX 3050 n’est pas faite ; elle relève de SCRUM-61. Aucun gain LoRA sur la qualité n’est donc établi. Sources : journal SCRUM-29 (fusionné, PR [#23](https://github.com/LindaBOUKHIT/TeamAI/pull/23)) et fiche PEFT/QLoRA (fusionné, PR [#42](https://github.com/LindaBOUKHIT/TeamAI/pull/42)).
+L’entraînement complet (SCRUM-39, le 25/11 sur T4) utilise le jeu SCRUM-36 : **199** exemples de train sur 200, `bachar-049` (5 778 tokens) étant écarté entier plutôt que tronqué. Deux réglages ont été entraînés **400 pas** chacun : `r8_qv` (rang 8, `q_proj`/`v_proj`, lr 2e-4, perte **0,880 → 0,151**) et `r16_qkvo` (rang 16, q/k/v/o, lr 1e-4, perte **0,827 → 0,140**), avec un pic VRAM d’environ **11 Go** et **6,5 s/pas**. Seul l’adaptateur est converti en GGUF puis appliqué au modèle quantifié Q4_0 par `lora_path` ; `r8_qv` pèse **4,5 Mo** (SHA-256 `52ff1ba7…59db7b`). Sur les 40 exemples de validation, la règle de sélection fixée avant l’entraînement (acceptation, hypothèses par bloc avec incident, erreurs d’appui) met les deux réglages à **égalité parfaite** : **39/40** acceptées et **12** hypothèses chacun, contre 11 pour la base. La règle ne prévoyant pas de départage, l’ordre de la configuration a retenu `r8_qv`, le plus petit ; ce départage est constaté, pas décidé à l’avance. Sur la validation, l’effet du LoRA est donc faible ; son effet sur le test est décrit en 3.3.6. Source : `eval/results/SCRUM-39/kaggle_final/README.md` (en relecture, PR [#78](https://github.com/LindaBOUKHIT/TeamAI/pull/78)).
 
 #### RAG à un agent — SCRUM-37
 
@@ -202,7 +200,7 @@ La référence et les paraphrases viennent de l’équipe. Les traces répètent
 
 #### Agents spécialisés — SCRUM-42
 
-L’organisation à **trois rôles**, recherche, rédaction et contrôle, est fusionnée dans `dev` le 24/11 (PR [#53](https://github.com/LindaBOUKHIT/TeamAI/pull/53)). Un run réel sur un GPU T4, le 16/11, sur 5 blocs de validation, donne **1 réponse acceptée sur 5**, **5/5** conformes au contrat C5 et **aucun passage cité**. Un correctif du contrôleur, mesuré le même jour sur les mêmes blocs, ne change pas ce résultat (`eval/results/SCRUM-42/kaggle_val5/` et `kaggle_val5_v2/`). Une troisième mesure, le 24/11, après les correctifs de la PR [#67](https://github.com/LindaBOUKHIT/TeamAI/pull/67), porte sur ces 5 blocs et sur 5 nouveaux blocs de validation : **0 réponse acceptée sur 10**, **10/10** conformes au contrat C5, des passages cités dans **3 réponses sur 10** et des motifs du contrôleur complets. Le contrôleur devient le goulot : il rejette aussi des réponses sans erreur visible et laisse passer des ordres affirmés (`eval/results/SCRUM-42/kaggle_val5_v3/`). Ces blocs ne mesurent pas la qualité, et aucun gain n’est établi. Source pour les rôles et la planification : [V0.1](TeamAI_Rapport_SCRUM33_V0.1.pdf), section 2.6, et [feuille de route](../projet/feuille_de_route.md), sprint « Agents & évaluation ».
+L’organisation à **trois rôles**, recherche, rédaction et contrôle, est fusionnée dans `dev` le 24/11 (PR [#53](https://github.com/LindaBOUKHIT/TeamAI/pull/53)). Un run réel sur un GPU T4, le 16/11, sur 5 blocs de validation, donne **1 réponse acceptée sur 5**, **5/5** conformes au contrat C5 et **aucun passage cité**. Un correctif du contrôleur, mesuré le même jour sur les mêmes blocs, ne change pas ce résultat (`eval/results/SCRUM-42/kaggle_val5/` et `kaggle_val5_v2/`). Une troisième mesure, le 24/11, après les correctifs de la PR [#67](https://github.com/LindaBOUKHIT/TeamAI/pull/67), porte sur ces 5 blocs et sur 5 nouveaux blocs de validation : **0 réponse acceptée sur 10**, **10/10** conformes au contrat C5, des passages cités dans **3 réponses sur 10** et des motifs du contrôleur complets. Le contrôleur devient le goulot : il rejette aussi des réponses sans erreur visible et laisse passer des ordres affirmés (`eval/results/SCRUM-42/kaggle_val5_v3/`). Ces blocs ne mesurent pas la qualité ; la mesure sur les 80 cas du test est donnée en 3.3.6. Source pour les rôles et la planification : [V0.1](TeamAI_Rapport_SCRUM33_V0.1.pdf), section 2.6, et [feuille de route](../projet/feuille_de_route.md), sprint « Agents & évaluation ».
 
 #### Interface locale — SCRUM-43
 
@@ -218,14 +216,7 @@ Cette interface est fusionnée par la PR [#54](https://github.com/LindaBOUKHIT/T
 
 #### Jeu d’adaptation annoté — SCRUM-36
 
-Le tirage stratifié retient **240 blocs train/val**, avec la seed **36**. Source : [`make_lots.py`, PR brouillon #64](https://github.com/LindaBOUKHIT/TeamAI/pull/64/files).
-Les blocs déjà vus sont exclus du tirage. Source : [`make_lots.py`, PR brouillon #64](https://github.com/LindaBOUKHIT/TeamAI/pull/64/files).
-Le jeu est réparti en **4 lots de 60**, chacun avec **50 blocs train et 10 val**. Source : PR brouillon [#64](https://github.com/LindaBOUKHIT/TeamAI/pull/64).
-Les brouillons sont rédigés, puis contrôlés par `check_lots` selon les règles v16. Source : [`check_lots.py`, PR brouillon #64](https://github.com/LindaBOUKHIT/TeamAI/pull/64/files).
-Une correction humaine est prévue pour chaque lot. Source : PR brouillon [#64](https://github.com/LindaBOUKHIT/TeamAI/pull/64).
-Elle est suivie d’une relecture croisée. Source : PR brouillon [#64](https://github.com/LindaBOUKHIT/TeamAI/pull/64).
-Au **24/11**, le lot de Linda est corrigé : **56 ok et 4 corrigés**. Source : PR brouillon [#64](https://github.com/LindaBOUKHIT/TeamAI/pull/64).
-Les **trois autres lots** sont en cours ; le travail reste dans la PR brouillon [#64](https://github.com/LindaBOUKHIT/TeamAI/pull/64). Source : PR brouillon [#64](https://github.com/LindaBOUKHIT/TeamAI/pull/64).
+Le tirage stratifié retient **240 blocs train/val** (seed **36**), hors blocs déjà vus, répartis en **4 lots de 60** (50 train et 10 val). Chaque brouillon est contrôlé par `check_lots` selon les règles v16, puis corrigé par un membre de l’équipe : **104 exemples sur 240** ont été modifiés (43,3 %), de 17 % à 100 % selon le lot. Le lot de Linda a en plus été relu par Alain (**13 corrections**). Les corrections portent surtout sur des destinataires multiples présentés au singulier, des présupposés dans les questions et des événements attribués au mauvais côté de l’échange. Le jeu final compte **200 exemples train** et **40 val** (`volet_b/annotations/train.jsonl` et `val.jsonl`), régénérables à l’identique par `merge_lots`, qui refuse tout doublon et tout bloc du test. Sources : [`volet_b/annotations/README.md`](../../volet_b/annotations/README.md) et PR [#64](https://github.com/LindaBOUKHIT/TeamAI/pull/64), en relecture.
 
 #### Défauts observés — SCRUM-46
 
@@ -352,43 +343,65 @@ Une mesure non effectuée doit être explicitement signalée, sans être remplac
 
 Sources : [contrats C5/C7](../contrats.md), [grille d'annotation](../volet_b/grille_annotation.md) et [PR SCRUM-35 #36](https://github.com/LindaBOUKHIT/TeamAI/pull/36).
 
+**Résultats sur le test réservé (SCRUM-45).** Les quatre configurations ont été mesurées le 25/11 sur un T4, au même commit `faabb47`, sur les **80 cas** figés par leur SHA-256 (`eval/volet_b/test_inputs.sha256`), avec les mêmes paramètres de génération. Tous les cas restent au dénominateur, échecs compris. Aucun prompt ni seuil n’a été modifié après ces mesures.
+
+| Configuration | Acceptées | Hypothèses (35 blocs avec incident) | Réponses acceptées citant un passage | Appels SLM moyens | Latence moyenne | Pic VRAM |
+|---|---:|---:|---:|---:|---:|---:|
+| Base, 1 agent | 79/80 | 22 | sans objet | 1,01 | 27,8 s | 4 314 Mio |
+| Base, 3 agents | 9/80 | 0 | 0 | 4,70 | 84,3 s | 4 322 Mio |
+| LoRA `r8_qv`, 1 agent | 79/80 | 22 | sans objet | 1,00 | 24,6 s | 4 322 Mio |
+| LoRA `r8_qv`, 3 agents | 25/80 | 9 | 5 | 4,61 | 73,8 s | 4 330 Mio |
+
+- **Aucune hypothèse sur un bloc sans incident** (45 blocs), dans aucune configuration, et aucune référence inconnue, cause réseau sans appui ou boucle.
+- **Échec commun.** `test-0011` échoue dans les quatre configurations avant toute génération : son prompt dépasse le plafond de 2 900 tokens.
+- **Effet du LoRA à 1 agent.** Il ne change ni l’acceptation ni le nombre d’hypothèses, mais il change la forme : les résumés qui affirment un ordre entre événements (« débuté par », « suivi de ») passent de **35/80 à 1/80**, et la latence baisse de 27,8 s à 24,6 s. C’est son effet le plus net. Les contrôles automatiques ne repèrent pas ces erreurs d’ordre, par exemple test-0012 : « suivi de l’allocation du bloc ». « Accepté » ne veut donc pas dire « juste ».
+- **Effet du LoRA à 3 agents.** Le contrôleur accepte **25** réponses au lieu de **9** ; **12** portent sur des blocs avec incident, contre 0, avec **9** hypothèses retenues et **5** réponses citant un passage, contre 0.
+- **Le contrôleur est le goulot.** Avec la base, il demande une correction dans **137** de ses **146** passages (119 sur 144 avec le LoRA). Sur les 48 motifs liés à l’ordre, 33 sont justifiés : le brouillon affirme un ordre entre des événements de la même seconde. La plupart des autres motifs opposent deux formulations proches ou exigent des détails que le contrat ne demande pas.
+- **La recherche apporte peu sur ces blocs** : elle ne renvoie que **4 passages distincts** sur les 80 cas.
+- **Mémoire.** Le pic VRAM reste entre 4 314 et 4 330 Mio : l’adaptateur ajoute moins de 10 Mio.
+
+Ces mesures portent sur la forme et sur l’appui des réponses, pas sur leur justesse. Les fiches de double annotation à l’aveugle (30 cas × 4 configurations, `eval/volet_b/double_annotation/`) sont générées mais pas encore remplies : aucune note humaine n’existe à ce jour. Sources : [`eval/results/volet_b.md`](../../eval/results/volet_b.md), `eval/results/SCRUM-45/kaggle_base/README.md` et `kaggle_lora/README.md` (en relecture, PR [#77](https://github.com/LindaBOUKHIT/TeamAI/pull/77)).
+
 ## 4. Analyse comparative
 
-Rédaction : Alain. Cette section synthétise la comparaison SCRUM-47 ([comparaison_a_b.md](../../eval/results/comparaison_a_b.md), en relecture, PR [#47](https://github.com/LindaBOUKHIT/TeamAI/pull/47)), dans son état au 24/11/2026. Chaque chiffre y est rattaché à sa source.
+Rédaction : Alain. Cette section synthétise la comparaison SCRUM-47 ([comparaison_a_b.md](../../eval/results/comparaison_a_b.md), en relecture, PR [#47](https://github.com/LindaBOUKHIT/TeamAI/pull/47)), dans son état au 24/11/2026, complétée par les mesures du test du volet B du 25/11 (3.3.6). Chaque chiffre y est rattaché à sa source.
 
 ### 4.1 Deux tâches différentes
 
 Le volet A détecte : il classe chaque bloc comme normal ou anormal. Le volet B explique : il résume un bloc, cite des faits, formule au besoin des hypothèses ou s'abstient. Une macro-F1 de détection et une qualité d'explication ne se comparent donc pas directement. La comparaison porte sur les axes du sujet : qualité dans sa propre tâche, latence, mémoire, coût, degré de contrôle, explicabilité, dépendance et reproductibilité.
 
-Les mesures n'ont pas le même statut. Les chiffres de test de A viennent de SCRUM-44, fusionné le 16/11 (PR [#50](https://github.com/LindaBOUKHIT/TeamAI/pull/50)). Ceux de B portent sur la **validation uniquement** : le test réservé du volet B est en cours de constitution (SCRUM-35) et sera mesuré dans SCRUM-45.
+Les deux volets sont désormais mesurés sur leur test. Les chiffres de A viennent de SCRUM-44, fusionné le 16/11 (PR [#50](https://github.com/LindaBOUKHIT/TeamAI/pull/50)) ; ceux de B viennent de SCRUM-45, sur 80 cas réservés (en relecture, PR [#77](https://github.com/LindaBOUKHIT/TeamAI/pull/77)). Ces mesures n'ont pas la même portée : A est mesuré sur 86 260 blocs étiquetés, B sur la forme et l'appui de 80 réponses, sans note humaine de justesse à ce jour.
 
 ### 4.2 Ce que montrent les mesures disponibles
 
 | Axe | Volet A — BiLSTM, ONNX, navigateur | Volet B — Gemma 4 E4B QAT, prompt v16 | Statut |
 |---|---|---|---|
-| Qualité | Test officiel, BiLSTM FP32 : macro-F1 **0,9938**, **58** fausses alertes et **3** anomalies manquées sur 86 260 blocs ; **0,9714** sur les 1 962 blocs à séquence inédite. INT8 identique ; le site sert le FP32 (SCRUM-40). | 40 blocs de validation : **40/40** réponses conformes au contrat, **39/40** contrôles factuels passés. La relecture relève **2/40** chronologies fausses, **3/40** causalités non démontrées, **3/40** pseudo-références et **1/40** résumé en boucle. | A : test ; B : validation |
-| Latence | **6 198,58** blocs/s sous Chrome WASM (FP32), boucle JavaScript comprise. | **30,624 s** par bloc, correction comprise, sur T4 Kaggle avec llama.cpp, sans LoRA ni RAG. | Protocoles et machines différents |
-| Mémoire | Modèle de **56 806** octets (FP32) et **22 570** octets (INT8). RAM du navigateur non relevée. | RAM et VRAM d'inférence non relevées. Le pic de 10,24 Gio de l'essai LoRA concerne l'entraînement. | Incomplet des deux côtés |
+| Qualité | Test officiel, BiLSTM FP32 : macro-F1 **0,9938**, **58** fausses alertes et **3** anomalies manquées sur 86 260 blocs ; **0,9714** sur les 1 962 blocs à séquence inédite. INT8 identique ; le site sert le FP32 (SCRUM-40). | Test, 80 cas : **79/80** réponses acceptées à 1 agent, avec ou sans LoRA, et **22** hypothèses, toutes sur des blocs avec incident. À 3 agents : **9/80** (base) et **25/80** (LoRA). Le LoRA fait passer les résumés affirmant un ordre entre événements de **35/80 à 1/80**, une erreur que les contrôles automatiques ne voient pas. Sur la validation, la relecture relevait **2/40** chronologies fausses et **3/40** causalités non démontrées. | Test pour les deux ; justesse de B non notée |
+| Latence | **6 198,58** blocs/s sous Chrome WASM (FP32), boucle JavaScript comprise. | Sur T4 avec llama.cpp, test : **27,8 s** par bloc (base, 1 agent), **24,6 s** (LoRA, 1 agent), **84,3 s** et **73,8 s** à 3 agents. | Protocoles et machines différents |
+| Mémoire | Modèle de **56 806** octets (FP32) et **22 570** octets (INT8). RAM du navigateur non relevée. | Modèle Q4_0 et adaptateur de **4,5 Mo**. Pic VRAM d'inférence de **4 314 à 4 330 Mio** sur T4 ; environ 11 Go pour l'entraînement LoRA. | RAM du navigateur et machine cible non relevées |
 | Coût | Non mesuré. | Non mesuré. | À mesurer |
-| Contrôle | Architecture, données, seuil et export maîtrisés par l'équipe. | Poids empruntés, encadrés par un prompt figé, un schéma fermé et des faits calculés. L'adaptation LoRA est faisable (30 pas sur T4), mais n'est pas validée en inférence. | Qualitatif |
+| Contrôle | Architecture, données, seuil et export maîtrisés par l'équipe. | Poids empruntés, encadrés par un prompt figé, un schéma fermé et des faits calculés. L'adaptateur LoRA est entraîné sur 199 exemples relus et appliqué en inférence au modèle quantifié. | Qualitatif |
 | Explicabilité | Classe et score : aucune cause n'est fournie. | Faits, hypothèses, informations manquantes et abstention. Une structure valide ne garantit pas une explication juste. | Qualitatif |
 | Dépendance | Runtime ONNX et navigateur. | Poids Gemma à révision figée, llama.cpp et modèle d'embeddings du RAG. | Qualitatif |
-| Reproductibilité | Hashes du modèle et des splits conservés, seuil figé. | Hashes du prompt, du schéma, du runtime et de l'adaptateur conservés. La configuration intégrée LoRA + RAG reste à figer. | Partielle pour B |
+| Reproductibilité | Hashes du modèle et des splits conservés, seuil figé. | Hashes du prompt, du schéma, du runtime et de l'adaptateur conservés. Commit, entrées de test et adaptateur (SHA-256) identiques pour les quatre configurations ; les poids restent hors dépôt. | Partielle pour B |
 
-Sources : [comparaison SCRUM-47](../../eval/results/comparaison_a_b.md), sections « Tableau principal », « Test officiel : SCRUM-44 », « Gemma 4 E4B QAT, prompt v16 », « Essai LoRA » et « Défauts v16 ».
+Sources : [comparaison SCRUM-47](../../eval/results/comparaison_a_b.md), sections « Tableau principal », « Test officiel : SCRUM-44 » et « Défauts v16 » ; [`eval/results/volet_b.md`](../../eval/results/volet_b.md) (PR [#77](https://github.com/LindaBOUKHIT/TeamAI/pull/77)) et `eval/results/SCRUM-39/kaggle_final/README.md` (PR [#78](https://github.com/LindaBOUKHIT/TeamAI/pull/78)).
 
-### 4.3 Lecture provisoire
+### 4.3 Lecture
 
-D'après ces mesures, A est rapide, léger et précis pour détecter. En revanche, il ne dit pas ce qui s'est passé. B produit un texte lisible et structuré, mais à un coût de calcul bien plus élevé, et avec des erreurs de fidélité qu'une conformité au format ne révèle pas. Les deux volets paraissent donc complémentaires : A signale les blocs suspects, B aide à les lire. Cette lecture reste à confirmer sur le test (SCRUM-45). Une porte de décision expérimentée en zéro-shot ajoutée à B (Laya, SCRUM-58) n'a apporté aucun signal sur la validation (AUC 0,47) et n'a pas été retenue (PR [#52](https://github.com/LindaBOUKHIT/TeamAI/pull/52)).
+D'après ces mesures, A est rapide, léger et précis pour détecter. En revanche, il ne dit pas ce qui s'est passé. B produit un texte lisible et structuré, mais à un coût de calcul bien plus élevé, et avec des erreurs de fidélité qu'une conformité au format ne révèle pas. Les mesures du test confirment cette lecture : à 1 agent, B accepte 79 réponses sur 80 sans jamais proposer d'hypothèse sur un bloc sans incident, mais une réponse acceptée peut encore affirmer un ordre faux. L'adaptation LoRA améliore surtout la forme (moins d'ordres affirmés, latence plus basse) ; à 3 agents, le contrôleur reste le goulot. Les deux volets sont donc complémentaires : A signale les blocs suspects, B aide à les lire. Une porte de décision expérimentée en zéro-shot ajoutée à B (Laya, SCRUM-58) n'a apporté aucun signal sur la validation (AUC 0,47) et n'a pas été retenue (PR [#52](https://github.com/LindaBOUKHIT/TeamAI/pull/52)).
 
-**Perspective : enchaîner A puis B.** Les deux volets ne sont pas combinés dans ce projet : aucune partie de B ne lit le score de A, et chaque volet est évalué seul. Un enchaînement serait pourtant le mode d'emploi naturel. A trierait tous les blocs, puis B n'expliquerait que ceux que A signale. Sur le test, A signale **2 581** blocs (2 523 anomalies détectées et 58 fausses alertes), soit 3,0 % des 86 260 blocs ([volet_a.md](../../eval/results/volet_a.md)). Au rythme mesuré pour B sur la validation (30,6 s par bloc sur T4), expliquer tout le test demanderait environ **734 heures** de GPU, contre environ **22 heures** pour les seuls blocs signalés. Ces ordres de grandeur sont calculés, pas mesurés. Deux précautions s'imposeraient : ne pas transmettre le verdict de A à B, pour qu'il ne justifie pas une décision au lieu de lire la trace, et évaluer la chaîne combinée comme un troisième système, sans réutiliser les mesures de A et B pris séparément.
+**Perspective : enchaîner A puis B.** Les deux volets ne sont pas combinés dans ce projet : aucune partie de B ne lit le score de A, et chaque volet est évalué seul. Un enchaînement serait pourtant le mode d'emploi naturel. A trierait tous les blocs, puis B n'expliquerait que ceux que A signale. Sur le test, A signale **2 581** blocs (2 523 anomalies détectées et 58 fausses alertes), soit 3,0 % des 86 260 blocs ([volet_a.md](../../eval/results/volet_a.md)). Au rythme mesuré pour B sur le test (24,6 s par bloc sur T4, LoRA à 1 agent), expliquer tout le test demanderait environ **590 heures** de GPU, contre environ **18 heures** pour les seuls blocs signalés. Ces ordres de grandeur sont calculés, pas mesurés. Deux précautions s'imposeraient : ne pas transmettre le verdict de A à B, pour qu'il ne justifie pas une décision au lieu de lire la trace, et évaluer la chaîne combinée comme un troisième système, sans réutiliser les mesures de A et B pris séparément.
 
 ### 4.4 Limites
 
-- Les chiffres de B portent sur 40 blocs de validation d'un échantillon, pas sur tout HDFS ni sur le test.
+- Les chiffres de B portent sur 80 cas de test et 40 de validation, pas sur tout HDFS. Ils mesurent la forme et l'appui des réponses ; la justesse attend la double annotation à l'aveugle, dont aucune note n'existe à ce jour.
+- Le choix de l'adaptateur `r8_qv` résulte d'un départage par l'ordre de la configuration, deux réglages étant à égalité sur la validation.
+- **Le volet B ne peut pas établir la cause racine.** HDFS_v1 (Loghub) ne fournit qu'une étiquette normal/anomalie par bloc, jamais la cause : une cause proposée n'est donc pas vérifiable, une distinction notée dès le choix du sujet le 21/09 ([journal](../projet/journal.md)). La documentation officielle ne comble pas ce manque : 19 des 29 types d'événements n'ont aucun passage utile, et sur les 14 codes que le prompt v16 traite comme indices d'incident, seul E12 en a un, et seulement comme contexte ([couverture du corpus, SCRUM-30](../volet_b/corpus_rag.md)). Le prompt v16 ferme donc le catalogue des hypothèses : seuls E7 « Could not read from stream » et E20 « BlockInfo not found in volumeMap » en autorisent une (`volet_b/slm/v16/policy.py`). Dans le jeu d'adaptation, 94 anomalies sur 155 en train (61 %) et 17 sur 30 en validation n'ont aucune hypothèse.
+- Le champ `sources` est vide dans les 240 exemples d'adaptation, ce qui est voulu puisque le prompt v16 à un agent n'utilise pas le RAG. L'adaptateur LoRA n'a donc jamais appris à citer un passage : en configuration à trois agents, il faut comparer le nombre de réponses sourcées avec la base, qui citait déjà 0 source sur 5 blocs de validation (`eval/results/SCRUM-42/kaggle_val5_v3`).
 - Les latences de A et B viennent de machines et de protocoles différents ; elles donnent un ordre de grandeur, pas une comparaison contrôlée.
 - Le résumé SCRUM-44 déclare qu'un fichier SCRUM-24 contenait déjà des résultats de test. Ce fichier n'a pas servi au réglage, mais ce précédent doit rester visible.
-- **Chiffres de test du volet B à venir (SCRUM-45)**, ainsi que les mesures de coût et de mémoire des deux parcours.
+- Le coût et la mémoire sur la machine cible (RTX 3050 6 Go) ne sont pas mesurés, ni la RAM du navigateur pour A.
 
 ## 5. Retour d’expérience
 
@@ -404,9 +417,67 @@ Les difficultés techniques ont conduit à revoir le matériel cible et la chaî
 
 ### 5.2 Retours individuels
 
-#### À rédiger par Alain Evina (SCRUM-49)
+#### Alain Evina : retour individuel (SCRUM-49)
 
-#### À rédiger par Bachar Ben Slama (SCRUM-49)
+Source : [retour_experience/alain.md](retour_experience/alain.md).
+
+##### Mon rôle
+
+J'ai mis en place le socle commun du dépôt : arborescence, contrats d'échange C1 à C7, règles de contribution, tests automatisés et intégration continue, structure en paquets et chemins centralisés (SCRUM-13, 55, 56, 59 et 60). J'ai construit le board Jira et préparé les supports de la revue J3 (SCRUM-32). Ce travail se voit peu dans les résultats, mais il a permis à chacun de brancher son code sur les mêmes formats et de faire relire chaque PR sur une CI commune.
+
+Sur le volet B, j'étais chargé du SLM. La première inférence de SmolLM2-1.7B sur ma machine (SCRUM-28) a montré qu'il était trop lent et qu'il ignorait les lignes WARN. Nous avons choisi Gemma 4 E4B QAT, exécuté avec llama.cpp (SCRUM-57 et 63). J'ai mené les itérations du prompt jusqu'à la v16 figée, sur des blocs de validation uniquement, avec des faits calculés par le code et un contrat de réponse vérifié. J'ai écrit la chaîne d'adaptation LoRA (SCRUM-29), le banc d'évaluation du volet B (SCRUM-38 et 45), la comparaison des deux volets et la V1 du rapport (SCRUM-47 et 48).
+
+##### Ce que j'ai appris techniquement
+
+- **Le format ne garantit pas le fond.** Une réponse conforme au schéma peut inverser une chronologie ou affirmer une causalité que la trace ne montre pas (SCRUM-46). Il faut des contrôles sur le contenu, et une relecture humaine.
+- **Séparer réglage et évaluation.** Pour Laya (SCRUM-58), choisir la question sur une cohorte de validation puis la mesurer une seule fois sur une autre m'a évité de conclure sur un résultat favorable de mise au point : l'AUC finale vaut 0,47 et la porte n'a pas été intégrée.
+- **La mémoire décide de l'architecture.** L'entraînement LoRA de Gemma ne tient pas sur 6 Go : les tables d'embeddings pèsent à elles seules environ 6,5 Gio. D'où la voie retenue, entraînement sur T4 puis adaptateur seul converti en GGUF et appliqué sur le modèle quantifié.
+
+##### Ce que j'ai appris en équipe
+
+- **Un outil d'aide doit être testé comme du code.** Le pré-contrôle que j'avais écrit pour la relecture du test réservé (SCRUM-35) produisait des faux positifs, que Bachar a dû contourner. Je l'ai corrigé après coup ; il aurait fallu le tester sur des cas connus avant de le diffuser.
+- **Un ticket fermé n'est pas un travail fini.** SCRUM-38 a été fermé automatiquement à la fusion de son script alors que les mesures restaient à faire. Depuis, je vérifie le critère de fin avant chaque clôture.
+
+##### Ce que je ferais autrement
+
+Le jalon de mi-parcours a été manqué et l'adaptation complète du volet B est arrivée tard. Je figerais plus tôt le modèle et le jeu de test réservé, pour que l'entraînement et les mesures avant/après ne dépendent pas des dernières semaines. Je réduirais aussi le nombre d'itérations du prompt au profit d'un jeu d'exemples relus plus tôt.
+
+##### Bilan personnel
+
+Ce projet m'a appris à piloter un travail d'équipe autant qu'à développer : découper en tickets, faire relire, tracer les décisions. Sur le plan technique, je retiens la séparation stricte entre réglage et évaluation, et le fait qu'un résultat négatif bien documenté a autant de valeur qu'un gain.
+
+#### Bachar Ben Slama : retour individuel (SCRUM-49)
+
+Source : [retour_experience/bachar.md](retour_experience/bachar.md) (fusionné, PR [#79](https://github.com/LindaBOUKHIT/TeamAI/pull/79)).
+
+##### Mon rôle
+
+J’ai principalement travaillé sur le volet A, la détection d’anomalies dans les logs HDFS. J’ai réalisé le premier essai d’export ONNX et d’inférence dans le navigateur (SCRUM-22), le site initial (SCRUM-23), puis l’entraînement et l’export du BiLSTM (SCRUM-25). J’ai ensuite développé la saisie des logs, le traitement par lot, le filtre des anomalies et l’export CSV (SCRUM-27).
+
+J’ai également analysé le seuil de décision (SCRUM-62), comparé les versions FP32 et INT8 et intégré un Web Worker (SCRUM-40). Pour SCRUM-41, j’ai ajouté le détail des événements par bloc et corrigé leur affichage sur mobile. Enfin, j’ai contribué aux vérifications et relectures des corrigés du volet B dans SCRUM-35.
+
+##### Ce que j’ai appris techniquement
+
+- **Entraîner et intégrer un modèle.** J’ai entraîné un BiLSTM depuis zéro sur HDFS_v1, puis exporté le modèle en ONNX pour l’exécuter avec ONNX Runtime Web. J’ai appris à vérifier la cohérence des scores entre Python et le navigateur.
+- **Choisir un seuil de décision.** Un bon macro-F1 peut masquer des anomalies manquées. En ajustant le seuil sur la validation, nous sommes passés de 21 anomalies manquées à une seule, avec une augmentation des fausses alertes de 23 à 59. J’ai mieux compris le compromis entre précision et rappel.
+- **Mesurer une optimisation.** Le candidat INT8 était environ 62 % plus léger. Les mesures de latence variaient selon le moteur et la taille des lots. Cela m’a appris à comparer plusieurs critères avant de choisir une version.
+- **Développer une interface utilisable.** J’ai appris à relier le modèle au parcours utilisateur, à gérer les erreurs et à afficher les résultats. L’essai à 390 px a révélé une colonne trop étroite qui coupait les codes d’événements. Les captures avant/après montrent la correction.
+
+**Ce que je dois encore approfondir.** Je souhaite mieux comprendre les différences numériques entre moteurs d’inférence et les méthodes permettant de vérifier qu’une optimisation conserve un comportement acceptable. Je dois aussi progresser dans l’organisation des tests utilisateurs.
+
+##### Ce que j’ai appris en équipe
+
+- **Travailler avec Git et les pull requests.** J’ai appris à créer une branche par ticket, à sauvegarder mon travail et à proposer une PR vers `dev`. J’ai aussi compris la différence entre une modification fusionnée dans `dev` et une version publiée depuis `main`.
+- **Utiliser les retours des collègues.** Le retour sur les anomalies manquées a conduit à SCRUM-62. Il m’a aidé à regarder les résultats au-delà d’un score global.
+- **Clarifier les dépendances.** Les contrats de données et les échanges avec mes collègues ont permis de relier l’entraînement, le prétraitement et le site. J’ai appris à vérifier ce qui était déjà intégré avant de commencer une nouvelle tâche.
+- **Utiliser l’IA avec recul.** Je me suis appuyé sur un assistant pour comprendre des erreurs, préparer du code et interpréter des résultats. Certains échanges ont demandé des corrections, notamment sur le pré-contrôle des annotations. Cela m’a montré l’importance de confronter les suggestions aux traces et aux résultats observés.
+
+##### Ce que je ferais autrement
+
+- Prévoir plus tôt les essais avec des utilisateurs extérieurs à l’équipe.
+- Vérifier régulièrement le site public après les fusions pour éviter un décalage avec la version locale.
+- Conserver dès chaque expérience un compte rendu avec la commande, les paramètres, l’empreinte du modèle et les résultats.
+- Prendre davantage de temps pour comprendre chaque modification avant de l’intégrer.
 
 #### Linda Boukhit : retour individuel (SCRUM-49)
 
@@ -533,12 +604,18 @@ Fiche : [outils/peft_qlora.md](outils/peft_qlora.md) (fusionné, PR [#42](https:
 
 ## 7. Conclusion et perspectives
 
-**À rédiger après SCRUM-44/45.**
+Le projet a confronté deux régimes techniques sur les mêmes journaux HDFS. Le volet A, un BiLSTM entraîné par l’équipe et servi dans le navigateur, détecte les blocs anormaux avec une macro-F1 de **0,9938** sur les 86 260 blocs du test officiel, et **0,9714** sur les séquences inédites, à plus de 6 000 blocs par seconde sans serveur. Le volet B, Gemma 4 E4B QAT encadré par un prompt figé, un schéma fermé et des faits calculés, produit des explications structurées et ancrées dans les lignes de la trace, au prix de 25 à 28 s par bloc sur GPU et d’erreurs de fidélité qu’aucune conformité au format ne révèle. Sur les 80 cas du test, il accepte 79 réponses à un agent et ne propose aucune hypothèse sur un bloc sans incident ; l’adaptation LoRA réduit surtout les ordres affirmés entre événements, de 35 à 1 résumé.
+
+Trois enseignements dépassent ce projet. D’abord, la maîtrise de bout en bout du volet A rend chaque décision vérifiable, mais elle ne dit rien de la cause ; un modèle emprunté explique, mais il faut l’encadrer par du code pour qu’il reste fidèle à la trace. Ensuite, la séparation stricte entre réglage et évaluation a protégé les conclusions : le seuil de A, le prompt v16 et la porte Laya ont été choisis sur la validation, et le test n’a été ouvert qu’une fois. Enfin, plusieurs résultats sont négatifs et documentés comme tels : la porte Laya (AUC 0,47), la chaîne à trois agents dont le contrôleur n’accepte que 9 réponses sur 80 avec la base et 25 avec le LoRA, et la difficulté du modèle à formuler des hypothèses appuyées.
+
+Les deux volets sont complémentaires plutôt que concurrents : A trie, B aide à lire. Leur enchaînement, décrit en 4.3, ramènerait le coût de B à environ 3 % des blocs, à condition de l’évaluer comme un système à part entière.
+
+Une limite tient aux données plutôt qu’aux modèles. Le volet B explique fidèlement ce qui s’est passé et ce qu’il faut vérifier, mais ni les logs, ni la documentation officielle, ni les étiquettes du jeu ne permettent d’établir la cause racine (4.4). Un jeu avec pannes injectées serait nécessaire pour l’apprendre. La documentation reste utile pour répondre aux questions sur le fonctionnement de HDFS : c’est le rôle de l’onglet « Demander à la doc » de la démonstration Vigie, un chat sourcé sur ce corpus qui s’abstient quand aucun passage ne couvre la question (SCRUM-68, en relecture, PR [#76](https://github.com/LindaBOUKHIT/TeamAI/pull/76)). Sa qualité n’est pas mesurée.
 
 Les perspectives suivantes sont des propositions de la feuille de route des défauts, section 4 (fusionné, PR [#41](https://github.com/LindaBOUKHIT/TeamAI/pull/41)), et non des résultats acquis :
 
 - **P0 : établir la référence et le coût local.** Figer la configuration avant les mesures réservées, conserver réponses et tentatives, relever l’environnement cible, puis mesurer chargement, latence, RAM et VRAM.
-- **P1 : améliorer la fidélité et comparer les variantes.** Renforcer les contrôles des références, de l’incertitude et de la chronologie ; compléter les exemples relus ; vérifier l’adaptation complète et une variante v16+RAG identifiée avant d’en attribuer les gains.
+- **P1 : améliorer la fidélité et comparer les variantes.** Renforcer les contrôles des références, de l’incertitude et de la chronologie ; compléter les exemples relus ; noter la justesse par la double annotation avant d’attribuer un gain au LoRA ou au RAG.
 - **P2–P3 : conditionner les extensions aux preuves.** N’envisager un modèle plus grand qu’après les améliorations et les mesures ; comparer les configurations sous protocole commun. Laya, piste optionnelle, a été essayé en zéro-shot sur la validation et n’est pas retenu (AUC 0,47 ; SCRUM-58, en relecture, PR [#52](https://github.com/LindaBOUKHIT/TeamAI/pull/52)).
 
 ## Annexe — Sources internes

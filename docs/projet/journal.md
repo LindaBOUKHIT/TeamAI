@@ -616,3 +616,6 @@ Usage IA : Claude.
 
 ## 2026-11-25 — SCRUM-67 : section « Cinq outils novateurs » recentrée
 Rapport §6 : Laya (essai argumenté, SCRUM-58), notebooks Kaggle T4, llama.cpp / GGUF, Jira et ses automatisations, PEFT / QLoRA, avec une fiche chacun dans `docs/rapport/outils/` (`laya.md` ajoutée, `kaggle.md` et `jira.md` réécrites). Passages de pilotage allégés (§2.3, §4, retours d'expérience), question 25 du jury retirée et question 26 renumérotée. Tableaux de `outils_novateurs.md` et annexe des sources mis à jour ; PDF du rapport régénéré (28 pages).
+
+## 2026-11-25 — SCRUM-48 : finalisation du rapport V1
+Page de garde définitive (version du 25/11), retour individuel d'Alain (`docs/rapport/retour_experience/alain.md`, §5.2), conclusion du §7 et section SCRUM-36 mise à jour avec le jeu final (200 train, 40 val, 104 exemples modifiés sur 240). PDF régénéré (29 pages). Reste : retour de Bachar, puis chiffres du test du volet B et effet du LoRA (SCRUM-45) à reporter au §3.3.6, au §4 et dans la conclusion.
