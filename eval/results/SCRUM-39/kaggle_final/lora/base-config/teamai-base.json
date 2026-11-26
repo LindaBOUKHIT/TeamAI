@@ -1,0 +1,5 @@
+{
+  "model_id": "google/gemma-4-E4B-it-qat-q4_0-unquantized",
+  "revision": "476025a01dbf99361c062bbeca3d6a76bb4c4566",
+  "config_sha256": "f2db6d6e24cb4b695308897d82c8424fae946e95272a27de68b6e908c77b0f95"
+}

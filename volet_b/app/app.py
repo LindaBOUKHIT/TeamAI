@@ -1,4 +1,4 @@
-"""Interface locale : traces HDFS, explications contrôlées et journal des agents."""
+"""Interface locale : traces HDFS, explications contrôlées, journal des agents et questions sur la documentation."""
 import argparse
 import csv
 import html
@@ -13,7 +13,8 @@ import pandas as pd
 from data.parse_hdfs import compile_templates
 from teamai.contracts import validate_answer
 from teamai.paths import SAMPLE, SPLITS, resolve_path
-from volet_b.agents import orchestrator, single_agent
+from volet_b.agents import doc_chat, orchestrator, single_agent
+from volet_b.app import ui
 from volet_b.slm.v16.facts import prepare_block
 
 BANNER = "Démo locale. Les explications sont générées et peuvent être fausses ; vérifiez les lignes citées."
@@ -201,32 +202,140 @@ def analyze(text, configuration="3 agents", model="base", adapter="", mock=False
     return "\n\n".join(output)
 
 
+CHAT_EXAMPLES = ("Que signifie l'événement E23 ?", "Comment HDFS détecte-t-il qu'un DataNode est en panne ?",
+                 "Que se passe-t-il quand une réplique d'un bloc est perdue ?",
+                 "Que faut-il vérifier pour le dernier bloc analysé ?")
+
+
+LABEL = re.compile(r"\s*\[P\d+(?:\s*,\s*P\d+)*\]")  # étiquettes de passage du prompt, déjà listées en Sources
+
+
+def source_line(passage):
+    """Une source citée : document, section et lien officiel quand il est sûr."""
+    label = f"{safe(passage['doc'])}, {safe(passage['section'])}"
+    url = str(passage.get("source_url") or "")
+    if re.fullmatch(r"https://[\w./#%-]+", url):
+        return f"- [{label}]({url})"
+    return f"- {label}"
+
+
+def render_reply(record):
+    """Rend la réponse contrôlée, ses sources, la requête lancée et les passages consultés."""
+    if record["status"] == "vide":
+        return ""
+    by_id = {p["id"]: p for p in record["passages"]}
+    consulted = ", ".join(safe(p["id"]) for p in record["passages"]) or "aucun"
+    trace = f"_Requête : {safe(record['query'])} · passages consultés : {consulted}_"
+    if record["status"] == "refusée":
+        return "Réponse refusée par le contrôle : " + safe(" ; ".join(record["errors"])) + ".\n\n" + trace
+    answer = record["answer"]
+    text = LABEL.sub("", answer["reponse"]).strip()
+    if answer["abstention"]:
+        detail = f" {safe(text)}" if " " in text and text != doc_chat.ABSTENTION else ""
+        return f"**Abstention.** {doc_chat.ABSTENTION}{detail}\n\n{trace}"
+    return "\n".join([safe(text), "", "**Sources**",
+                      *[source_line(by_id[s]) for s in answer["sources"]], "", trace])
+
+
+def chat(question, history, analysis="", model="base", adapter="", mock=False):
+    """Ajoute au fil la question et sa réponse sourcée ; vide la zone de saisie."""
+    history = list(history or [])
+    question = (question or "").strip()
+    if not question:
+        return history, ""
+    adapter = str(resolve_path(adapter.strip())) if model == "adapté" and adapter.strip() else None
+    previous_turns = [{**m, "content": html.unescape(str(m.get("content") or ""))} for m in history]
+    with LOCK:
+        previous = os.environ.get("TEAMAI_SLM_MOCK")
+        os.environ["TEAMAI_SLM_MOCK"] = "1" if mock else "0"
+        try:
+            caller = doc_chat.mock_call_slm if mock else get_caller(adapter)
+            # Seule une sortie d'analyse (qui commence par le bandeau) sert de contexte, pas l'accueil.
+            context = html.unescape(analysis) if (analysis or "").startswith(BANNER) else ""
+            record = doc_chat.ask(question, previous_turns, get_retriever(mock), caller, analysis=context)
+            reply = render_reply(record)
+        except Exception as exc:
+            reply = "Réponse impossible : " + safe(exc)
+        finally:
+            if previous is None:
+                os.environ.pop("TEAMAI_SLM_MOCK", None)
+            else:
+                os.environ["TEAMAI_SLM_MOCK"] = previous
+    if mock:
+        reply += "\n\n**Mode factice actif (sans modèle).**"
+    return history + [{"role": "user", "content": question}, {"role": "assistant", "content": reply}], ""
+
+
 def import_logs(path):
     """Lit un fichier de logs importé depuis le composant local."""
     return resolve_path(path).read_text(encoding="utf-8", errors="replace") if path else ""
 
 
 def build_app(mock=False):
-    """Construit l'interface en important Gradio uniquement à la demande."""
+    """Construit l'interface « Vigie » en important Gradio uniquement à la demande."""
     import gradio as gr
 
     anomaly, normal = choose_examples()
-    with gr.Blocks(title="TeamAI — Volet B") as app:
-        gr.Markdown(BANNER)
-        text = gr.Textbox(label="Lignes de logs HDFS brutes", lines=12)
-        file = gr.File(label="Importer un fichier .log/.txt", file_types=[".log", ".txt"], type="filepath")
-        file.change(import_logs, file, text)
-        configuration = gr.Radio(["1 agent", "3 agents"], value="3 agents", label="Configuration")
-        model = gr.Radio(["base", "adapté"], value="base", label="Modèle")
-        adapter = gr.Textbox(label="Chemin d'adaptateur (vide = base)")
-        mock_mode = gr.Checkbox(value=mock, label="Mode factice (sans modèle)")
-        mock_notice = gr.Markdown("Mode factice actif (sans modèle)." if mock else "")
-        mock_mode.change(mock_message, mock_mode, mock_notice)
-        gr.Button("Exemple val avec indice d'anomalie").click(example_anomaly, gr.State(anomaly), text)
-        gr.Button("Exemple val normal").click(example_normal, gr.State(normal), text)
-        run = gr.Button("Analyser", variant="primary")
-        result = gr.Markdown(sanitize_html=True)
-        run.click(analyze, [text, configuration, model, adapter, mock_mode], result, concurrency_limit=1)
+    with gr.Blocks(title="Vigie · l'assistant qui lit vos logs HDFS", theme=ui.theme(), css=ui.CSS,
+                   fill_width=True) as app:
+        gr.HTML(ui.HEADER)
+        with gr.Accordion("Réglages du moteur", open=False, elem_classes="vg-settings"):
+            with gr.Row():
+                configuration = gr.Radio(["1 agent", "3 agents"], value="3 agents", label="Architecture",
+                                         info="3 agents : recherche documentaire, rédaction puis contrôle.")
+                model = gr.Radio(["base", "adapté"], value="base", label="Modèle",
+                                 info="Adapté : Gemma 4 avec l'adaptateur LoRA de l'équipe.")
+            with gr.Row():
+                adapter = gr.Textbox(label="Chemin de l'adaptateur GGUF", placeholder="vide = modèle de base")
+                mock_mode = gr.Checkbox(value=mock, label="Mode factice (sans modèle)",
+                                        info="Pour découvrir l'interface sans charger le modèle.")
+            mock_notice = gr.Markdown("Mode factice actif (sans modèle)." if mock else "")
+            mock_mode.change(mock_message, mock_mode, mock_notice)
+        with gr.Tabs(elem_classes="vg-tabs"):
+            with gr.Tab("Analyser une trace"):
+                with gr.Row(equal_height=False):
+                    with gr.Column(scale=5, min_width=320):
+                        text = gr.Textbox(label="Logs HDFS bruts", lines=20, max_lines=30, elem_classes="vg-logs",
+                                          placeholder="081109 203615 148 INFO dfs.DataNode$PacketResponder: "
+                                                      "PacketResponder 1 for block blk_… terminating")
+                        with gr.Row():
+                            gr.Button("Exemple : bloc anormal", size="sm", elem_classes=["vg-chip", "vg-mask", "vg-i-alert"]).click(
+                                example_anomaly, gr.State(anomaly), text)
+                            gr.Button("Exemple : bloc normal", size="sm", elem_classes=["vg-chip", "vg-mask", "vg-i-check"]).click(
+                                example_normal, gr.State(normal), text)
+                        file = gr.File(label="… ou importer un fichier .log / .txt", file_types=[".log", ".txt"],
+                                       type="filepath")
+                        file.change(import_logs, file, text)
+                        run = gr.Button("Analyser la trace", variant="primary", elem_classes="vg-cta")
+                    with gr.Column(scale=7, min_width=360):
+                        with gr.Group(elem_classes="vg-panel"):
+                            result = gr.Markdown(ui.RESULT_EMPTY, sanitize_html=True, elem_classes="vg-result",
+                                                 padding=True)
+                run.click(analyze, [text, configuration, model, adapter, mock_mode], result, concurrency_limit=1)
+            with gr.Tab("Demander à la doc"):
+                with gr.Row(equal_height=False):
+                    with gr.Column(scale=8, min_width=360):
+                        thread = gr.Chatbot(type="messages", height=560, allow_tags=False, sanitize_html=True,
+                                            show_label=False, avatar_images=ui.AVATARS,
+                                            placeholder=ui.CHAT_PLACEHOLDER, show_copy_button=True)
+                        with gr.Row(equal_height=True):
+                            question = gr.Textbox(show_label=False, placeholder="Posez votre question sur HDFS…",
+                                                  scale=6, container=False, autofocus=False)
+                            send = gr.Button("Envoyer", variant="primary", scale=1, min_width=120, elem_classes=["vg-mask", "vg-i-send"])
+                    with gr.Column(scale=4, min_width=260):
+                        gr.Markdown("**Essayez**")
+                        for example in CHAT_EXAMPLES:
+                            gr.Button(example, size="sm", elem_classes="vg-chip").click(
+                                lambda e=example: e, None, question)
+                        gr.ClearButton([thread, question], value="Nouvelle conversation", size="sm",
+                                       elem_classes=["vg-mask", "vg-i-reset"])
+                        gr.HTML(ui.COVERAGE)
+                inputs = [question, thread, result, model, adapter, mock_mode]
+                send.click(chat, inputs, [thread, question], concurrency_limit=1)
+                question.submit(chat, inputs, [thread, question], concurrency_limit=1)
+            with gr.Tab("Comment ça marche"):
+                gr.HTML(ui.HOW_IT_WORKS)
+        gr.HTML(ui.FOOTER)
     return app
 
 

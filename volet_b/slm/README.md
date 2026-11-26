@@ -172,6 +172,8 @@ La [preuve du 08/10](../../eval/results/SCRUM-28/README.md) publie la synthèse,
 
 `python -m volet_b.slm.bench_gguf --backend llamacpp|transformers --offline` conserve le banc historique sur un bloc. Installation : `pip install -e ".[volet_b_gguf]" --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu`. Résultats et limites dans `docs/projet/journal.md`.
 
+`python -m volet_b.slm.verif_machine --adapter adapter.gguf --sha256 …` (SCRUM-61) relève la machine (système, Python, GPU, paquets) puis compare base, échelle 0 et échelle 1 de l'adaptateur GGUF sur le prompt de `seed-0001`, chaque lancement dans son propre processus ; résultats dans `eval/results/SCRUM-61/machine/<date>/`. Mode d'emploi pour la RTX 3050 : `docs/projet/passation_nassim.md`.
+
 ## Backend llama.cpp et conversion LoRA → GGUF
 
 Dans SCRUM-57, Transformers était le défaut et SmolLM2 la base. Depuis SCRUM-63, le YAML sélectionne Gemma sous llama.cpp ; ces commandes historiques exigent de reprendre les configurations archivées dans les résultats SCRUM-28/SCRUM-57 pour reproduire leurs mesures. L'interface et le retour (`text`, `new_tokens`, `seconds`) sont inchangés. `TEAMAI_SLM_MOCK=1` fonctionne avec les deux backends sans charger de poids.

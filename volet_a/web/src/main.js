@@ -358,6 +358,9 @@ elements.analyze.addEventListener("click", async () => {
             { tone: "ok" }
         );
         setStep("results");
+        // Masquer la progression avant le défilement : sinon la page remonte
+        // ensuite et le titre des résultats passe sous la barre supérieure (mobile).
+        setProgress(0, 0);
         elements.results.scrollIntoView({
             behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
             block: "start",

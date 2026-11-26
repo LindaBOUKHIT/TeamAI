@@ -1,0 +1,78 @@
+"""SCRUM-61 étape 5 : adaptateur GGUF de l'essai appliqué au GGUF QAT q4_0 (T4), échelle 0 contre 1."""
+import glob, hashlib, json, os, site, subprocess, sys, time, urllib.request
+from pathlib import Path
+
+OUT = Path('/kaggle/working')
+WHEEL_URL = ''  # lien signé Kaggle retiré (expire)
+WHEEL_SHA256 = 'b89030f400a039434237da3b91bb7ae5d6106cf96735e85d6fb33dd8d35968da'
+ADAPTER_URL = ''  # lien signé Kaggle retiré (expire)
+ADAPTER_SHA256 = 'a6ca706c55e2e587c918afc03c071f34ac09d066588db633480198245d75b003'
+SEED_URL = 'https://raw.githubusercontent.com/LindaBOUKHIT/TeamAI/14fbee836e70fd19c65dcd88cf38a4b8bac975fa/volet_b/annotations/seed_alain.jsonl'
+SEED_SHA256 = '3c95ff56a86b56ff484e9b1d5e403e36530b2f1314492902c9ef9d4d2e9b5603'
+
+
+def fetch(url, digest, name):
+    """Télécharge un fichier et vérifie son empreinte."""
+    path = OUT / name
+    urllib.request.urlretrieve(url, path)
+    assert hashlib.sha256(path.read_bytes()).hexdigest() == digest, name
+    return path
+
+
+def main():
+    """Installe la roue CUDA, génère deux fois le même prompt train et compare."""
+    wheel = fetch(WHEEL_URL, WHEEL_SHA256, 'llama_cpp_python-0.3.36-py3-none-linux_x86_64.whl')
+    adapter = fetch(ADAPTER_URL, ADAPTER_SHA256, 'adapter.gguf')
+    seed = fetch(SEED_URL, SEED_SHA256, 'seed_alain.jsonl')
+    subprocess.run([sys.executable, '-m', 'pip', 'install', '-q', '--only-binary=:all:', str(wheel),
+                    'nvidia-cuda-runtime-cu12', 'nvidia-cublas-cu12'], check=True)
+    roots = set(site.getsitepackages()) | {p for p in sys.path if p.endswith(('site-packages', 'dist-packages'))}
+    libs = sorted({d for sp in roots for d in glob.glob(sp + '/nvidia/*/lib')})
+    env = {**os.environ, 'LD_LIBRARY_PATH': ':'.join(libs + [os.environ.get('LD_LIBRARY_PATH', '')])}
+    from huggingface_hub import hf_hub_download
+    model = hf_hub_download('google/gemma-4-E4B-it-qat-q4_0-gguf', 'gemma-4-E4B_q4_0-it.gguf',
+                            revision='4b4a2c1d584be7264f87aac328a1bc739ce81b6c')
+    example = json.loads(seed.read_text(encoding='utf-8').splitlines()[0])
+    (OUT / 'prompt.txt').write_text(example['prompt'], encoding='utf-8')
+    child = r'''
+import json, subprocess, sys, time
+from llama_cpp import Llama
+model, prompt_path, adapter, scale, out = sys.argv[1:6]
+prompt = open(prompt_path, encoding='utf-8').read()
+kw = dict(lora_path=adapter, lora_scale=float(scale)) if adapter != '-' else {}
+t0 = time.perf_counter()
+llm = Llama(model_path=model, n_ctx=4096, n_gpu_layers=-1, seed=42, verbose=True, **kw)
+load = time.perf_counter() - t0
+t1 = time.perf_counter()
+r = llm.create_chat_completion(messages=[{"role": "user", "content": prompt}], max_tokens=400, temperature=0.0, seed=42)
+gen = time.perf_counter() - t1
+vram = subprocess.run(['nvidia-smi', '--query-gpu=memory.used', '--format=csv,noheader,nounits'], capture_output=True, text=True).stdout.strip()
+json.dump(dict(adapter=adapter, scale=scale, load_s=round(load, 1), gen_s=round(gen, 1), usage=r['usage'],
+               tok_s=round(r['usage']['completion_tokens'] / gen, 2), vram_used_mib=vram,
+               text=r['choices'][0]['message']['content']), open(out, 'w', encoding='utf-8'), ensure_ascii=False, indent=2)
+'''
+    (OUT / 'child.py').write_text(child, encoding='utf-8')
+    results = {}
+    for name, adapter_arg, scale in (('base', '-', '0'), ('lora_echelle_0', str(adapter), '0.0'),
+                                     ('lora_echelle_1', str(adapter), '1.0')):
+        out = OUT / f'{name}.json'
+        r = subprocess.run([sys.executable, str(OUT / 'child.py'), model, str(OUT / 'prompt.txt'), adapter_arg, scale, str(out)],
+                           env=env, capture_output=True, text=True, timeout=1800)
+        (OUT / f'{name}.log').write_text(r.stdout + r.stderr, encoding='utf-8')
+        lora_lines = [l for l in (r.stdout + r.stderr).splitlines() if 'lora' in l.lower() or 'adapter' in l.lower()]
+        print(name, 'code', r.returncode, '\n'.join(lora_lines[-15:]), flush=True)
+        if r.returncode == 0:
+            results[name] = json.loads(out.read_text(encoding='utf-8'))
+            print(json.dumps({k: v for k, v in results[name].items() if k != 'text'}), flush=True)
+    if {'base', 'lora_echelle_0', 'lora_echelle_1'} <= set(results):
+        summary = dict(example=example['id'],
+                       base_equals_scale0=results['base']['text'] == results['lora_echelle_0']['text'],
+                       scale0_differs_scale1=results['lora_echelle_0']['text'] != results['lora_echelle_1']['text'])
+        (OUT / 'resume.json').write_text(json.dumps(summary, indent=2), encoding='utf-8')
+        print(json.dumps(summary), flush=True)
+    for name, value in results.items():
+        print(f'=== {name}\n{value["text"][:1500]}', flush=True)
+
+
+if __name__ == '__main__':
+    main()

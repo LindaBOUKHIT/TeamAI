@@ -1,0 +1,39 @@
+adapter_dir: /kaggle/working/lora/adapters/r16_qkvo
+annotations_review_status: voir volet_b/annotations/README.md (statut de relecture
+  par lot)
+base_model:
+  architecture: Gemma4ForCausalLM
+  dtype: float16
+  model_id: google/gemma-4-E4B-it-qat-q4_0-unquantized
+  revision: 476025a01dbf99361c062bbeca3d6a76bb4c4566
+data: volet_b/annotations/train.jsonl
+essai: r16_qkvo
+lora:
+  alpha: 32
+  bias: none
+  dropout: 0.05
+  modules_to_save: null
+  r: 16
+  target_modules:
+  - q_proj
+  - k_proj
+  - v_proj
+  - o_proj
+  use_dora: false
+purpose: lora_final_quality
+run_name: lora_r16_qkvo
+runs_dir: /kaggle/working/lora/runs
+seed: 42
+training:
+  batch_size: 1
+  bf16: false
+  fp16: true
+  gradient_checkpointing: true
+  init_scale: 1024
+  learning_rate: 0.0001
+  max_consecutive_skips: 8
+  max_grad_norm: 1.0
+  max_tokens: 4096
+  steps: 400
+  too_long: exclude
+  torch_threads: 4
