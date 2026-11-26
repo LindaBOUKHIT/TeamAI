@@ -122,7 +122,7 @@ Chaque expérience doit documenter la date, le responsable, le code, les donnée
 
 ### 3.1 Volet A — classification et application web
 
-**Rédaction : Alain, à partir des sources du dépôt, à la place de la section attendue de Bachar. À relire par Bachar.**
+**Rédaction : Alain, à partir des sources du dépôt. Relecture et corrections : Bachar Ben Slama.**
 
 **Chaîne de traitement.** Les lignes de logs sont regroupées par identifiant de bloc `blk_…`. Chaque ligne est associée à l'un des 29 modèles d'événements HDFS (E1 à E29). Le vocabulaire compte 31 indices : 0 pour le remplissage, 30 pour un événement inconnu. Le modèle lit les **50 premiers** événements de chaque bloc ; au-delà, ils sont tronqués et le site le signale. Le même prétraitement est écrit en Python pour l'entraînement et en JavaScript pour le site, et des cas de parité le vérifient. Sources : `volet_a/training/dataset.py`, `volet_a/web/src/preprocess.js`, `volet_a/web/public/model/parity_cases.json`.
 
@@ -130,7 +130,7 @@ Chaque expérience doit documenter la date, le responsable, le code, les donnée
 
 **Seuil (SCRUM-62).** Le seuil **0,4081** a été choisi sur la validation pour ne manquer presque aucune anomalie, au prix de fausses alertes supplémentaires (§3.3.5). Il est figé depuis et appliqué tel quel sur le test.
 
-**Test officiel (SCRUM-44).** Le test est ouvert une seule fois, sur **86 260** blocs, avec le seuil figé.
+**Test officiel (SCRUM-44).** Cette campagne finale évalue **86 260 blocs** avec le seuil figé. Une évaluation antérieure de la baseline sur le test est déclarée ci-dessous.
 
 | Modèle | Population | Macro-F1 | Fausses alertes | Anomalies manquées |
 |---|---|---:|---:|---:|
@@ -146,7 +146,7 @@ Le BiLSTM divise par deux les fausses alertes sur le test complet, pour une anom
 **Application web.** Le site est statique, construit avec Vite et publié sur GitHub Pages. Tout le calcul se fait dans le navigateur : les logs ne sont envoyés à aucun serveur.
 
 - **Inférence (SCRUM-40).** ONNX Runtime Web en WASM, dans un Web Worker, par lots de 64 blocs : la page reste réactive pendant l'analyse. Le modèle est gardé dans le cache du navigateur. Le site sert le FP32 : le candidat INT8 gagne surtout en taille (62 % de moins) et n'est pas le fichier évalué ([optimisation](../volet_a/optimisation.md)).
-- **Parité navigateur (SCRUM-44).** Sous Chrome, les 86 260 scores du test ont été recalculés et comparés aux scores Python sauvegardés, sans rouvrir le test : **0** décision divergente, écart maximal **2,4 × 10⁻⁷** en FP32. Le débit mesuré est d'environ **6 200 blocs par seconde**, boucle JavaScript comprise.
+- **Parité navigateur (SCRUM-44).** Sous Chrome, les **86 260 scores du test** ont été recalculés et comparés aux scores Python sauvegardés, sans ajuster le modèle ni le seuil : **0** décision divergente, écart maximal **2,4 × 10⁻⁷** en FP32. Le débit mesuré est d'environ **6 200 blocs par seconde**, boucle JavaScript comprise.
 - **Usage (SCRUM-27, SCRUM-41).** Collage de logs, import d'un fichier de 10 Mo au plus ou exemples tirés de la validation. Le tableau donne, pour chaque bloc, la classe, le score, le nombre d'événements, les troncatures et les événements inconnus. Un filtre garde les anomalies. L'export CSV reprend le seuil et l'empreinte du modèle, et neutralise les cellules qui ressembleraient à des formules. La séquence de chaque bloc se déplie, et les codes rares dans le lot sont signalés.
 - **Avertissements affichés.** La complétude d'un bloc ne peut pas être vérifiée à partir d'un extrait, et le score n'est pas une probabilité calibrée.
 - **Ergonomie (SCRUM-65, en relecture, PR [#59](https://github.com/LindaBOUKHIT/TeamAI/pull/59)).** Parcours en trois étapes, bilan chiffré du lot, score affiché avec le seuil, recherche et tri des blocs, affichage en cartes sur mobile, thème clair et sombre.
@@ -158,7 +158,7 @@ Le BiLSTM divise par deux les fausses alertes sur le test complet, pour une anom
 - **SCRUM-24 — baseline.** Régression logistique. Les résultats de référence publiés par Nassim sont repris dans `eval/results/SCRUM-25-bilstm-v1/metrics.json`, champ `baseline_reference`. Sur la validation globale : macro-F1 **0,9897**, précision anomalie **0,9608**, rappel anomalie **1,0000**, **103** fausses alertes et **0** anomalie manquée. Sur les **1 929** blocs de validation à séquence inédite : macro-F1 **0,9618**. La baseline n’a pas été réentraînée pour cette comparaison. Source : [métriques SCRUM-25](../../eval/results/SCRUM-25-bilstm-v1/metrics.json).
 - **SCRUM-25 — métriques de VALIDATION.** Au seuil **0,9900**, sur **86 259** blocs : macro-F1 **0,9955**, précision anomalie **0,9909**, rappel anomalie **0,9917**, **23** fausses alertes et **21** anomalies manquées. Sur les **1 929** blocs à séquence inédite : macro-F1 **0,9767**, précision anomalie **0,9646**, rappel anomalie **0,9682**. Source : `eval/results/SCRUM-25-bilstm-v1/metrics.json`, champs `validation`, `unseen` et `threshold`.
 - **SCRUM-62 — seuil orienté rappel.** Sans changer les poids, le candidat **0,4081** donne sur la validation globale **1** anomalie manquée et **59** fausses alertes ; rappel anomalie **0,9996**, F1 anomalie **0,9883**, macro-F1 **0,9939**. Sur la validation inédite : **1** anomalie manquée, **41** fausses alertes, rappel **0,9981**, macro-F1 **0,9734**. Source : [analyse du seuil](../../eval/results/SCRUM-62_20261023T153242Z_690fcb/analysis.json), `candidates.max_fn_1.all_validation` et `candidates.max_fn_1.unseen`. Les seuils affichés ici sont arrondis ; les valeurs exactes restent dans le JSON.
-- **SCRUM-62 — vérification navigateur.** WASM, modèle issu du cache, **10** cas distincts, batchs **1, 3 et 10**, **0** désaccord de classe ; vérification attribuée à Bachar dans `verified_by`. Source : [relevé navigateur](../../eval/results/SCRUM-62_20261023T153242Z_690fcb/browser_check.json). Ce relevé ne mesure ni latence ni mémoire. L’analyse porte `metadata_updated: false`, alors que le journal annonce des métadonnées actualisées : la version finale et son seuil doivent être identifiés pour SCRUM-44. Sources : même dossier, `analysis.json`, et [journal, entrée SCRUM-62](../projet/journal.md).
+- **SCRUM-62 — vérification navigateur.** WASM, modèle issu du cache, **10** cas distincts, batchs **1, 3 et 10**, **0** désaccord de classe ; vérification attribuée à Bachar dans `verified_by`. Source : [relevé navigateur](../../eval/results/SCRUM-62_20261023T153242Z_690fcb/browser_check.json). Ce relevé ne mesure ni latence ni mémoire. L’analyse initiale a été produite sans modifier les métadonnées (`metadata_updated: false`). Le seuil a ensuite été mis à jour séparément dans `detector.meta.json`, puis vérifié en Python et dans le navigateur. Sources : même dossier, `analysis.json`, et [journal, entrée SCRUM-62](../projet/journal.md).
 
 ### 3.2 Volet B — interprétation locale
 
