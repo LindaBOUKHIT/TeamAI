@@ -23,9 +23,13 @@ DISAGREEMENTS = 'desaccords.csv'
 
 
 def read_sheet(path: Path) -> dict:
-    """Notes d'une fiche par (cas, étiquette) ; toute note absente ou hors de 0, 1, 2 est refusée."""
+    """Notes d'une fiche par (cas, étiquette) ; toute note absente ou hors de 0, 1, 2 est refusée.
+
+    Lecture en utf-8-sig : une fiche réenregistrée par Excel commence par un BOM, qui renommerait
+    sinon la première colonne en « \\ufeffid ».
+    """
     grades, problems = {}, []
-    with path.open(encoding='utf-8', newline='') as source:
+    with path.open(encoding='utf-8-sig', newline='') as source:
         for row in csv.DictReader(source):
             item = (row['id'], row['etiquette'])
             if item in grades:
