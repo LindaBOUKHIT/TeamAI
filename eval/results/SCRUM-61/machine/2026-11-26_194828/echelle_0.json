@@ -1,0 +1,10 @@
+{
+  "chargement_s": 2.9,
+  "generation_s": 10.1,
+  "tokens": 281,
+  "tokens_par_s": 27.74,
+  "vram_avant_mib": 0,
+  "vram_apres_mib": 3703,
+  "vram_modele_mib": 3703,
+  "texte": "```json\n{\n  \"resume_evenements\": \"Des opérations d'écriture de réplicas ont été observées, incluant trois occurrences de début d'écriture sur un DataNode [F03] et trois réceptions de réplicas par un DataNode [F04]. Un événement atypique est une demande redondante d'enregistrement du bloc [F08] qui est enregistré à 2008-11-11 08:31:26 [T09].\",\n  \"faits_observes\": [\n    \"E27 : 1 occurrence(s) ; demande redondante d’enregistrement du bloc.\",\n    \"E5 : 3 occurrence(s) ; début d'écriture d'un réplica sur un DataNode.\",\n    \"E9 : 3 occurrence(s) ; réplica reçu par un DataNode.\"\n  ],\n  \"hypotheses\": [],\n  \"infos_manquantes\": [\n    \"Quelle est la raison de la demande redondante d’enregistrement du bloc observée à 2008-11-11 08:31:26 [T09] ?\"\n  ],\n  \"sources\": [],\n  \"abstention\": false\n}\n```"
+}
