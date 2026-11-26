@@ -1,0 +1,37 @@
+15:03:56 $ git clone -q https://github.com/LindaBOUKHIT/TeamAI.git /kaggle/temp/TeamAI
+15:03:58 
+15:03:58 $ git checkout -q 261a238
+15:03:58 
+15:04:04 $ /usr/bin/python3 -m pip install -q --only-binary=:all: /kaggle/working/wheels/llama_cpp_python-0.3.36-py3-none-linux_x86_64.whl
+15:04:11 
+15:04:11 $ /usr/bin/python3 -m pip install -q faiss-cpu rank_bm25 nvidia-cuda-runtime-cu12 nvidia-cublas-cu12
+15:04:15 
+15:04:46 $ /usr/bin/python3 -m volet_b.rag.build_index
+15:05:36 51 passages encodés (BAAI/bge-small-en-v1.5@5c38ec7c405ec4b44b94cc5a9bb96e735b38267a, dim 384)
+Index : /kaggle/temp/TeamAI/volet_b/rag/index/index.faiss
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 2455.39it/s]
+
+15:05:36 $ /usr/bin/python3 -c import json, sys, time
+from volet_b.agents import doc_chat, orchestrator
+call = orchestrator.make_call_slm(None)
+retriever = orchestrator.load_retriever(orchestrator.DEFAULT_METHOD)
+history, out = [], []
+for q in json.loads(sys.argv[1]):
+    t = time.time()
+    r = doc_chat.ask(q, history, retriever, call)
+    r['seconds'] = round(time.time() - t, 1)
+    out.append(r)
+    print(json.dumps(r, ensure_ascii=False), flush=True)
+    open('/kaggle/working/chat_reel.json', 'w', encoding='utf-8').write(json.dumps(out, ensure_ascii=False, indent=2))
+ ["Que signifie l'événement E23 ?", "Comment HDFS détecte-t-il qu'un DataNode est en panne ?", "Que se passe-t-il quand une réplique d'un bloc est perdue ?", "Pourquoi l'erreur BlockInfo not found in volumeMap apparaît-elle (E20) ?", "Quelle est la capitale de l'Australie ?"]
+15:06:28 nin the near future.\nThe DataNode stores HDFS data in files in its local file system. The DataNode has no knowledge about HDFS files.", "source_url": "https://hadoop.apache.org/docs/stable1/hdfs_design.html", "version": "Hadoop 1.2.1 documentation; guide copyright 2008", "score": 0.0293, "scores": {"dense": 0.4712, "bm25": 0.0}}, {"id": "hdfs-architecture-1.2.1#simple-coherency-model#1", "doc": "HDFS Architecture Guide", "section": "Simple Coherency Model", "text": "HDFS applications need a write-once-read-many access model for files. A file once created, written, and closed need not be changed.\nThis assumption simplifies data coherency issues and enables high throughput data access. A MapReduce application or a web crawler\napplication fits perfectly with this model. There is a plan to support appending-writes to files in the future.", "source_url": "https://hadoop.apache.org/docs/stable1/hdfs_design.html", "version": "Hadoop 1.2.1 documentation; guide copyright 2008", "score": 0.0293, "scores": {"dense": 0.4283, "bm25": 0.0}}, {"id": "hdfs-architecture-1.2.1#the-file-system-namespace#1", "doc": "HDFS Architecture Guide", "section": "The File System Namespace", "text": "HDFS supports a traditional hierarchical file organization. A user or an application can create directories and store files inside\nthese directories. The file system namespace hierarchy is similar to most other existing file systems; one can create and\nremove files, move a file from one directory to another, or rename a file. HDFS does not yet implement user quotas. HDFS\ndoes not support hard links or soft links. However, the HDFS architecture does not preclude implementing these features.\nThe NameNode maintains the file system namespace. Any change to the file system namespace or its properties is\nrecorded by the NameNode. An application can specify the number of replicas of a file that should be maintained by\nHDFS. The number of copies of a file is called the replication factor of that file. This information is stored by the NameNode.", "source_url": "https://hadoop.apache.org/docs/stable1/hdfs_design.html", "version": "Hadoop 1.2.1 documentation; guide copyright 2008", "score": 0.029, "scores": {"dense": 0.4371, "bm25": 0.0}}, {"id": "hdfs-architecture-1.2.1#safemode#1", "doc": "HDFS Architecture Guide", "section": "Safemode", "text": "On startup, the NameNode enters a special state called Safemode. Replication of data blocks does not occur\nwhen the NameNode is in the Safemode state. The NameNode receives Heartbeat and Blockreport messages\nfrom the DataNodes. A Blockreport contains the list of data blocks that a DataNode is hosting. Each block\nhas a specified minimum number of replicas. A block is considered safely replicated when the minimum number\nof replicas of that data block has checked in with the NameNode. After a configurable percentage of safely\nreplicated data blocks checks in with the NameNode (plus an additional 30 seconds), the NameNode exits\nthe Safemode state. It then determines the list of data blocks (if any) that still have fewer than the specified\nnumber of replicas. The NameNode then replicates these blocks to other DataNodes.", "source_url": "https://hadoop.apache.org/docs/stable1/hdfs_design.html", "version": "Hadoop 1.2.1 documentation; guide copyright 2008", "score": 0.0287, "scores": {"dense": 0.4423, "bm25": 0.0}}], "answer": {"reponse": "abstention", "sources": [], "abstention": true}, "errors": [], "status": "abstention", "seconds": 3.3}
+llama_kv_cache_iswa: using full-size SWA cache (ref: https://github.com/ggml-org/llama.cpp/pull/13194#issuecomment-2868343055)
+llama_kv_cache: the V embeddings have different sizes across layers and FA is not enabled - padding V cache to 1024
+llama_kv_cache: the V embeddings have different sizes across layers and FA is not enabled - padding V cache to 1024
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 2656.84it/s]
+

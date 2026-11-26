@@ -24,9 +24,12 @@ class CallLimitReached(RuntimeError):
     """Signale une limite atteinte avant tout appel supplémentaire."""
 
 
-def explain_block_three_agents(block, retriever, call_slm, k=5, max_calls=5):
-    """Explique un bloc préparé, conserve les appels bruts et autorise une seule reprise."""
-    if block.get('split') == 'test':
+def explain_block_three_agents(block, retriever, call_slm, k=5, max_calls=5, final_evaluation=False):
+    """Explique un bloc préparé, conserve les appels bruts et autorise une seule reprise.
+
+    Le split test n'est accepté qu'avec final_evaluation=True, réservé au banc SCRUM-45.
+    """
+    if block.get('split') == 'test' and not final_evaluation:
         raise ValueError('split test réservé à l’évaluation finale')
     if k < 1 or max_calls < 0:
         raise ValueError('k doit être positif et max_calls non négatif')
