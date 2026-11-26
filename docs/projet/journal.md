@@ -619,3 +619,9 @@ Rapport §6 : Laya (essai argumenté, SCRUM-58), notebooks Kaggle T4, llama.cpp 
 
 ## 2026-11-25 — SCRUM-48 : finalisation du rapport V1
 Page de garde définitive (version du 25/11), retour individuel d'Alain (`docs/rapport/retour_experience/alain.md`, §5.2), conclusion du §7 et section SCRUM-36 mise à jour avec le jeu final (200 train, 40 val, 104 exemples modifiés sur 240). PDF régénéré (29 pages). Reste : retour de Bachar, puis chiffres du test du volet B et effet du LoRA (SCRUM-45) à reporter au §3.3.6, au §4 et dans la conclusion.
+
+## 25/11/2026 · SCRUM-35 : validation du jeu de test réservé du volet B (Alain)
+
+Relecture croisée des cas 0021 à 0040 vérifiés par Linda : 2 validations et 18 corrections reportées (portée des messages E21, information manquante sur les exceptions E4 de 0034 et 0040). Alain vérifie les cas 0061 à 0080, déjà relus par Bachar, et relit les cas 0041 à 0060 vérifiés par Bachar : une correction (0056, invalidation présentée comme effective). Mêmes règles (E5, E21, E2 et E4) appliquées à ses propres cas 0001 à 0020 : 10 corrections. Au total, 32 corrections journalisées dans `corrections_journal.csv` ; champs d'entrée inchangés, 0 erreur C5 hors relecteur.
+
+`eval/volet_b/figer_test.py` écrit `test.jsonl` et `test.sha256` une fois les 80 cas vérifiés et relus. La relecture croisée de 0001 à 0020 par une autre personne qu'Alain reste à faire : le jeu n'est pas encore figé.
