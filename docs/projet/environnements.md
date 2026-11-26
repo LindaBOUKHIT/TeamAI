@@ -110,7 +110,7 @@ La PR [#4](https://github.com/LindaBOUKHIT/TeamAI/pull/4) a été approuvée pui
 
 - **06/10 — Inférence et démo du volet B sur la machine d'Alain** (CPU, 32 Go).
 - **06/10 — Entraînement LoRA envisagé sur GPU en ligne** (Kaggle, Colab en secours). La disponibilité du GPU, sa VRAM et un entraînement court restent à vérifier dans SCRUM-29 avant d'engager l'entraînement complet. L'adaptateur doit ensuite pouvoir être utilisé en local.
-- **Cache des modèles sur D:\** : `HF_HOME=D:\IA_Caches\HuggingFace\` relevé le 12/10 sur la machine d'Alain. Vérifier aussi la configuration du cache Hub et la présence des poids avant une exécution hors ligne ; ne pas déclencher un second téléchargement pour cette vérification.
+- **Cache des modèles sur `D:\`** : `HF_HOME=D:\IA_Caches\HuggingFace\` relevé le 12/10 sur la machine d'Alain. Vérifier aussi la configuration du cache Hub et la présence des poids avant une exécution hors ligne ; ne pas déclencher un second téléchargement pour cette vérification.
 - **26/11 — Vérification GPU sur la machine de Nassim (SCRUM-61)** : Python 3.12 isolé dans `.venv312`, exécution de Gemma GGUF quantifié et de l'adaptateur LoRA `r8_qv` sur RTX 3050 6 Go ; base = LoRA échelle 0, LoRA échelle 1 différente, débit 26,90 à 27,74 tokens/s sur le prompt de vérification, mémoire GPU du modèle 3697 à 3705 Mio.
 
 ## Conditions de clôture de SCRUM-15

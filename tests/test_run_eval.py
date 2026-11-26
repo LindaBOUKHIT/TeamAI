@@ -324,6 +324,14 @@ def test_scores_means_agreement_and_disagreements(inputs, tmp_path):
     assert 'agent' not in (out / blind_scores.DISAGREEMENTS).read_text(encoding='utf-8')
 
 
+def test_scores_read_sheet_saved_by_excel(tmp_path):
+    """Une fiche réenregistrée par Excel (BOM, champs entre guillemets, CRLF) se lit comme l'originale."""
+    path = tmp_path / 'fiche.csv'
+    content = '﻿"id","etiquette","F","S","A","U"\r\n"test-0004","A","2","1","2","0"\r\n'
+    path.write_bytes(content.encode('utf-8'))
+    assert blind_scores.read_sheet(path) == {('test-0004', 'A'): dict(F=2, S=1, A=2, U=0)}
+
+
 def test_scores_refuse_missing_grade(inputs, tmp_path):
     """Une grille incomplète est refusée avec le cas et le critère manquants."""
     paths, selection = fake_runs(tmp_path, inputs)
