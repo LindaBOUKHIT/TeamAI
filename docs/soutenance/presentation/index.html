@@ -10,6 +10,8 @@
  eval/results/SCRUM-42/kaggle_val5/README.md et kaggle_val5_v2/README.md :
  chaque run sur les mêmes 5 blocs val : 1/5 accepté, 5/5 conformes ;
  aucun passage cité par la réponse acceptée ; causes des rejets avant/après correctif.
+ eval/results/SCRUM-42/kaggle_val5_v3/README.md : après PR #67, 10 blocs val (5 de réglage + 5 seed 7) :
+ 0/10 accepté, 10/10 conformes, passages cités 3/10, motifs non tronqués.
  eval/results/SCRUM-58/README.md, run 4 validation unique : Laya AUC 0,4700 → 0,47.
  eval/results/SCRUM-37/retrieval_val.json : hybride, description, k=3, 306 traces val,
  rappel 0,6644, templates trouvés 6/10 ; retrieval seul, pas qualité des explications.
@@ -135,8 +137,8 @@
 <!-- Repère oral : 50 s. -->
 <section class="slide twoways">
 <p class="hand kicker">Résultats B · SCRUM-42 · validation</p>
-<h2>Deux runs, un bloc accepté sur cinq</h2>
-<div class="spread"><article class="page-card left"><h3>Run v1 · avant correctif</h3><ul><li><b>1/5 accepté</b> ; <b>5/5 conformes</b> au contrôle code.</li><li>Le contrôleur ne voit pas le contrat.</li><li>Il reproche surtout des sources vides.</li></ul></article><div class="spine"><span class="hand">mêmes<br>5 blocs val</span></div><article class="page-card right"><h3>Run v2 · après correctif</h3><ul><li><b>1/5 accepté</b> ; <b>5/5 conformes</b> au contrôle code.</li><li>Le reproche sur les sources vides disparaît.</li><li>Ordres non prouvés, exigences hors contrat et motifs tronqués persistent.</li></ul></article></div><p class="foot-line">Aucun passage cité par la réponse acceptée dans chaque run. Essai de fonctionnement, pas mesure de qualité.</p>
+<h2>Trois runs, tous conformes au contrat</h2>
+<div class="spread"><article class="page-card left"><h3>Run v1 · avant correctif</h3><ul><li><b>1/5 accepté</b> ; <b>5/5 conformes</b> au contrôle code.</li><li>Le contrôleur ne voit pas le contrat.</li><li>Il reproche surtout des sources vides.</li></ul></article><div class="spine"><span class="hand">blocs val<br>uniquement</span></div><article class="page-card right"><h3>Runs v2 et v3 · après correctifs</h3><ul><li>v2 : <b>1/5 accepté</b> ; le reproche sur les sources vides disparaît.</li><li>v3, 10 blocs : <b>0/10 accepté</b> ; <b>10/10 conformes</b> ; passages cités dans <b>3/10</b>.</li><li>Le contrôleur devient le goulot : rejets sans erreur visible, ordres affirmés manqués.</li></ul></article></div><p class="foot-line">Essai de fonctionnement sur la validation, pas mesure de qualité.</p>
 <footer><span>TeamAI · Présentation · 8 min</span><span class="folio">7</span></footer>
 </section>
 <!-- Repère oral : 35 s. -->

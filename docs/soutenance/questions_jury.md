@@ -59,38 +59,35 @@ Le prompt v16 fournit des faits calculés (événements, chronologie, lignes) et
 Sur 40 nouveaux blocs de validation : 2 erreurs de chronologie, 3 liens de causalité non étayés, 3 pseudo-références, 1 réponse en boucle. Dans les 16 cas où la cause reste inconnue, aucun résumé ne le dit. Les blocs de plus de 39 événements dépassent la fenêtre de contexte ; ils représentent 4,2 % des anomalies de la validation. Sources : [défauts et feuille de route](../volet_b/defauts_feuille_de_route.md) ; pour les traces longues, [mesures CPU du 24/11](../../eval/results/SCRUM-43/cpu_24-11/README.md) et [décompte des longueurs](../../eval/results/SCRUM-43/cpu_24-11/longueurs_val.json) (PR #62).
 
 **17. À quoi sert le RAG ?**
-Il ajoute des passages de la documentation HDFS pour éclairer les événements. Dans les runs à 3 agents, aucune réponse acceptée ne cite de passage : l'apport du RAG n'est pas démontré. Source : [SCRUM-42](../../eval/results/SCRUM-42/kaggle_val5_v2/README.md).
+Il ajoute des passages de la documentation HDFS pour éclairer les événements. Dans le dernier run à 3 agents, 3 réponses sur 10 citent un passage, mais aucune n'est acceptée : l'apport du RAG n'est pas démontré. Source : [SCRUM-42](../../eval/results/SCRUM-42/kaggle_val5_v3/README.md).
 
 **18. Pourquoi trois agents ?**
-Pour séparer la recherche des passages, la rédaction et le contrôle. Sur 5 blocs de validation, 1 réponse est acceptée sur 5, avec environ 86 s de génération par bloc sur un T4. C'est un essai de fonctionnement, pas une mesure de qualité. Source : [SCRUM-42](../../eval/results/SCRUM-42/kaggle_val5_v2/README.md).
+Pour séparer la recherche des passages, la rédaction et le contrôle. Les deux premiers runs, sur 5 blocs de validation, acceptent 1 réponse sur 5, avec environ 86 s de génération par bloc sur un T4. Après correctifs, le troisième, sur 10 blocs, n'en accepte aucune, mais les 10 sont conformes au contrat : le contrôleur est trop strict et manque des ordres affirmés. Sur les 80 cas du test, le contrôleur n'accepte que 9 réponses avec la base et 25 avec le LoRA : il demande une correction dans 137 passages sur 146, dont une partie seulement est justifiée (un ordre inventé entre événements de la même seconde). Sources : [SCRUM-42](../../eval/results/SCRUM-42/kaggle_val5_v3/README.md) et [résultats du volet B](../../eval/results/volet_b.md).
 
 **19. Et le LoRA ?**
-La faisabilité est établie : un essai QLoRA de 30 pas sur un T4 Kaggle, puis la conversion de l'adaptateur en GGUF. L'inférence avec l'adaptateur et l'entraînement complet ne sont pas faits ; aucun gain n'est donc établi. Source : [rapport, §3.2](../rapport/rapport_v1.md).
+Deux réglages QLoRA ont été entraînés 400 pas sur un T4, sur 199 exemples relus ; seul l'adaptateur est converti en GGUF et appliqué au modèle quantifié. Ils sont à égalité sur la validation, et l'ordre de la configuration a retenu `r8_qv`. Sur le test, à 1 agent, le LoRA ne change ni l'acceptation (79/80) ni les hypothèses (22), mais les résumés affirmant un ordre entre événements passent de 35/80 à 1/80. La justesse n'est pas encore notée par un humain. Source : [rapport, §3.2 et §3.3.6](../rapport/rapport_v1.md).
 
 **20. Avez-vous évalué le volet B sur le test ?**
-Pas encore : il faut d'abord un jeu de référence relu et une double annotation (SCRUM-35, SCRUM-45). Tous les chiffres du volet B présentés viennent de la validation. *Mettre à jour cette réponse si SCRUM-45 aboutit avant la soutenance.*
+Oui, une seule fois, le 25/11 : 80 cas figés par SHA-256, quatre configurations au même commit. À 1 agent, 79/80 réponses acceptées, et aucune hypothèse sur un bloc sans incident ; à 3 agents, 9/80 (base) et 25/80 (LoRA). Ces mesures portent sur la forme et l'appui, pas sur la justesse : la double annotation à l'aveugle est préparée mais pas encore faite. Source : [résultats du volet B](../../eval/results/volet_b.md).
 
 ## 4. Comparaison et perspectives
 
 **21. Lequel des deux volets est le meilleur ?**
-Ils ne font pas la même chose : A décide si un bloc est anormal, B aide à le comprendre. A est mesuré sur le test ; B seulement sur la validation. Les comparer sur une seule métrique n'aurait pas de sens. Source : [comparaison A/B](../../eval/results/comparaison_a_b.md).
+Ils ne font pas la même chose : A décide si un bloc est anormal, B aide à le comprendre. Les deux sont mesurés sur leur test, mais A sur 86 260 blocs étiquetés, B sur la forme de 80 réponses. Les comparer sur une seule métrique n'aurait pas de sens. Source : [comparaison A/B](../../eval/results/comparaison_a_b.md).
 
 **22. Pourquoi ne pas les enchaîner ?**
-C'est la suite naturelle : A trie tout, B n'explique que les blocs signalés. Sur le test, A signale 2 581 blocs (3,0 %). Au rythme mesuré pour B, il faudrait environ 22 heures de GPU au lieu de 734 heures pour tout expliquer. Ces durées sont calculées, pas mesurées. Il ne faudrait pas transmettre le verdict de A à B, et la chaîne devrait être évaluée comme un troisième système. Source : [rapport, §4.3](../rapport/rapport_v1.md).
+C'est la suite naturelle : A trie tout, B n'explique que les blocs signalés. Sur le test, A signale 2 581 blocs (3,0 %). Au rythme mesuré pour B sur le test (24,6 s par bloc), il faudrait environ 18 heures de GPU au lieu de 590 heures pour tout expliquer. Ces durées sont calculées, pas mesurées. Il ne faudrait pas transmettre le verdict de A à B, et la chaîne devrait être évaluée comme un troisième système. Source : [rapport, §4.3](../rapport/rapport_v1.md).
 
 **23. Que feriez-vous avec un mois de plus ?**
-Mesurer le volet B sur le test avec double annotation, gérer les traces longues (résumé ou découpage), puis évaluer la chaîne A puis B. Un modèle plus grand ne viendrait qu'après. Source : [feuille de route](../volet_b/defauts_feuille_de_route.md), §4.
+Noter la justesse du volet B par la double annotation, rendre le contrôleur moins pointilleux, gérer les traces longues (résumé ou découpage), puis évaluer la chaîne A puis B. Un modèle plus grand ne viendrait qu'après. Source : [feuille de route](../volet_b/defauts_feuille_de_route.md), §4.
 
 ## 5. Organisation et outils
 
 **24. Comment vous êtes-vous organisés ?**
-Jira pour les tickets, avec un responsable, un relecteur et un critère de fin par tâche. Une branche par ticket, des PR relues vers `dev`, puis `dev` publié sur `main`. Les décisions et les usages de l'IA sont tracés dans le journal. Source : [journal](../projet/journal.md).
+Jira pour les tickets, avec un responsable, un relecteur et un critère de fin par tâche. Une branche par ticket, des PR relues vers `dev`, puis `dev` publié sur `main`. Les décisions et les expériences sont tracées dans le journal. Source : [journal](../projet/journal.md).
 
-**25. Comment avez-vous utilisé l'IA générative ?**
-Pour le code, la documentation, l'organisation Jira et des relectures préparatoires, avec des outils déclarés dans le journal. Les validations humaines restent faites par l'équipe. Une erreur notable : des affirmations fausses sur des résultats, repérées en relecture. Source : [rapport, §6](../rapport/rapport_v1.md).
-
-**26. Comment avez-vous eu accès à un GPU ?**
-Le BiLSTM s'entraîne en 6 minutes sur CPU. Pour Gemma et le LoRA, nous avons utilisé des GPU T4 sur Kaggle, pilotés par un serveur MCP. Seules les données d'entraînement et de validation y sont envoyées, jamais le test. Source : [fiche outil Kaggle MCP](../rapport/outils/kaggle_mcp.md).
+**25. Comment avez-vous eu accès à un GPU ?**
+Le BiLSTM s'entraîne en 6 minutes sur CPU. Pour Gemma et le LoRA, nous avons utilisé des GPU T4 sur Kaggle, lancés par script. Le test du volet A n'y est jamais envoyé ; celui du volet B y a été mesuré une seule fois, dans un notebook privé, avec des entrées figées par SHA-256 et sans réglage après coup. Source : [fiche outil Kaggle](../rapport/outils/kaggle.md).
 
 ## Démonstrations à savoir refaire
 
