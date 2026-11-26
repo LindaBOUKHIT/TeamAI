@@ -1,0 +1,10 @@
+{
+  "chargement_s": 2.6,
+  "generation_s": 10.7,
+  "tokens": 289,
+  "tokens_par_s": 26.9,
+  "vram_avant_mib": 0,
+  "vram_apres_mib": 3705,
+  "vram_modele_mib": 3705,
+  "texte": "{\"resume_evenements\": \"L'allocation du bloc et trois mises à jour de blockMap sont observées [F06][F07]. Trois réceptions de réplica et trois débuts d'écriture sont consignés [F04][F03]. Une demande redondante d'enregistrement est présente à 08:31:26 ; cause indéterminée [F08][L01].\", \"faits_observes\": [\"[F08] E27 : 1 occurrence(s) ; demande redondante d’enregistrement du bloc.\", \"[F04] E9 : 3 occurrence(s) ; réplica reçu par un DataNode.\", \"[F03] E5 : 3 occurrence(s) ; début d'écriture d'un réplica sur un DataNode.\", \"[F06] E22 : 1 occurrence(s) ; allocation du bloc par le NameNode.\", \"[F07] E26 : 3 occurrence(s) ; mise à jour de blockMap ; nombre de messages, pas nombre garanti de réplicas distincts.\"], \"hypotheses\": [], \"infos_manquantes\": [\"Quel est l'état du bloc sur le DataNode émetteur de la demande redondante [L01] ?\"], \"sources\": [], \"abstention\": false}"
+}
