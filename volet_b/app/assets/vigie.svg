@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Vigie">
+  <defs>
+    <linearGradient id="beam" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#F5A524" stop-opacity="0.95"/>
+      <stop offset="1" stop-color="#F5A524" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="#0B1F33"/>
+  <path d="M30 22 L62 10 L62 34 Z" fill="url(#beam)"/>
+  <path d="M10 32 C18 20 42 20 50 32 C42 44 18 44 10 32 Z" fill="none" stroke="#E2E8F0" stroke-width="3" stroke-linejoin="round"/>
+  <circle cx="30" cy="32" r="7.5" fill="#F5A524"/>
+  <circle cx="30" cy="32" r="3" fill="#0B1F33"/>
+  <path d="M8 50 H56" stroke="#14B8A6" stroke-width="3" stroke-linecap="round" stroke-dasharray="2 5"/>
+</svg>

@@ -1,0 +1,51 @@
+# SCRUM-39 : LoRA complet sur le jeu d'adaptation SCRUM-36 (train seul), sélection sur val.
+# Chaque essai complète ce socle commun ; la règle de sélection est fixée avant tout entraînement.
+base_model:
+  model_id: google/gemma-4-E4B-it-qat-q4_0-unquantized
+  revision: 476025a01dbf99361c062bbeca3d6a76bb4c4566
+  architecture: Gemma4ForCausalLM
+  dtype: float16
+data: volet_b/annotations/train.jsonl
+val: volet_b/annotations/val.jsonl
+seed: 42
+purpose: lora_final_quality
+annotations_review_status: voir volet_b/annotations/README.md (statut de relecture par lot)
+
+lora:
+  r: 8
+  alpha: 16
+  dropout: 0.05
+  target_modules: [q_proj, v_proj]
+  bias: none
+  use_dora: false
+  modules_to_save: null
+
+training:
+  steps: 400              # 2 époques de 200 exemples train
+  batch_size: 1
+  fp16: true
+  bf16: false
+  learning_rate: 2.0e-4
+  max_grad_norm: 1.0
+  init_scale: 1024
+  max_consecutive_skips: 8
+  max_tokens: 4096        # n_ctx de l'inférence ; un exemple plus long est refusé, jamais tronqué
+  too_long: exclude       # un tel exemple est écarté entier et listé dans metrics.json (examples_excluded_too_long)
+  gradient_checkpointing: true
+  torch_threads: 4
+
+essais:
+  r8_qv:
+    lora: {r: 8, alpha: 16, target_modules: [q_proj, v_proj]}
+    training: {learning_rate: 2.0e-4}
+  r16_qkvo:
+    lora: {r: 16, alpha: 32, target_modules: [q_proj, k_proj, v_proj, o_proj]}
+    training: {learning_rate: 1.0e-4}
+
+# Sélection sur les 40 exemples val, pipeline v16 à 1 agent, adaptateur GGUF sur le GGUF QAT q4_0.
+# Critères dans l'ordre : réponses acceptées, c'est-à-dire au contrat v16 final valide (max), hypothèses par bloc avec incident (max),
+# références inconnues + causes réseau sans appui (min). Le test n'intervient jamais dans ce choix.
+selection:
+  split: val
+  config: lora_1agent
+  criteres: [accepted, hypotheses_per_block_with_incident, -erreurs_appui]

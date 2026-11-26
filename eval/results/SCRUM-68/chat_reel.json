@@ -1,0 +1,352 @@
+[
+  {
+    "question": "Que signifie l'événement E23 ?",
+    "query": "E23 event meaning",
+    "passages": [
+      {
+        "id": "loghub-templates#E23",
+        "doc": "Templates Loghub HDFS",
+        "section": "E23",
+        "source_url": "https://github.com/logpai/loghub/tree/master/HDFS",
+        "text": "E23 log template: [*]BLOCK* NameSystem[*]delete:[*]is added to invalidSet of[*]. Team paraphrase: NameNode deletes a file and adds its block to the invalidate set of a DataNode"
+      },
+      {
+        "id": "hdfs-architecture-1.2.1#cluster-rebalancing#1",
+        "doc": "HDFS Architecture Guide",
+        "section": "Cluster Rebalancing",
+        "text": "The HDFS architecture is compatible with data rebalancing schemes. A scheme might automatically move\ndata from one DataNode to another if the free space on a DataNode falls below a certain threshold. In the\nevent of a sudden high demand for a particular file, a scheme might dynamically create additional replicas\nand rebalance other data in the cluster. These types of data rebalancing schemes are not yet implemented.",
+        "source_url": "https://hadoop.apache.org/docs/stable1/hdfs_design.html",
+        "version": "Hadoop 1.2.1 documentation; guide copyright 2008",
+        "score": 0.0305,
+        "scores": {
+          "dense": 0.4122,
+          "bm25": 4.3584
+        }
+      },
+      {
+        "id": "hdfs-architecture-1.2.1#safemode#1",
+        "doc": "HDFS Architecture Guide",
+        "section": "Safemode",
+        "text": "On startup, the NameNode enters a special state called Safemode. Replication of data blocks does not occur\nwhen the NameNode is in the Safemode state. The NameNode receives Heartbeat and Blockreport messages\nfrom the DataNodes. A Blockreport contains the list of data blocks that a DataNode is hosting. Each block\nhas a specified minimum number of replicas. A block is considered safely replicated when the minimum number\nof replicas of that data block has checked in with the NameNode. After a configurable percentage of safely\nreplicated data blocks checks in with the NameNode (plus an additional 30 seconds), the NameNode exits\nthe Safemode state. It then determines the list of data blocks (if any) that still have fewer than the specified\nnumber of replicas. The NameNode then replicates these blocks to other DataNodes.",
+        "source_url": "https://hadoop.apache.org/docs/stable1/hdfs_design.html",
+        "version": "Hadoop 1.2.1 documentation; guide copyright 2008",
+        "score": 0.0291,
+        "scores": {
+          "dense": 0.473,
+          "bm25": 0.0
+        }
+      },
+      {
+        "id": "hdfs-architecture-1.2.1#staging#1",
+        "doc": "HDFS Architecture Guide",
+        "section": "Staging",
+        "text": "A client request to create a file does not reach the NameNode immediately. In fact, initially the HDFS\nclient caches the file data into a temporary local file. Application writes are transparently redirected to\nthis temporary local file. When the local file accumulates data worth over one HDFS block size, the\nclient contacts the NameNode. The NameNode inserts the file name into the file system hierarchy\nand allocates a data block for it. The NameNode responds to the client request with the identity\nof the DataNode and the destination data block. Then the client flushes the block of data from the\nlocal temporary file to the specified DataNode. When a file is closed, the remaining un-flushed data\nin the temporary local file is transferred to the DataNode. The client then tells the NameNode that\nthe file is closed. At this point, the NameNode commits the file creation operation into a persistent\nstore. If the NameNode dies before the file is closed, the file is lost.\nThe above approach has been adopted after careful consideration of target applications that run on\nHDFS. These applications need streaming writes to files. If a client writes to a remote file directly\nwithout any client side buffering, the network speed and the congestion in the network impacts\nthroughput considerably. This approach is not without precedent. Earlier distributed file systems,\ne.g. AFS, have used client side caching to\nimprove performance. A POSIX requirement has been relaxed to achieve higher performance of\ndata uploads.",
+        "source_url": "https://hadoop.apache.org/docs/stable1/hdfs_design.html",
+        "version": "Hadoop 1.2.1 documentation; guide copyright 2008",
+        "score": 0.029,
+        "scores": {
+          "dense": 0.3988,
+          "bm25": 1.8254
+        }
+      },
+      {
+        "id": "hdfs-architecture-1.2.1#data-disk-failure-heartbeats-and-re-replication#1",
+        "doc": "HDFS Architecture Guide",
+        "section": "Data Disk Failure, Heartbeats and Re-Replication",
+        "text": "Each DataNode sends a Heartbeat message to the NameNode periodically. A network partition can cause a\nsubset of DataNodes to lose connectivity with the NameNode. The NameNode detects this condition by the\nabsence of a Heartbeat message. The NameNode marks DataNodes without recent Heartbeats as dead and\ndoes not forward any new IO requests to them. Any data that was\nregistered to a dead DataNode is not available to HDFS any more. DataNode death may cause the replication\nfactor of some blocks to fall below their specified value. The NameNode constantly tracks which blocks need\nto be replicated and initiates replication whenever necessary. The necessity for re-replication may arise due\nto many reasons: a DataNode may become unavailable, a replica may become corrupted, a hard disk on a\nDataNode may fail, or the replication factor of a file may be increased.",
+        "source_url": "https://hadoop.apache.org/docs/stable1/hdfs_design.html",
+        "version": "Hadoop 1.2.1 documentation; guide copyright 2008",
+        "score": 0.0275,
+        "scores": {
+          "dense": 0.4365,
+          "bm25": 0.0
+        }
+      }
+    ],
+    "answer": {
+      "reponse": "L'événement E23 signifie que le NameNode supprime un fichier et ajoute son bloc au jeu d'invalidation d'un DataNode [P1].",
+      "sources": [
+        "loghub-templates#E23"
+      ],
+      "abstention": false
+    },
+    "errors": [],
+    "status": "sourcée",
+    "seconds": 7.8
+  },
+  {
+    "question": "Comment HDFS détecte-t-il qu'un DataNode est en panne ?",
+    "query": "HDFS DataNode failure detection",
+    "passages": [
+      {
+        "id": "hdfs-architecture-1.2.1#data-disk-failure-heartbeats-and-re-replication#1",
+        "doc": "HDFS Architecture Guide",
+        "section": "Data Disk Failure, Heartbeats and Re-Replication",
+        "text": "Each DataNode sends a Heartbeat message to the NameNode periodically. A network partition can cause a\nsubset of DataNodes to lose connectivity with the NameNode. The NameNode detects this condition by the\nabsence of a Heartbeat message. The NameNode marks DataNodes without recent Heartbeats as dead and\ndoes not forward any new IO requests to them. Any data that was\nregistered to a dead DataNode is not available to HDFS any more. DataNode death may cause the replication\nfactor of some blocks to fall below their specified value. The NameNode constantly tracks which blocks need\nto be replicated and initiates replication whenever necessary. The necessity for re-replication may arise due\nto many reasons: a DataNode may become unavailable, a replica may become corrupted, a hard disk on a\nDataNode may fail, or the replication factor of a file may be increased.",
+        "source_url": "https://hadoop.apache.org/docs/stable1/hdfs_design.html",
+        "version": "Hadoop 1.2.1 documentation; guide copyright 2008",
+        "score": 0.0323,
+        "scores": {
+          "dense": 0.8245,
+          "bm25": 3.9237
+        }
+      },
+      {
+        "id": "hdfs-architecture-1.2.1#metadata-disk-failure#1",
+        "doc": "HDFS Architecture Guide",
+        "section": "Metadata Disk Failure",
+        "text": "The FsImage and the EditLog are central data structures of HDFS. A corruption of these files can\ncause the HDFS instance to be non-functional. For this reason, the NameNode can be configured\nto support maintaining multiple copies of the FsImage and EditLog. Any update to either the FsImage\nor EditLog causes each of the FsImages and EditLogs to get updated synchronously. This\nsynchronous updating of multiple copies of the FsImage and EditLog may degrade the rate of\nnamespace transactions per second that a NameNode can support. However, this degradation is\nacceptable because even though HDFS applications are very data intensive in nature, they are not\nmetadata intensive. When a NameNode restarts, it selects the latest consistent FsImage and EditLog to use.\nThe NameNode machine is a single point of failure for an HDFS cluster. If the NameNode machine fails,\nmanual intervention is necessary. Currently, automatic restart and failover of the NameNode software to\nanother machine is not supported.",
+        "source_url": "https://hadoop.apache.org/docs/stable1/hdfs_design.html",
+        "version": "Hadoop 1.2.1 documentation; guide copyright 2008",
+        "score": 0.032,
+        "scores": {
+          "dense": 0.8028,
+          "bm25": 4.1551
+        }
+      },
+      {
+        "id": "hdfs-architecture-1.2.1#hardware-failure#1",
+        "doc": "HDFS Architecture Guide",
+        "section": "Hardware Failure",
+        "text": "Hardware failure is the norm rather than the exception. An HDFS instance may consist of hundreds or thousands of server machines,\neach storing part of the file system’s data. The fact that there are a huge number of components and that each component has\na non-trivial probability of failure means that some component of HDFS is always non-functional. Therefore, detection of faults and quick,\nautomatic recovery from them is a core architectural goal of HDFS.",
+        "source_url": "https://hadoop.apache.org/docs/stable1/hdfs_design.html",
+        "version": "Hadoop 1.2.1 documentation; guide copyright 2008",
+        "score": 0.0313,
+        "scores": {
+          "dense": 0.7917,
+          "bm25": 9.5373
+        }
+      },
+      {
+        "id": "hdfs-architecture-1.2.1#data-integrity#1",
+        "doc": "HDFS Architecture Guide",
+        "section": "Data Integrity",
+        "text": "It is possible that a block of data fetched from a DataNode arrives corrupted. This corruption can occur\nbecause of faults in a storage device, network faults, or buggy software. The HDFS client software\nimplements checksum checking on the contents of HDFS files. When a client creates an HDFS file,\nit computes a checksum of each block of the file and stores these checksums in a separate hidden\nfile in the same HDFS namespace. When a client retrieves file contents it verifies that the data it\nreceived from each DataNode matches the checksum stored in the associated checksum file. If not,\nthen the client can opt to retrieve that block from another DataNode that has a replica of that block.",
+        "source_url": "https://hadoop.apache.org/docs/stable1/hdfs_design.html",
+        "version": "Hadoop 1.2.1 documentation; guide copyright 2008",
+        "score": 0.0313,
+        "scores": {
+          "dense": 0.8051,
+          "bm25": 2.2961
+        }
+      }
+    ],
+    "answer": {
+      "reponse": "Le NameNode détecte qu'un DataNode est en panne par l'absence de message Heartbeat de la part de ce DataNode.",
+      "sources": [
+        "hdfs-architecture-1.2.1#data-disk-failure-heartbeats-and-re-replication#1"
+      ],
+      "abstention": false
+    },
+    "errors": [],
+    "status": "sourcée",
+    "seconds": 6.9
+  },
+  {
+    "question": "Que se passe-t-il quand une réplique d'un bloc est perdue ?",
+    "query": "block replica loss",
+    "passages": [
+      {
+        "id": "hdfs-architecture-1.2.1#replica-placement-the-first-baby-steps#2",
+        "doc": "HDFS Architecture Guide",
+        "section": "Replica Placement: The First Baby Steps",
+        "text": "on one node in the local rack, another on a node in a different (remote) rack, and the last on a different node in the\nsame remote rack. This policy cuts the inter-rack write traffic which generally improves write performance. The\nchance of rack failure is far less than that of node failure; this policy does not impact data reliability and availability\nguarantees. However, it does reduce the aggregate network bandwidth used when reading data since a block is\nplaced in only two unique racks rather than three. With this policy, the replicas of a file do not evenly distribute\nacross the racks. One third of replicas are on one node, two thirds of replicas are on one rack, and the other third\nare evenly distributed across the remaining racks. This policy improves write performance without compromising\ndata reliability or read performance.\nThe current, default replica placement policy described here is a work in progress.",
+        "source_url": "https://hadoop.apache.org/docs/stable1/hdfs_design.html",
+        "version": "Hadoop 1.2.1 documentation; guide copyright 2008",
+        "score": 0.0315,
+        "scores": {
+          "dense": 0.7497,
+          "bm25": 3.6564
+        }
+      },
+      {
+        "id": "hdfs-architecture-1.2.1#safemode#1",
+        "doc": "HDFS Architecture Guide",
+        "section": "Safemode",
+        "text": "On startup, the NameNode enters a special state called Safemode. Replication of data blocks does not occur\nwhen the NameNode is in the Safemode state. The NameNode receives Heartbeat and Blockreport messages\nfrom the DataNodes. A Blockreport contains the list of data blocks that a DataNode is hosting. Each block\nhas a specified minimum number of replicas. A block is considered safely replicated when the minimum number\nof replicas of that data block has checked in with the NameNode. After a configurable percentage of safely\nreplicated data blocks checks in with the NameNode (plus an additional 30 seconds), the NameNode exits\nthe Safemode state. It then determines the list of data blocks (if any) that still have fewer than the specified\nnumber of replicas. The NameNode then replicates these blocks to other DataNodes.",
+        "source_url": "https://hadoop.apache.org/docs/stable1/hdfs_design.html",
+        "version": "Hadoop 1.2.1 documentation; guide copyright 2008",
+        "score": 0.0313,
+        "scores": {
+          "dense": 0.7518,
+          "bm25": 2.0656
+        }
+      },
+      {
+        "id": "hdfs-users-1.2.1#rebalancer#1",
+        "doc": "HDFS Users Guide",
+        "section": "Rebalancer",
+        "text": "HDFS data might not always be be placed uniformly across the\nDataNode. One common reason is addition of new DataNodes to an\nexisting cluster. While placing new blocks (data for a file is\nstored as a series of blocks), NameNode considers various\nparameters before choosing the DataNodes to receive these blocks.\nSome of the considerations are:\nPolicy to keep one of the replicas of a block on the same node\nas the node that is writing the block.\nNeed to spread different replicas of a block across the racks so\nthat cluster can survive loss of whole rack.\nOne of the replicas is usually placed on the same rack as the\nnode writing to the file so that cross-rack network I/O is\nreduced.\nSpread HDFS data uniformly across the DataNodes in the cluster.\nDue to multiple competing considerations, data might not be\nuniformly placed across the DataNodes.\nHDFS provides a tool for administrators that analyzes block\nplacement and rebalanaces data across the DataNode. A brief\nadministrator's guide for rebalancer as a\nPDF\nis attached to\nHADOOP-1652.\nFor command usage, see\nbalancer.",
+        "source_url": "https://hadoop.apache.org/docs/stable1/hdfs_user_guide.html",
+        "version": "Hadoop 1.2.1 documentation; guide copyright 2008",
+        "score": 0.0311,
+        "scores": {
+          "dense": 0.6636,
+          "bm25": 4.991
+        }
+      },
+      {
+        "id": "hdfs-architecture-1.2.1#replication-pipelining#1",
+        "doc": "HDFS Architecture Guide",
+        "section": "Replication Pipelining",
+        "text": "When a client is writing data to an HDFS file, its data is first written to a local file as explained\nin the previous section. Suppose the HDFS file has a replication factor of three. When the local\nfile accumulates a full block of user data, the client retrieves a list of DataNodes from the NameNode.\nThis list contains the DataNodes that will host a replica of that block. The client then flushes the\ndata block to the first DataNode. The first DataNode starts receiving the data in small portions (4 KB),\nwrites each portion to its local repository and transfers that portion to the second DataNode in the list.\nThe second DataNode, in turn starts receiving each portion of the data block, writes that portion to its\nrepository and then flushes that portion to the third DataNode. Finally, the third DataNode writes the\ndata to its local repository. Thus, a DataNode can be receiving data from the previous one in the pipeline\nand at the same time forwarding data to the next one in the pipeline. Thus, the data is pipelined from\none DataNode to the next.",
+        "source_url": "https://hadoop.apache.org/docs/stable1/hdfs_design.html",
+        "version": "Hadoop 1.2.1 documentation; guide copyright 2008",
+        "score": 0.0306,
+        "scores": {
+          "dense": 0.6758,
+          "bm25": 3.664
+        }
+      }
+    ],
+    "answer": {
+      "reponse": "Aucun passage ne décrit ce qui se passe lorsqu'une réplique d'un bloc est perdue.",
+      "sources": [],
+      "abstention": true
+    },
+    "errors": [],
+    "status": "abstention",
+    "seconds": 5.8
+  },
+  {
+    "question": "Pourquoi l'erreur BlockInfo not found in volumeMap apparaît-elle (E20) ?",
+    "query": "BlockInfo not found in volumeMap (E20)",
+    "passages": [
+      {
+        "id": "loghub-templates#E20",
+        "doc": "Templates Loghub HDFS",
+        "section": "E20",
+        "source_url": "https://github.com/logpai/loghub/tree/master/HDFS",
+        "text": "E20 log template: [*]Unexpected error trying to delete block[*]BlockInfo not found in volumeMap[*]. Team paraphrase: Unexpected error while deleting a block: block info not found in the volume map"
+      },
+      {
+        "id": "hdfs-architecture-1.2.1#the-persistence-of-file-system-metadata#2",
+        "doc": "HDFS Architecture Guide",
+        "section": "The Persistence of File System Metadata",
+        "text": "It stores each block of HDFS data in a separate file in its local file system. The DataNode does not create all files\nin the same directory. Instead, it uses a heuristic to determine the optimal number of files per directory and creates\nsubdirectories appropriately. It is not optimal to create all local files in the same directory because the local file\nsystem might not be able to efficiently support a huge number of files in a single directory. When a DataNode starts\nup, it scans through its local file system, generates a list of all HDFS data blocks that correspond to each of these\nlocal files and sends this report to the NameNode: this is the Blockreport.",
+        "source_url": "https://hadoop.apache.org/docs/stable1/hdfs_design.html",
+        "version": "Hadoop 1.2.1 documentation; guide copyright 2008",
+        "score": 0.0312,
+        "scores": {
+          "dense": 0.5825,
+          "bm25": 1.758
+        }
+      },
+      {
+        "id": "hdfs-architecture-1.2.1#staging#1",
+        "doc": "HDFS Architecture Guide",
+        "section": "Staging",
+        "text": "A client request to create a file does not reach the NameNode immediately. In fact, initially the HDFS\nclient caches the file data into a temporary local file. Application writes are transparently redirected to\nthis temporary local file. When the local file accumulates data worth over one HDFS block size, the\nclient contacts the NameNode. The NameNode inserts the file name into the file system hierarchy\nand allocates a data block for it. The NameNode responds to the client request with the identity\nof the DataNode and the destination data block. Then the client flushes the block of data from the\nlocal temporary file to the specified DataNode. When a file is closed, the remaining un-flushed data\nin the temporary local file is transferred to the DataNode. The client then tells the NameNode that\nthe file is closed. At this point, the NameNode commits the file creation operation into a persistent\nstore. If the NameNode dies before the file is closed, the file is lost.\nThe above approach has been adopted after careful consideration of target applications that run on\nHDFS. These applications need streaming writes to files. If a client writes to a remote file directly\nwithout any client side buffering, the network speed and the congestion in the network impacts\nthroughput considerably. This approach is not without precedent. Earlier distributed file systems,\ne.g. AFS, have used client side caching to\nimprove performance. A POSIX requirement has been relaxed to achieve higher performance of\ndata uploads.",
+        "source_url": "https://hadoop.apache.org/docs/stable1/hdfs_design.html",
+        "version": "Hadoop 1.2.1 documentation; guide copyright 2008",
+        "score": 0.0304,
+        "scores": {
+          "dense": 0.5738,
+          "bm25": 3.0338
+        }
+      },
+      {
+        "id": "hdfs-users-1.2.1#dfsadmin-command#1",
+        "doc": "HDFS Users Guide",
+        "section": "DFSAdmin Command",
+        "text": "The bin/hadoop dfsadmin\ncommand supports a few HDFS administration related operations.\nThe bin/hadoop dfsadmin -help command\nlists all the commands currently supported. For e.g.:\n-report\n: reports basic statistics of HDFS. Some of this information is\nalso available on the NameNode front page.\n-safemode\n: though usually not required, an administrator can manually enter\nor leave Safemode.\n-finalizeUpgrade\n: removes previous backup of the cluster made during last upgrade.\n-refreshNodes\n: Updates the set of hosts allowed to connect to namenode.\nRe-reads the config file to update values defined by dfs.hosts and\ndfs.host.exclude and reads the entires (hostnames) in those files.\nEach entry not defined in dfs.hosts but in dfs.hosts.exclude\nis decommissioned. Each entry defined in dfs.hosts and also in\ndfs.host.exclude is stopped from decommissioning if it has aleady\nbeen marked for decommission. Entires not present in both the lists\nare decommissioned.\nFor command usage, see\ndfsadmin.",
+        "source_url": "https://hadoop.apache.org/docs/stable1/hdfs_user_guide.html",
+        "version": "Hadoop 1.2.1 documentation; guide copyright 2008",
+        "score": 0.0303,
+        "scores": {
+          "dense": 0.5603,
+          "bm25": 4.0924
+        }
+      },
+      {
+        "id": "hdfs-users-1.2.1#safemode#1",
+        "doc": "HDFS Users Guide",
+        "section": "Safemode",
+        "text": "During start up the NameNode loads the file system state from the\nfsimage and the edits log file. It then waits for DataNodes\nto report their blocks so that it does not prematurely start\nreplicating the blocks though enough replicas already exist in the\ncluster. During this time NameNode stays in Safemode.\nSafemode\nfor the NameNode is essentially a read-only mode for the HDFS cluster,\nwhere it does not allow any modifications to file system or blocks.\nNormally the NameNode leaves Safemode automatically after the DataNodes\nhave reported that most file system blocks are available.\nIf required, HDFS could be placed in Safemode explicitly\nusing 'bin/hadoop dfsadmin -safemode' command. NameNode front\npage shows whether Safemode is on or off. A more detailed\ndescription and configuration is maintained as JavaDoc for\nNameNode.setSafeMode().",
+        "source_url": "https://hadoop.apache.org/docs/stable1/hdfs_user_guide.html",
+        "version": "Hadoop 1.2.1 documentation; guide copyright 2008",
+        "score": 0.0302,
+        "scores": {
+          "dense": 0.6004,
+          "bm25": 1.4876
+        }
+      }
+    ],
+    "answer": {
+      "reponse": "L'erreur E20, intitulée \"Unexpected error trying to delete block: block info not found in the volume map\", est un template de log HDFS. [P1]",
+      "sources": [
+        "loghub-templates#E20"
+      ],
+      "abstention": false
+    },
+    "errors": [],
+    "status": "sourcée",
+    "seconds": 8.7
+  },
+  {
+    "question": "Quelle est la capitale de l'Australie ?",
+    "query": "australia capital",
+    "passages": [
+      {
+        "id": "hdfs-architecture-1.2.1#the-persistence-of-file-system-metadata#1",
+        "doc": "HDFS Architecture Guide",
+        "section": "The Persistence of File System Metadata",
+        "text": "The HDFS namespace is stored by the NameNode. The NameNode uses a transaction log called the EditLog\nto persistently record every change that occurs to file system metadata. For example, creating a new file in\nHDFS causes the NameNode to insert a record into the EditLog indicating this. Similarly, changing the\nreplication factor of a file causes a new record to be inserted into the EditLog. The NameNode uses a file\nin its local host OS file system to store the EditLog. The entire file system namespace, including the mapping\nof blocks to files and file system properties, is stored in a file called the FsImage. The FsImage is stored as\na file in the NameNode’s local file system too.\nThe NameNode keeps an image of the entire file system namespace and file Blockmap in memory. This key\nmetadata item is designed to be compact, such that a NameNode with 4 GB of RAM is plenty to support a\nhuge number of files and directories. When the NameNode starts up, it reads the FsImage and EditLog from\ndisk, applies all the transactions from the EditLog to the in-memory representation of the FsImage, and flushes\nout this new version into a new FsImage on disk. It can then truncate the old EditLog because its transactions\nhave been applied to the persistent FsImage. This process is called a checkpoint. In the current implementation,\na checkpoint only occurs when the NameNode starts up. Work is in progress to support periodic checkpointing\nin the near future.\nThe DataNode stores HDFS data in files in its local file system. The DataNode has no knowledge about HDFS files.",
+        "source_url": "https://hadoop.apache.org/docs/stable1/hdfs_design.html",
+        "version": "Hadoop 1.2.1 documentation; guide copyright 2008",
+        "score": 0.0293,
+        "scores": {
+          "dense": 0.4712,
+          "bm25": 0.0
+        }
+      },
+      {
+        "id": "hdfs-architecture-1.2.1#simple-coherency-model#1",
+        "doc": "HDFS Architecture Guide",
+        "section": "Simple Coherency Model",
+        "text": "HDFS applications need a write-once-read-many access model for files. A file once created, written, and closed need not be changed.\nThis assumption simplifies data coherency issues and enables high throughput data access. A MapReduce application or a web crawler\napplication fits perfectly with this model. There is a plan to support appending-writes to files in the future.",
+        "source_url": "https://hadoop.apache.org/docs/stable1/hdfs_design.html",
+        "version": "Hadoop 1.2.1 documentation; guide copyright 2008",
+        "score": 0.0293,
+        "scores": {
+          "dense": 0.4283,
+          "bm25": 0.0
+        }
+      },
+      {
+        "id": "hdfs-architecture-1.2.1#the-file-system-namespace#1",
+        "doc": "HDFS Architecture Guide",
+        "section": "The File System Namespace",
+        "text": "HDFS supports a traditional hierarchical file organization. A user or an application can create directories and store files inside\nthese directories. The file system namespace hierarchy is similar to most other existing file systems; one can create and\nremove files, move a file from one directory to another, or rename a file. HDFS does not yet implement user quotas. HDFS\ndoes not support hard links or soft links. However, the HDFS architecture does not preclude implementing these features.\nThe NameNode maintains the file system namespace. Any change to the file system namespace or its properties is\nrecorded by the NameNode. An application can specify the number of replicas of a file that should be maintained by\nHDFS. The number of copies of a file is called the replication factor of that file. This information is stored by the NameNode.",
+        "source_url": "https://hadoop.apache.org/docs/stable1/hdfs_design.html",
+        "version": "Hadoop 1.2.1 documentation; guide copyright 2008",
+        "score": 0.029,
+        "scores": {
+          "dense": 0.4371,
+          "bm25": 0.0
+        }
+      },
+      {
+        "id": "hdfs-architecture-1.2.1#safemode#1",
+        "doc": "HDFS Architecture Guide",
+        "section": "Safemode",
+        "text": "On startup, the NameNode enters a special state called Safemode. Replication of data blocks does not occur\nwhen the NameNode is in the Safemode state. The NameNode receives Heartbeat and Blockreport messages\nfrom the DataNodes. A Blockreport contains the list of data blocks that a DataNode is hosting. Each block\nhas a specified minimum number of replicas. A block is considered safely replicated when the minimum number\nof replicas of that data block has checked in with the NameNode. After a configurable percentage of safely\nreplicated data blocks checks in with the NameNode (plus an additional 30 seconds), the NameNode exits\nthe Safemode state. It then determines the list of data blocks (if any) that still have fewer than the specified\nnumber of replicas. The NameNode then replicates these blocks to other DataNodes.",
+        "source_url": "https://hadoop.apache.org/docs/stable1/hdfs_design.html",
+        "version": "Hadoop 1.2.1 documentation; guide copyright 2008",
+        "score": 0.0287,
+        "scores": {
+          "dense": 0.4423,
+          "bm25": 0.0
+        }
+      }
+    ],
+    "answer": {
+      "reponse": "abstention",
+      "sources": [],
+      "abstention": true
+    },
+    "errors": [],
+    "status": "abstention",
+    "seconds": 3.3
+  }
+]
