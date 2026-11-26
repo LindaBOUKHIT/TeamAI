@@ -55,7 +55,7 @@ Informations manquantes : aucune
 
 Sources documentaires : aucune
 
-Abstention : non",0,1,1,1,Les messages Deleting journalisent une opération locale sans en confirmer l’achèvement.
+Abstention : non",2,2,2,1,"Les faits distinguent correctement demande et journalisation locale, sans affirmer un achèvement. Le résumé omet les mises à jour de blockMap et répète F08."
 test-0004,B,"1: 081111 060149 21326 INFO dfs.DataNode$DataXceiver: Receiving block blk_1422210367847367358 src: /10.251.107.227:54654 dest: /10.251.107.227:50010
 2: 081111 060149 21589 INFO dfs.DataNode$DataXceiver: Receiving block blk_1422210367847367358 src: /10.251.107.227:45795 dest: /10.251.107.227:50010
 3: 081111 060149 21661 INFO dfs.DataNode$DataXceiver: Receiving block blk_1422210367847367358 src: /10.251.194.147:59623 dest: /10.251.194.147:50010
@@ -411,7 +411,7 @@ Informations manquantes : aucune
 
 Sources documentaires : aucune
 
-Abstention : non",0,1,2,1,Les réceptions et les mises à jour de blockMap ont le même horodatage. Leur ordre relatif est indéterminé.
+Abstention : non",1,2,2,1,Les réceptions et les mises à jour de blockMap ont le même horodatage. Leur ordre relatif est indéterminé.
 test-0009,D,"1: 081111 033145 19143 INFO dfs.DataNode$DataXceiver: Receiving block blk_7345670855121510431 src: /10.250.6.191:52032 dest: /10.250.6.191:50010
 2: 081111 033145 26 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/rand4/_temporary/_task_200811101024_0009_m_001731_0/part-01731. blk_7345670855121510431
 3: 081111 033146 18572 INFO dfs.DataNode$DataXceiver: Receiving block blk_7345670855121510431 src: /10.251.106.214:50282 dest: /10.251.106.214:50010
@@ -649,7 +649,7 @@ Informations manquantes : aucune
 
 Sources documentaires : aucune
 
-Abstention : non",2,1,2,2,
+Abstention : non",2,2,2,2,
 test-0010,D,"1: 081111 045515 31 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/rand5/_temporary/_task_200811101024_0011_m_000072_0/part-00072. blk_-2575947670106144473
 2: 081111 045516 20348 INFO dfs.DataNode$DataXceiver: Receiving block blk_-2575947670106144473 src: /10.251.193.224:39823 dest: /10.251.193.224:50010
 3: 081111 045516 20481 INFO dfs.DataNode$DataXceiver: Receiving block blk_-2575947670106144473 src: /10.251.193.224:48677 dest: /10.251.193.224:50010
@@ -709,7 +709,7 @@ Informations manquantes : aucune
 
 Sources documentaires : aucune
 
-Abstention : non",2,1,2,2,
+Abstention : non",2,2,2,2,
 test-0017,A,"1: 081111 044450 15097 INFO dfs.DataNode$DataXceiver: Receiving block blk_-12138228845474377 src: /10.251.123.33:39004 dest: /10.251.123.33:50010
 2: 081111 044450 20229 INFO dfs.DataNode$DataXceiver: Receiving block blk_-12138228845474377 src: /10.251.123.33:35121 dest: /10.251.123.33:50010
 3: 081111 044450 20286 INFO dfs.DataNode$DataXceiver: Receiving block blk_-12138228845474377 src: /10.251.110.8:33505 dest: /10.251.110.8:50010
@@ -769,7 +769,7 @@ Informations manquantes : aucune
 
 Sources documentaires : aucune
 
-Abstention : non",0,0,2,1,"F06 compte trois messages Deleting, contre deux dans le résumé."
+Abstention : non",1,2,2,1,"F06 compte trois messages Deleting, contre deux dans le résumé."
 test-0017,B,"1: 081111 044450 15097 INFO dfs.DataNode$DataXceiver: Receiving block blk_-12138228845474377 src: /10.251.123.33:39004 dest: /10.251.123.33:50010
 2: 081111 044450 20229 INFO dfs.DataNode$DataXceiver: Receiving block blk_-12138228845474377 src: /10.251.123.33:35121 dest: /10.251.123.33:50010
 3: 081111 044450 20286 INFO dfs.DataNode$DataXceiver: Receiving block blk_-12138228845474377 src: /10.251.110.8:33505 dest: /10.251.110.8:50010
@@ -889,7 +889,7 @@ Informations manquantes : aucune
 
 Sources documentaires : aucune
 
-Abstention : non",2,1,2,2,
+Abstention : non",1,2,2,1,"F09 décrit les mises à jour de blockMap, pas les inscriptions dans invalidSet étayées par F08. Cette étape est omise du résumé."
 test-0017,D,"1: 081111 044450 15097 INFO dfs.DataNode$DataXceiver: Receiving block blk_-12138228845474377 src: /10.251.123.33:39004 dest: /10.251.123.33:50010
 2: 081111 044450 20229 INFO dfs.DataNode$DataXceiver: Receiving block blk_-12138228845474377 src: /10.251.123.33:35121 dest: /10.251.123.33:50010
 3: 081111 044450 20286 INFO dfs.DataNode$DataXceiver: Receiving block blk_-12138228845474377 src: /10.251.110.8:33505 dest: /10.251.110.8:50010
@@ -1007,7 +1007,7 @@ Informations manquantes : aucune
 
 Sources documentaires : aucune
 
-Abstention : non",1,1,2,2,F05 journalise la fin du PacketResponder. La réception du réplica est étayée par F04.
+Abstention : non",1,2,2,1,F05 journalise la fin du PacketResponder. La réception du réplica est étayée par F04.
 test-0019,B,"1: 081110 144606 12635 INFO dfs.DataNode$DataXceiver: Receiving block blk_-1280277122957483102 src: /10.251.214.112:39429 dest: /10.251.214.112:50010
 2: 081110 144606 12648 INFO dfs.DataNode$DataXceiver: Receiving block blk_-1280277122957483102 src: /10.251.215.192:60740 dest: /10.251.215.192:50010
 3: 081110 144606 12948 INFO dfs.DataNode$DataXceiver: Receiving block blk_-1280277122957483102 src: /10.251.214.112:33461 dest: /10.251.214.112:50010
@@ -1125,7 +1125,7 @@ Informations manquantes : aucune
 
 Sources documentaires : aucune
 
-Abstention : non",0,1,2,1,F07 indique une seule allocation pour ce bloc.
+Abstention : non",1,2,2,1,F07 indique une seule allocation pour ce bloc.
 test-0019,D,"1: 081110 144606 12635 INFO dfs.DataNode$DataXceiver: Receiving block blk_-1280277122957483102 src: /10.251.214.112:39429 dest: /10.251.214.112:50010
 2: 081110 144606 12648 INFO dfs.DataNode$DataXceiver: Receiving block blk_-1280277122957483102 src: /10.251.215.192:60740 dest: /10.251.215.192:50010
 3: 081110 144606 12948 INFO dfs.DataNode$DataXceiver: Receiving block blk_-1280277122957483102 src: /10.251.214.112:33461 dest: /10.251.214.112:50010
@@ -1244,7 +1244,7 @@ Informations manquantes : aucune
 
 Sources documentaires : aucune
 
-Abstention : non",0,1,2,1,Les trois débuts de réception du bloc visent deux adresses de destination distinctes.
+Abstention : non",2,2,2,2,Les comptes sont conformes à la trace. Le singulier « un DataNode » décrit le type d’opération sans affirmer une destination unique ; la limite des suppressions est explicite.
 test-0022,B,"1: 081111 060456 21280 INFO dfs.DataNode$DataXceiver: Receiving block blk_2284131606093448390 src: /10.251.107.242:47891 dest: /10.251.107.242:50010
 2: 081111 060456 21410 INFO dfs.DataNode$DataXceiver: Receiving block blk_2284131606093448390 src: /10.250.6.4:33905 dest: /10.250.6.4:50010
 3: 081111 060456 21707 INFO dfs.DataNode$DataXceiver: Receiving block blk_2284131606093448390 src: /10.251.107.242:43536 dest: /10.251.107.242:50010
@@ -1518,7 +1518,7 @@ Informations manquantes : aucune
 
 Sources documentaires : aucune
 
-Abstention : non",0,1,2,1,Les trois lignes Receiving du début de la trace indiquent deux adresses de DataNode distinctes.
+Abstention : non",2,2,2,2,Le singulier « un DataNode » est générique. Les deux secondes de la trace sont distinguées et les faits explicitent leur ordre interne indéterminé.
 test-0024,C,"1: 081111 034605 19095 INFO dfs.DataNode$DataXceiver: Receiving block blk_1435042286855114919 src: /10.251.74.192:55300 dest: /10.251.74.192:50010
 2: 081111 034605 19098 INFO dfs.DataNode$DataXceiver: Receiving block blk_1435042286855114919 src: /10.251.74.192:43420 dest: /10.251.74.192:50010
 3: 081111 034605 19331 INFO dfs.DataNode$DataXceiver: Receiving block blk_1435042286855114919 src: /10.251.65.237:43284 dest: /10.251.65.237:50010
@@ -1670,7 +1670,7 @@ Informations manquantes : aucune
 
 Sources documentaires : aucune
 
-Abstention : non",1,1,2,1,Les réceptions citées surviennent environ 40 secondes après le premier événement.
+Abstention : non",1,2,2,1,Les réceptions citées surviennent environ 40 secondes après le premier événement.
 test-0025,B,"1: 081110 223208 16140 INFO dfs.DataNode$DataXceiver: Receiving block blk_546683699916768046 src: /10.251.37.240:54571 dest: /10.251.37.240:50010
 2: 081110 223208 16218 INFO dfs.DataNode$DataXceiver: Receiving block blk_546683699916768046 src: /10.251.37.240:40386 dest: /10.251.37.240:50010
 3: 081110 223208 16355 INFO dfs.DataNode$DataXceiver: Receiving block blk_546683699916768046 src: /10.251.30.179:42396 dest: /10.251.30.179:50010
@@ -2081,7 +2081,7 @@ Informations manquantes : aucune
 
 Sources documentaires : aucune
 
-Abstention : non",0,0,1,1,"F03 établit trois débuts d’écriture, explicitement niés dans le résumé."
+Abstention : non",0,2,2,1,"F03 établit trois débuts d’écriture, explicitement niés dans le résumé."
 test-0028,A,"1: 081111 072341 22621 INFO dfs.DataNode$DataXceiver: Receiving block blk_-7022782725882588627 src: /10.251.193.224:58991 dest: /10.251.193.224:50010
 2: 081111 072341 23110 INFO dfs.DataNode$DataXceiver: Receiving block blk_-7022782725882588627 src: /10.251.193.224:39426 dest: /10.251.193.224:50010
 3: 081111 072341 29 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/rand6/_temporary/_task_200811101024_0013_m_000847_0/part-00847. blk_-7022782725882588627
@@ -2200,7 +2200,7 @@ Informations manquantes : aucune
 
 Sources documentaires : aucune
 
-Abstention : non",1,1,2,2,Les trois lignes Received mentionnent deux adresses sources. Elles ne désignent pas un destinataire unique. Les opérations Deleting figurent dans les faits observés.
+Abstention : non",2,2,2,2,Le singulier « un DataNode » est générique et ne désigne pas un destinataire unique. Les opérations Deleting et leur limite figurent dans les faits observés.
 test-0028,C,"1: 081111 072341 22621 INFO dfs.DataNode$DataXceiver: Receiving block blk_-7022782725882588627 src: /10.251.193.224:58991 dest: /10.251.193.224:50010
 2: 081111 072341 23110 INFO dfs.DataNode$DataXceiver: Receiving block blk_-7022782725882588627 src: /10.251.193.224:39426 dest: /10.251.193.224:50010
 3: 081111 072341 29 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/rand6/_temporary/_task_200811101024_0013_m_000847_0/part-00847. blk_-7022782725882588627
@@ -2439,7 +2439,7 @@ Informations manquantes : aucune
 
 Sources documentaires : aucune
 
-Abstention : non",2,2,2,2,
+Abstention : non",1,2,2,2,"L’allocation et les trois débuts d’écriture partagent 02:49:43. Présenter seule l’allocation comme point de départ est imprécis, sans invalider les autres étapes décrites."
 test-0033,C,"1: 081111 024943 17979 INFO dfs.DataNode$DataXceiver: Receiving block blk_-5197282817719548999 src: /10.251.65.237:52547 dest: /10.251.65.237:50010
 2: 081111 024943 18004 INFO dfs.DataNode$DataXceiver: Receiving block blk_-5197282817719548999 src: /10.251.193.175:40974 dest: /10.251.193.175:50010
 3: 081111 024943 18128 INFO dfs.DataNode$DataXceiver: Receiving block blk_-5197282817719548999 src: /10.251.193.175:53791 dest: /10.251.193.175:50010
@@ -2639,7 +2639,7 @@ Informations manquantes :
 
 Sources documentaires : aucune
 
-Abstention : non",0,1,2,1,"L02 situe la deuxième exception à 07:17:46. À 08:26:11, T13 indique une lecture servie."
+Abstention : non",0,2,2,1,"L02 situe la deuxième exception à 07:17:46. À 08:26:11, T13 indique une lecture servie."
 test-0034,B,"1: 081110 014321 27 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/randtxt/_temporary/_task_200811092030_0003_m_001515_0/part-01515. blk_7304855330352525404
 2: 081110 014321 5685 INFO dfs.DataNode$DataXceiver: Receiving block blk_7304855330352525404 src: /10.251.111.228:33284 dest: /10.251.111.228:50010
 3: 081110 014321 5918 INFO dfs.DataNode$DataXceiver: Receiving block blk_7304855330352525404 src: /10.251.123.20:59388 dest: /10.251.123.20:50010
@@ -2719,7 +2719,7 @@ Informations manquantes :
 
 Sources documentaires : aucune
 
-Abstention : non",0,0,2,1,"F03 compte six lectures servies, contre trois dans le résumé."
+Abstention : non",1,2,2,1,"F03 compte six lectures servies, contre trois dans le résumé."
 test-0034,C,"1: 081110 014321 27 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/randtxt/_temporary/_task_200811092030_0003_m_001515_0/part-01515. blk_7304855330352525404
 2: 081110 014321 5685 INFO dfs.DataNode$DataXceiver: Receiving block blk_7304855330352525404 src: /10.251.111.228:33284 dest: /10.251.111.228:50010
 3: 081110 014321 5918 INFO dfs.DataNode$DataXceiver: Receiving block blk_7304855330352525404 src: /10.251.123.20:59388 dest: /10.251.123.20:50010
@@ -2799,7 +2799,7 @@ Informations manquantes :
 
 Sources documentaires : aucune
 
-Abstention : non",0,1,1,1,Les logs indiquent des demandes par DataNode. Ils ne démontrent pas la suppression du bloc dans son ensemble.
+Abstention : non",1,2,1,1,"Les logs indiquent des demandes par DataNode, sans établir la portée exhaustive « dans son ensemble ». La réponse réserve correctement l’état final des copies."
 test-0034,D,"1: 081110 014321 27 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/randtxt/_temporary/_task_200811092030_0003_m_001515_0/part-01515. blk_7304855330352525404
 2: 081110 014321 5685 INFO dfs.DataNode$DataXceiver: Receiving block blk_7304855330352525404 src: /10.251.111.228:33284 dest: /10.251.111.228:50010
 3: 081110 014321 5918 INFO dfs.DataNode$DataXceiver: Receiving block blk_7304855330352525404 src: /10.251.123.20:59388 dest: /10.251.123.20:50010
@@ -2879,7 +2879,7 @@ Informations manquantes :
 
 Sources documentaires : aucune
 
-Abstention : non",2,1,2,2,T08 désigne une fin de PacketResponder. T06 et T07 soutiennent les mises à jour de blockMap.
+Abstention : non",2,2,2,2,T08 désigne une fin de PacketResponder. T06 et T07 soutiennent les mises à jour de blockMap.
 test-0036,A,"1: 081111 024621 17916 INFO dfs.DataNode$DataXceiver: Receiving block blk_5005786149836572537 src: /10.251.43.115:42255 dest: /10.251.43.115:50010
 2: 081111 024621 29 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/rand4/_temporary/_task_200811101024_0009_m_000205_0/part-00205. blk_5005786149836572537
 3: 081111 024622 17733 INFO dfs.DataNode$DataXceiver: Receiving block blk_5005786149836572537 src: /10.251.126.227:42843 dest: /10.251.126.227:50010
@@ -2938,7 +2938,7 @@ Informations manquantes : aucune
 
 Sources documentaires : aucune
 
-Abstention : non",2,1,2,2,
+Abstention : non",1,2,2,2,"F13 décrit les inscriptions dans invalidSet, pas les messages Deleting. F06 étaye ces messages locaux et explicite leur limite."
 test-0036,B,"1: 081111 024621 17916 INFO dfs.DataNode$DataXceiver: Receiving block blk_5005786149836572537 src: /10.251.43.115:42255 dest: /10.251.43.115:50010
 2: 081111 024621 29 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/rand4/_temporary/_task_200811101024_0009_m_000205_0/part-00205. blk_5005786149836572537
 3: 081111 024622 17733 INFO dfs.DataNode$DataXceiver: Receiving block blk_5005786149836572537 src: /10.251.126.227:42843 dest: /10.251.126.227:50010
@@ -3238,7 +3238,7 @@ Informations manquantes : aucune
 
 Sources documentaires : aucune
 
-Abstention : non",0,1,2,1,"Le premier horodatage indique des débuts d’écriture, sans confirmation à ce moment-là."
+Abstention : non",1,2,2,1,"Le premier horodatage indique des débuts d’écriture, sans confirmation à ce moment-là."
 test-0038,C,"1: 081109 213231 2293 INFO dfs.DataNode$DataXceiver: Receiving block blk_-3126046394980374282 src: /10.251.30.101:54465 dest: /10.251.30.101:50010
 2: 081109 213231 2308 INFO dfs.DataNode$DataXceiver: Receiving block blk_-3126046394980374282 src: /10.251.91.229:58937 dest: /10.251.91.229:50010
 3: 081109 213231 2335 INFO dfs.DataNode$DataXceiver: Receiving block blk_-3126046394980374282 src: /10.251.30.101:52283 dest: /10.251.30.101:50010
@@ -3405,7 +3405,7 @@ Informations manquantes : aucune
 
 Sources documentaires : aucune
 
-Abstention : non",0,1,2,1,Les trois lignes Receiving indiquent deux adresses de DataNode distinctes.
+Abstention : non",2,2,2,2,"Les comptes sont conformes à la trace. Le singulier « un DataNode » est générique ; la réponse distingue réception, mises à jour de blockMap et fin de PacketResponder."
 test-0039,B,"1: 081111 082036 24335 INFO dfs.DataNode$DataXceiver: Receiving block blk_-8545253910745733560 src: /10.251.199.245:54757 dest: /10.251.199.245:50010
 2: 081111 082036 26 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/rand7/_temporary/_task_200811101024_0014_m_001013_0/part-01013. blk_-8545253910745733560
 3: 081111 082037 23705 INFO dfs.DataNode$DataXceiver: Receiving block blk_-8545253910745733560 src: /10.251.91.159:33775 dest: /10.251.91.159:50010
@@ -3453,7 +3453,7 @@ Informations manquantes : aucune
 
 Sources documentaires : aucune
 
-Abstention : non",2,1,2,1,
+Abstention : non",1,2,2,1,"T04 et T06 désignent des fins de PacketResponder, T08 et T09 des mises à jour de blockMap. Leur rattachement aux seules réceptions est imprécis ; cette étape n’est pas expliquée dans le résumé."
 test-0039,C,"1: 081111 082036 24335 INFO dfs.DataNode$DataXceiver: Receiving block blk_-8545253910745733560 src: /10.251.199.245:54757 dest: /10.251.199.245:50010
 2: 081111 082036 26 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/rand7/_temporary/_task_200811101024_0014_m_001013_0/part-01013. blk_-8545253910745733560
 3: 081111 082037 23705 INFO dfs.DataNode$DataXceiver: Receiving block blk_-8545253910745733560 src: /10.251.91.159:33775 dest: /10.251.91.159:50010
@@ -3635,7 +3635,7 @@ Informations manquantes :
 
 Sources documentaires : aucune
 
-Abstention : non",2,1,2,2,"F04 étaye le nombre d’exceptions. L’adresse du client figure dans L01, L02 et L03."
+Abstention : non",2,2,2,2,"F04 étaye le nombre d’exceptions. L’adresse du client figure dans L01, L02 et L03."
 test-0041,B,"1: 081110 014325 30 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/randtxt/_temporary/_task_200811092030_0003_m_001440_0/part-01440. blk_8778690542254370358
 2: 081110 014326 5796 INFO dfs.DataNode$DataXceiver: Receiving block blk_8778690542254370358 src: /10.251.195.70:54247 dest: /10.251.195.70:50010
 3: 081110 014326 5817 INFO dfs.DataNode$DataXceiver: Receiving block blk_8778690542254370358 src: /10.251.42.16:39544 dest: /10.251.42.16:50010
@@ -3721,7 +3721,7 @@ Informations manquantes :
 
 Sources documentaires : aucune
 
-Abstention : non",0,1,1,1,Le message associe l’erreur à l’absence de BlockInfo. Il ne démontre pas à lui seul que cette absence est la cause.
+Abstention : non",2,2,2,1,"L04 donne l’absence de BlockInfo dans volumeMap comme motif local de l’erreur, sans établir sa cause racine. Le résumé omet les lectures servies, les réceptions et les messages Deleting."
 test-0041,C,"1: 081110 014325 30 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/randtxt/_temporary/_task_200811092030_0003_m_001440_0/part-01440. blk_8778690542254370358
 2: 081110 014326 5796 INFO dfs.DataNode$DataXceiver: Receiving block blk_8778690542254370358 src: /10.251.195.70:54247 dest: /10.251.195.70:50010
 3: 081110 014326 5817 INFO dfs.DataNode$DataXceiver: Receiving block blk_8778690542254370358 src: /10.251.42.16:39544 dest: /10.251.42.16:50010
@@ -3805,7 +3805,7 @@ Informations manquantes :
 
 Sources documentaires : aucune
 
-Abstention : non",0,0,1,1,Les mises à jour de blockMap sont observées. Les fins de PacketResponder ne constituent pas un événement atypique en elles-mêmes.
+Abstention : non",1,2,1,1,Les mises à jour de blockMap sont observées. Les fins de PacketResponder ne constituent pas un événement atypique en elles-mêmes.
 test-0041,D,"1: 081110 014325 30 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/randtxt/_temporary/_task_200811092030_0003_m_001440_0/part-01440. blk_8778690542254370358
 2: 081110 014326 5796 INFO dfs.DataNode$DataXceiver: Receiving block blk_8778690542254370358 src: /10.251.195.70:54247 dest: /10.251.195.70:50010
 3: 081110 014326 5817 INFO dfs.DataNode$DataXceiver: Receiving block blk_8778690542254370358 src: /10.251.42.16:39544 dest: /10.251.42.16:50010
@@ -3891,7 +3891,7 @@ Informations manquantes :
 
 Sources documentaires : aucune
 
-Abstention : non",0,1,1,1,Les trois exceptions d’envoi et l’erreur de suppression sont des événements distincts.
+Abstention : non",1,2,1,1,Les trois exceptions d’envoi et l’erreur de suppression sont des événements distincts.
 test-0047,A,"1: 081110 211412 14321 INFO dfs.DataNode$DataXceiver: Receiving block blk_4284099996556810257 src: /10.251.195.70:58350 dest: /10.251.195.70:50010
 2: 081110 211412 14770 INFO dfs.DataNode$DataXceiver: Receiving block blk_4284099996556810257 src: /10.251.195.70:56735 dest: /10.251.195.70:50010
 3: 081110 211412 30 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/rand3/_temporary/_task_200811101024_0005_m_000125_0/part-00125. blk_4284099996556810257
@@ -3937,7 +3937,7 @@ data to its local repository. Thus, a DataNode can be receiving data from the pr
 and at the same time forwarding data to the next one in the pipeline. Thus, the data is pipelined from
 one DataNode to the next.
 
-Abstention : non",0,1,2,1,La trace montre une seule allocation et deux débuts de réception vers la même adresse de DataNode.
+Abstention : non",1,1,2,2,La trace montre une seule allocation et deux débuts de réception vers la même adresse de DataNode.
 test-0047,B,"1: 081110 211412 14321 INFO dfs.DataNode$DataXceiver: Receiving block blk_4284099996556810257 src: /10.251.195.70:58350 dest: /10.251.195.70:50010
 2: 081110 211412 14770 INFO dfs.DataNode$DataXceiver: Receiving block blk_4284099996556810257 src: /10.251.195.70:56735 dest: /10.251.195.70:50010
 3: 081110 211412 30 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/rand3/_temporary/_task_200811101024_0005_m_000125_0/part-00125. blk_4284099996556810257
@@ -4008,7 +4008,7 @@ Informations manquantes :
 
 Sources documentaires : aucune
 
-Abstention : non",2,2,2,1,
+Abstention : non",2,2,2,2,
 test-0047,D,"1: 081110 211412 14321 INFO dfs.DataNode$DataXceiver: Receiving block blk_4284099996556810257 src: /10.251.195.70:58350 dest: /10.251.195.70:50010
 2: 081110 211412 14770 INFO dfs.DataNode$DataXceiver: Receiving block blk_4284099996556810257 src: /10.251.195.70:56735 dest: /10.251.195.70:50010
 3: 081110 211412 30 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/rand3/_temporary/_task_200811101024_0005_m_000125_0/part-00125. blk_4284099996556810257
@@ -4072,7 +4072,7 @@ Informations manquantes : aucune
 
 Sources documentaires : aucune
 
-Abstention : non",1,1,1,1,
+Abstention : non",2,2,1,1,
 test-0051,B,"1: 081110 014037 26 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/randtxt/_temporary/_task_200811092030_0003_m_001434_0/part-01434. blk_2415622095534006294
 2: 081110 014037 5660 INFO dfs.DataNode$DataXceiver: Receiving block blk_2415622095534006294 src: /10.251.91.32:47335 dest: /10.251.91.32:50010","COMPTEURS ET DEFINITIONS (faits calculés) :
 [F01] 2 lignes du bloc ; intervalle 2008-11-10 01:40:37 à 2008-11-10 01:40:37 ; durée 0 h 00 min 00 s (0 secondes).
@@ -4250,7 +4250,7 @@ Informations manquantes :
 
 Sources documentaires : aucune
 
-Abstention : non",2,1,2,1,"E20 figure dans les faits observés, mais le résumé passe sous silence cet avertissement. T04 indique une fin de PacketResponder."
+Abstention : non",1,2,2,1,"E20 figure dans les faits observés, mais le résumé passe sous silence cet avertissement. T04 indique une fin de PacketResponder."
 test-0052,B,"1: 081111 073448 23633 INFO dfs.DataNode$DataXceiver: Receiving block blk_8968730668433643962 src: /10.251.199.86:47550 dest: /10.251.199.86:50010
 2: 081111 073448 29 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/rand6/_temporary/_task_200811101024_0013_m_001197_0/part-01197. blk_8968730668433643962
 3: 081111 073452 23120 INFO dfs.DataNode$DataXceiver: Receiving block blk_8968730668433643962 src: /10.251.66.192:51710 dest: /10.251.66.192:50010
@@ -4314,7 +4314,7 @@ Informations manquantes :
 
 Sources documentaires : aucune
 
-Abstention : non",0,1,2,1,F08 indique une seule allocation. F06 indique une seule demande concernant un réplica introuvable.
+Abstention : non",1,2,2,1,F08 indique une seule allocation. F06 indique une seule demande concernant un réplica introuvable.
 test-0052,C,"1: 081111 073448 23633 INFO dfs.DataNode$DataXceiver: Receiving block blk_8968730668433643962 src: /10.251.199.86:47550 dest: /10.251.199.86:50010
 2: 081111 073448 29 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/rand6/_temporary/_task_200811101024_0013_m_001197_0/part-01197. blk_8968730668433643962
 3: 081111 073452 23120 INFO dfs.DataNode$DataXceiver: Receiving block blk_8968730668433643962 src: /10.251.66.192:51710 dest: /10.251.66.192:50010
@@ -4444,7 +4444,7 @@ Informations manquantes :
 
 Sources documentaires : aucune
 
-Abstention : non",0,1,1,1,"Le message établit que BlockInfo est absent de volumeMap, sans établir que le bloc lui-même est introuvable."
+Abstention : non",1,2,1,1,"Le message établit que BlockInfo est absent de volumeMap, sans établir que le bloc lui-même est introuvable."
 test-0056,A,"1: 081110 214729 15383 INFO dfs.DataNode$DataXceiver: Receiving block blk_-2705986310204860977 src: /10.251.38.53:50134 dest: /10.251.38.53:50010
 2: 081110 214729 15385 INFO dfs.DataNode$DataXceiver: Receiving block blk_-2705986310204860977 src: /10.251.71.97:36842 dest: /10.251.71.97:50010
 3: 081110 214729 15518 INFO dfs.DataNode$DataXceiver: Receiving block blk_-2705986310204860977 src: /10.251.38.53:45915 dest: /10.251.38.53:50010
@@ -4572,7 +4572,7 @@ Informations manquantes :
 
 Sources documentaires : aucune
 
-Abstention : non",0,1,2,1,"Les preuves concernent un bloc unique, alors que le résumé évoque plusieurs blocs."
+Abstention : non",1,2,2,1,"Les preuves concernent un bloc unique, alors que le résumé évoque plusieurs blocs."
 test-0056,C,"1: 081110 214729 15383 INFO dfs.DataNode$DataXceiver: Receiving block blk_-2705986310204860977 src: /10.251.38.53:50134 dest: /10.251.38.53:50010
 2: 081110 214729 15385 INFO dfs.DataNode$DataXceiver: Receiving block blk_-2705986310204860977 src: /10.251.71.97:36842 dest: /10.251.71.97:50010
 3: 081110 214729 15518 INFO dfs.DataNode$DataXceiver: Receiving block blk_-2705986310204860977 src: /10.251.38.53:45915 dest: /10.251.38.53:50010
@@ -4700,7 +4700,7 @@ Informations manquantes :
 
 Sources documentaires : aucune
 
-Abstention : non",0,1,2,1,F03 et F05 ne documentent aucune demande d’ajout. Le résumé ne distingue pas clairement le début d’écriture de l’enregistrement du bloc.
+Abstention : non",1,2,2,1,F03 et F05 ne documentent aucune demande d’ajout. Le résumé ne distingue pas clairement le début d’écriture de l’enregistrement du bloc.
 test-0062,A,"1: 081110 014726 26 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/randtxt/_temporary/_task_200811092030_0003_m_001360_0/part-01360. blk_-3646517331515187756
 2: 081110 014726 6026 INFO dfs.DataNode$DataXceiver: Receiving block blk_-3646517331515187756 src: /10.250.5.237:55563 dest: /10.250.5.237:50010
 3: 081110 014727 5845 INFO dfs.DataNode$DataXceiver: Receiving block blk_-3646517331515187756 src: /10.250.5.237:36726 dest: /10.250.5.237:50010
@@ -4791,7 +4791,7 @@ Informations manquantes :
 
 Sources documentaires : aucune
 
-Abstention : non",0,1,2,1,T01 indique une seule allocation pour le bloc.
+Abstention : non",1,2,2,1,T01 indique une seule allocation pour le bloc.
 test-0062,B,"1: 081110 014726 26 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/randtxt/_temporary/_task_200811092030_0003_m_001360_0/part-01360. blk_-3646517331515187756
 2: 081110 014726 6026 INFO dfs.DataNode$DataXceiver: Receiving block blk_-3646517331515187756 src: /10.250.5.237:55563 dest: /10.250.5.237:50010
 3: 081110 014727 5845 INFO dfs.DataNode$DataXceiver: Receiving block blk_-3646517331515187756 src: /10.250.5.237:36726 dest: /10.250.5.237:50010
@@ -4884,7 +4884,7 @@ Informations manquantes :
 
 Sources documentaires : aucune
 
-Abstention : non",0,1,0,1,La demande de nouvelle copie précède les inscriptions dans invalidSet. Les logs n’établissent pas de causalité entre lectures servies et exceptions.
+Abstention : non",0,2,1,1,La demande de nouvelle copie précède les inscriptions dans invalidSet. Les logs n’établissent pas de causalité entre lectures servies et exceptions.
 test-0062,C,"1: 081110 014726 26 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/randtxt/_temporary/_task_200811092030_0003_m_001360_0/part-01360. blk_-3646517331515187756
 2: 081110 014726 6026 INFO dfs.DataNode$DataXceiver: Receiving block blk_-3646517331515187756 src: /10.250.5.237:55563 dest: /10.250.5.237:50010
 3: 081110 014727 5845 INFO dfs.DataNode$DataXceiver: Receiving block blk_-3646517331515187756 src: /10.250.5.237:36726 dest: /10.250.5.237:50010
@@ -5114,7 +5114,7 @@ e.g. AFS, have used client side caching to
 improve performance. A POSIX requirement has been relaxed to achieve higher performance of
 data uploads.
 
-Abstention : non",0,1,1,1,La trace montre un début d’écriture côté DataNode. Elle n’identifie pas le client comme auteur de cette opération.
+Abstention : non",1,1,1,1,La trace montre un début d’écriture côté DataNode. Elle n’identifie pas le client comme auteur de cette opération.
 test-0064,B,"1: 081110 112651 10000 INFO dfs.DataNode$DataXceiver: Receiving block blk_6456148978944478207 src: /10.251.67.4:43618 dest: /10.251.67.4:50010
 2: 081110 112651 28 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/rand/_temporary/_task_200811101024_0001_m_001618_0/part-01618. blk_6456148978944478207","COMPTEURS ET DEFINITIONS (faits calculés) :
 [F01] 2 lignes du bloc ; intervalle 2008-11-10 11:26:51 à 2008-11-10 11:26:51 ; durée 0 h 00 min 00 s (0 secondes).
@@ -5143,7 +5143,7 @@ Informations manquantes : aucune
 
 Sources documentaires : aucune
 
-Abstention : non",1,1,1,1,
+Abstention : non",2,2,1,1,
 test-0064,C,"1: 081110 112651 10000 INFO dfs.DataNode$DataXceiver: Receiving block blk_6456148978944478207 src: /10.251.67.4:43618 dest: /10.251.67.4:50010
 2: 081110 112651 28 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/rand/_temporary/_task_200811101024_0001_m_001618_0/part-01618. blk_6456148978944478207","COMPTEURS ET DEFINITIONS (faits calculés) :
 [F01] 2 lignes du bloc ; intervalle 2008-11-10 11:26:51 à 2008-11-10 11:26:51 ; durée 0 h 00 min 00 s (0 secondes).
@@ -5357,7 +5357,7 @@ data to its local repository. Thus, a DataNode can be receiving data from the pr
 and at the same time forwarding data to the next one in the pipeline. Thus, the data is pipelined from
 one DataNode to the next.
 
-Abstention : non",0,1,2,1,T02 et T03 montrent des débuts de réception vers le même DataNode.
+Abstention : non",1,1,2,2,T02 et T03 montrent des débuts de réception vers le même DataNode.
 test-0073,A,"1: 081109 211549 35 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/rand/_temporary/_task_200811092030_0001_m_001540_0/part-01540. blk_8817374089832812292
 2: 081109 211550 1690 INFO dfs.DataNode$DataXceiver: Receiving block blk_8817374089832812292 src: /10.251.39.209:35101 dest: /10.251.39.209:50010
 3: 081109 211551 1676 INFO dfs.DataNode$DataXceiver: Receiving block blk_8817374089832812292 src: /10.251.39.209:50754 dest: /10.251.39.209:50010
@@ -5511,7 +5511,7 @@ Informations manquantes :
 
 Sources documentaires : aucune
 
-Abstention : non",0,1,1,1,"L03 signale une erreur de suppression et l’absence de BlockInfo, sans établir une causalité."
+Abstention : non",2,2,2,2,L03 donne l’absence de BlockInfo dans volumeMap comme motif local de l’erreur. La cause racine reste inconnue ; les questions ciblent les suites et l’état du bloc.
 test-0073,C,"1: 081109 211549 35 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/rand/_temporary/_task_200811092030_0001_m_001540_0/part-01540. blk_8817374089832812292
 2: 081109 211550 1690 INFO dfs.DataNode$DataXceiver: Receiving block blk_8817374089832812292 src: /10.251.39.209:35101 dest: /10.251.39.209:50010
 3: 081109 211551 1676 INFO dfs.DataNode$DataXceiver: Receiving block blk_8817374089832812292 src: /10.251.39.209:50754 dest: /10.251.39.209:50010
@@ -5711,7 +5711,7 @@ data to its local repository. Thus, a DataNode can be receiving data from the pr
 and at the same time forwarding data to the next one in the pipeline. Thus, the data is pipelined from
 one DataNode to the next.
 
-Abstention : non",0,1,2,1,F05 indique une seule allocation et la trace donne la même adresse de destination pour les deux débuts de réception.
+Abstention : non",1,1,2,2,F05 indique une seule allocation et la trace donne la même adresse de destination pour les deux débuts de réception.
 test-0074,B,"1: 081111 081157 23933 INFO dfs.DataNode$DataXceiver: Receiving block blk_-7264616954252932491 src: /10.251.125.193:48788 dest: /10.251.125.193:50010
 2: 081111 081157 23993 INFO dfs.DataNode$DataXceiver: Receiving block blk_-7264616954252932491 src: /10.251.125.193:42422 dest: /10.251.125.193:50010
 3: 081111 081157 32 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/rand7/_temporary/_task_200811101024_0014_m_000780_0/part-00780. blk_-7264616954252932491
@@ -5782,7 +5782,7 @@ Informations manquantes :
 
 Sources documentaires : aucune
 
-Abstention : non",2,2,2,1,
+Abstention : non",2,2,2,2,
 test-0074,D,"1: 081111 081157 23933 INFO dfs.DataNode$DataXceiver: Receiving block blk_-7264616954252932491 src: /10.251.125.193:48788 dest: /10.251.125.193:50010
 2: 081111 081157 23993 INFO dfs.DataNode$DataXceiver: Receiving block blk_-7264616954252932491 src: /10.251.125.193:42422 dest: /10.251.125.193:50010
 3: 081111 081157 32 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/rand7/_temporary/_task_200811101024_0014_m_000780_0/part-00780. blk_-7264616954252932491
@@ -5948,7 +5948,7 @@ Informations manquantes : aucune
 
 Sources documentaires : aucune
 
-Abstention : non",1,1,1,1,
+Abstention : non",2,2,1,1,
 test-0077,A,"1: 081110 121850 33 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/randtxt2/_temporary/_task_200811101024_0002_m_001300_0/part-01300. blk_-4346736380428326495
 2: 081110 121851 11050 INFO dfs.DataNode$DataXceiver: Receiving block blk_-4346736380428326495 src: /10.251.39.179:50728 dest: /10.251.39.179:50010","COMPTEURS ET DEFINITIONS (faits calculés) :
 [F01] 2 lignes du bloc ; intervalle 2008-11-10 12:18:50 à 2008-11-10 12:18:51 ; durée 0 h 00 min 01 s (1 secondes).
@@ -6088,7 +6088,7 @@ Informations manquantes : aucune
 
 Sources documentaires : aucune
 
-Abstention : non",2,1,1,2,
+Abstention : non",2,2,1,2,
 test-0078,A,"1: 081110 001030 31 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/sortrand/_temporary/_task_200811092030_0002_r_000093_0/part-00093. blk_-5216731224772621734
 2: 081110 001030 4249 INFO dfs.DataNode$DataXceiver: Receiving block blk_-5216731224772621734 src: /10.251.31.5:60118 dest: /10.251.31.5:50010
 3: 081110 001030 4684 INFO dfs.DataNode$DataXceiver: Receiving block blk_-5216731224772621734 src: /10.251.106.10:42258 dest: /10.251.106.10:50010
@@ -6223,7 +6223,7 @@ Informations manquantes :
 
 Sources documentaires : aucune
 
-Abstention : non",0,1,2,1,"F08 indique une seule allocation. F12 décrit l’allocation et les débuts d’écriture, pas une suppression locale."
+Abstention : non",1,2,2,1,"F08 indique une seule allocation. F12 décrit l’allocation et les débuts d’écriture, pas une suppression locale."
 test-0078,C,"1: 081110 001030 31 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/sortrand/_temporary/_task_200811092030_0002_r_000093_0/part-00093. blk_-5216731224772621734
 2: 081110 001030 4249 INFO dfs.DataNode$DataXceiver: Receiving block blk_-5216731224772621734 src: /10.251.31.5:60118 dest: /10.251.31.5:50010
 3: 081110 001030 4684 INFO dfs.DataNode$DataXceiver: Receiving block blk_-5216731224772621734 src: /10.251.106.10:42258 dest: /10.251.106.10:50010
@@ -6441,7 +6441,7 @@ Informations manquantes :
 
 Sources documentaires : aucune
 
-Abstention : non",1,1,2,1,F06 indique des fins de PacketResponder. Les réceptions sont étayées par F05.
+Abstention : non",1,2,2,1,F06 indique des fins de PacketResponder. Les réceptions sont étayées par F05.
 test-0079,B,"1: 081111 045612 18723 INFO dfs.DataNode$DataXceiver: Receiving block blk_-7356422865929660798 src: /10.250.15.67:38398 dest: /10.250.15.67:50010
 2: 081111 045612 20057 INFO dfs.DataNode$DataXceiver: Receiving block blk_-7356422865929660798 src: /10.250.15.67:50376 dest: /10.250.15.67:50010
 3: 081111 045612 31 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/rand5/_temporary/_task_200811101024_0011_m_000519_0/part-00519. blk_-7356422865929660798
@@ -6794,7 +6794,7 @@ Informations manquantes :
 
 Sources documentaires : aucune
 
-Abstention : non",2,2,2,1,
+Abstention : non",2,2,2,2,
 test-0080,D,"1: 081111 102839 26524 INFO dfs.DataNode$DataXceiver: Receiving block blk_-1965250832942158890 src: /10.251.39.192:53426 dest: /10.251.39.192:50010
 2: 081111 102839 26811 INFO dfs.DataNode$DataXceiver: Receiving block blk_-1965250832942158890 src: /10.251.39.192:43729 dest: /10.251.39.192:50010
 3: 081111 102839 32 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/randtxt9/_temporary/_task_200811101024_0016_m_000926_0/part-00926. blk_-1965250832942158890
@@ -6841,4 +6841,4 @@ data to its local repository. Thus, a DataNode can be receiving data from the pr
 and at the same time forwarding data to the next one in the pipeline. Thus, the data is pipelined from
 one DataNode to the next.
 
-Abstention : non",0,1,2,1,F05 indique une seule allocation. Les deux débuts de réception visent le même DataNode.
+Abstention : non",1,1,2,2,F05 indique une seule allocation. Les deux débuts de réception visent le même DataNode.
