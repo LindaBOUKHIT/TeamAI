@@ -2,6 +2,7 @@
 import argparse
 import csv
 import html
+import inspect
 import os
 import re
 import threading
@@ -271,6 +272,24 @@ def import_logs(path):
     return resolve_path(path).read_text(encoding="utf-8", errors="replace") if path else ""
 
 
+def chatbot_options(chatbot):
+    """Options du fil de discussion, compatibles Gradio 4/5 et 6.
+
+    Gradio 6 a retiré `type` (le format messages y est le seul) et remplacé `show_copy_button`
+    par `buttons`. Les arguments sont choisis d'après la signature de la classe installée.
+    """
+    accepted = inspect.signature(chatbot.__init__).parameters
+    options = dict(height=560, allow_tags=False, sanitize_html=True, show_label=False,
+                   avatar_images=ui.AVATARS, placeholder=ui.CHAT_PLACEHOLDER)
+    if "type" in accepted:
+        options["type"] = "messages"
+    if "buttons" in accepted:
+        options["buttons"] = ["copy"]
+    else:
+        options["show_copy_button"] = True
+    return options
+
+
 def build_app(mock=False):
     """Construit l'interface « Vigie » en important Gradio uniquement à la demande."""
     import gradio as gr
@@ -315,9 +334,7 @@ def build_app(mock=False):
             with gr.Tab("Demander à la doc"):
                 with gr.Row(equal_height=False):
                     with gr.Column(scale=8, min_width=360):
-                        thread = gr.Chatbot(type="messages", height=560, allow_tags=False, sanitize_html=True,
-                                            show_label=False, avatar_images=ui.AVATARS,
-                                            placeholder=ui.CHAT_PLACEHOLDER, show_copy_button=True)
+                        thread = gr.Chatbot(**chatbot_options(gr.Chatbot))
                         with gr.Row(equal_height=True):
                             question = gr.Textbox(show_label=False, placeholder="Posez votre question sur HDFS…",
                                                   scale=6, container=False, autofocus=False)
