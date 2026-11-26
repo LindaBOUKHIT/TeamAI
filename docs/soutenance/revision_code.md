@@ -5,7 +5,7 @@ Le jury choisit qui répond, sur n'importe quelle partie du code. Cette fiche do
 Règles de lecture :
 
 - chaque chiffre renvoie au fichier qui l'atteste ; « validation » et « test » ne se mélangent jamais ;
-- les mesures finales du volet B (SCRUM-45) seront publiées dans `eval/results/volet_b.md` : aucune valeur n'est reprise ici ;
+- les mesures automatiques du volet B sur le test (SCRUM-45, 25/11) sont dans `eval/results/volet_b.md` et reprises aux § 5 et 8 ; la justesse des explications attend la double annotation à l'aveugle ;
 - toutes les commandes se lancent depuis la racine du dépôt (`python -m paquet.module`) ;
 - la suite de tests passe sur `dev` le 25/11/2026 : `python -m pytest -q` donne 302 tests réussis et 6 ignorés, sans modèle ni réseau.
 
@@ -89,18 +89,20 @@ L'INT8 donne des métriques identiques. Parité Python / Chrome sur les 86 260 b
 
 ## 5. `volet_b/slm/` : modèle, interface unique et LoRA
 
-- **Rôle** : `generate.py` est la seule porte vers le modèle. Le RAG et les agents l'appellent sans savoir si le modèle est de base ou adapté. `train_lora.py` entraîne l'adaptateur, `make_seed.py` produit des brouillons d'exemples, `convert_gguf.py` convertit l'adaptateur en GGUF, `kaggle_bundle.py` et `kaggle_lora_essai.py` préparent l'archive pour Kaggle.
-- **Entrées** : `generate(messages, adapter=None)` ; `python -m volet_b.slm.kaggle_lora_essai --bundle sortie.zip`, puis, sur Kaggle, `--steps 3` et `--steps 30`. `TEAMAI_SLM_MOCK=1` renvoie une réponse C5 factice sans charger de poids.
+- **Rôle** : `generate.py` est la seule porte vers le modèle. Le RAG et les agents l'appellent sans savoir si le modèle est de base ou adapté. `train_lora.py` entraîne l'adaptateur, `make_seed.py` produit des brouillons d'exemples, `convert_gguf.py` convertit l'adaptateur en GGUF, `kaggle_bundle.py` et `kaggle_lora_essai.py` préparent l'essai de 30 pas, `kaggle_lora_final.py` mène l'entraînement complet, l'export et la sélection sur val (SCRUM-39), et `verif_machine.py` contrôle l'adaptateur sur une machine donnée (SCRUM-61).
+- **Entrées** : `generate(messages, adapter=None)` ; `python -m volet_b.slm.kaggle_lora_essai --bundle sortie.zip`, puis, sur Kaggle, `--steps 3` et `--steps 30` ; pour le LoRA final, `python -m volet_b.slm.kaggle_lora_final --train` puis `--select`. `TEAMAI_SLM_MOCK=1` renvoie une réponse C5 factice sans charger de poids.
 - **Configuration** (`configs/generation.yaml`) : `google/gemma-4-E4B-it-qat-q4_0-gguf`, révision `4b4a2c1d…`, backend llama.cpp, contexte 4 096, 800 tokens, température 0, seed 42, réflexion désactivée, `local_files_only: true`, `n_gpu_layers: -1`. L'instance llama.cpp est gardée en cache (`lru_cache`).
-- **LoRA** (`configs/lora_essai.yaml`) : base HF `gemma-4-E4B-it-qat-q4_0-unquantized` (révision `476025a…`), QLoRA NF4 avec calcul en fp16, r = 8, alpha = 16, `q_proj` et `v_proj`, lot de 1, 30 pas, lr 2 × 10⁻⁴, 3 072 tokens au plus sans troncature. La perte ne porte que sur le JSON de la réponse et le marqueur de fin de tour : `logits_to_keep` évite de calculer les logits du prompt sur un vocabulaire de 262 144 tokens.
-- **Données** : 20 brouillons tirés des blocs **train** du sample avec les fonctions v16 (`make_seed.py`). `lora_data.prepare_examples` recoupe chaque bloc avec C4 et refuse un bloc val ou test.
+- **LoRA final** (`configs/lora_final.yaml`, SCRUM-39) : même base et même QLoRA que l'essai, 400 pas (2 époques), contexte d'entraînement de 4 096 tokens, un exemple trop long écarté entier et listé, jamais tronqué. Deux réglages : `r8_qv` (r = 8, `q_proj` et `v_proj`, lr 2 × 10⁻⁴) et `r16_qkvo` (r = 16, q/k/v/o, lr 1 × 10⁻⁴). La règle de sélection sur val (acceptation, hypothèses par bloc avec incident, erreurs d'appui) est fixée avant l'entraînement.
+- **LoRA de l'essai** (`configs/lora_essai.yaml`) : base HF `gemma-4-E4B-it-qat-q4_0-unquantized` (révision `476025a…`), QLoRA NF4 avec calcul en fp16, r = 8, alpha = 16, `q_proj` et `v_proj`, lot de 1, 30 pas, lr 2 × 10⁻⁴, 3 072 tokens au plus sans troncature. La perte ne porte que sur le JSON de la réponse et le marqueur de fin de tour : `logits_to_keep` évite de calculer les logits du prompt sur un vocabulaire de 262 144 tokens.
+- **Données** : pour le LoRA final, le jeu SCRUM-36 relu (`volet_b/annotations/train.jsonl`, 200 exemples, et `val.jsonl`, 40 exemples). Pour l'essai, 20 brouillons tirés des blocs **train** du sample avec les fonctions v16 (`make_seed.py`). `lora_data.prepare_examples` recoupe chaque bloc avec C4 et refuse un bloc val ou test.
+- **Chiffres** du LoRA final, T4 Kaggle du 25/11 (`eval/results/SCRUM-39/kaggle_final/README.md`) : 199 exemples sur 200 (`bachar-049`, 5 778 tokens, écarté), 400 pas sans pas sauté pour chaque réglage. `r8_qv` : perte 0,880 → 0,151, pic VRAM 11,1 Go, 6,5 s par pas. `r16_qkvo` : perte 0,827 → 0,140. Sur val, égalité parfaite (39/40 acceptées, 12 hypothèses chacun, 11 pour la base) : l'ordre de la configuration retient `r8_qv`, le plus petit, ce départage étant constaté et non décidé à l'avance. Adaptateur GGUF de 4 547 904 octets, SHA-256 `52ff1ba7…59db7b`, versionné dans le dépôt.
 - **Chiffres** de l'essai T4 Kaggle du 08/11 (`docs/projet/journal.md`, entrée SCRUM-29) : 30 pas appliqués, 0 sauté, perte moyenne de 0,586 sur les 5 premiers pas à 0,052 sur les 5 derniers, 4,9 s par pas, pic VRAM 10,24 Gio, 2 269 184 paramètres entraînables. Adaptateur GGUF F16 de 4 547 904 octets, `inference_validated: false` (`eval/results/SCRUM-29/kaggle_t4_gguf_meta.json`).
 
 **Questions probables**
 
 - *Pourquoi QLoRA ?* Les poids BF16 de la base pèsent environ 15,9 Go, autant que la T4 de 16 Go. En NF4, l'entraînement tient, avec un pic à 10,24 Gio.
-- *La perte qui baisse prouve-t-elle que LoRA aide ?* Non. Elle est mesurée sur 20 exemples d'entraînement non relus, et l'inférence avec l'adaptateur sur la RTX 3050 n'est pas faite. Le gain éventuel sera mesuré dans SCRUM-45 (`eval/results/volet_b.md`).
-- *Pourquoi deux bases différentes ?* On entraîne sur les poids HF non quantifiés de la version QAT et on infère sur le GGUF Q4_0 officiel, l'adaptateur étant chargé par `lora_path`. Le transfert de NF4 vers Q4_0 reste à vérifier. La fusion puis requantification n'est pas retenue : elle ne reproduit pas le GGUF QAT officiel.
+- *La perte qui baisse prouve-t-elle que LoRA aide ?* Non : elle porte sur les exemples d'entraînement. Sur val, l'effet est faible (une hypothèse de plus). Sur le test (SCRUM-45, `eval/results/volet_b.md`), à 1 agent, les acceptations ne changent pas (79/80) mais les résumés qui affirment un ordre entre événements passent de 35/80 à 1/80. À 3 agents, le contrôleur accepte 25 réponses sur 80 au lieu de 9. Ces mesures portent sur la forme et l'appui ; la justesse relève de la double annotation à l'aveugle. L'inférence sur la RTX 3050 reste à faire (`verif_machine.py`, SCRUM-61).
+- *Pourquoi deux bases différentes ?* On entraîne sur les poids HF non quantifiés de la version QAT et on infère sur le GGUF Q4_0 officiel, l'adaptateur étant chargé par `lora_path`. Sur T4, l'adaptateur appliqué au GGUF à l'échelle 0 redonne exactement la sortie de la base, et l'échelle 1 la modifie ; sur le test, il ajoute moins de 10 Mio de mémoire GPU. La fusion puis requantification n'est pas retenue : elle ne reproduit pas le GGUF QAT officiel.
 
 ## 6. `volet_b/slm/v16/` : explication contrôlée, sans RAG
 
@@ -138,11 +140,12 @@ L'INT8 donne des métriques identiques. Parité Python / Chrome sur les 86 260 b
   - **contrôle** (`roles/checker.py`) : le code vérifie d'abord C5, v16, les boucles et l'arrêt normal ; le modèle ne rend son verdict (`accepte`, `corriger`, `abstention`) que si ces contrôles passent.
   Un ordre affirmé entre événements de la même seconde déclenche la reprise par le code, sans appel au contrôleur. La réponse finale n'est jamais réparée. Statuts possibles : `accepte`, `rejete`, `abstention_demandee`, `non_controle`.
 - **Entrées** : `python -m volet_b.agents.single_agent --split val --n 5 --mock` ; `python -m volet_b.agents.orchestrator`. Le split `test` est refusé dans les deux cas.
+- **Chiffres** du test réservé, T4 Kaggle du 25/11 (SCRUM-45, `eval/results/volet_b.md`), 80 cas, échecs au dénominateur : à 1 agent, 79/80 acceptées avec ou sans LoRA ; à 3 agents, 9/80 pour la base et 25/80 avec le LoRA. Latence moyenne : 27,8 s et 24,6 s à 1 agent, 84,3 s et 73,8 s à 3 agents. Aucune hypothèse sur un bloc sans incident. La recherche ne renvoie que 4 passages distincts sur les 80 cas.
 - **Chiffres** de la validation, T4 Kaggle : runs 1 et 2, 1 bloc accepté sur 5, 5/5 conformes C5 ; run 3, 0 accepté sur 10, 10/10 conformes C5, passages cités dans 3 réponses finales sur 10 (`eval/results/SCRUM-42/kaggle_val5*/`). Porte Laya (SCRUM-58) abandonnée : AUC de 0,47 entre `Fail` et `Success` sur la validation unique (`eval/results/SCRUM-58/README.md`, `laya_gate.py`).
 
 **Questions probables**
 
-- *Quel est le gain réel des agents ?* Il n'est pas mesuré sur le test : ce sera SCRUM-45 (`eval/results/volet_b.md`). Sur 10 blocs de validation, le contrôleur rejette tout. Il rejette aussi des réponses sans erreur visible et manque des ordres affirmés (`eval/results/SCRUM-42/kaggle_val5_v3/README.md`).
+- *Quel est le gain réel des agents ?* Sur le test, aucun gain d'acceptation : 9/80 à 3 agents contre 79/80 à 1 agent pour la base, pour une latence trois fois plus élevée. Avec le LoRA, 25/80, dont 12 blocs avec incident et 5 réponses qui citent la documentation. À la relecture, environ un rejet sur trois est justifié (un ordre inventé entre des événements de la même seconde). Sur 10 blocs de validation, le contrôleur rejetait déjà tout. Il rejette aussi des réponses sans erreur visible et manque des ordres affirmés (`eval/results/SCRUM-42/kaggle_val5_v3/README.md`).
 - *Pourquoi 5 appels au plus ?* Chaque appel coûte de l'ordre de 30 s sur T4 (`volet_b/README.md`). La limite borne le coût : 1 recherche, puis 2 rédactions et 2 contrôles au plus.
 - *Que se passe-t-il si le contexte de 4 096 tokens déborde ?* Le code retire des passages avant l'appel. Si le contrôle ne tient pas, aucun appel n'est fait et la réponse prend le statut `non_controle`.
 
@@ -164,7 +167,7 @@ L'INT8 donne des métriques identiques. Parité Python / Chrome sur les 86 260 b
 - **Rôle** : évaluer sans tricher. `metrics.py` calcule précision, rappel, macro-F1 et matrice de confusion ; `volet_a/evaluate.py` porte la campagne SCRUM-44 ; `volet_b/run_config.py` mesure la configuration de base v16 (SCRUM-38/45) ; `volet_b/gpu_memory.py` échantillonne la VRAM du processus toutes les 0,2 s. Les résultats sont dans `results/`, les sorties brutes C7 dans `runs/` (non versionné).
 - **Entrées** : `python -m eval.volet_a.evaluate --preflight` ne lit jamais le test. `--run-final --confirm-test-once SCRUM-44-TEST-UNIQUE` crée un marqueur irrévocable **avant** d'ouvrir le test. `python -m eval.volet_b.run_config --config base` vérifie le SHA-256 du test C5 contre `test.sha256` et refuse `rag1`.
 - **Mécanisme** : le seuil, l'empreinte du modèle FP32 et celle des splits sont figés dans le code (`EXPECTED_THRESHOLD`, `EXPECTED_FP32_SHA`, `EXPECTED_SPLITS_SHA`). Trois populations : test complet, séquences inédites, et test sans les 3 blocs exposés auparavant.
-- **Chiffres** : volet A au § 4 (`eval/results/volet_a.md`) ; comparaison A/B dans `eval/results/comparaison_a_b.md` ; volet B à lire dans `eval/results/volet_b.md` (SCRUM-45).
+- **Chiffres** : volet A au § 4 (`eval/results/volet_a.md`) ; comparaison A/B dans `eval/results/comparaison_a_b.md` ; volet B dans `eval/results/volet_b.md` (SCRUM-45 : 4 configurations sur les 80 cas du test, le 25/11).
 
 **Questions probables**
 
