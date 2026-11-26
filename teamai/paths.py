@@ -40,8 +40,13 @@ EVAL = ROOT / "eval"
 EVAL_VOLET_B = EVAL / "volet_b"
 VOLET_B_TEST = EVAL_VOLET_B / "test.jsonl"
 VOLET_B_TEST_SHA256 = EVAL_VOLET_B / "test.sha256"
+VOLET_B_TEST_INPUTS = EVAL_VOLET_B / "test_inputs.jsonl"
+VOLET_B_TEST_INPUTS_SHA256 = EVAL_VOLET_B / "test_inputs.sha256"
+VOLET_B_DOUBLE_ANNOTATION = EVAL_VOLET_B / "double_annotation.csv"
+VOLET_B_BLIND = EVAL_VOLET_B / "double_annotation"
 RESULTS = EVAL / "results"
 VOLET_B_SUMMARY = RESULTS / "volet_b.md"
+VOLET_B_PROMPT_FREEZE = RESULTS / "SCRUM-63" / "prompt_freeze.json"
 RUNS = EVAL / "runs"
 
 

@@ -1,0 +1,193 @@
+{
+  "seed": "random.Random(\"SCRUM-45:<id>\").sample(['base_1agent', 'base_3agents', 'lora_1agent', 'lora_3agents'], 4), étiquettes ABCD dans cet ordre",
+  "input_sha256": "32b75a84e100bb1101c7fd4c8cab2ef5e322b6c205716aac378d56bf1a7ec4b8",
+  "runs": {
+    "base_1agent": "D:\\scolaire\\master\\m2\\26-27 Natural Language Processing 2_M2IA_S3\\projet\\.claude\\worktrees\\agent-a2636966c27137a52\\eval\\results\\SCRUM-45\\kaggle_base\\runs\\base_1agent\\2026-11-25_105441_437715Z_3e29c258_base_1agent",
+    "base_3agents": "D:\\scolaire\\master\\m2\\26-27 Natural Language Processing 2_M2IA_S3\\projet\\.claude\\worktrees\\agent-a2636966c27137a52\\eval\\results\\SCRUM-45\\kaggle_base\\runs\\base_3agents\\2026-11-25_113202_804321Z_f1fb6b37_base_3agents",
+    "lora_1agent": "D:\\scolaire\\master\\m2\\26-27 Natural Language Processing 2_M2IA_S3\\projet\\.claude\\worktrees\\agent-a2636966c27137a52\\eval\\results\\SCRUM-45\\kaggle_lora\\runs\\lora_1agent\\2026-11-25_155420_375625Z_aff5bd17_lora_1agent",
+    "lora_3agents": "D:\\scolaire\\master\\m2\\26-27 Natural Language Processing 2_M2IA_S3\\projet\\.claude\\worktrees\\agent-a2636966c27137a52\\eval\\results\\SCRUM-45\\kaggle_lora\\runs\\lora_3agents\\2026-11-25_162722_966563Z_403b5e68_lora_3agents"
+  },
+  "criteria": "F exactitude des faits, S appui sur les sources, A abstention justifiée, U utilité ; 0 à 2",
+  "cases": {
+    "test-0004": {
+      "A": "base_1agent",
+      "B": "lora_3agents",
+      "C": "base_3agents",
+      "D": "lora_1agent"
+    },
+    "test-0009": {
+      "A": "lora_1agent",
+      "B": "lora_3agents",
+      "C": "base_3agents",
+      "D": "base_1agent"
+    },
+    "test-0010": {
+      "A": "lora_1agent",
+      "B": "lora_3agents",
+      "C": "base_3agents",
+      "D": "base_1agent"
+    },
+    "test-0017": {
+      "A": "base_3agents",
+      "B": "lora_3agents",
+      "C": "base_1agent",
+      "D": "lora_1agent"
+    },
+    "test-0019": {
+      "A": "base_1agent",
+      "B": "lora_3agents",
+      "C": "base_3agents",
+      "D": "lora_1agent"
+    },
+    "test-0022": {
+      "A": "lora_3agents",
+      "B": "base_3agents",
+      "C": "base_1agent",
+      "D": "lora_1agent"
+    },
+    "test-0024": {
+      "A": "lora_3agents",
+      "B": "base_1agent",
+      "C": "lora_1agent",
+      "D": "base_3agents"
+    },
+    "test-0025": {
+      "A": "base_3agents",
+      "B": "lora_3agents",
+      "C": "lora_1agent",
+      "D": "base_1agent"
+    },
+    "test-0026": {
+      "A": "lora_1agent",
+      "B": "base_1agent",
+      "C": "base_3agents",
+      "D": "lora_3agents"
+    },
+    "test-0028": {
+      "A": "lora_3agents",
+      "B": "base_3agents",
+      "C": "base_1agent",
+      "D": "lora_1agent"
+    },
+    "test-0033": {
+      "A": "lora_3agents",
+      "B": "base_3agents",
+      "C": "base_1agent",
+      "D": "lora_1agent"
+    },
+    "test-0034": {
+      "A": "lora_1agent",
+      "B": "lora_3agents",
+      "C": "base_3agents",
+      "D": "base_1agent"
+    },
+    "test-0036": {
+      "A": "base_3agents",
+      "B": "lora_1agent",
+      "C": "base_1agent",
+      "D": "lora_3agents"
+    },
+    "test-0038": {
+      "A": "lora_3agents",
+      "B": "base_1agent",
+      "C": "lora_1agent",
+      "D": "base_3agents"
+    },
+    "test-0039": {
+      "A": "base_1agent",
+      "B": "base_3agents",
+      "C": "lora_1agent",
+      "D": "lora_3agents"
+    },
+    "test-0041": {
+      "A": "lora_1agent",
+      "B": "base_1agent",
+      "C": "base_3agents",
+      "D": "lora_3agents"
+    },
+    "test-0047": {
+      "A": "base_3agents",
+      "B": "lora_1agent",
+      "C": "base_1agent",
+      "D": "lora_3agents"
+    },
+    "test-0051": {
+      "A": "base_3agents",
+      "B": "base_1agent",
+      "C": "lora_3agents",
+      "D": "lora_1agent"
+    },
+    "test-0052": {
+      "A": "base_1agent",
+      "B": "base_3agents",
+      "C": "lora_1agent",
+      "D": "lora_3agents"
+    },
+    "test-0056": {
+      "A": "lora_1agent",
+      "B": "base_3agents",
+      "C": "lora_3agents",
+      "D": "base_1agent"
+    },
+    "test-0062": {
+      "A": "base_1agent",
+      "B": "base_3agents",
+      "C": "lora_3agents",
+      "D": "lora_1agent"
+    },
+    "test-0064": {
+      "A": "lora_3agents",
+      "B": "base_3agents",
+      "C": "lora_1agent",
+      "D": "base_1agent"
+    },
+    "test-0072": {
+      "A": "base_1agent",
+      "B": "lora_1agent",
+      "C": "lora_3agents",
+      "D": "base_3agents"
+    },
+    "test-0073": {
+      "A": "lora_1agent",
+      "B": "base_1agent",
+      "C": "base_3agents",
+      "D": "lora_3agents"
+    },
+    "test-0074": {
+      "A": "base_3agents",
+      "B": "lora_3agents",
+      "C": "base_1agent",
+      "D": "lora_1agent"
+    },
+    "test-0076": {
+      "A": "lora_1agent",
+      "B": "base_1agent",
+      "C": "lora_3agents",
+      "D": "base_3agents"
+    },
+    "test-0077": {
+      "A": "base_1agent",
+      "B": "lora_1agent",
+      "C": "lora_3agents",
+      "D": "base_3agents"
+    },
+    "test-0078": {
+      "A": "lora_3agents",
+      "B": "base_3agents",
+      "C": "lora_1agent",
+      "D": "base_1agent"
+    },
+    "test-0079": {
+      "A": "base_1agent",
+      "B": "lora_3agents",
+      "C": "base_3agents",
+      "D": "lora_1agent"
+    },
+    "test-0080": {
+      "A": "lora_3agents",
+      "B": "lora_1agent",
+      "C": "base_1agent",
+      "D": "base_3agents"
+    }
+  }
+}
