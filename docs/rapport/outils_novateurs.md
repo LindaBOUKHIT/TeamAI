@@ -20,22 +20,21 @@
 |---|---|---|
 | [PEFT / QLoRA sur T4 Kaggle](outils/peft_qlora.md) — **fiche critique** | Bibliothèque | Alain |
 | [llama.cpp / GGUF](outils/llama_cpp.md) | Runtime local | Alain |
-| [Connecteur MCP Atlassian](outils/mcp_atlassian.md) | MCP | Alain (avec les automatisations de Linda) |
-| [Serveur MCP Kaggle](outils/kaggle_mcp.md) | MCP | Alain |
-| [Codex CLI piloté par Claude Code](outils/codex_claude.md) | Agents de code | Alain |
+| [Jira Cloud, automatisations et intégration GitHub](outils/jira.md) | Application | Alain (avec les automatisations de Linda) |
+| [Notebooks Kaggle sur GPU T4](outils/kaggle.md) | Plateforme de calcul | Alain |
+| [Laya](outils/laya.md) — **essayé puis abandonné** | Modèle ouvert | Alain |
 
 ## Candidats
 
 | Outil | Nature | Qui | Statut |
 |---|---|---|---|
-| Connecteur MCP Atlassian (Jira) via Claude Code | MCP | Alain | Fiche rédigée |
+| Jira Cloud, automatisations et intégration GitHub | Application | Alain, Linda | Fiche rédigée |
 | ONNX Runtime Web | Bibliothèque | Bachar | À démarrer (SCRUM-22) |
 | PEFT / QLoRA | Bibliothèque | Alain | Fiche rédigée (critique) |
 | Ollama ou llama.cpp | Runtime local | Alain | llama.cpp retenu, fiche rédigée ; Ollama non évalué |
 | Gradio | Bibliothèque UI | Linda | À démarrer |
-| Serveur MCP Kaggle | MCP | Alain | Fiche rédigée |
-| Codex CLI piloté par Claude Code | Agents de code | Alain | Fiche rédigée |
-| Laya (modèle de décision calibré, ModernBERT) | Modèle ouvert | Alain | Essayé (SCRUM-58), non retenu |
+| Notebooks Kaggle sur GPU T4 | Plateforme de calcul | Alain | Fiche rédigée |
+| Laya (modèle de décision calibré, ModernBERT) | Modèle ouvert | Alain | Essayé (SCRUM-58), non retenu ; fiche rédigée |
 
 ## Laya : essai court (SCRUM-58)
 
