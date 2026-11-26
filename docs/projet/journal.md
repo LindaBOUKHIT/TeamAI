@@ -609,3 +609,13 @@ Usage IA : Codex, Claude.
 
 ## 2026-11-25, SCRUM-36 : jeu d'adaptation LoRA final (Alain)
 Vérification ciblée des lots d'Alain, de Bachar et de Nassim contre les traces, sur les défauts relevés dans le lot de Linda : 9, 10 et 6 corrections de fond (destinataires différents présentés comme un seul client, présence ou retrait antérieur supposé, événement supposé côté émetteur). Lot d'Alain : 10 formulations négatives reprises pour que `prepare_examples` accepte le jeu. Lot de Nassim : accents restaurés dans les 60 réponses, où ils étaient remplacés par « ? ». `volet_b/slm/merge_lots.py` produit `train.jsonl` (200 exemples) et `val.jsonl` (40), triés par id, sans bloc test ni doublon ; `prepare_examples` accepte `split="val"` pour contrôler la validation. Taux de correction par lot dans `volet_b/annotations/README.md`. Relecture croisée faite pour le seul lot de Linda : `reviewed_by` vide pour les 180 autres exemples. 303 tests passent.
+
+## 2026-11-25 — SCRUM-66 : troisième mesure SCRUM-42 reportée dans les supports
+Rapport §3.2 et tableau des preuves, slide 7 de la présentation, questions 17 et 18 du jury : ajout du run du 24/11 après la PR #67 (0/10 accepté, 10/10 conformes C5, passages cités 3/10). PDF du rapport et de la présentation régénérés.
+Usage IA : Claude.
+
+## 2026-11-25 — SCRUM-67 : section « Cinq outils novateurs » recentrée
+Rapport §6 : Laya (essai argumenté, SCRUM-58), notebooks Kaggle T4, llama.cpp / GGUF, Jira et ses automatisations, PEFT / QLoRA, avec une fiche chacun dans `docs/rapport/outils/` (`laya.md` ajoutée, `kaggle.md` et `jira.md` réécrites). Passages de pilotage allégés (§2.3, §4, retours d'expérience), question 25 du jury retirée et question 26 renumérotée. Tableaux de `outils_novateurs.md` et annexe des sources mis à jour ; PDF du rapport régénéré (28 pages).
+
+## 2026-11-25 — SCRUM-48 : finalisation du rapport V1
+Page de garde définitive (version du 25/11), retour individuel d'Alain (`docs/rapport/retour_experience/alain.md`, §5.2), conclusion du §7 et section SCRUM-36 mise à jour avec le jeu final (200 train, 40 val, 104 exemples modifiés sur 240). PDF régénéré (29 pages). Reste : retour de Bachar, puis chiffres du test du volet B et effet du LoRA (SCRUM-45) à reporter au §3.3.6, au §4 et dans la conclusion.
