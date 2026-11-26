@@ -11,9 +11,16 @@ eval/
 │   ├── test.jsonl              Jeu de test RÉSERVÉ (C5), figé et hashé avant tout réglage           SCRUM-35
 │   ├── test.sha256
 │   ├── figer_test.py           Contrôle C5 et validation humaine, puis écrit test.jsonl et test.sha256   SCRUM-35
+│   ├── test_inputs.jsonl       Entrées figées du test, sans réponse attendue                      SCRUM-45
+│   ├── test_inputs.sha256
 │   ├── run_config.py           Mesure base via v16 (SCRUM-38) → runs/                            SCRUM-38 / SCRUM-45
+│   ├── run_eval.py             Évaluation automatique des 4 configurations → runs/                SCRUM-45
+│   ├── summarize.py            Tableau des 4 configurations → results/volet_b.md                 SCRUM-45
+│   ├── blind_sheets.py         Fiches de double annotation à l'aveugle et clé                     SCRUM-45
+│   ├── blind_scores.py         Dépouillement des fiches : moyennes, kappa, désaccords            SCRUM-45
 │   ├── grille.md               Grille d'évaluation humaine (lien vers docs/volet_b/grille_annotation.md)
-│   └── double_annotation.csv   Notes des 2 annotateurs + arbitrage                                SCRUM-45
+│   ├── double_annotation.csv   30 cas choisis pour la double annotation                          SCRUM-35 / SCRUM-45
+│   └── double_annotation/      Fiches à l'aveugle, clé, dépouillement                             SCRUM-45
 ├── runs/                       Sorties brutes par exécution (C7) — non versionné
 └── results/                    Tableaux et figures pour le rapport — versionné
     ├── volet_a.md
@@ -120,7 +127,7 @@ sélectionnés par `prepare_test.py`, puis `expected`, `annotator` et `reviewed_
 
 | Cas | Vérification (`annotator`) | Relecture (`reviewed_by`) |
 |---|---|---|
-| `test-0001` à `test-0020` | Alain | à faire |
+| `test-0001` à `test-0020` | Alain | Linda |
 | `test-0021` à `test-0040` | Linda | Alain |
 | `test-0041` à `test-0060` | Bachar | Alain |
 | `test-0061` à `test-0080` | Alain | Bachar |
@@ -136,7 +143,7 @@ et journalisées dans `corrections_journal.csv` : 3 de Bachar (`corrections_Bach
 `validation_humaine.csv`. Les champs `id`, `block_id`, `split`, `label`, `trace_lines` et
 `events` sont identiques à ceux de la sélection initiale.
 
-Les fichiers de double annotation (30 traces, `double_annotation.csv`) restent vierges.
+Les 30 traces de la double annotation sont listées dans `double_annotation.csv` ; les fiches à l'aveugle sont décrites dans la section SCRUM-45.
 
 ### Gel et empreinte
 
@@ -155,7 +162,124 @@ ni à l'optimisation du RAG.
 
 ### État
 
-La relecture croisée de `test-0001` à `test-0020` manque : C5 impose un relecteur distinct
-d'Alain et aucun n'est désigné. `figer_test` refuse donc d'écrire `test.jsonl` et
-`test.sha256`. Une fois la relecture faite, le relecteur est renseigné dans
-`validation_humaine.csv` et `annotations_travail.jsonl`, puis la commande est relancée.
+`test.jsonl` est figé depuis le 25/11/2026 : les 80 cas sont vérifiés puis relus par une
+autre personne (Linda pour `test-0001` à `test-0020`), SHA-256
+`2c9caf95ae67f7d473980eb7eb3d163181cdc0c8e6ea6915bb2ad718dc0c45ff`. Les entrées de
+l'évaluation SCRUM-45 (`test_inputs.jsonl`) reprennent ses traces sans les réponses attendues :
+mêmes `id`, `block_id` et `trace_lines` pour les 80 cas.
+
+## Évaluation des 4 configurations du volet B (SCRUM-45)
+
+Quatre configurations, mêmes traces, même corpus et mêmes paramètres de génération
+(llama.cpp, Gemma 4 E4B QAT Q4_0, glouton, 800 tokens, seed 42, sans réflexion) :
+
+| Configuration | Modèle | Pipeline |
+|---|---|---|
+| `base_1agent` | Gemma de base | v16 à 1 agent sans RAG, mesure « avant adaptation » de SCRUM-38 |
+| `base_3agents` | Gemma de base | recherche, rédaction et contrôle avec RAG (orchestrateur SCRUM-42) |
+| `lora_1agent` | Gemma + adaptateur LoRA GGUF | v16 à 1 agent sans RAG |
+| `lora_3agents` | Gemma + adaptateur LoRA GGUF | 3 agents avec RAG |
+
+La variante « v16 + RAG à 1 agent » n'existe pas : le prompt v16 n'accepte pas de
+passages. Commandes, une configuration par run, depuis la racine :
+
+```bash
+python -m eval.volet_b.run_eval --config base_1agent
+python -m eval.volet_b.run_eval --config base_3agents
+python -m eval.volet_b.run_eval --config lora_1agent --adapter CHEMIN/adapter.gguf
+python -m eval.volet_b.run_eval --config lora_3agents --adapter CHEMIN/adapter.gguf
+```
+
+`--adapter` est obligatoire pour `lora_*` et interdit pour `base_*` ; le fichier doit
+exister et son SHA-256 est enregistré. Options : `--k 5` passages candidats et
+`--max-calls 5` appels SLM par cas (3 agents seulement), `--limit N` et
+`--ids test-0004,test-0009` pour un essai partiel, `--data CHEMIN` pour d'autres
+entrées, `--mock` pour un run factice (`TEAMAI_SLM_MOCK=1` pour 1 agent,
+`mock_call_slm` et `MockRetriever` pour 3 agents). `TEAMAI_SLM_MOCK=1` sans `--mock`
+est refusé : un run factice est toujours déclaré.
+
+### Entrées figées
+
+`test_inputs.jsonl` reprend les 80 cas `test-0001` à `test-0080` de
+`annotations_travail.jsonl` (SCRUM-35, commit `c9763aa`), dans le même ordre, en ne
+gardant que les champs d'entrée `id, block_id, split, label, trace_lines, events`
+(UTF-8, LF). Les réponses attendues, annotateurs et relecteurs restent dans
+`test.jsonl` (SCRUM-35, autre branche) : le banc n'en a pas besoin et ne peut donc
+pas les transmettre. Seuls `id`, `block_id`, `split` et `trace_lines` sont lus pour
+construire les preuves ; `label` et `events` ne sont jamais lus par le pipeline.
+`test_inputs.sha256` (`<empreinte>  test_inputs.jsonl`) est vérifié avant toute
+exécution : une empreinte différente arrête le run avant tout chargement.
+`run_config.predict` accepte pour cela `check_annotations=False`, qui ne contrôle que
+les champs d'entrée ; son comportement par défaut ne change pas. L'orchestrateur
+SCRUM-42 refuse toujours le split test, sauf `final_evaluation=True`, passé
+uniquement par ce banc ; sa CLI reste inchangée.
+
+### Sorties C7
+
+Chaque run crée `eval/runs/<horodatage>_<suffixe>_<config>/`. Le modèle et le
+retriever sont chargés une seule fois, avant le premier cas.
+
+- `config.json` : configuration, commit Git et état dirty, SHA-256 des entrées et de
+  l'adaptateur, paramètres de génération, SHA-256 des prompts des 3 rôles et du gel
+  v16 `eval/results/SCRUM-63/prompt_freeze.json` (avec ses empreintes de consigne,
+  politique et runtime), templates, `k`, `max_calls`, méthode RAG, corpus et
+  métadonnées de l'index, machine (Python, plateforme, CPU, GPU visibles).
+- `predictions.jsonl`, écrit au fil de l'eau : l'enregistrement complet du mode
+  (tentatives v16 ou étapes des 3 agents, passages, textes bruts), plus `final` (texte
+  et réponse finale analysée, erreurs C5, contrôles communs), `attention` et
+  `wall_seconds`.
+- `metrics.json` : métriques communes aux 4 configurations, puis `mode_metrics`
+  (`run_config.metrics` pour 1 agent, `orchestrator.metrics` pour 3 agents).
+
+Les métriques communes portent sur la **réponse finale** (1 agent : dernière tentative
+v16 ; 3 agents : dernière rédaction, même rejetée par le contrôle), avec **tous les
+cas au dénominateur, échecs compris** : conformité C5 (`check_answer`, sources
+limitées aux passages fournis), réponses acceptées (statut `accepte` pour 3 agents,
+contrat v16 valide pour 1 agent), abstentions (réponse conforme avec `abstention`
+vrai), hypothèses par bloc avec et sans incident (indice `attention` de
+`prepare_block`, jamais le label), références inconnues et causes réseau sans appui
+(contrôles v16, champ `sources` exclu), réponses en boucle (`repetition_errors`),
+appels SLM (moyenne, maximum), latence murale moyenne et médiane par cas (chargement
+exclu), pics RSS et VRAM (chargement inclus). L'abstention demandée par le contrôleur
+reste dans `mode_metrics.abstentions_effectives`.
+
+### Résumé
+
+```bash
+python -m eval.volet_b.summarize eval/runs/<run1> eval/runs/<run2> eval/runs/<run3> eval/runs/<run4>
+```
+
+Écrit ou remplace la section « Évaluation automatique des 4 configurations » de
+`eval/results/volet_b.md`. Le script exige exactement un run par configuration et
+refuse un run factice, partiel (`--limit`, `--ids`) ou dont l'empreinte d'entrée
+diffère de `test_inputs.sha256`.
+
+### Double annotation à l'aveugle
+
+```bash
+python -m eval.volet_b.blind_sheets eval/runs/<run1> eval/runs/<run2> eval/runs/<run3> eval/runs/<run4>
+```
+
+Pour les 30 cas de `double_annotation.csv`, le script écrit dans
+`eval/volet_b/double_annotation/` deux fiches identiques, `aveugle_annotateur_1.csv` et
+`aveugle_annotateur_2.csv` : une ligne par cas et par réponse, avec la trace
+numérotée, les preuves calculées par v16 (faits, chronologie, messages, causes
+compatibles), la réponse finale rendue lisible (passages cités compris) sous une
+étiquette A, B, C ou D, puis les colonnes vides `F`, `S`, `A`, `U` (0 à 2, voir
+`docs/volet_b/grille_annotation.md`) et `commentaire`. Le label n'est pas affiché.
+L'ordre des étiquettes est tiré par `random.Random("SCRUM-45:<id>")`, donc fixe et
+différent selon le cas ; la correspondance est dans `cle_aveugle.json`, à ne pas
+ouvrir avant la fin des deux grilles. Les runs factices sont refusés et aucun fichier
+existant n'est écrasé.
+
+Une fois les deux grilles remplies :
+
+```bash
+python -m eval.volet_b.blind_scores
+```
+
+Le dépouillement refuse toute note absente ou hors de 0, 1, 2, puis écrit
+`depouillement.json` (moyennes par configuration et par critère, pour chaque
+annotateur et ensemble, total sur 8 ; accord par critère : kappa de Cohen pondéré
+quadratique et accord exact) et `desaccords.csv`, la liste des notes divergentes à
+arbitrer, sans la configuration.

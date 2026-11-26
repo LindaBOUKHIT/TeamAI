@@ -1,0 +1,156 @@
+12:17:55 $ git clone --filter=blob:none --no-checkout https://github.com/LindaBOUKHIT/TeamAI.git /kaggle/temp/TeamAI
+12:17:56 Cloning into '/kaggle/temp/TeamAI'...
+12:17:56 $ git sparse-checkout set --no-cone /* !/data/sample/HDFS_sample.log !/data/sample/Event_traces.csv
+12:17:56 
+12:17:56 $ git checkout -q 2be514d1163d8e67d5b3e667fe955f1da83186d4
+12:17:57 
+12:17:57 $ git rev-parse HEAD
+12:17:57 2be514d1163d8e67d5b3e667fe955f1da83186d4
+12:17:57 seed7 : extrait vérifié, blocs blk_-2762091965675374009, blk_-4732326805048063705, blk_3036603747764053369, blk_6080543005931752460, blk_8342213972413455107
+12:17:57 reglage : extrait vérifié, blocs blk_-4683813028403463392, blk_1310945118270269763, blk_5458156658233261729, blk_5546121571032469732, blk_7069523072054316608
+12:18:02 wheel téléchargée et vérifiée
+12:18:02 $ /usr/bin/python3 -m pip install -q --only-binary=:all: /kaggle/working/wheels/llama_cpp_python-0.3.36-py3-none-linux_x86_64.whl
+12:18:09 
+12:18:09 $ /usr/bin/python3 -m pip install -q faiss-cpu rank_bm25 nvidia-cuda-runtime-cu12 nvidia-cublas-cu12
+12:18:14 
+12:18:14 $ ldd /usr/local/lib/python3.13/dist-packages/llama_cpp/lib/libggml-base.so
+12:18:14 	linux-vdso.so.1 (0x00007c43dc935000)
+	libgomp.so.1 => /lib/x86_64-linux-gnu/libgomp.so.1 (0x00007c43dc7f0000)
+	libstdc++.so.6 => /lib/x86_64-linux-gnu/libstdc++.so.6 (0x00007c43dc572000)
+	libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007c43dc489000)
+	libgcc_s.so.1 => /lib/x86_64-linux-gnu/libgcc_s.so.1 (0x00007c43dc459000)
+	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007c43dc246000)
+	/lib64/ld-linux-x86-64.so.2 (0x00007c43dc937000)
+12:18:14 libggml-base.so : toutes les dépendances trouvées
+12:18:14 $ ldd /usr/local/lib/python3.13/dist-packages/llama_cpp/lib/libggml-cpu.so
+12:18:14 	linux-vdso.so.1 (0x00007df65888b000)
+	libggml-base.so.0 => /usr/local/lib/python3.13/dist-packages/llama_cpp/lib/libggml-base.so.0 (0x00007df6585b6000)
+	libgomp.so.1 => /lib/x86_64-linux-gnu/libgomp.so.1 (0x00007df65854f000)
+	libstdc++.so.6 => /lib/x86_64-linux-gnu/libstdc++.so.6 (0x00007df6582d1000)
+	libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007df6581e6000)
+	libgcc_s.so.1 => /lib/x86_64-linux-gnu/libgcc_s.so.1 (0x00007df6581b8000)
+	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007df657fa5000)
+	/lib64/ld-linux-x86-64.so.2 (0x00007df65888d000)
+12:18:14 libggml-cpu.so : toutes les dépendances trouvées
+12:18:14 $ ldd /usr/local/lib/python3.13/dist-packages/llama_cpp/lib/libggml-cuda.so
+12:18:14 	linux-vdso.so.1 (0x00007d64c506f000)
+	libggml-base.so.0 => /usr/local/lib/python3.13/dist-packages/llama_cpp/lib/libggml-base.so.0 (0x00007d64c154f000)
+	libcudart.so.12 => /usr/local/lib/python3.13/dist-packages/nvidia/cuda_runtime/lib/libcudart.so.12 (0x00007d64c1200000)
+	libcublas.so.12 => /usr/local/lib/python3.13/dist-packages/nvidia/cublas/lib/libcublas.so.12 (0x00007d64baa00000)
+	libcuda.so.1 => /usr/local/nvidia/lib64/libcuda.so.1 (0x00007d64b4c00000)
+	libnccl.so.2 => /usr/local/lib/python3.13/dist-packages/nvidia/nccl/lib/libnccl.so.2 (0x00007d649ba00000)
+	libstdc++.so.6 => /lib/x86_64-linux-gnu/libstdc++.so.6 (0x00007d649b782000)
+	libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007d64c1117000)
+	libgcc_s.so.1 => /lib/x86_64-linux-gnu/libgcc_s.so.1 (0x00007d64c150e000)
+	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007d649b56f000)
+	libgomp.so.1 => /lib/x86_64-linux-gnu/libgomp.so.1 (0x00007d64c10c1000)
+	/lib64/ld-linux-x86-64.so.2 (0x00007d64c5071000)
+	libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007d64c1507000)
+	libpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0 (0x00007d64c1502000)
+	librt.so.1 => /lib/x86_64-linux-gnu/librt.so.1 (0x00007d64c14fd000)
+	libcublasLt.so.12 => /usr/local/lib/python3.13/dist-packages/nvidia/cublas/lib/libcublasLt.so.12 (0x00007d6469200000)
+12:18:14 libggml-cuda.so : toutes les dépendances trouvées
+12:18:14 $ ldd /usr/local/lib/python3.13/dist-packages/llama_cpp/lib/libggml.so
+12:18:14 	linux-vdso.so.1 (0x00007c3c42a36000)
+	libggml-cpu.so.0 => /usr/local/lib/python3.13/dist-packages/llama_cpp/lib/libggml-cpu.so.0 (0x00007c3c42829000)
+	libggml-cuda.so.0 => /usr/local/lib/python3.13/dist-packages/llama_cpp/lib/libggml-cuda.so.0 (0x00007c3c3ede7000)
+	libggml-base.so.0 => /usr/local/lib/python3.13/dist-packages/llama_cpp/lib/libggml-base.so.0 (0x00007c3c3ed11000)
+	libstdc++.so.6 => /lib/x86_64-linux-gnu/libstdc++.so.6 (0x00007c3c3ea80000)
+	libgcc_s.so.1 => /lib/x86_64-linux-gnu/libgcc_s.so.1 (0x00007c3c3ea52000)
+	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007c3c3e83f000)
+	libgomp.so.1 => /lib/x86_64-linux-gnu/libgomp.so.1 (0x00007c3c3e7e9000)
+	libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007c3c3e700000)
+	/lib64/ld-linux-x86-64.so.2 (0x00007c3c42a38000)
+	libcudart.so.12 => /usr/local/lib/python3.13/dist-packages/nvidia/cuda_runtime/lib/libcudart.so.12 (0x00007c3c3e400000)
+	libcublas.so.12 => /usr/local/lib/python3.13/dist-packages/nvidia/cublas/lib/libcublas.so.12 (0x00007c3c37c00000)
+	libcuda.so.1 => /usr/local/nvidia/lib64/libcuda.so.1 (0x00007c3c31e00000)
+	libnccl.so.2 => /usr/local/lib/python3.13/dist-packages/nvidia/nccl/lib/libnccl.so.2 (0x00007c3c18c00000)
+	libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007c3c3e6f9000)
+	libpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0 (0x00007c3c3e6f2000)
+	librt.so.1 => /lib/x86_64-linux-gnu/librt.so.1 (0x00007c3c3e6ed000)
+	libcublasLt.so.12 => /usr/local/lib/python3.13/dist-packages/nvidia/cublas/lib/libcublasLt.so.12 (0x00007c3be6800000)
+12:18:14 libggml.so : toutes les dépendances trouvées
+12:18:14 $ ldd /usr/local/lib/python3.13/dist-packages/llama_cpp/lib/libllama.so
+12:18:14 	linux-vdso.so.1 (0x00007838c8de9000)
+	libggml.so.0 => /usr/local/lib/python3.13/dist-packages/llama_cpp/lib/libggml.so.0 (0x00007838c89e3000)
+	libggml-base.so.0 => /usr/local/lib/python3.13/dist-packages/llama_cpp/lib/libggml-base.so.0 (0x00007838c890d000)
+	libstdc++.so.6 => /lib/x86_64-linux-gnu/libstdc++.so.6 (0x00007838c867e000)
+	libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007838c8593000)
+	libgcc_s.so.1 => /lib/x86_64-linux-gnu/libgcc_s.so.1 (0x00007838c8565000)
+	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007838c8352000)
+	/lib64/ld-linux-x86-64.so.2 (0x00007838c8deb000)
+	libggml-cpu.so.0 => /usr/local/lib/python3.13/dist-packages/llama_cpp/lib/libggml-cpu.so.0 (0x00007838c815b000)
+	libggml-cuda.so.0 => /usr/local/lib/python3.13/dist-packages/llama_cpp/lib/libggml-cuda.so.0 (0x00007838c4719000)
+	libgomp.so.1 => /lib/x86_64-linux-gnu/libgomp.so.1 (0x00007838c46c1000)
+	libcudart.so.12 => /usr/local/lib/python3.13/dist-packages/nvidia/cuda_runtime/lib/libcudart.so.12 (0x00007838c4400000)
+	libcublas.so.12 => /usr/local/lib/python3.13/dist-packages/nvidia/cublas/lib/libcublas.so.12 (0x00007838bdc00000)
+	libcuda.so.1 => /usr/local/nvidia/lib64/libcuda.so.1 (0x00007838b7e00000)
+	libnccl.so.2 => /usr/local/lib/python3.13/dist-packages/nvidia/nccl/lib/libnccl.so.2 (0x000078389ec00000)
+	libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007838c46ba000)
+	libpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0 (0x00007838c43fb000)
+	librt.so.1 => /lib/x86_64-linux-gnu/librt.so.1 (0x00007838c43f6000)
+	libcublasLt.so.12 => /usr/local/lib/python3.13/dist-packages/nvidia/cublas/lib/libcublasLt.so.12 (0x000078386c800000)
+12:18:14 libllama.so : toutes les dépendances trouvées
+12:18:14 $ ldd /usr/local/lib/python3.13/dist-packages/llama_cpp/lib/libmtmd.so
+12:18:14 	linux-vdso.so.1 (0x00007d58c9cbf000)
+	libllama.so.0 => /usr/local/lib/python3.13/dist-packages/llama_cpp/lib/libllama.so.0 (0x00007d58c970e000)
+	libggml.so.0 => /usr/local/lib/python3.13/dist-packages/llama_cpp/lib/libggml.so.0 (0x00007d58c9700000)
+	libggml-base.so.0 => /usr/local/lib/python3.13/dist-packages/llama_cpp/lib/libggml-base.so.0 (0x00007d58c962a000)
+	libstdc++.so.6 => /lib/x86_64-linux-gnu/libstdc++.so.6 (0x00007d58c9399000)
+	libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007d58c92b0000)
+	libgcc_s.so.1 => /lib/x86_64-linux-gnu/libgcc_s.so.1 (0x00007d58c9282000)
+	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007d58c906f000)
+	/lib64/ld-linux-x86-64.so.2 (0x00007d58c9cc1000)
+	libggml-cpu.so.0 => /usr/local/lib/python3.13/dist-packages/llama_cpp/lib/libggml-cpu.so.0 (0x00007d58c8e78000)
+	libggml-cuda.so.0 => /usr/local/lib/python3.13/dist-packages/llama_cpp/lib/libggml-cuda.so.0 (0x00007d58c5434000)
+	libgomp.so.1 => /lib/x86_64-linux-gnu/libgomp.so.1 (0x00007d58c53de000)
+	libcudart.so.12 => /usr/local/lib/python3.13/dist-packages/nvidia/cuda_runtime/lib/libcudart.so.12 (0x00007d58c5000000)
+	libcublas.so.12 => /usr/local/lib/python3.13/dist-packages/nvidia/cublas/lib/libcublas.so.12 (0x00007d58be800000)
+	libcuda.so.1 => /usr/local/nvidia/lib64/libcuda.so.1 (0x00007d58b8a00000)
+	libnccl.so.2 => /usr/local/lib/python3.13/dist-packages/nvidia/nccl/lib/libnccl.so.2 (0x00007d589f800000)
+	libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007d58c53d7000)
+	libpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0 (0x00007d58c53d2000)
+	librt.so.1 => /lib/x86_64-linux-gnu/librt.so.1 (0x00007d58c53cd000)
+	libcublasLt.so.12 => /usr/local/lib/python3.13/dist-packages/nvidia/cublas/lib/libcublasLt.so.12 (0x00007d586d400000)
+12:18:14 libmtmd.so : toutes les dépendances trouvées
+12:18:14 $ /usr/bin/python3 -c import llama_cpp; print("llama_cpp", llama_cpp.__version__)
+12:18:19 llama_cpp 0.3.36
+12:18:49 modèle : /root/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-q4_0-gguf/snapshots/4b4a2c1d584be7264f87aac328a1bc739ce81b6c/gemma-4-E4B_q4_0-it.gguf (5154941280 octets)
+12:18:49 $ /usr/bin/python3 -m volet_b.rag.build_index
+12:19:42 51 passages encodés (BAAI/bge-small-en-v1.5@5c38ec7c405ec4b44b94cc5a9bb96e735b38267a, dim 384)
+Index : /kaggle/temp/TeamAI/volet_b/rag/index/index.faiss
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 2488.71it/s]
+12:19:42 $ nvidia-smi --query-gpu=name,memory.total,driver_version --format=csv
+12:19:42 name, memory.total [MiB], driver_version
+Tesla T4, 15360 MiB, 580.178.04
+Tesla T4, 15360 MiB, 580.178.04
+12:19:42 $ /usr/bin/python3 -m volet_b.agents.orchestrator --file /kaggle/working/val5_seed7.log
+12:27:51 [1/5] blk_-4732326805048063705 : rejete (5 appels)
+[2/5] blk_3036603747764053369 : rejete (5 appels)
+[3/5] blk_8342213972413455107 : rejete (5 appels)
+[4/5] blk_-2762091965675374009 : rejete (5 appels)
+[5/5] blk_6080543005931752460 : rejete (5 appels)
+Run : /kaggle/temp/TeamAI/eval/runs/2026-11-24_121956_528781Z_39cfde8a_three_agents
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 2503.30it/s]
+llama_kv_cache_iswa: using full-size SWA cache (ref: https://github.com/ggml-org/llama.cpp/pull/13194#issuecomment-2868343055)
+llama_kv_cache: the V embeddings have different sizes across layers and FA is not enabled - padding V cache to 1024
+llama_kv_cache: the V embeddings have different sizes across layers and FA is not enabled - padding V cache to 1024
+12:27:51 seed7 : durée totale orchestrateur : 488.2 s
+12:27:51 copié : seed7/2026-11-24_121956_528781Z_39cfde8a_three_agents
+12:27:51 $ /usr/bin/python3 -m volet_b.agents.orchestrator --file /kaggle/working/val5_reglage.log
+12:35:16 [1/5] blk_1310945118270269763 : rejete (5 appels)
+[2/5] blk_7069523072054316608 : rejete (5 appels)
+[3/5] blk_-4683813028403463392 : rejete (4 appels)
+[4/5] blk_5546121571032469732 : rejete (5 appels)
+[5/5] blk_5458156658233261729 : rejete (5 appels)
+Run : /kaggle/temp/TeamAI/eval/runs/2026-11-24_122804_296445Z_40246b45_three_agents
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 2546.49it/s]
+llama_kv_cache_iswa: using full-size SWA cache (ref: https://github.com/ggml-org/llama.cpp/pull/13194#issuecomment-2868343055)
+llama_kv_cache: the V embeddings have different sizes across layers and FA is not enabled - padding V cache to 1024
+llama_kv_cache: the V embeddings have different sizes across layers and FA is not enabled - padding V cache to 1024
+12:35:16 reglage : durée totale orchestrateur : 445.1 s
+12:35:16 copié : reglage/2026-11-24_122804_296445Z_40246b45_three_agents

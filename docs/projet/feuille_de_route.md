@@ -1,6 +1,6 @@
 # TeamAI — Feuille de route
 
-Mise à jour du 6 octobre 2026. La source de vérité est le [board Jira SCRUM](https://lindaboukhit04.atlassian.net/jira/software/projects/SCRUM/boards/1) ; ce document en donne la vue d'ensemble.
+Mise à jour du 6 octobre 2026 ; date de soutenance corrigée le 24 novembre (lundi 30/11, et non 07/12). La source de vérité est le [board Jira SCRUM](https://lindaboukhit04.atlassian.net/jira/software/projects/SCRUM/boards/1) ; ce document en donne la vue d'ensemble.
 
 Sujet : détection et interprétation d'anomalies dans les logs HDFS (Loghub HDFS_v1). Validation de l'enseignant toujours en attente ; l'équipe a démarré pour ne pas perdre de temps (relance : SCRUM-12).
 
@@ -16,7 +16,7 @@ Sujet : détection et interprétation d'anomalies dans les logs HDFS (Loghub HDF
 | 01/10 (manqué) | Mi-parcours | Volet A v0 en ligne, 1re inférence locale, tag Git, capture du board |
 | **16/10** | J3 | Volet A fonctionnel, LoRA engagé, supports J3, rapport commencé |
 | 28/11 (interne) | Rapport V1 | PDF remis, site figé en v1.0 |
-| **07/12** | J4 — soutenance | Site en ligne **avant** ce jour, pitch + présentation envoyés, vidéos de secours |
+| **30/11** | J4 — soutenance | Site en ligne **avant** ce jour, pitch + présentation envoyés, vidéos de secours |
 
 ## Sprints
 
@@ -26,7 +26,7 @@ Sujet : détection et interprétation d'anomalies dans les logs HDFS (Loghub HDF
 | 2 — Adaptation & RAG | 19/10 → 01/11 | Jeu de test B réservé ; annotation du jeu d'adaptation ; RAG à 1 agent ; mesures « avant » ; LoRA complet ; volet A optimisé (int8) et UX soignée |
 | 3 — Agents & évaluation | 02/11 → 15/11 | 3 agents ; interface locale ; évaluation finale A ; évaluation B (4 configurations, double annotation) ; défauts + feuille de route B |
 | 4 — Rapport & gel site | 16/11 → 29/11 | Comparaison A/B ; rapport V1 PDF ; retours d'expérience individuels ; site v1.0 vérifié ; vidéos de démo |
-| 5 — Soutenance | 30/11 → 07/12 | Pitch et présentation ; répétitions et questions croisées ; remise des livrables |
+| 5 — Soutenance | 24/11 → 30/11, en parallèle de la fin du sprint 4 | Pitch et présentation ; répétitions et questions croisées ; remise des livrables |
 
 ## Epics et responsables
 

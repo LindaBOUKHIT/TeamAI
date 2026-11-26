@@ -555,6 +555,71 @@ Section rédigée dans docs/volet_b/defauts_feuille_de_route.md : périmètre, d
 Lecture seule des preuves val et du code ; aucune donnée test consultée, aucun modèle exécuté, aucun service externe appelé, aucune opération git.
 Usage IA : rédaction Codex gpt-6.1-sol supervisée par Claude ; relecture d'Alain à faire.
 
+## 2026-11-13 — SCRUM-58 : porte Laya (abstention, vérification des hypothèses), expérience optionnelle abandonnée
+Laya (`convaiinnovations/laya`, Apache 2.0, révision `85cc74dd`, paquet 0.4.31) a été appliqué en zéro-shot, sur CPU (portable d'Alain), aux réponses v16 déjà produites sur la validation. Il y a deux cohortes de 40 blocs `val`, avec 10 `Fail` chacune. La question a été choisie sur la cohorte de mise au point (3 variantes), puis appliquée une seule fois à la validation unique, sans réglage après lecture.
+Résultat : AUC de la probabilité d'anomalie entre Fail et Success de 0,47 sur la validation unique (0,37 à 0,55 en mise au point). La porte ajoute 8 abstentions sur 40 sans lien avec le label. Sur les 4 hypothèses, elle garde les 2 que la relecture SCRUM-63 met en cause et en écarte une qui ne l'était pas. Coût : 2,25 s par bloc, pic RSS de 2,65 GiB, 32 s de chargement.
+Décision : porte non intégrée, pas de 5ᵉ configuration pour SCRUM-45. L'adaptation Kaggle n'est pas lancée : sur les labels, elle doublerait le détecteur du volet A ; sur les annotations B, elle demande un jeu relu (SCRUM-36). Détails et métriques : `eval/results/SCRUM-58/README.md`.
+Aucune donnée de test lue ; aucune donnée envoyée à un service externe (seul le téléchargement du modèle depuis Hugging Face).
+Usage IA : code de la porte et des tests écrit par Codex gpt-6.1-sol, puis revu et corrigé par Claude (révision transmise au routeur, état limité à 512 tokens, chargement chronométré à part) ; mesures lancées par Claude ; relecture d'Alain et de Linda à faire.
+
+## 2026-11-15 — SCRUM-42 : orchestration à 3 agents (recherche, rédaction, contrôle)
+`volet_b/agents/orchestrator.py` et `roles/{search,writer,checker}.py` : une seule instance du SLM via `generate()`, au plus 5 appels par bloc (recherche 1, rédaction et contrôle 2 fois au plus), une reprise maximum. La rédaction reprend le prompt v16 à l'identique quand aucun passage n'est retenu ; sinon deux phrases fixes sont remplacées et une section DOCUMENTATION est ajoutée (budget 3 000 caractères, `sources` limité aux passages injectés). Les contrôles v16 et C5 sont faits par le code avant tout appel au contrôleur ; la réponse finale n'est jamais réparée. Version 1 agent inchangée.
+Vérifié : 239 tests passent, essai `--mock` sur 5 blocs de validation (3 appels chacun), split test refusé. Aucune donnée test consultée. Mesure avec Gemma sur 5 blocs de validation à faire (machine de Nassim ou Kaggle).
+Usage IA : code Codex gpt-6.1-sol supervisé et relu par Claude ; relecture d'Alain à faire.
+
+## 2026-11-15 — SCRUM-43 : interface locale du volet B (Gradio)
+`volet_b/app/app.py`, lancé par `python -m volet_b.app.app` (option `--mock` sans modèle), écoute uniquement sur 127.0.0.1. On colle des logs ou on importe un fichier, puis on choisit 1 ou 3 agents et le modèle de base ou adapté. L'interface affiche le résumé, les faits, les hypothèses, les infos manquantes, les passages sources et le journal des étapes. Une réponse non conforme C5 ou rejetée est montrée en sortie brute avec ses erreurs, sans réparation. Tout bloc du split test fait refuser l'entrée avant appel au modèle ; 5 blocs maximum par analyse ; exemples tirés uniquement de la validation. Section « Lancer la démo » ajoutée au README du volet B.
+Vérifié : 250 tests passent ; démo `--mock` pilotée dans un navigateur sur un exemple de validation (3 appels, statut accepte). Démo avec Gemma sur la machine d'Alain à faire (critère de fin).
+Usage IA : code Codex gpt-6.1-sol supervisé et terminé par Claude ; relecture d'Alain à faire.
+## 2026-11-16 — SCRUM-42 : correctif du contrôleur après la mesure Kaggle d'Alain
+Mesure réelle (Alain, `eval/results/SCRUM-42/kaggle_val5/`) : 1 bloc accepté sur 5, alors que les 5 réponses étaient conformes à C5 ; le contrôleur ne voyait pas le contrat et reprochait surtout des sources vides. Correctif : `checker.txt` rappelle les règles du contrat (sélection de 2 à 5 faits, hypothèses et sources facultatives) et ne demande une correction que pour une affirmation précise non appuyée, en citant la référence. Garde de contexte ajoutée à la recherche et au contrôle : on retire des passages avant l'appel ; sans place pour le contrôle, aucun appel et la réponse n'est pas acceptée (`non_controle`). Métriques : `abstentions_effectives` ajouté, `answers_with_sources` limité aux réponses acceptées. 243 tests passent ; à remesurer sur les 5 mêmes blocs de validation.
+Usage IA : correctif écrit et testé par Claude, d'après l'analyse d'Alain.
+
+## 2026-11-24 — SCRUM-49 : retour d'expérience de Linda
+Retour d'expérience.
+Usage IA : Claude.
+
+## 2026-11-24 — SCRUM-52 : supports de soutenance (pitch 4 min, présentation 8 min)
+`docs/soutenance/pitch/` (6 slides) et `docs/soutenance/presentation/` (12 slides), repris du style du support d'avancement ; PDF exportés avec Chrome (`pitch.pdf`, `presentation.pdf`). Sources de chaque chiffre en tête des `index.html` ; aucun chiffre du test du volet B, aucune mesure non archivée.
+Usage IA : supports rédigés par Codex (gpt-6.1-sol) à partir des résultats du dépôt ; chiffres contrôlés par Claude (une erreur corrigée : les deux runs SCRUM-42 n'acceptent pas le même bloc) ; à valider par les 4 membres.
+
+## 2026-11-24 — SCRUM-48 : date de soutenance et PDF du rapport
+Soutenance le lundi 30/11 (et non le 07/12) : date corrigée dans le README, la feuille de route et le rapport (§2.2). Les documents d'archive et de cadrage gardent la date d'origine. PDF du rapport régénéré avec les ajouts de la #65 (27 pages).
+Usage IA : modifications faites par Claude à la demande d'Alain.
+
+## 2026-11-24 — SCRUM-42 (suite) : qualité de la chaîne à 3 agents
+D'après les deux runs Kaggle (1/5 accepté) : l'ordre affirmé entre événements de la même seconde (drapeau v16 existant) déclenche maintenant une reprise par le code, sans appel au contrôleur et sans compter la réponse comme non conforme à C5 ; motifs du contrôleur limités à 400 caractères (une phrase courte qui commence par la référence) au lieu de 240 ; `checker.txt` n'exige plus que le résumé reprenne chaque fait sélectionné ni une précision absente des preuves ; `writer.txt` demande de citer un passage qui explique une opération mentionnée. Prompt v16 sans passage inchangé. 302 tests passent. À mesurer sur GPU sur d'autres blocs val que les 5 de réglage.
+Usage IA : modifications écrites par Codex (gpt-6.1-sol), relues, corrigées (séparation erreur de fond / conformité C5) et testées par Claude.
+
+## 2026-11-24 — SCRUM-42 : mesure GPU des correctifs de la PR #67
+Run Kaggle (T4) sur 5 nouveaux blocs `val` (seed 7) et sur les 5 blocs de réglage : 10/10 réponses conformes à C5, mais 0 acceptée (contre 1/5 au run 2). Motifs complets, passages cités dans 3 réponses finales sur 10, une reprise par le drapeau d'ordre. Le contrôleur rejette des réponses sans erreur visible et manque des ordres affirmés (« a débuté par … suivi par »). Pas de réglage avant la soutenance. Détails : `eval/results/SCRUM-42/kaggle_val5_v3/README.md`.
+Usage IA : run lancé et analysé par Claude, à la demande d'Alain ; seules des lignes de blocs `val` ont été envoyées.
+
+## 2026-11-10 — SCRUM-36 : tirage des 240 blocs et brouillons des 4 lots
+`volet_b/slm/make_lots.py` : tirage stratifié (seed 36) de 240 blocs train/val, hors blocs déjà vus (seed SCRUM-29, mise au point v16) ; 4 lots de 60 (50 train + 10 val). `check_lots.py` applique les contrôles v16 (schéma, faits, références, ancrage des hypothèses, mots de chronologie, doublons) ; `fiche_lot.py` produit une fiche HTML de correction par annotateur.
+Usage IA : brouillons des 240 réponses rédigés par Codex (gpt-6.1-sol) à partir des prompts v16, contrôlés par `check_lots` (0 erreur) ; chaque lot doit être corrigé par un humain puis relu par un autre membre avant d'entrer dans le jeu LoRA.
+
+## 2026-11-16 — SCRUM-36 : correction du lot de Linda (60 exemples)
+Pré-relecture des 60 brouillons par l'IA (Codex gpt-6.1-sol, contrôlée par Claude) : 56 jugés justes, 4 à corriger (001, 002, 006, 008 : la question supposait la « disparition » d'une entrée BlockInfo, alors que le log dit seulement qu'elle est introuvable). Verdicts pré-remplis par l'IA dans la fiche, puis vérifiés et téléchargés par Linda (`corrections_linda.jsonl`). Résultat : 56 ok, 4 corrigés, 0 rejet ; contrôles `check_lots` : 0 erreur. Relecture croisée humaine à faire (Alain).
+Usage IA : pré-relecture et pré-remplissage des verdicts par l'IA, vérification par Linda — à mentionner dans le taux de correction du README.
+
+## 2026-11-24 — SCRUM-36 : relecture croisée du lot de Linda (Alain)
+Relecture des 60 exemples de Linda : 47 ok, 13 corrigés, 0 rejet (`relecture_linda.jsonl`, motifs dans `relecture_linda.md`). Les corrections précisent surtout des destinataires multiples présentés au singulier et retirent des présupposés des questions (008, 010, 012, 015, 018, 019, 026, 027, 030, 048, 052, 053, 056). `lot_linda.jsonl` reprend ces réponses, avec `annotator: linda` et `reviewed_by: alain` ; contrôles `check_lots` : 0 erreur.
+Usage IA : Codex, Claude.
+
+## 2026-11-25, SCRUM-36 : jeu d'adaptation LoRA final (Alain)
+Vérification ciblée des lots d'Alain, de Bachar et de Nassim contre les traces, sur les défauts relevés dans le lot de Linda : 9, 10 et 6 corrections de fond (destinataires différents présentés comme un seul client, présence ou retrait antérieur supposé, événement supposé côté émetteur). Lot d'Alain : 10 formulations négatives reprises pour que `prepare_examples` accepte le jeu. Lot de Nassim : accents restaurés dans les 60 réponses, où ils étaient remplacés par « ? ». `volet_b/slm/merge_lots.py` produit `train.jsonl` (200 exemples) et `val.jsonl` (40), triés par id, sans bloc test ni doublon ; `prepare_examples` accepte `split="val"` pour contrôler la validation. Taux de correction par lot dans `volet_b/annotations/README.md`. Relecture croisée faite pour le seul lot de Linda : `reviewed_by` vide pour les 180 autres exemples. 303 tests passent.
+
+## 2026-11-25 — SCRUM-66 : troisième mesure SCRUM-42 reportée dans les supports
+Rapport §3.2 et tableau des preuves, slide 7 de la présentation, questions 17 et 18 du jury : ajout du run du 24/11 après la PR #67 (0/10 accepté, 10/10 conformes C5, passages cités 3/10). PDF du rapport et de la présentation régénérés.
+Usage IA : Claude.
+
+## 2026-11-25 — SCRUM-67 : section « Cinq outils novateurs » recentrée
+Rapport §6 : Laya (essai argumenté, SCRUM-58), notebooks Kaggle T4, llama.cpp / GGUF, Jira et ses automatisations, PEFT / QLoRA, avec une fiche chacun dans `docs/rapport/outils/` (`laya.md` ajoutée, `kaggle.md` et `jira.md` réécrites). Passages de pilotage allégés (§2.3, §4, retours d'expérience), question 25 du jury retirée et question 26 renumérotée. Tableaux de `outils_novateurs.md` et annexe des sources mis à jour ; PDF du rapport régénéré (28 pages).
+
+## 2026-11-25 — SCRUM-48 : finalisation du rapport V1
+Page de garde définitive (version du 25/11), retour individuel d'Alain (`docs/rapport/retour_experience/alain.md`, §5.2), conclusion du §7 et section SCRUM-36 mise à jour avec le jeu final (200 train, 40 val, 104 exemples modifiés sur 240). PDF régénéré (29 pages). Reste : retour de Bachar, puis chiffres du test du volet B et effet du LoRA (SCRUM-45) à reporter au §3.3.6, au §4 et dans la conclusion.
+
 ## 25/11/2026 · SCRUM-35 : validation du jeu de test réservé du volet B (Alain)
 
 Relecture croisée des cas 0021 à 0040 vérifiés par Linda : 2 validations et 18 corrections reportées (portée des messages E21, information manquante sur les exceptions E4 de 0034 et 0040). Alain vérifie les cas 0061 à 0080, déjà relus par Bachar, et relit les cas 0041 à 0060 vérifiés par Bachar : une correction (0056, invalidation présentée comme effective). Mêmes règles (E5, E21, E2 et E4) appliquées à ses propres cas 0001 à 0020 : 10 corrections. Au total, 32 corrections journalisées dans `corrections_journal.csv` ; champs d'entrée inchangés, 0 erreur C5 hors relecteur.
