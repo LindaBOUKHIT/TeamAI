@@ -1,0 +1,33 @@
+id,block_id,corrige_par,date,motif
+test-0056,blk_-2705986310204860977,Bachar,2026-11-14,J'ai juste précisé l’unique occurrence d’E27 visible à la ligne 14 pour éviter que le pré-contrôle confonde le début de l’adresse IP avec un effectif.
+test-0065,blk_-8254791135193474574,Bachar,2026-11-14,Le niveau WARN est indiqué à la ligne 14 de la trace.
+test-0078,blk_-5216731224772621734,Bachar,2026-11-14,J’ai placé les totaux en début de ligne. Le pré-contrôle prenait les sous-totaux pour les effectifs complets.
+test-0001,blk_686986449611901412,Alain,2026-11-25,E5 atteste un début de réception ; la réception est confirmée par E9.
+test-0002,blk_1292583462119209881,Alain,2026-11-25,Préciser que les trois messages E21 sont des suppressions journalisées.
+test-0011,blk_6263807359485750335,Alain,2026-11-25,Préciser que les trois messages E21 sont des suppressions journalisées.
+test-0014,blk_7842450760472974441,Alain,2026-11-25,Préciser la portée des trois messages E21 dans le résumé et les faits observés.
+test-0015,blk_-3470499101952745743,Alain,2026-11-25,"Ordre E4 puis E3, vérification E2 réussie, portée des messages E21 et information manquante sur les exceptions E4."
+test-0016,blk_2034555571908900806,Alain,2026-11-25,Préciser la portée des trois messages E21 dans le résumé et les faits observés.
+test-0017,blk_-12138228845474377,Alain,2026-11-25,Préciser la portée des trois messages E21 dans le résumé et les faits observés.
+test-0018,blk_5954640055410099815,Alain,2026-11-25,Préciser la portée des trois messages E21 dans le résumé et les faits observés.
+test-0019,blk_-1280277122957483102,Alain,2026-11-25,Préciser la portée des trois messages E21 dans le résumé et les faits observés.
+test-0020,blk_-3469211513507921496,Alain,2026-11-25,Préciser la portée des trois messages E21 dans le résumé et les faits observés.
+test-0021,blk_5444836772391403403,Alain,2026-11-24,Préciser la portée des trois messages E21 dans le résumé et les faits observés.
+test-0022,blk_2284131606093448390,Alain,2026-11-24,Préciser la portée des trois messages E21 dans le résumé et les faits observés.
+test-0023,blk_-1651189670830362760,Alain,2026-11-24,Préciser la portée des trois messages E21 dans le résumé et les faits observés.
+test-0025,blk_546683699916768046,Alain,2026-11-24,Préciser la portée des trois messages E21 dans le résumé et les faits observés.
+test-0026,blk_-2320691444482384830,Alain,2026-11-24,Préciser la portée des trois messages E21 dans le résumé et les faits observés.
+test-0027,blk_-1597964280753970618,Alain,2026-11-24,Préciser la portée des trois messages E21 dans le résumé et les faits observés.
+test-0028,blk_-7022782725882588627,Alain,2026-11-24,Préciser la portée des trois messages E21 dans le résumé et les faits observés.
+test-0029,blk_1015583120777869036,Alain,2026-11-24,Préciser la portée des trois messages E21 dans le résumé et les faits observés.
+test-0030,blk_-3011708218918868670,Alain,2026-11-24,Préciser la portée des trois messages E21 dans le résumé et les faits observés.
+test-0031,blk_-5022333932770048663,Alain,2026-11-24,Préciser la portée des trois messages E21 dans le résumé et les faits observés.
+test-0032,blk_1430640213223799092,Alain,2026-11-24,Préciser la portée des trois messages E21 dans le résumé et les faits observés.
+test-0033,blk_-5197282817719548999,Alain,2026-11-24,Préciser la portée des trois messages E21 dans le résumé et les faits observés.
+test-0034,blk_7304855330352525404,Alain,2026-11-24,Préciser la portée des trois messages E21 dans le résumé et les faits observés. Préciser les informations manquantes sur les exceptions E4.
+test-0035,blk_-2873397174621066796,Alain,2026-11-24,Préciser la portée des trois messages E21 dans le résumé et les faits observés.
+test-0036,blk_5005786149836572537,Alain,2026-11-24,Préciser la portée des trois messages E21 dans le résumé et les faits observés.
+test-0037,blk_1953997662556956187,Alain,2026-11-24,Préciser la portée des trois messages E21 dans le résumé et les faits observés.
+test-0038,blk_-3126046394980374282,Alain,2026-11-24,Préciser la portée des trois messages E21 dans le résumé et les faits observés.
+test-0040,blk_-5116091373247376102,Alain,2026-11-24,Préciser la portée des trois messages E21 dans le résumé et les faits observés. Préciser les informations manquantes sur les exceptions E4.
+test-0056,blk_-2705986310204860977,Alain,2026-11-25,E23 inscrit le bloc dans les ensembles d'invalidation sans attester l'invalidation sur les DataNodes.
