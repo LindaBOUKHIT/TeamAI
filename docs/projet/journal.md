@@ -594,3 +594,18 @@ Usage IA : modifications écrites par Codex (gpt-6.1-sol), relues, corrigées (s
 ## 2026-11-24 — SCRUM-42 : mesure GPU des correctifs de la PR #67
 Run Kaggle (T4) sur 5 nouveaux blocs `val` (seed 7) et sur les 5 blocs de réglage : 10/10 réponses conformes à C5, mais 0 acceptée (contre 1/5 au run 2). Motifs complets, passages cités dans 3 réponses finales sur 10, une reprise par le drapeau d'ordre. Le contrôleur rejette des réponses sans erreur visible et manque des ordres affirmés (« a débuté par … suivi par »). Pas de réglage avant la soutenance. Détails : `eval/results/SCRUM-42/kaggle_val5_v3/README.md`.
 Usage IA : run lancé et analysé par Claude, à la demande d'Alain ; seules des lignes de blocs `val` ont été envoyées.
+
+## 2026-11-10 — SCRUM-36 : tirage des 240 blocs et brouillons des 4 lots
+`volet_b/slm/make_lots.py` : tirage stratifié (seed 36) de 240 blocs train/val, hors blocs déjà vus (seed SCRUM-29, mise au point v16) ; 4 lots de 60 (50 train + 10 val). `check_lots.py` applique les contrôles v16 (schéma, faits, références, ancrage des hypothèses, mots de chronologie, doublons) ; `fiche_lot.py` produit une fiche HTML de correction par annotateur.
+Usage IA : brouillons des 240 réponses rédigés par Codex (gpt-6.1-sol) à partir des prompts v16, contrôlés par `check_lots` (0 erreur) ; chaque lot doit être corrigé par un humain puis relu par un autre membre avant d'entrer dans le jeu LoRA.
+
+## 2026-11-16 — SCRUM-36 : correction du lot de Linda (60 exemples)
+Pré-relecture des 60 brouillons par l'IA (Codex gpt-6.1-sol, contrôlée par Claude) : 56 jugés justes, 4 à corriger (001, 002, 006, 008 : la question supposait la « disparition » d'une entrée BlockInfo, alors que le log dit seulement qu'elle est introuvable). Verdicts pré-remplis par l'IA dans la fiche, puis vérifiés et téléchargés par Linda (`corrections_linda.jsonl`). Résultat : 56 ok, 4 corrigés, 0 rejet ; contrôles `check_lots` : 0 erreur. Relecture croisée humaine à faire (Alain).
+Usage IA : pré-relecture et pré-remplissage des verdicts par l'IA, vérification par Linda — à mentionner dans le taux de correction du README.
+
+## 2026-11-24 — SCRUM-36 : relecture croisée du lot de Linda (Alain)
+Relecture des 60 exemples de Linda : 47 ok, 13 corrigés, 0 rejet (`relecture_linda.jsonl`, motifs dans `relecture_linda.md`). Les corrections précisent surtout des destinataires multiples présentés au singulier et retirent des présupposés des questions (008, 010, 012, 015, 018, 019, 026, 027, 030, 048, 052, 053, 056). `lot_linda.jsonl` reprend ces réponses, avec `annotator: linda` et `reviewed_by: alain` ; contrôles `check_lots` : 0 erreur.
+Usage IA : Codex, Claude.
+
+## 2026-11-25, SCRUM-36 : jeu d'adaptation LoRA final (Alain)
+Vérification ciblée des lots d'Alain, de Bachar et de Nassim contre les traces, sur les défauts relevés dans le lot de Linda : 9, 10 et 6 corrections de fond (destinataires différents présentés comme un seul client, présence ou retrait antérieur supposé, événement supposé côté émetteur). Lot d'Alain : 10 formulations négatives reprises pour que `prepare_examples` accepte le jeu. Lot de Nassim : accents restaurés dans les 60 réponses, où ils étaient remplacés par « ? ». `volet_b/slm/merge_lots.py` produit `train.jsonl` (200 exemples) et `val.jsonl` (40), triés par id, sans bloc test ni doublon ; `prepare_examples` accepte `split="val"` pour contrôler la validation. Taux de correction par lot dans `volet_b/annotations/README.md`. Relecture croisée faite pour le seul lot de Linda : `reviewed_by` vide pour les 180 autres exemples. 303 tests passent.
