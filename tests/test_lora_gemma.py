@@ -15,7 +15,7 @@ from teamai.contracts import load_jsonl, validate_example
 from teamai.paths import ROOT
 from volet_b.slm import convert_gguf, kaggle_lora_essai
 from volet_b.slm import kaggle_bundle
-from volet_b.slm.lora_data import encode_example, prepare_examples, validate_lora_config, read_splits
+from volet_b.slm.lora_data import encode_example, encode_examples, prepare_examples, validate_lora_config, read_splits
 from volet_b.slm.train_lora import CONFIG, prepare_qlora_text
 from volet_b.slm.v16.runtime import build_prompt, schema, validate
 
@@ -394,3 +394,17 @@ def test_conversion_explicit_base_requires_valid_manifest(conversion_case, tmp_p
         case.converter.assert_not_called()
         assert not case.output_dir.exists()
     case.snapshot.assert_not_called()
+
+
+def test_too_long_examples_excluded_whole_and_listed():
+    """En mode exclude, un exemple trop long est écarté entier et listé ; en mode error, il arrête l'entraînement."""
+    tokenizer = CharacterTokenizer()
+    short = {"id": "court", "prompt": "p", "expected": {"a": 1}}
+    long = {"id": "long", "prompt": "p" * 500, "expected": {"a": 1}}
+    kept, encoded, excluded = encode_examples([short, long], tokenizer, 200, too_long="exclude")
+    assert [e["id"] for e in kept] == ["court"] and len(encoded) == 1
+    assert excluded[0]["id"] == "long" and excluded[0]["tokens"] > 200
+    with pytest.raises(ValueError, match="max_tokens"):
+        encode_examples([short, long], tokenizer, 200)
+    with pytest.raises(ValueError, match="Aucun"):
+        encode_examples([long], tokenizer, 200, too_long="exclude")
