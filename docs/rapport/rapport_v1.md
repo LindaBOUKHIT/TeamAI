@@ -458,7 +458,7 @@ J’ai également analysé le seuil de décision (SCRUM-62), comparé les versio
 
 ##### Ce que j’ai appris techniquement
 
-- **Entraîner et intégrer un modèle.** J’ai entraîné un BiLSTM à partir de poids aléatoires sur HDFS_v1, puis exporté le modèle en ONNX pour l’exécuter avec ONNX Runtime Web. J’ai appris à vérifier la cohérence des scores entre Python et le navigateur.
+- **Entraîner et intégrer un modèle.** J’ai entraîné un BiLSTM depuis zéro sur HDFS_v1, puis exporté le modèle en ONNX pour l’exécuter avec ONNX Runtime Web. J’ai appris à vérifier la cohérence des scores entre Python et le navigateur.
 - **Choisir un seuil de décision.** Un bon macro-F1 peut masquer des anomalies manquées. En ajustant le seuil sur la validation, nous sommes passés de 21 anomalies manquées à une seule, avec une augmentation des fausses alertes de 23 à 59. J’ai mieux compris le compromis entre précision et rappel.
 - **Mesurer une optimisation.** Le candidat INT8 était environ 62 % plus léger. Les mesures de latence variaient selon le moteur et la taille des lots. Cela m’a appris à comparer plusieurs critères avant de choisir une version.
 - **Développer une interface utilisable.** J’ai appris à relier le modèle au parcours utilisateur, à gérer les erreurs et à afficher les résultats. L’essai à 390 px a révélé une colonne trop étroite qui coupait les codes d’événements. Les captures avant/après montrent la correction.
