@@ -9,7 +9,7 @@ Uniquement des traces issues de **train/val** HDFS. Le jeu de test réservé vit
 | `brouillons/lot_<prénom>.jsonl` | 4 lots corrigés de 60 exemples (50 train, 10 val), source de train/val | SCRUM-36 |
 | `train.jsonl` / `val.jsonl` | Jeu d'adaptation final : 200 exemples train, 40 val | SCRUM-36 |
 
-Pour chaque exemple : `annotator` et `reviewed_by` renseignés. Si un exemple est pré-généré par un modèle, l'indiquer dans le journal IA et noter le taux de correction humaine ici.
+À la clôture de la relecture, chaque exemple doit porter un `annotator` et un `reviewed_by` distincts. Si un exemple est pré-généré par un modèle, l'indiquer dans le journal IA et noter le taux de correction humaine ici.
 
 Exception provisoire SCRUM-29 (27/10/2026) : `seed_alain.jsonl` contient vingt
 brouillons v16 produits par règles, uniquement train. `reviewed_by` est vide :
@@ -27,6 +27,10 @@ relues. Voir [l'essai Gemma](../slm/README.md#essai-lora-scrum-29-gemma-4-e4b-qa
 du split test de `data/splits/splits.csv` ou `data/sample/splits.csv`.
 `prepare_examples` applique les contrôles v16 à chaque fichier : split train
 dans l'annotation et dans C4 pour `train.jsonl`, split val pour `val.jsonl`.
+
+### Bilan de la version utilisée pour SCRUM-39
+
+Les chiffres ci-dessous décrivent les données du [run SCRUM-39](../../eval/results/SCRUM-39/kaggle_final/README.md). Les fichiers [train](https://github.com/LindaBOUKHIT/TeamAI/blob/faabb47f454b1b47bfc138de840d83ce957cb187/volet_b/annotations/train.jsonl) et [val](https://github.com/LindaBOUKHIT/TeamAI/blob/faabb47f454b1b47bfc138de840d83ce957cb187/volet_b/annotations/val.jsonl) de cette expérience sont accessibles au commit `faabb47`.
 
 | Lot | Train / val | `annotator` | `reviewed_by` | Exemples modifiés | Taux de correction | Relecture croisée |
 |---|---|---|---|---|---|---|
@@ -62,4 +66,8 @@ Les lots alain, bachar et nassim n'ont pas eu de relecture croisée :
 `reviewed_by` reste vide pour ces 180 exemples. `prepare_examples` et
 `tests/test_fichiers_du_depot.py` tolèrent uniquement ce champ vide.
 
-La [relecture préparée pour le lot de Bachar](brouillons/relecture_bachar.md) contient les corrections proposées et six variantes C5 sur la réussite de l’écriture. Les décisions nominatives restent à renseigner après relecture.
+### Révision du lot de Bachar après SCRUM-39
+
+Les 19 corrections du lot de Bachar sont intégrées dans `train.jsonl` (17 réponses) et `val.jsonl` (2 réponses). Les 41 autres réponses du lot sont reconduites. La [fiche par bloc](brouillons/relecture_bachar.md) rassemble les formulations avant/après et leurs preuves. Le relecteur renseigne `reviewed_by` sur les blocs qu’il confirme.
+
+Les six [variantes C5](brouillons/abstentions_bachar_c5.jsonl) restent disponibles séparément pour la question portant sur l’issue de l’écriture.
