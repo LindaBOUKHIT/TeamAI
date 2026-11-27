@@ -61,3 +61,5 @@ Taux de correction humaine = exemples dont `expected` diffère du brouillon / 60
 Les lots alain, bachar et nassim n'ont pas eu de relecture croisée :
 `reviewed_by` reste vide pour ces 180 exemples. `prepare_examples` et
 `tests/test_fichiers_du_depot.py` tolèrent uniquement ce champ vide.
+
+La [relecture préparée pour le lot de Bachar](brouillons/relecture_bachar.md) contient les corrections proposées et six variantes C5 sur la réussite de l’écriture. Les décisions nominatives restent à renseigner après relecture.
