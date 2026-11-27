@@ -7,9 +7,11 @@
  eval/results/SCRUM-63/README.md, Validation unique : 40 blocs val inédits,
  40/40 contrats et copies, 39/40 contrôles ; 2 chronologies, 3 causalités, 3 pseudo-références,
  1 résumé inutilisable ; 30,62 → 30,6 s/bloc avec correction sur deux T4 ; sans LoRA ni RAG.
- eval/results/SCRUM-42/kaggle_val5/README.md et kaggle_val5_v2/README.md :
- chaque run sur les mêmes 5 blocs val : 1/5 accepté, 5/5 conformes ;
- aucun passage cité par la réponse acceptée ; causes des rejets avant/après correctif.
+ eval/results/volet_b.md, Évaluation automatique (SCRUM-45, test réservé, 80 cas, runs T4 du 25/11) :
+ 1 agent base/LoRA 98,8 % acceptées (79/80) ; ordres affirmés 35/80 → 1/80 ; latence 27,82 → 27,8 s
+ et 24,56 → 24,6 s ; 3 agents acceptées 11,2 % (9/80) → 31,2 % (25/80) ; appels 4,70/4,61 → environ 4,7 ;
+ latences 84,30 et 73,81 s → 74 à 84 s ; pic VRAM 4 314 à 4 330 Mio → 4,2 Gio (4 314 / 1 024 = 4,21 ; 4 330 / 1 024 = 4,23) ;
+ LoRA < 10 Mio ; 4 passages distincts sur 80 cas ; forme, pas justesse.
  eval/results/SCRUM-58/README.md, run 4 validation unique : Laya AUC 0,4700 → 0,47.
  eval/results/SCRUM-37/retrieval_val.json : hybride, description, k=3, 306 traces val,
  rappel 0,6644, templates trouvés 6/10 ; retrieval seul, pas qualité des explications.
@@ -129,35 +131,35 @@
 <section class="slide twoways">
 <p class="hand kicker">Résultats B · SCRUM-63 · validation</p>
 <h2>Bon format, fond encore fragile</h2>
-<div class="spread"><article class="page-card left"><h3>Contrôles automatiques</h3><ul><li><b>40/40</b> contrats et copies de faits conformes.</li><li><b>39/40</b> passent les contrôles factuels.</li><li><b>30,6 s/bloc</b>, correction incluse, deux T4.</li></ul></article><div class="spine"><span class="hand">40 blocs<br>val inédits</span></div><article class="page-card right"><h3>Relecture humaine</h3><ul><li><b>2/40</b> chronologies fausses.</li><li><b>3/40</b> causalités non démontrées.</li><li><b>3/40</b> pseudo-références ; <b>1/40</b> résumé inutilisable.</li></ul></article></div><p class="foot-line">Sans RAG ni LoRA. Les défauts se recoupent. Évaluation sur le test réservé en cours.</p>
+<div class="spread"><article class="page-card left"><h3>Contrôles automatiques</h3><ul><li><b>40/40</b> contrats et copies de faits conformes.</li><li><b>39/40</b> passent les contrôles factuels.</li><li><b>30,6 s/bloc</b>, correction incluse, deux T4.</li></ul></article><div class="spine"><span class="hand">40 blocs<br>val inédits</span></div><article class="page-card right"><h3>Relecture humaine</h3><ul><li><b>2/40</b> chronologies fausses.</li><li><b>3/40</b> causalités non démontrées.</li><li><b>3/40</b> pseudo-références ; <b>1/40</b> résumé inutilisable.</li></ul></article></div><p class="foot-line">Sans RAG ni LoRA, sur la validation. Les défauts se recoupent.</p>
 <footer><span>TeamAI · Présentation · 8 min</span><span class="folio">6</span></footer>
 </section>
 <!-- Repère oral : 50 s. -->
 <section class="slide twoways">
-<p class="hand kicker">Résultats B · SCRUM-42 · validation</p>
-<h2>Deux runs, un bloc accepté sur cinq</h2>
-<div class="spread"><article class="page-card left"><h3>Run v1 · avant correctif</h3><ul><li><b>1/5 accepté</b> ; <b>5/5 conformes</b> au contrôle code.</li><li>Le contrôleur ne voit pas le contrat.</li><li>Il reproche surtout des sources vides.</li></ul></article><div class="spine"><span class="hand">mêmes<br>5 blocs val</span></div><article class="page-card right"><h3>Run v2 · après correctif</h3><ul><li><b>1/5 accepté</b> ; <b>5/5 conformes</b> au contrôle code.</li><li>Le reproche sur les sources vides disparaît.</li><li>Ordres non prouvés, exigences hors contrat et motifs tronqués persistent.</li></ul></article></div><p class="foot-line">Aucun passage cité par la réponse acceptée dans chaque run. Essai de fonctionnement, pas mesure de qualité.</p>
+<p class="hand kicker">Résultats B · SCRUM-45 · test réservé</p>
+<h2>Le LoRA change la forme,<br>pas encore le fond</h2>
+<div class="spread"><article class="page-card left"><h3>1 agent · base → LoRA</h3><ul><li><b>79/80</b> réponses acceptées dans les deux cas.</li><li>Ordres affirmés entre événements : <b>35/80 → 1/80</b>.</li><li>Latence moyenne : <b>27,8 s → 24,6 s</b> par cas, T4.</li></ul></article><div class="spine"><span class="hand">80 cas<br>gelés</span></div><article class="page-card right"><h3>3 agents · base → LoRA</h3><ul><li>Acceptées par le contrôleur : <b>9/80 → 25/80</b>.</li><li>Environ <b>4,7 appels</b> et <b>74 à 84 s</b> en moyenne par cas.</li><li>Pic mémoire GPU : <b>4,2 Gio</b> ; LoRA &lt; 10 Mio de plus.</li></ul></article></div><p class="foot-line">Mesures de forme, pas de justesse. La justesse est notée à l’aveugle par deux annotateurs sur 30 cas × 4 configurations.</p>
 <footer><span>TeamAI · Présentation · 8 min</span><span class="folio">7</span></footer>
 </section>
 <!-- Repère oral : 35 s. -->
 <section class="slide twoways">
 <p class="hand kicker">Résultats B · retrieval et piste écartée</p>
 <h2>Documenter aussi les limites</h2>
-<div class="spread"><article class="page-card left"><h3>RAG · SCRUM-37</h3><ul><li>Hybride, requêtes par description, <b>k = 3</b>.</li><li><b>306 traces val</b> ; rappel <b>0,6644</b>.</li><li>Templates trouvés : <b>6/10</b>.</li></ul></article><div class="spine"><span class="hand">preuves<br>séparées</span></div><article class="page-card right"><h3>Laya · SCRUM-58</h3><ul><li>Validation unique : <b>AUC 0,47</b>.</li><li>Ne sépare pas Fail et Success dans cet essai.</li><li>Porte non intégrée : aucun bénéfice observé.</li></ul></article></div><p class="foot-line">Le rappel documentaire ne mesure pas la justesse des explications. Pas de gain RAG établi par les runs SCRUM-42.</p>
+<div class="spread"><article class="page-card left"><h3>RAG · SCRUM-37</h3><ul><li>Hybride, requêtes par description, <b>k = 3</b>.</li><li><b>306 traces val</b> ; rappel <b>0,6644</b>.</li><li>Templates trouvés : <b>6/10</b>.</li></ul></article><div class="spine"><span class="hand">preuves<br>séparées</span></div><article class="page-card right"><h3>Laya · SCRUM-58</h3><ul><li>Validation unique : <b>AUC 0,47</b>.</li><li>Ne sépare pas Fail et Success dans cet essai.</li><li>Porte non intégrée : aucun bénéfice observé.</li></ul></article></div><p class="foot-line">Le rappel documentaire ne mesure pas la justesse des explications. Sur le test, la recherche ne renvoie que 4 passages distincts sur 80 cas.</p>
 <footer><span>TeamAI · Présentation · 8 min</span><span class="folio">8</span></footer>
 </section>
 <!-- Repère oral : 40 s. -->
 <section class="slide twoways">
 <p class="hand kicker">Comparaison par axes</p>
 <h2>Deux tâches, des compromis différents</h2>
-<div class="spread"><article class="page-card left"><h3>A · Détecter</h3><ul><li><b>Qualité :</b> métriques sur le test.</li><li><b>Latence :</b> débit élevé dans Chrome.</li><li><b>Contrôle :</b> poids entraînés par l’équipe.</li><li><b>Explicabilité :</b> classe et score.</li><li><b>Dépendances :</b> ONNX Runtime Web.</li></ul></article><div class="spine"><span class="hand"></span></div><article class="page-card right"><h3>B · Expliquer</h3><ul><li><b>Qualité :</b> validation, revue humaine nécessaire.</li><li><b>Latence :</b> génération coûteuse sur T4.</li><li><b>Contrôle :</b> poids empruntés, prompt encadré.</li><li><b>Explicabilité :</b> faits et hypothèses à vérifier.</li><li><b>Dépendances :</b> Gemma, llama.cpp, BGE.</li></ul></article></div><p class="foot-line">Coût financier, temps humain et pics mémoire comparables : à mesurer. Machines et tâches différentes.</p>
+<div class="spread"><article class="page-card left"><h3>A · Détecter</h3><ul><li><b>Qualité :</b> métriques sur le test.</li><li><b>Latence :</b> débit élevé dans Chrome.</li><li><b>Contrôle :</b> poids entraînés par l’équipe.</li><li><b>Explicabilité :</b> classe et score.</li><li><b>Dépendances :</b> ONNX Runtime Web.</li></ul></article><div class="spine"><span class="hand"></span></div><article class="page-card right"><h3>B · Expliquer</h3><ul><li><b>Qualité :</b> forme mesurée sur le test, justesse notée par des humains.</li><li><b>Latence :</b> 25 à 84 s par cas sur T4.</li><li><b>Contrôle :</b> poids empruntés, prompt encadré.</li><li><b>Explicabilité :</b> faits et hypothèses à vérifier.</li><li><b>Dépendances :</b> Gemma, llama.cpp, BGE.</li></ul></article></div><p class="foot-line">Coût financier et temps humain : à mesurer. Machines et tâches différentes.</p>
 <footer><span>TeamAI · Présentation · 8 min</span><span class="folio">9</span></footer>
 </section>
 <!-- Repère oral : 40 s. -->
 <section class="slide next">
 <p class="hand kicker">Défauts et feuille de route</p>
 <h2>Consolider avant de promettre un gain</h2>
-<div class="spread"><article class="page-card left"><h3>Défauts observés</h3><ul><li>A : fausses alertes et anomalies manquées.</li><li>B : chronologie et causalité fragiles.</li><li>Contrôleur parfois hors contrat.</li><li>Apport documentaire encore peu visible.</li></ul></article><div class="spine"><span class="hand"></span></div><article class="page-card right"><h3>Priorités proposées</h3><ul><li>Aligner rédaction, contrôle et contrat sur val.</li><li>Mieux afficher l’incertitude et les preuves.</li><li>Mesurer le coût complet sur la cible locale.</li><li>Comparer les variantes après gel du protocole.</li></ul></article></div><p class="foot-line">Évaluation sur le test réservé en cours. Aucun réglage sur le test ; gain LoRA non démontré.</p>
+<div class="spread"><article class="page-card left"><h3>Défauts observés</h3><ul><li>A : fausses alertes et anomalies manquées.</li><li>B : chronologie et causalité fragiles.</li><li>Contrôleur parfois hors contrat.</li><li>Apport documentaire encore peu visible.</li></ul></article><div class="spine"><span class="hand"></span></div><article class="page-card right"><h3>Priorités proposées</h3><ul><li>Aligner rédaction, contrôle et contrat sur val.</li><li>Mieux afficher l’incertitude et les preuves.</li><li>Mesurer le coût complet sur la cible locale.</li><li>Élargir la recherche documentaire.</li></ul></article></div><p class="foot-line">Aucun réglage sur le test. Gain LoRA mesuré sur la forme, pas encore sur la justesse.</p>
 <footer><span>TeamAI · Présentation · 8 min</span><span class="folio">10</span></footer>
 </section>
 <!-- Repère oral : 35 s. -->
@@ -171,7 +173,7 @@
 <section class="slide next">
 <p class="hand kicker">Conclusion</p>
 <h2>Détecter est livré.<br>Expliquer exige des preuves.</h2>
-<div class="spread"><article class="page-card left"><h3>Ce que nous livrons</h3><ul><li>Un site public de détection dans le navigateur.</li><li>Une chaîne locale pour lire les faits et proposer une explication.</li></ul></article><div class="spine"><span class="hand">merci !</span></div><article class="page-card right"><h3>Ce que nous retenons</h3><ul><li>Un format valide ne garantit pas une réponse juste.</li><li>Une hypothèse doit rester reliée à ses preuves.</li><li>Évaluation sur le test réservé en cours.</li></ul></article></div>
+<div class="spread"><article class="page-card left"><h3>Ce que nous livrons</h3><ul><li>Un site public de détection dans le navigateur.</li><li>Une chaîne locale pour lire les faits et proposer une explication.</li></ul></article><div class="spine"><span class="hand">merci !</span></div><article class="page-card right"><h3>Ce que nous retenons</h3><ul><li>Un format valide ne garantit pas une réponse juste.</li><li>Une hypothèse doit rester reliée à ses preuves.</li><li>Sur le test, le LoRA n’affirme presque plus d’ordre entre événements.</li></ul></article></div>
 <footer><span>TeamAI · Présentation · 8 min</span><span class="folio">12</span></footer>
 </section>
 <script src="deck.js"></script>

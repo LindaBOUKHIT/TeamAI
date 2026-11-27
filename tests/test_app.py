@@ -114,6 +114,23 @@ def test_build_interface():
     assert app.build_app(mock=True) is not None
 
 
+def test_chatbot_options_follow_installed_gradio():
+    """Gradio 6 refuse `type` et `show_copy_button` : les options suivent la signature reçue."""
+    class Gradio5:
+        """Signature de Chatbot en Gradio 5."""
+        def __init__(self, type=None, show_copy_button=False, **kwargs):
+            """Accepte les anciens arguments."""
+
+    class Gradio6:
+        """Signature de Chatbot en Gradio 6."""
+        def __init__(self, buttons=None, **kwargs):
+            """Accepte les nouveaux arguments."""
+
+    old, new = app.chatbot_options(Gradio5), app.chatbot_options(Gradio6)
+    assert old["type"] == "messages" and old["show_copy_button"] is True and "buttons" not in old
+    assert new["buttons"] == ["copy"] and "type" not in new and "show_copy_button" not in new
+
+
 def test_unknown_block_refused_without_official_splits(monkeypatch):
     """Sans data/splits/splits.csv, un bloc absent de l'échantillon est refusé avant tout chargement."""
     monkeypatch.setattr(app, "official_splits_available", lambda: False)

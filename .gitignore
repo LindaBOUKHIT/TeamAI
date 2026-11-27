@@ -43,3 +43,7 @@ Thumbs.db
 
 # Site compilé — généré par Vite
 volet_a/web/dist/
+# Page locale de relecture SCRUM-35 (contient des données de test)
+eval/volet_b/relecture_locale.html
+# Adaptateur LoRA retenu par SCRUM-39 (4,5 Mo) : seul GGUF versionné
+!eval/results/SCRUM-39/kaggle_final/adapter_r8_qv.gguf
