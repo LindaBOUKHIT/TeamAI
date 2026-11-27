@@ -35,6 +35,7 @@ ANNOTATIONS = VOLET_B / "annotations"
 
 DOCS = ROOT / "docs"
 RAPPORT = DOCS / "rapport"
+RAPPORT_FINAL = RAPPORT / "final"
 
 EVAL = ROOT / "eval"
 EVAL_VOLET_B = EVAL / "volet_b"
