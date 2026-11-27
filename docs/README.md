@@ -4,20 +4,23 @@
 docs/
 ├── contrats.md                 Formats d'échange entre les tâches (C1…C7)          SCRUM-55
 ├── sujet/                      Énoncé du projet (PDF)
-├── projet/
+├── projet/                     Pilotage du projet
+│   ├── architecture_cible.svg  Architecture visée à la livraison (+ .png)
 │   ├── feuille_de_route.md     Jalons, sprints, chemin critique, risques
 │   ├── journal.md              Décisions, abandons, usages IA, réunions (miroir du classeur)   SCRUM-14
 │   ├── environnements.md       Environnement de chacun + machine cible du SLM      SCRUM-15
 │   ├── jalons.md               Preuves de jalons (tags, URL, captures)              SCRUM-17
 │   ├── cadrage/                Rendu J2, cadrage, tâches initiales
-│   └── archives/               Ancienne proposition (support client, abandonnée)
+│   └── archives/               Ancienne proposition abandonnée, passation volet B terminée
 ├── data/
 │   ├── audit_hdfs_scrum18.md           Audit du corpus                                      SCRUM-18
 │   └── format_entree.md        Formats acceptés par le site                         SCRUM-21
 ├── volet_a/
 │   ├── optimisation.md         Quantification, taille, latence (tableau comparatif)  SCRUM-40
 │   ├── retours_ux.md           Retours utilisateurs, captures avant/après           SCRUM-41
-│   └── recette_v1.md           Checklist de recette avant gel du site               SCRUM-50
+│   ├── recette_v1.md           Checklist de recette avant gel du site               SCRUM-50
+│   ├── verification_site.md    Vérification du site en production                  SCRUM-50
+│   └── verification_site/      Scripts, résultats bruts et captures de la recette   SCRUM-50
 ├── volet_b/
 │   ├── corpus_rag.md           Périmètre et découpage du corpus documentaire        SCRUM-30
 │   ├── grille_annotation.md    Grille commune d'annotation et d'évaluation          SCRUM-31
