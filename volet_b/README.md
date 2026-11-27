@@ -36,7 +36,7 @@ volet_b/
 │   └── assets/                 Logo et avatars SVG
 └── annotations/                                                 tous
     ├── seed_alain.jsonl        ~20 exemples provisoires pour l'essai LoRA        SCRUM-29
-    ├── train.jsonl, val.jsonl  Jeu d'adaptation relu (C5)                        SCRUM-36
+    ├── train.jsonl, val.jsonl  Jeu d'adaptation (C5), relecture en cours         SCRUM-36
     └── README.md               Qui annote quoi, taux de correction humaine
 ```
 
