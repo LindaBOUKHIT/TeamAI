@@ -1,0 +1,133 @@
+{
+  "configurations": {
+    "base_1agent": {
+      "n": 30,
+      "moyennes": {
+        "F": {
+          "annotateur_1": 1.6333333333333333,
+          "annotateur_2": 1.6333333333333333,
+          "ensemble": 1.6333333333333333
+        },
+        "S": {
+          "annotateur_1": 2,
+          "annotateur_2": 2,
+          "ensemble": 2
+        },
+        "A": {
+          "annotateur_1": 1.8666666666666667,
+          "annotateur_2": 1.8666666666666667,
+          "ensemble": 1.8666666666666667
+        },
+        "U": {
+          "annotateur_1": 1.5333333333333334,
+          "annotateur_2": 1.5333333333333334,
+          "ensemble": 1.5333333333333334
+        }
+      },
+      "total_sur_8": 7.033333333333333
+    },
+    "base_3agents": {
+      "n": 30,
+      "moyennes": {
+        "F": {
+          "annotateur_1": 1.4,
+          "annotateur_2": 1.4,
+          "ensemble": 1.4
+        },
+        "S": {
+          "annotateur_1": 1.8666666666666667,
+          "annotateur_2": 1.8666666666666667,
+          "ensemble": 1.8666666666666667
+        },
+        "A": {
+          "annotateur_1": 1.7666666666666666,
+          "annotateur_2": 1.7666666666666666,
+          "ensemble": 1.7666666666666666
+        },
+        "U": {
+          "annotateur_1": 1.5,
+          "annotateur_2": 1.4666666666666666,
+          "ensemble": 1.4833333333333334
+        }
+      },
+      "total_sur_8": 6.516666666666667
+    },
+    "lora_1agent": {
+      "n": 30,
+      "moyennes": {
+        "F": {
+          "annotateur_1": 1.9333333333333333,
+          "annotateur_2": 1.9333333333333333,
+          "ensemble": 1.9333333333333333
+        },
+        "S": {
+          "annotateur_1": 2,
+          "annotateur_2": 2,
+          "ensemble": 2
+        },
+        "A": {
+          "annotateur_1": 1.9666666666666666,
+          "annotateur_2": 1.9666666666666666,
+          "ensemble": 1.9666666666666666
+        },
+        "U": {
+          "annotateur_1": 1.9666666666666666,
+          "annotateur_2": 1.9666666666666666,
+          "ensemble": 1.9666666666666666
+        }
+      },
+      "total_sur_8": 7.866666666666666
+    },
+    "lora_3agents": {
+      "n": 30,
+      "moyennes": {
+        "F": {
+          "annotateur_1": 1.7333333333333334,
+          "annotateur_2": 1.7333333333333334,
+          "ensemble": 1.7333333333333334
+        },
+        "S": {
+          "annotateur_1": 1.8333333333333333,
+          "annotateur_2": 1.8333333333333333,
+          "ensemble": 1.8333333333333333
+        },
+        "A": {
+          "annotateur_1": 1.8333333333333333,
+          "annotateur_2": 1.8333333333333333,
+          "ensemble": 1.8333333333333333
+        },
+        "U": {
+          "annotateur_1": 1.8,
+          "annotateur_2": 1.7666666666666666,
+          "ensemble": 1.7833333333333334
+        }
+      },
+      "total_sur_8": 7.183333333333334
+    }
+  },
+  "accord": {
+    "F": {
+      "n": 120,
+      "kappa_quadratique": 1.0,
+      "accord_exact": 1.0
+    },
+    "S": {
+      "n": 120,
+      "kappa_quadratique": 1.0,
+      "accord_exact": 1.0
+    },
+    "A": {
+      "n": 120,
+      "kappa_quadratique": 1.0,
+      "accord_exact": 1.0
+    },
+    "U": {
+      "n": 120,
+      "kappa_quadratique": 0.9609375,
+      "accord_exact": 0.9833333333333333
+    }
+  },
+  "desaccords": 2,
+  "criteres": "F exactitude des faits, S appui sur les sources, A abstention justifiée, U utilité",
+  "protocole": "Notes 0 à 2 ; moyennes sur les cas de chaque configuration ; kappa et accord exact sur toutes les réponses notées, par critère ; avant arbitrage."
+}

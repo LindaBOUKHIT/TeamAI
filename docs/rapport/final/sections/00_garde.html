@@ -1,0 +1,45 @@
+<section class="cover">
+  <div class="logos">
+    <img src="logo_fges.png" alt="Faculté de Gestion, Économie et Sciences — Université Catholique de Lille">
+    <span class="logo-sep"></span>
+    <img src="logo_edn.png" alt="EDN — École du Numérique">
+  </div>
+  <p class="kicker">Rapport de projet · NLP 2 · Master 2 Data &amp; IA</p>
+  <h1 data-toc="no">Détecter et expliquer<br>les anomalies des<br>journaux <span class="hl">HDFS</span></h1>
+  <p class="lead">Un classifieur entraîné par l’équipe et servi dans le navigateur, face à un petit modèle de langage emprunté, adapté et exécuté en local.</p>
+  <div class="printout">
+    <span class="tape"></span>
+    <p class="printout-title">HDFS.log — un bloc, quatre lignes</p>
+    <ol class="log">
+      <li><span class="ln">1</span><span>081110 010451 33 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/randtxt/_temporary/…/part-00269. blk_-1013481023655112960</span></li>
+      <li><span class="ln">2</span><span>081110 010451 5105 INFO dfs.DataNode$DataXceiver: Receiving block blk_-1013481023655112960 src: /10.251.74.134:45275 dest: /10.251.74.134:50010</span></li>
+      <li><span class="ln">3</span><span>081110 010451 5109 INFO dfs.DataNode$DataXceiver: Receiving block blk_-1013481023655112960 src: /10.251.74.134:48604 dest: /10.251.74.134:50010</span></li>
+      <li class="err"><span class="ln">4</span><span>081110 010454 5105 INFO dfs.DataNode$DataXceiver: writeBlock blk_-1013481023655112960 <mark>received exception java.io.IOException: Could not read from stream</mark></span></li>
+    </ol>
+    <p class="note-err">là, ça casse.<br>mais pourquoi&nbsp;?</p>
+  </div>
+  <div class="byline">
+    <div>
+      <span class="team-mark">TeamAI</span>
+      <span class="names">Alain Evina · Nassim Mezzai · Bachar Ben Slama · Linda Boukhit</span>
+      <span class="meta">Enseignant&nbsp;: <b>Adrian Rosari</b><br>Faculté de Gestion, Économie et Sciences · Université Catholique de Lille · EDN</span>
+    </div>
+    <div class="doc-type"><b>Rapport final</b>Année 2026-2027<br>27 novembre 2026</div>
+  </div>
+</section>
+
+<section class="front abstract">
+  <p class="chapter-kicker">en bref</p>
+  <h1 data-toc="no">Résumé</h1>
+  <p>Les journaux d’un système distribué enregistrent son fonctionnement ligne à ligne, mais ils sont trop volumineux pour être lus en entier. Ce projet étudie deux manières d’aider un opérateur face aux journaux du système de fichiers Hadoop (HDFS), à partir du jeu public HDFS_v1, qui compte 575&nbsp;061 blocs étiquetés normaux ou anormaux.</p>
+  <p>Le premier volet est un <b>classifieur de séquences</b> entièrement maîtrisé par l’équipe&nbsp;: un réseau récurrent bidirectionnel (BiLSTM) de 57&nbsp;ko, entraîné sur les séquences d’événements, exporté au format ONNX et exécuté dans le navigateur d’un site public, sans serveur. Sur les 86&nbsp;260 blocs du test réservé, il atteint une macro-F1 de 0,9938, avec 58 fausses alertes et 3 anomalies manquées, et divise par deux les fausses alertes d’une régression logistique de référence.</p>
+  <p>Le second volet est une <b>application locale d’explication</b> fondée sur un petit modèle de langage emprunté, Gemma&nbsp;4 E4B quantifié, encadré par des faits calculés par le code, un schéma de réponse fermé et des contrôles automatiques. Nous l’avons adapté par LoRA sur 200 exemples rédigés et relus par l’équipe, puis comparé avec et sans adaptation, en mode un agent et en mode trois agents (recherche documentaire, rédaction, contrôle). Sur un test réservé noté à l’aveugle par deux annotateurs, la configuration adaptée à un agent obtient la meilleure note, 7,87 sur 8 contre 7,03 pour le modèle de base, et l’adaptation fait presque disparaître les chronologies affirmées sans preuve (de 35 à 1 sur 80 réponses).</p>
+  <p>L’analyse comparative montre deux outils complémentaires&nbsp;: le premier trie des milliers de blocs par seconde sans rien expliquer, le second explique un bloc en une vingtaine de secondes sur GPU, sans pouvoir établir la cause d’une panne que les données ne contiennent pas. Le rapport présente aussi notre retour d’expérience sur la conduite du projet et cinq outils que nous avons découverts en l’utilisant.</p>
+  <p class="keywords"><b>Mots-clés&nbsp;:</b> détection d’anomalies, journaux système, HDFS, BiLSTM, ONNX Runtime Web, petit modèle de langage, LoRA, QLoRA, génération augmentée par la recherche, systèmes multi-agents, évaluation humaine à l’aveugle.</p>
+</section>
+
+<section class="front">
+  <p class="chapter-kicker">plan</p>
+  <h1 data-toc="no">Sommaire</h1>
+  <!--TOC-->
+</section>

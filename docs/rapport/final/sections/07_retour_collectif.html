@@ -1,0 +1,58 @@
+<section class="chapter">
+  <p class="chapter-kicker">chapitre 7</p>
+  <h1><span class="n">7</span>Retour d’expérience collectif</h1>
+  <p>Ce chapitre porte sur la conduite du projet, non sur le produit livré. Nous nous en tenons à ce que les traces du projet permettent d’établir&nbsp;: tickets, historique du dépôt, journal des décisions et revues de code.</p>
+
+  <h2><span class="n">7.1</span>Méthodologie</h2>
+  <h3>Organisation et répartition</h3>
+  <p>L’équipe compte quatre membres. Les responsabilités ont été réparties au cadrage selon les volets, chaque domaine ayant un responsable et un relecteur désigné (tableau&nbsp;10). Linda Boukhit a assuré le pilotage&nbsp;: tenue du board, échéances et relances.</p>
+  <figure class="table">
+    <figcaption><b>Tableau 10.</b> Répartition des responsabilités telle qu’elle s’est effectivement exercée.</figcaption>
+    <table>
+      <thead><tr><th style="width:20%">Membre</th><th>Responsabilités principales</th></tr></thead>
+      <tbody>
+        <tr><td><b>Linda Boukhit</b></td><td>Pilotage du projet&nbsp;; corpus documentaire, recherche documentaire, organisation en trois agents et interface locale du volet&nbsp;B&nbsp;; prétraitement JavaScript du site.</td></tr>
+        <tr><td><b>Alain Evina</b></td><td>Socle commun du dépôt (structure, contrats de format, tests et intégration continue)&nbsp;; modèle de langage, consigne, adaptation LoRA et banc d’évaluation du volet&nbsp;B&nbsp;; rapport.</td></tr>
+        <tr><td><b>Bachar Ben Slama</b></td><td>Volet&nbsp;A&nbsp;: entraînement et export du BiLSTM, choix du seuil, site web et inférence dans le navigateur.</td></tr>
+        <tr><td><b>Nassim Mezzai</b></td><td>Audit et préparation du corpus, partitions, régression logistique de référence, évaluation finale du volet&nbsp;A&nbsp;; essais d’adaptation et mesures sur le poste cible du volet&nbsp;B.</td></tr>
+      </tbody>
+    </table>
+  </figure>
+  <h3>Décisions et réunions</h3>
+  <p>Les décisions importantes ont été consignées, avec leur justification, dans un journal des décisions tenu dans le dépôt&nbsp;: choix du jeu HDFS, stratégie de branches, abandon de SmolLM2 au profit de Gemma&nbsp;4, entraînement déporté sur Kaggle, règles du test réservé. Les échanges courants se sont faits par messagerie instantanée et dans les revues de code. Nous n’avons pas tenu de réunions planifiées avec un compte rendu écrit&nbsp;: le journal des décisions en a tenu lieu. C’est un point que nous changerions (section&nbsp;7.4).</p>
+  <h3>Supports de documentation</h3>
+  <p>Trois supports se sont révélés utiles. Les <b>contrats de format</b>, qui décrivent sept formats d’échange entre les modules (journaux, séquences, modèle exporté, partitions, exemples annotés, passages documentaires, résultats d’expérience), ont permis à chacun d’avancer sans attendre le code des autres. Le <b>journal des décisions</b> a évité de rediscuter des choix déjà faits. Les <b>fiches de résultats</b>, rangées avec les données brutes de chaque expérience, ont rendu chaque chiffre de ce rapport vérifiable. Le classeur de suivi partagé a surtout servi aux jalons.</p>
+
+  <h2><span class="n">7.2</span>Outillage</h2>
+  <h3>Dépôt Git</h3>
+  <p>Le dépôt suit une stratégie à deux branches&nbsp;: <b>main</b> ne contient que des versions publiées, puisque le site se déploie depuis elle, et <b>dev</b> sert à l’intégration. Chaque tâche est développée sur une branche nommée d’après son ticket, puis proposée par une demande de fusion vers dev. Une fusion exige l’approbation d’un autre membre, l’auteur ne pouvant pas approuver son propre travail, et la réussite des tests automatiques, soit environ 380 tests Python et les tests du site. Au total, 87 demandes de fusion ont été intégrées. Les messages de commit commencent par la clé du ticket, ce qui relie chaque modification à sa tâche.</p>
+  <h3>Board de tickets</h3>
+  <p>Le board Jira a été construit le 6 octobre, avant l’essentiel du travail&nbsp;: 7 épopées, 5 sprints alignés sur les jalons, et des tickets dotés d’un responsable, d’un relecteur, d’un critère de fin et de leurs dépendances. Il a servi au pilotage réel, et non à un renseignement après coup. Des automatisations font avancer un ticket à l’ouverture puis à la fusion de sa demande de fusion. Deux défauts sont apparus&nbsp;: la première version des automatisations fermait aussi des tickets seulement cités dans une demande de fusion, et une fusion ne prouve pas qu’un critère de fin est atteint (un ticket de mesures a été fermé à la fusion de son script alors que les mesures restaient à faire, puis rouvert). Les sprints, enfin, n’ont pas toujours été tenus à jour.</p>
+  <h3>Relecture par un tiers</h3>
+  <p>Toute modification a été relue par un autre membre avant intégration&nbsp;; la pilote a relu à elle seule une trentaine de demandes de fusion. Les annotations du volet&nbsp;B ont fait l’objet d’une relecture croisée, et la notation à l’aveugle d’une double annotation suivie d’une confrontation.</p>
+
+  <h2><span class="n">7.3</span>Difficultés</h2>
+  <ul>
+    <li><b>Un jalon manqué.</b> Au jalon de mi-parcours du 1<sup>er</sup> octobre, rien n’était livrable. Le 6 octobre, nous avons construit le board et planifié un sprint de rattrapage, qui a produit les données préparées, un premier site, un premier modèle entraîné et une première inférence locale. Les points de ce jalon sont perdus.</li>
+    <li><b>Le matériel.</b> Un seul membre dispose d’un GPU NVIDIA, de 6&nbsp;Go, insuffisant pour entraîner le modèle. Sur un portable sans GPU, la première inférence produisait moins d’un token par seconde. La solution, un entraînement sur Kaggle et une inférence sur le poste équipé, a ajouté une étape de transfert et de vérification.</li>
+    <li><b>Un changement de modèle en cours de route.</b> L’abandon de SmolLM2 pour Gemma&nbsp;4, décidé le 27 octobre, a décalé toutes les tâches qui en dépendaient. L’organisation en agents et l’interface, prévues pour les 9 et 13 novembre, ont été intégrées le 24 novembre.</li>
+    <li><b>L’adaptation.</b> Quatre semaines ont séparé le premier essai LoRA sur processeur (14 octobre) du premier entraînement abouti sur GPU (8 novembre), à cause de dépassements mémoire, de gradients non finis et d’incompatibilités entre bibliothèques.</li>
+    <li><b>L’annotation.</b> Rédiger des réponses de référence a été beaucoup plus long que prévu&nbsp;: 43&nbsp;% des brouillons ont dû être corrigés, et deux annotateurs indépendants ne s’accordaient au départ que faiblement sur les notes.</li>
+    <li><b>Désaccords.</b> Les désaccords, techniques pour l’essentiel, ont été tranchés en revenant aux données&nbsp;: lignes brutes pour les annotations, mesures sur la validation pour les choix de conception. Aucun n’est resté bloquant.</li>
+  </ul>
+  <h3>Charge estimée et charge réelle</h3>
+  <p>Nous n’avons pas relevé les heures passées&nbsp;: l’écart ne peut donc s’apprécier qu’en dates. Il est important sur le volet&nbsp;B, où l’entraînement final et les mesures sur le test n’ont eu lieu que le 25 novembre. Nous voyons trois causes de sous-estimation&nbsp;: des dépendances en chaîne (le modèle conditionne la consigne, qui conditionne les exemples, qui conditionnent l’adaptation), le coût d’appropriation d’outils nouveaux, et le temps de production de données de qualité, que nous avions compté comme une tâche annexe.</p>
+
+  <h2><span class="n">7.4</span>Enseignements</h2>
+  <ul>
+    <li><b>Figer tôt ce qui conditionne la suite</b>&nbsp;: le modèle, le jeu de test réservé et la grille d’évaluation, pour que l’adaptation et les mesures avant et après ne se jouent pas dans les dernières semaines.</li>
+    <li><b>Planifier l’annotation comme une tâche à part entière</b>, avec une calibration commune des annotateurs avant la notation, ce qui aurait relevé l’accord initial.</li>
+    <li><b>Tenir des points d’équipe courts mais réguliers, avec un compte rendu</b>, et relever le temps passé pour pouvoir comparer estimation et réalité.</li>
+    <li><b>Vérifier un critère de fin avant de fermer un ticket</b>, même quand une automatisation le propose.</li>
+  </ul>
+  <p>Plusieurs acquis sont directement transposables en entreprise&nbsp;: un ticket, une branche, une relecture&nbsp;; des contrats de format entre les modules&nbsp;; la séparation stricte entre réglage et évaluation&nbsp;; et l’habitude de documenter un résultat négatif comme un résultat.</p>
+
+  <h2><span class="n">7.5</span>Axes de progression</h2>
+  <p><b>Techniques.</b> L’évaluation des modèles de langage reste notre principale lacune&nbsp;: juger qu’une explication est juste demande une relecture humaine coûteuse, et nous voulons maîtriser des méthodes plus solides (grilles calibrées, échantillons plus larges, tests de significativité). Les différences numériques entre moteurs d’inférence et le transfert d’un adaptateur entre formats de quantification méritent aussi d’être approfondis.</p>
+  <p><b>Collectifs.</b> Nous devons relancer plus tôt quand une tâche bloque les autres, réajuster le planning au lieu de laisser les échéances dépasser, et oser dire plus tôt qu’on ne comprend pas le travail d’un autre volet. La délégation a bien fonctionné lorsqu’elle s’accompagnait d’une vérification&nbsp;; elle a moins bien fonctionné lorsqu’une tâche dépendait d’un choix encore ouvert.</p>
+</section>

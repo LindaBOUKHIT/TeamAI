@@ -1,0 +1,78 @@
+<section class="chapter">
+  <p class="chapter-kicker">chapitre 3</p>
+  <h1><span class="n">3</span>Volet A&nbsp;: un détecteur dans le navigateur</h1>
+
+  <h2><span class="n">3.1</span>Chaîne de traitement</h2>
+  <p>Le volet&nbsp;A suit une chaîne courte, entièrement maîtrisée par l’équipe (figure&nbsp;2). Les lignes de journaux sont regroupées par bloc, chaque ligne est convertie en code d’événement, puis le modèle lit la séquence et renvoie un score d’anomalie entre 0 et 1.</p>
+  <figure>
+    <div class="flow">
+      <span class="node">Journaux HDFS<small>collés ou importés</small></span><span class="link">→</span>
+      <span class="node">Regroupement<small>par bloc</small></span><span class="link">→</span>
+      <span class="node">Codes E1–E29<small>50 premiers événements</small></span><span class="link">→</span>
+      <span class="node ocean">BiLSTM<small>ONNX, 57 ko</small></span><span class="link">→</span>
+      <span class="node accent">Score et classe<small>dans le navigateur</small></span>
+    </div>
+    <figcaption><b>Figure 2.</b> Chaîne du volet&nbsp;A. Le même prétraitement est écrit en Python pour l’entraînement et en JavaScript pour le site.</figcaption>
+  </figure>
+  <p>Le vocabulaire compte 31 entrées&nbsp;: les 29 événements, un code de remplissage et un code «&nbsp;événement inconnu&nbsp;». Le modèle lit les <b>50 premiers événements</b> d’un bloc&nbsp;; au-delà, la séquence est tronquée et le site le signale. Comme le prétraitement existe en deux langages, des cas de parité vérifient qu’il produit exactement les mêmes codes des deux côtés.</p>
+
+  <h2><span class="n">3.2</span>Modèle et entraînement</h2>
+  <p>Le modèle est volontairement petit. Une couche de plongement de dimension 16 alimente un LSTM bidirectionnel <span class="ref">[4, 5]</span> de 32 unités par sens. Les sorties sont moyennées sur les seules positions réelles, sans le remplissage, puis une couche linéaire suivie d’une sigmoïde donne le score. L’entraînement dure 5 époques (lots de 512, taux d’apprentissage 0,001) et prend environ six minutes sur un processeur de portable, validation comprise. Exporté au format ONNX, le modèle pèse <b>56&nbsp;806 octets</b>.</p>
+  <p>La référence est une <b>régression logistique</b> sur le nombre d’occurrences de chaque événement. Elle ignore l’ordre des événements&nbsp;: la comparer au BiLSTM mesure donc ce qu’apporte la lecture séquentielle.</p>
+
+  <h2><span class="n">3.3</span>Choix du seuil de décision</h2>
+  <p>Avec un seuil de 0,99, le BiLSTM obtenait sur la validation une macro-F1 de 0,9955, mais manquait 21 anomalies. Dans un usage de surveillance, une anomalie manquée coûte plus cher qu’une fausse alerte. Sans modifier les poids, nous avons donc cherché sur la validation le seuil qui ne manque presque aucune anomalie. Le seuil retenu, <b>0,4081</b>, ramène les anomalies manquées de 21 à 1, au prix de 59 fausses alertes au lieu de 23 (macro-F1 0,9939). Il a été figé avant l’ouverture du test et appliqué tel quel.</p>
+
+  <h2><span class="n">3.4</span>Résultats sur le test réservé</h2>
+  <p>Le tableau&nbsp;3 donne les résultats des deux modèles sur les 86&nbsp;260 blocs du test, puis sur les 1&nbsp;962 blocs à séquence inédite.</p>
+  <figure class="table">
+    <figcaption><b>Tableau 3.</b> Volet A sur le test réservé, seuil figé sur la validation.</figcaption>
+    <table>
+      <thead><tr><th>Modèle</th><th>Population</th><th class="r">Macro-F1</th><th class="r">Fausses alertes</th><th class="r">Anomalies manquées</th></tr></thead>
+      <tbody>
+        <tr><td>Régression logistique</td><td>Test complet (86&nbsp;260)</td><td class="r">0,9882</td><td class="r">116</td><td class="r">2</td></tr>
+        <tr class="best"><td><b>BiLSTM</b></td><td>Test complet (86&nbsp;260)</td><td class="r"><b>0,9938</b></td><td class="r"><b>58</b></td><td class="r">3</td></tr>
+        <tr><td>Régression logistique</td><td>Séquences inédites (1&nbsp;962)</td><td class="r">0,9576</td><td class="r">67</td><td class="r">2</td></tr>
+        <tr class="best"><td><b>BiLSTM</b></td><td>Séquences inédites (1&nbsp;962)</td><td class="r"><b>0,9714</b></td><td class="r"><b>43</b></td><td class="r">3</td></tr>
+      </tbody>
+    </table>
+  </figure>
+  <figure>
+    <div class="panel">
+      <svg viewBox="0 0 640 210" width="100%" role="img" aria-label="Matrice de confusion du BiLSTM sur le test">
+        <text x="330" y="16" font-size="12" fill="#5E534B" text-anchor="middle">Classe prédite</text>
+        <text x="230" y="38" font-size="12.5" font-weight="700" fill="#2B2522" text-anchor="middle">Normal</text>
+        <text x="430" y="38" font-size="12.5" font-weight="700" fill="#2B2522" text-anchor="middle">Anomalie</text>
+        <text x="40" y="128" font-size="12" fill="#5E534B" text-anchor="middle" transform="rotate(-90 40 128)">Classe réelle</text>
+        <text x="120" y="88" font-size="12.5" font-weight="700" fill="#2B2522" text-anchor="end">Normal</text>
+        <text x="120" y="170" font-size="12.5" font-weight="700" fill="#2B2522" text-anchor="end">Anomalie</text>
+        <rect x="132" y="48" width="196" height="76" fill="#2F5F80"/>
+        <rect x="332" y="48" width="196" height="76" fill="#F1C6B3"/>
+        <rect x="132" y="128" width="196" height="76" fill="#F1C6B3"/>
+        <rect x="332" y="128" width="196" height="76" fill="#4F7A57"/>
+        <text x="230" y="88" font-size="22" fill="#fff" text-anchor="middle" font-family="Young Serif, serif">83 676</text>
+        <text x="230" y="108" font-size="11" fill="#fff" text-anchor="middle">vrais négatifs</text>
+        <text x="430" y="88" font-size="22" fill="#2B2522" text-anchor="middle" font-family="Young Serif, serif">58</text>
+        <text x="430" y="108" font-size="11" fill="#2B2522" text-anchor="middle">fausses alertes</text>
+        <text x="230" y="168" font-size="22" fill="#2B2522" text-anchor="middle" font-family="Young Serif, serif">3</text>
+        <text x="230" y="188" font-size="11" fill="#2B2522" text-anchor="middle">anomalies manquées</text>
+        <text x="430" y="168" font-size="22" fill="#fff" text-anchor="middle" font-family="Young Serif, serif">2 523</text>
+        <text x="430" y="188" font-size="11" fill="#fff" text-anchor="middle">anomalies détectées</text>
+        <text x="548" y="80" font-size="11.5" fill="#5E534B">Précision anomalie</text>
+        <text x="548" y="98" font-size="17" fill="#2F5F80" font-family="Young Serif, serif">0,978</text>
+        <text x="548" y="152" font-size="11.5" fill="#5E534B">Rappel anomalie</text>
+        <text x="548" y="170" font-size="17" fill="#2F5F80" font-family="Young Serif, serif">0,999</text>
+      </svg>
+    </div>
+    <figcaption><b>Figure 3.</b> Matrice de confusion du BiLSTM sur les 86&nbsp;260 blocs du test réservé (2&nbsp;526 anomalies).</figcaption>
+  </figure>
+  <p>Le BiLSTM <b>divise par deux les fausses alertes</b> de la référence (58 contre 116) pour une anomalie manquée de plus (3 contre 2). L’écart se maintient sur les séquences inédites, où les deux modèles perdent en précision&nbsp;: c’est là que le score global surestimait le plus la capacité de généralisation. Les trois anomalies manquées ont toutes une séquence inédite. Une version quantifiée en entiers 8 bits prend exactement les mêmes décisions sur le test pour un fichier de 22&nbsp;570 octets&nbsp;; le site sert néanmoins la version en virgule flottante, la seule dont la parité avec Python a été vérifiée sur tout le test (section&nbsp;3.5).</p>
+
+  <h2><span class="n">3.5</span>Application web</h2>
+  <p>Le site est une application statique construite avec Vite et publiée sur GitHub Pages. Tout le calcul se fait dans le navigateur grâce à ONNX Runtime Web <span class="ref">[18]</span> compilé en WebAssembly&nbsp;: <b>les journaux ne quittent jamais le poste de l’utilisateur</b>. L’inférence tourne dans un processus séparé (Web Worker), par lots de 64 blocs, pour que la page reste réactive.</p>
+  <p>Le parcours tient en trois étapes. L’utilisateur colle des journaux, importe un fichier de 10&nbsp;Mo au plus ou choisit un exemple tiré de la validation. Le site affiche ensuite un bilan du lot et, pour chaque bloc, la classe, le score comparé au seuil, le nombre d’événements, les troncatures et les événements inconnus. La séquence de chaque bloc se déplie, et un filtre isole les anomalies. Enfin, un export CSV reprend le seuil et l’empreinte du modèle. L’interface s’adapte au mobile et propose un thème clair et un thème sombre. Deux avertissements sont affichés en permanence&nbsp;: un extrait de journal ne garantit pas qu’un bloc est complet, et le score n’est pas une probabilité calibrée.</p>
+  <p>Pour vérifier que le navigateur reproduit fidèlement le modèle entraîné, nous avons recalculé sous Chrome les 86&nbsp;260 scores du test et les avons comparés aux scores Python, sans rien ajuster&nbsp;: <b>aucune décision ne diverge</b> et l’écart maximal entre scores est de 2,4&nbsp;×&nbsp;10<sup>−7</sup>. Le débit mesuré est d’environ <b>6&nbsp;200 blocs par seconde</b>, boucle JavaScript comprise.</p>
+
+  <h2><span class="n">3.6</span>Limites</h2>
+  <p>Le détecteur ne reconnaît que des journaux au format HDFS attendu et ne lit que les 50 premiers événements d’un bloc. Il ne dit rien de ce qui s’est passé&nbsp;: il signale un bloc suspect sans l’expliquer, ce qui est précisément le rôle du volet&nbsp;B. Enfin, avant l’ouverture officielle du test, un fichier de résultats de la régression logistique contenait déjà des mesures sur ce test. Ce fichier n’a servi à aucun réglage, mais nous le signalons par transparence.</p>
+</section>

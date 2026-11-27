@@ -1,0 +1,99 @@
+<section class="chapter">
+  <p class="chapter-kicker">chapitre 8</p>
+  <h1><span class="n">8</span>Retours d’expérience individuels</h1>
+  <p>Le sujet recommande une rédaction individuelle de cette partie. Chaque membre a rédigé la sienne&nbsp;; nous n’en avons harmonisé que la forme.</p>
+
+  <div class="person">
+    <div class="person-head"><h2><span class="n">8.1</span>Alain Evina</h2><span class="role">socle du dépôt, modèle de langage, évaluation</span></div>
+    <h3>Mon rôle</h3>
+    <p>J’ai mis en place le socle commun du dépôt&nbsp;: arborescence, contrats d’échange entre les modules, règles de contribution, tests automatisés et intégration continue, structure en paquets et chemins centralisés. J’ai construit le board Jira et préparé les supports de la revue J3. Ce travail se voit peu dans les résultats, mais il a permis à chacun de brancher son code sur les mêmes formats et de faire relire chaque contribution sur une intégration continue commune.</p>
+    <p>Sur le volet&nbsp;B, j’étais chargé du modèle de langage. La première inférence de SmolLM2-1.7B sur ma machine a montré qu’il était trop lent et qu’il ignorait les lignes d’avertissement. Nous avons choisi Gemma&nbsp;4 E4B QAT, exécuté avec llama.cpp. J’ai mené les itérations de la consigne jusqu’à la version figée, sur des blocs de validation uniquement, avec des faits calculés par le code et un contrat de réponse vérifié. J’ai écrit la chaîne d’adaptation LoRA, le banc d’évaluation du volet&nbsp;B, la comparaison des deux volets et ce rapport.</p>
+    <h3>Ce que j’ai appris techniquement</h3>
+    <ul>
+      <li><b>Le format ne garantit pas le fond.</b> Une réponse conforme au schéma peut inverser une chronologie ou affirmer une causalité que la trace ne montre pas. Il faut des contrôles sur le contenu, et une relecture humaine.</li>
+      <li><b>Séparer réglage et évaluation.</b> Pour l’essai de Laya, choisir la question sur une cohorte de validation puis la mesurer une seule fois sur une autre m’a évité de conclure sur un résultat favorable de mise au point&nbsp;: l’aire sous la courbe finale vaut 0,47 et l’outil n’a pas été intégré.</li>
+      <li><b>La mémoire décide de l’architecture.</b> L’entraînement LoRA de Gemma ne tient pas sur 6&nbsp;Go&nbsp;: les tables de plongement pèsent à elles seules environ 6,5&nbsp;Gio. D’où la voie retenue&nbsp;: entraînement sur T4, puis adaptateur seul converti en GGUF et appliqué au modèle quantifié.</li>
+    </ul>
+    <h3>Ce que j’ai appris en équipe</h3>
+    <ul>
+      <li><b>Un outil d’aide doit être testé comme du code.</b> Le pré-contrôle que j’avais écrit pour la relecture du test réservé produisait des faux positifs, que Bachar a dû contourner. Je l’ai corrigé après coup&nbsp;; il aurait fallu le tester sur des cas connus avant de le diffuser.</li>
+      <li><b>Un ticket fermé n’est pas un travail fini.</b> Un ticket de mesures a été fermé automatiquement à la fusion de son script alors que les mesures restaient à faire. Depuis, je vérifie le critère de fin avant chaque clôture.</li>
+    </ul>
+    <h3>Ce que je ferais autrement</h3>
+    <p>Le jalon de mi-parcours a été manqué et l’adaptation complète du volet&nbsp;B est arrivée tard. Je figerais plus tôt le modèle et le jeu de test réservé, pour que l’entraînement et les mesures avant et après ne dépendent pas des dernières semaines. Je réduirais aussi le nombre d’itérations de la consigne au profit d’un jeu d’exemples relus plus tôt.</p>
+    <h3>Bilan personnel</h3>
+    <p>Ce projet m’a appris à piloter un travail d’équipe autant qu’à développer&nbsp;: découper en tickets, faire relire, tracer les décisions. Sur le plan technique, je retiens la séparation stricte entre réglage et évaluation, et le fait qu’un résultat négatif bien documenté a autant de valeur qu’un gain.</p>
+  </div>
+
+  <div class="person">
+    <div class="person-head"><h2><span class="n">8.2</span>Bachar Ben Slama</h2><span class="role">volet A, modèle et site web</span></div>
+    <h3>Mon rôle</h3>
+    <p>J’ai principalement travaillé sur le volet&nbsp;A, la détection d’anomalies dans les journaux HDFS. J’ai réalisé le premier essai d’export ONNX et d’inférence dans le navigateur, le site initial, puis l’entraînement et l’export du BiLSTM. J’ai ensuite développé la saisie des journaux, le traitement par lot, le filtre des anomalies et l’export CSV.</p>
+    <p>J’ai également analysé le seuil de décision, comparé les versions FP32 et INT8 et intégré un Web Worker. J’ai ajouté le détail des événements par bloc et corrigé leur affichage sur mobile. Enfin, j’ai contribué aux vérifications et relectures des réponses de référence du volet&nbsp;B.</p>
+    <h3>Ce que j’ai appris techniquement</h3>
+    <ul>
+      <li><b>Entraîner et intégrer un modèle.</b> J’ai entraîné un BiLSTM depuis zéro sur HDFS_v1, puis exporté le modèle en ONNX pour l’exécuter avec ONNX Runtime Web. J’ai appris à vérifier la cohérence des scores entre Python et le navigateur.</li>
+      <li><b>Choisir un seuil de décision.</b> Une bonne macro-F1 peut masquer des anomalies manquées. En ajustant le seuil sur la validation, nous sommes passés de 21 anomalies manquées à une seule, avec une augmentation des fausses alertes de 23 à 59. J’ai mieux compris le compromis entre précision et rappel.</li>
+      <li><b>Mesurer une optimisation.</b> Le candidat INT8 était environ 62&nbsp;% plus léger. Les mesures de latence variaient selon le moteur et la taille des lots. Cela m’a appris à comparer plusieurs critères avant de choisir une version.</li>
+      <li><b>Développer une interface utilisable.</b> J’ai appris à relier le modèle au parcours utilisateur, à gérer les erreurs et à afficher les résultats. L’essai sur un écran de 390 pixels a révélé une colonne trop étroite qui coupait les codes d’événements&nbsp;; les captures avant et après montrent la correction.</li>
+    </ul>
+    <p><b>Ce que je dois encore approfondir.</b> Je souhaite mieux comprendre les différences numériques entre moteurs d’inférence et les méthodes permettant de vérifier qu’une optimisation conserve un comportement acceptable. Je dois aussi progresser dans l’organisation des tests utilisateurs.</p>
+    <h3>Ce que j’ai appris en équipe</h3>
+    <ul>
+      <li><b>Travailler avec Git et les demandes de fusion.</b> J’ai appris à créer une branche par ticket, à sauvegarder mon travail et à proposer une demande de fusion vers dev. J’ai aussi compris la différence entre une modification intégrée dans dev et une version publiée depuis main.</li>
+      <li><b>Utiliser les retours des collègues.</b> Le retour sur les anomalies manquées a conduit à revoir le seuil. Il m’a aidé à regarder les résultats au-delà d’un score global.</li>
+      <li><b>Clarifier les dépendances.</b> Les contrats de données et les échanges avec mes collègues ont permis de relier l’entraînement, le prétraitement et le site. J’ai appris à vérifier ce qui était déjà intégré avant de commencer une nouvelle tâche.</li>
+      <li><b>Utiliser les assistants avec recul.</b> Je me suis appuyé sur un assistant pour comprendre des erreurs, préparer du code et interpréter des résultats. Certains échanges ont demandé des corrections, notamment sur le pré-contrôle des annotations. Cela m’a montré l’importance de confronter les suggestions aux traces et aux résultats observés.</li>
+    </ul>
+    <h3>Ce que je ferais autrement</h3>
+    <ul>
+      <li>Prévoir plus tôt des essais avec des utilisateurs extérieurs à l’équipe.</li>
+      <li>Vérifier régulièrement le site public après les fusions pour éviter un décalage avec la version locale.</li>
+      <li>Conserver dès chaque expérience un compte rendu avec la commande, les paramètres, l’empreinte du modèle et les résultats.</li>
+      <li>Prendre davantage de temps pour comprendre chaque modification avant de l’intégrer.</li>
+    </ul>
+  </div>
+
+  <div class="person">
+    <div class="person-head"><h2><span class="n">8.3</span>Linda Boukhit</h2><span class="role">pilotage, recherche documentaire, agents</span></div>
+    <h3>Mon rôle</h3>
+    <p>J’étais la <b>pilote</b> de l’équipe&nbsp;: j’ai organisé le projet dans Jira (sprints, tickets, échéances), mis en place le classeur de suivi et le journal du projet, préparé les preuves de mi-parcours et relu environ 30 demandes de fusion de l’équipe. Côté technique, j’ai travaillé sur le <b>volet&nbsp;B</b>&nbsp;: le corpus documentaire, la recherche documentaire, l’orchestration à trois agents et l’interface de démonstration. J’ai aussi écrit le prétraitement JavaScript du site du volet&nbsp;A.</p>
+    <h3>Ce que j’ai appris techniquement</h3>
+    <ul>
+      <li><b>Le prétraitement des données.</b> Transformer des lignes de journaux en événements E1 à E29 m’a montré qu’un détail compte&nbsp;: le site devait donner exactement le même résultat que Python. Les tests de parité (2&nbsp;000 blocs sur 2&nbsp;000 identiques) m’ont appris à <b>prouver</b> que deux programmes font la même chose, au lieu de le supposer.</li>
+      <li><b>Le fonctionnement d’une recherche documentaire.</b> J’ai compris toute la chaîne&nbsp;: découper une documentation, transformer les passages en vecteurs, chercher par le sens et par les mots-clés, puis donner les passages au modèle. Surtout, j’ai appris qu’il faut <b>mesurer avant de décider</b>&nbsp;: j’avais prévu un seuil de pertinence, mais les mesures sur la validation ont montré qu’il retirerait autant de bons passages que de mauvais. Je l’ai donc abandonné et documenté.</li>
+      <li><b>Les limites de cette approche.</b> La documentation HDFS explique le fonctionnement normal, pas les pannes. Une recherche documentaire ne vaut que ce que vaut son corpus.</li>
+      <li><b>L’organisation en agents.</b> Découper le travail entre une recherche, une rédaction et un contrôle, avec une limite d’appels. La première mesure réelle a montré que le contrôleur rejetait de bonnes réponses parce qu’il ne connaissait pas les règles&nbsp;: un agent doit recevoir le même contrat que celui qu’il contrôle.</li>
+    </ul>
+    <p><b>Ce qui me manque encore.</b> Je dois approfondir l’<b>évaluation des modèles de langage</b>. Je sais construire une chaîne de recherche documentaire et mesurer la recherche, mais juger si une explication générée est vraiment juste reste difficile&nbsp;: il faut une relecture humaine, et je veux apprendre des méthodes plus solides pour le faire.</p>
+    <h3>Ce que j’ai appris en équipe</h3>
+    <ul>
+      <li><b>Organiser un projet à quatre.</b> La règle «&nbsp;un ticket, une branche, une demande de fusion, une relecture&nbsp;» nous a évité beaucoup d’erreurs, et les contrats de format ont permis à chacun d’avancer sans attendre les autres.</li>
+      <li><b>Oser dire que je n’ai pas compris.</b> Au milieu du projet, je me suis rendu compte que je ne comprenais plus bien ce que faisait l’équipe sur le volet&nbsp;B. J’ai pris le temps de tout me faire réexpliquer (le projet, les codes d’événements, la recherche documentaire) avant de continuer. Cela m’a permis de mieux piloter ensuite.</li>
+      <li><b>Les délais.</b> Plusieurs de mes tâches, l’orchestration en agents et l’interface, prévues pour le 9 et le 13 novembre, ont pris du retard parce qu’elles dépendaient du passage à Gemma. J’aurais dû <b>relancer plus tôt</b> et réajuster le planning dans Jira au lieu de laisser les échéances dépasser.</li>
+      <li><b>Déléguer.</b> J’ai appris à confier des tâches tout en gardant la responsabilité de vérifier. Par exemple, une relecture a classé un problème comme «&nbsp;bloquant&nbsp;» alors qu’il était mineur&nbsp;: il faut toujours vérifier avant de conclure.</li>
+    </ul>
+    <h3>Ce que je ferais autrement</h3>
+    <ul>
+      <li>Tenir les <b>sprints Jira à jour</b> chaque semaine&nbsp;: fermer les sprints, déplacer les tickets en retard.</li>
+      <li><b>Relancer plus tôt</b> quand une tâche bloque les autres.</li>
+      <li>Garder plus de <b>temps pour coder moi-même</b>, pas seulement organiser et vérifier.</li>
+    </ul>
+  </div>
+
+  <div class="person">
+    <div class="person-head"><h2><span class="n">8.4</span>Nassim Mezzai</h2><span class="role">données, évaluation du volet A, adaptation</span></div>
+    <p>Dans le cadre du projet TeamAI, j’ai participé à plusieurs étapes du développement d’un système d’intelligence artificielle, de la préparation des données jusqu’à l’entraînement, l’expérimentation et l’évaluation des modèles.</p>
+    <h3>Préparation et audit des données</h3>
+    <p>J’ai principalement travaillé sur le jeu de données HDFS, en participant à son audit, au découpage des journaux, à la construction des séquences d’événements et à la préparation des partitions d’entraînement, de validation et de test. Une difficulté importante a été la présence de nombreuses séquences répétées dans le jeu. Ce travail m’a permis de comprendre les risques de fuite de données et l’importance d’évaluer les modèles sur des séquences inédites, afin de mieux mesurer leur capacité de généralisation.</p>
+    <h3>Entraînement et expérimentation de modèles</h3>
+    <p>J’ai développé et entraîné une régression logistique de référence pour la détection d’anomalies HDFS. Cette première approche a servi de point de comparaison pour le modèle BiLSTM développé par l’équipe. J’ai également participé aux expérimentations d’adaptation d’un modèle de langage, notamment <b>Gemma&nbsp;4 E4B avec QLoRA</b>, en utilisant l’environnement Kaggle et ses GPU NVIDIA T4. Ces essais m’ont permis d’explorer les principales étapes de l’adaptation d’un modèle préentraîné&nbsp;: préparation des exemples, configuration des paramètres LoRA, quantification NF4, chargement du modèle et lancement de l’entraînement.</p>
+    <p>J’ai rencontré plusieurs difficultés techniques, notamment des dépassements de mémoire GPU, des incompatibilités entre bibliothèques et des gradients non finis pendant l’entraînement. Ces problèmes m’ont amené à examiner la consommation mémoire, le calcul de la fonction de perte et les contraintes de l’entraînement en précision réduite. Ils m’ont appris qu’un entraînement qui démarre correctement n’est pas nécessairement un entraînement réussi, et qu’il faut distinguer la faisabilité technique, la stabilité de l’optimisation et la qualité réelle du modèle obtenu.</p>
+    <h3>Évaluation et optimisation des modèles</h3>
+    <p>J’ai pris en charge l’évaluation comparative du volet&nbsp;A, en confrontant la référence, le BiLSTM FP32 et sa version quantifiée INT8. J’ai travaillé sur la génération des métriques de classification, les matrices de confusion, l’analyse des faux positifs et des faux négatifs, ainsi que les vérifications de parité entre ONNX Runtime en Python et ONNX Runtime Web. La quantification INT8 m’a notamment permis d’étudier les compromis entre taille du modèle, vitesse d’inférence et stabilité des prédictions. J’ai aussi réalisé des mesures de chargement et de cache directement dans Chrome.</p>
+    <h3>Travail collaboratif et outils</h3>
+    <p>Le projet m’a permis d’approfondir l’utilisation de Python, PyTorch, ONNX Runtime, Kaggle, Git, GitHub et Jira. L’organisation en branches, tickets et demandes de fusion m’a appris à mieux documenter les expérimentations et à travailler avec des procédures de relecture.</p>
+    <h3>Bilan personnel</h3>
+    <p>Ce projet m’a permis de progresser dans trois domaines complémentaires&nbsp;: la préparation de données fiables, l’entraînement et l’adaptation de modèles, et leur évaluation expérimentale. J’ai surtout compris qu’obtenir de bonnes performances ne suffit pas. Il faut aussi pouvoir expliquer comment elles ont été obtenues, vérifier la reproductibilité des expériences, identifier les limites des modèles et distinguer les résultats confirmés des hypothèses. Cette expérience m’a permis de développer une approche plus rigoureuse et plus critique de l’apprentissage automatique et des modèles de langage.</p>
+  </div>
+</section>

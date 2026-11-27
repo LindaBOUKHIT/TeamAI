@@ -1,0 +1,77 @@
+<section class="chapter">
+  <p class="chapter-kicker">chapitre 4</p>
+  <h1><span class="n">4</span>Volet B&nbsp;: expliquer un bloc en local</h1>
+  <p>Le volet&nbsp;B ne remplace pas le détecteur&nbsp;: il aide à lire un bloc. À partir des lignes brutes, il doit produire un résumé des événements, les faits observés, d’éventuelles hypothèses, les informations qui manquent pour conclure, les passages de documentation utilisés, ou s’abstenir quand la trace ne permet pas d’explication fiable. Le chapitre décrit le modèle retenu, la manière dont nous l’encadrons, puis les trois extensions évaluées&nbsp;: l’adaptation LoRA, la recherche documentaire et l’organisation en agents.</p>
+
+  <h2><span class="n">4.1</span>Choix du modèle</h2>
+  <p>Le premier modèle essayé, SmolLM2-1.7B-Instruct, a permis une première inférence locale, mais s’est révélé inadapté&nbsp;: sur un processeur de portable, il produisait 0,64 token par seconde pour un pic mémoire de 16&nbsp;Go, ignorait les lignes d’avertissement et inventait des informations absentes de la trace. Nous avons alors comparé plusieurs petits modèles ouverts sur 40 blocs de validation, sur GPU distant. <b>Gemma&nbsp;4 E4B</b> <span class="ref">[16]</span>, dans sa version entraînée en tenant compte de la quantification (QAT) et distribuée en 4 bits au format GGUF, a été retenu&nbsp;: il respectait le format sur les 40 blocs, proposait des hypothèses sur les blocs anormaux et n’en proposait pas sur les blocs sains. Les autres candidats (Granite, Qwen, SmolLM3) ont été écartés.</p>
+  <p>Le modèle est exécuté par <b>llama.cpp</b> <span class="ref">[17]</span>, un moteur d’inférence en C++ optimisé pour les modèles quantifiés, avec la réflexion interne désactivée, un contexte de 4&nbsp;096 tokens, au plus 800 tokens de réponse, une température nulle et une graine fixe. Sur le poste cible (RTX 3050 Laptop, 6&nbsp;Go), le modèle occupe environ <b>3,7&nbsp;Gio</b> de mémoire graphique et génère environ <b>27 tokens par seconde</b>, adaptateur compris.</p>
+
+  <h2><span class="n">4.2</span>Encadrer le modèle par le code</h2>
+  <p>Un petit modèle laissé libre recopie les journaux, invente des identifiants ou affirme des causes. Notre choix de conception a été de <b>ne confier au modèle que la rédaction</b> et de laisser au code tout ce qui peut être calculé ou vérifié (figure&nbsp;4).</p>
+  <figure>
+    <div class="flow">
+      <span class="node">Lignes<br>du bloc</span><span class="link">→</span>
+      <span class="node">Faits calculés<small>comptes, chronologie</small></span><span class="link">→</span>
+      <span class="node ocean">Gemma 4 E4B<small>consigne figée<br>JSON imposé</small></span><span class="link">→</span>
+      <span class="node">Contrôles<small>une correction</small></span><span class="link">→</span>
+      <span class="node accent">Réponse<br>vérifiée</span>
+    </div>
+    <figcaption><b>Figure 4.</b> Chaîne du volet&nbsp;B en mode un agent. Le modèle rédige&nbsp;; le code calcule les faits avant et vérifie la réponse après.</figcaption>
+  </figure>
+  <ul>
+    <li><b>Avant la génération.</b> Le code extrait des lignes les faits vérifiables (types d’événements, nombre d’occurrences, chronologie) et les numérote. Le glossaire transmis au modèle se limite aux événements présents dans le bloc. La consigne, figée après seize versions mises au point sur la validation, ne change plus ensuite.</li>
+    <li><b>Pendant la génération.</b> La réponse est contrainte par un schéma JSON fermé à six champs&nbsp;: résumé, faits observés, hypothèses, informations manquantes, sources et abstention. Les hypothèses sont facultatives et limitées à un catalogue fermé&nbsp;: seuls deux événements d’erreur (E7, échec de lecture du flux, et E20, bloc introuvable sur le DataNode) en autorisent une.</li>
+    <li><b>Après la génération.</b> Des contrôles vérifient le format, la recopie exacte des faits et l’existence de chaque référence citée. En cas d’échec, le modèle dispose d’une seule correction, et les deux réponses brutes sont conservées. Une garde rejette aussi les réponses qui bouclent.</li>
+  </ul>
+  <p>Ces contrôles garantissent la forme et l’ancrage des références, pas la justesse de toute la prose. Le tableau&nbsp;4 montre ce que la relecture humaine a trouvé sur 40 blocs de validation jamais utilisés pour la mise au point.</p>
+  <figure class="table">
+    <figcaption><b>Tableau 4.</b> Défauts relevés par relecture humaine sur 40 blocs de validation (consigne figée, sans adaptation ni recherche documentaire). Un même bloc peut cumuler plusieurs défauts.</figcaption>
+    <table>
+      <thead><tr><th>Constat</th><th class="r">Blocs</th></tr></thead>
+      <tbody>
+        <tr><td>Réponse au format et faits recopiés exactement</td><td class="r">40/40</td></tr>
+        <tr><td>Réponse passant tous les contrôles automatiques</td><td class="r">39/40</td></tr>
+        <tr><td>Chronologie fausse</td><td class="r">2/40</td></tr>
+        <tr><td>Lien de causalité affirmé sans preuve</td><td class="r">3/40</td></tr>
+        <tr><td>Pseudo-référence (référence au bon format mais sans appui réel)</td><td class="r">3/40</td></tr>
+        <tr><td>Cause indéterminée non signalée dans le résumé</td><td class="r">16/40</td></tr>
+        <tr><td>Résumé inutilisable par répétition</td><td class="r">1/40</td></tr>
+      </tbody>
+    </table>
+  </figure>
+  <div class="keypoint"><span class="t">Le format ne garantit pas le fond</span><p>Une réponse peut respecter le schéma, recopier tous les faits et passer les contrôles, tout en inversant une chronologie ou en affirmant une causalité que la trace ne montre pas. C’est pourquoi l’évaluation finale du chapitre&nbsp;5 repose aussi sur une notation humaine.</p></div>
+
+  <h2><span class="n">4.3</span>Un jeu d’adaptation rédigé et relu par l’équipe</h2>
+  <p>Adapter le modèle demande des exemples de réponses justes. Aucun n’existe pour HDFS&nbsp;: nous les avons rédigés. Nous avons tiré <b>240 blocs</b> de l’entraînement et de la validation, stratifiés et jamais utilisés auparavant, répartis en quatre lots de 60 (50 pour l’entraînement, 10 pour la validation), un par membre. Pour chaque bloc, un brouillon produit par la chaîne de la figure&nbsp;4 a été vérifié automatiquement, puis corrigé à la main en revenant aux lignes brutes. <b>104 réponses sur 240 (43&nbsp;%) ont été modifiées</b>&nbsp;; selon les lots, la proportion varie de 17 à 100&nbsp;%. Les corrections portent surtout sur des destinataires multiples présentés au singulier, des présupposés glissés dans les questions et des événements attribués au mauvais côté d’un échange entre nœuds.</p>
+  <p>Deux lots ont ensuite fait l’objet d’une relecture croisée par un second membre, qui a apporté 13 corrections sur l’un et 19 sur l’autre. Ces 19 dernières ont été intégrées après l’entraînement&nbsp;: l’adaptateur évalué au chapitre&nbsp;5 a été entraîné sur la version précédente du jeu, qui reste identifiable. Le jeu final compte <b>200 exemples d’entraînement et 40 de validation</b>&nbsp;; un script le reconstitue à l’identique et refuse tout doublon et tout bloc du test.</p>
+
+  <h2><span class="n">4.4</span>Adaptation par LoRA</h2>
+  <p>LoRA <span class="ref">[6]</span> fige les poids du modèle et n’entraîne que de petites matrices de rang faible ajoutées à certaines couches. QLoRA <span class="ref">[7]</span> va plus loin en chargeant le modèle de base en 4 bits (format NF4) pendant l’entraînement. Même ainsi, Gemma&nbsp;4 E4B ne tient pas dans les 6&nbsp;Go de la carte cible&nbsp;: ses seules tables de plongement pèsent environ 6,5&nbsp;Gio. Nous avons donc entraîné sur un GPU T4 de 15&nbsp;Gio (Kaggle), puis appliqué l’adaptateur au modèle quantifié utilisé en inférence.</p>
+  <p>La mise au point a été longue. Le premier essai saturait la mémoire, parce que la perte était calculée sur toutes les positions d’un vocabulaire de 262&nbsp;144 tokens&nbsp;; nous ne la calculons plus que sur la partie de réponse à apprendre. Le calcul en demi-précision produisait ensuite des gradients non finis, la T4 ne disposant pas du format bf16&nbsp;; un facteur d’échelle initial plus bas et un écrêtage des gradients ont stabilisé l’entraînement. Un essai court de 30 pas a validé la chaîne complète avant l’entraînement final.</p>
+  <p>Pour l’entraînement final, deux réglages fixés à l’avance ont été entraînés pendant 400 pas chacun sur 199 des 200 exemples, le dernier, trop long (5&nbsp;778 tokens), ayant été écarté plutôt que tronqué&nbsp;:</p>
+  <figure class="table">
+    <figcaption><b>Tableau 5.</b> Réglages LoRA entraînés et sélection sur la validation (40 exemples).</figcaption>
+    <table>
+      <thead><tr><th>Réglage</th><th>Couches adaptées</th><th class="r">Rang</th><th class="r">Taux d’appr.</th><th class="r">Perte (début → fin)</th><th class="r">Acceptées (val)</th><th class="r">Hypothèses (val)</th></tr></thead>
+      <tbody>
+        <tr><td>Modèle de base</td><td>—</td><td class="r">—</td><td class="r">—</td><td class="r">—</td><td class="r">—</td><td class="r">11</td></tr>
+        <tr class="best"><td><b>r8 q/v</b> (retenu)</td><td>requête, valeur</td><td class="r">8</td><td class="r">2·10<sup>−4</sup></td><td class="r">0,880 → 0,151</td><td class="r">39/40</td><td class="r">12</td></tr>
+        <tr><td>r16 q/k/v/o</td><td>requête, clé, valeur, sortie</td><td class="r">16</td><td class="r">1·10<sup>−4</sup></td><td class="r">0,827 → 0,140</td><td class="r">39/40</td><td class="r">12</td></tr>
+      </tbody>
+    </table>
+  </figure>
+  <p>Chaque entraînement a demandé environ 6,5&nbsp;s par pas et un pic de 11&nbsp;Go de mémoire graphique. La règle de sélection, fixée avant l’entraînement, met les deux réglages à <b>égalité parfaite</b> sur la validation. Elle ne prévoyait pas de départage&nbsp;: c’est l’ordre de la configuration qui a retenu le plus petit adaptateur, r8 q/v. Nous le signalons comme un départage constaté, non décidé à l’avance. Sur la validation, l’effet de l’adaptation est donc faible&nbsp;; son effet sur le test est mesuré au chapitre&nbsp;5.</p>
+  <p>L’adaptateur retenu, converti au format GGUF par llama.cpp, pèse <b>4,5&nbsp;Mo</b>. Il est appliqué au modèle quantifié au moment de l’inférence, sans fusion ni requantification. Deux vérifications l’accompagnent. Appliqué avec un poids nul, il donne une sortie identique, caractère pour caractère, à celle du modèle de base&nbsp;; avec un poids de 1, la sortie change&nbsp;: l’adaptateur agit donc bien malgré le passage du format NF4 de l’entraînement au format Q4_0 de l’inférence. Sur la RTX 3050 du poste cible, il ajoute moins de 10&nbsp;Mio de mémoire. Enfin, la conversion a révélé une particularité de Gemma&nbsp;4&nbsp;: les 18 dernières couches partagent leur cache clé-valeur et n’ont pas de projection «&nbsp;valeur&nbsp;» propre, si bien que celle-ci n’est adaptée que sur 24 couches sur 42.</p>
+
+  <h2><span class="n">4.5</span>Recherche documentaire</h2>
+  <p>La génération augmentée par la recherche <span class="ref">[8]</span> fournit au modèle des passages de documentation en rapport avec la trace. Notre corpus compte <b>51 passages</b> tirés de la documentation officielle de HDFS, découpés par section. La recherche combine un index dense (plongements BGE <span class="ref">[9]</span>, index FAISS <span class="ref">[10]</span>) et un index lexical BM25 <span class="ref">[11]</span>, fusionnés par rang réciproque <span class="ref">[12]</span>. Les événements du bloc sont reformulés en anglais pour interroger la documentation.</p>
+  <p>Sur 306 traces de validation, avec trois passages renvoyés, la recherche hybride retrouve le passage attendu dans <b>66&nbsp;%</b> des cas, contre 69&nbsp;% pour BM25 seul et 35&nbsp;% pour la recherche dense seule. Nous avions prévu un seuil de pertinence minimal&nbsp;; les mesures ont montré qu’il retirerait autant de bons passages que de mauvais, et nous l’avons abandonné. La limite principale tient au corpus lui-même&nbsp;: la documentation décrit le fonctionnement normal de HDFS, pas ses pannes. <b>19 des 29 types d’événements</b> n’y ont aucun passage utile, et un seul des quatorze événements traités comme indices d’incident en a un.</p>
+
+  <h2><span class="n">4.6</span>Organisation en trois agents</h2>
+  <p>La seconde configuration répartit le travail entre trois agents qui utilisent le même modèle&nbsp;: un agent de <b>recherche</b> choisit les passages documentaires, un agent de <b>rédaction</b> produit la réponse et un agent de <b>contrôle</b> l’accepte ou demande une correction, dans une limite fixée d’appels. L’hypothèse était qu’un contrôle par le modèle lui-même repérerait des erreurs que les contrôles automatiques ne voient pas, comme une chronologie inversée.</p>
+  <p>Les premiers essais sur la validation ont été décevants&nbsp;: une réponse acceptée sur 5, puis aucune sur 10 après correction du contrôleur. Ils nous ont appris qu’un agent de contrôle doit recevoir exactement le même contrat que l’agent qu’il contrôle&nbsp;; sinon, il rejette de bonnes réponses au nom de règles qu’il invente. La mesure complète sur le test figure au chapitre&nbsp;5.</p>
+
+  <h2><span class="n">4.7</span>Interface locale</h2>
+  <p>Une interface Gradio, accessible uniquement depuis le poste (adresse locale, sans partage public), permet de coller des journaux ou d’importer un fichier texte, de choisir le modèle de base ou adapté et le mode un ou trois agents. Elle affiche le résumé, les faits, les hypothèses, les informations manquantes, les sources, le journal des étapes et le temps d’exécution. La réponse structurée n’est affichée que si elle passe les contrôles&nbsp;; sinon, la sortie brute et les erreurs restent visibles. Une analyse porte sur cinq blocs au plus, et tout bloc du test réservé est refusé avant tout appel au modèle. Un second onglet, «&nbsp;Demander à la doc&nbsp;», répond aux questions sur le fonctionnement de HDFS à partir du corpus documentaire et s’abstient quand aucun passage ne couvre la question&nbsp;; sa qualité n’a pas été mesurée.</p>
+</section>

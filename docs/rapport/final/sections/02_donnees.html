@@ -1,0 +1,40 @@
+<section class="chapter">
+  <p class="chapter-kicker">chapitre 2</p>
+  <h1><span class="n">2</span>Données et protocole commun</h1>
+
+  <h2><span class="n">2.1</span>Le jeu HDFS_v1</h2>
+  <p>Nous utilisons HDFS_v1, distribué par la collection Loghub <span class="ref">[1]</span> et issu des travaux de Xu et&nbsp;al. <span class="ref">[2]</span>. Il rassemble les journaux d’un cluster Hadoop de plus de deux cents nœuds. Chaque ligne mentionne un identifiant de bloc&nbsp;; regrouper les lignes par bloc donne l’unité d’observation du projet. Chaque bloc porte une étiquette binaire, normal ou anormal, établie par les auteurs du jeu.</p>
+  <p>Chaque ligne correspond à l’un des <b>29 types d’événements</b> du jeu, notés E1 à E29 (par exemple E22, allocation d’un bloc par le NameNode, ou E7, exception d’écriture «&nbsp;Could not read from stream&nbsp;»). Un bloc devient ainsi une séquence ordonnée d’événements. Le corpus compte <b>575&nbsp;061 blocs</b>, dont <b>16&nbsp;838 anomalies</b> (2,9&nbsp;%). Il ne contient pourtant que <b>18&nbsp;373 séquences distinctes</b>&nbsp;: la plupart des blocs répètent exactement le déroulé d’autres blocs.</p>
+  <div class="keypoint"><span class="t">Une étiquette n’est pas une cause</span><p>L’étiquette indique qu’un bloc s’est mal terminé, pas pourquoi. Elle permet d’évaluer une détection, mais ni une cause racine ni une explication. Cette limite des données structure tout le volet&nbsp;B.</p></div>
+
+  <h2><span class="n">2.2</span>Partition et séquences inédites</h2>
+  <p>Les deux volets partagent une partition unique, stratifiée selon l’étiquette avec une graine fixée&nbsp;: 70&nbsp;% des blocs pour l’entraînement, 15&nbsp;% pour la validation et 15&nbsp;% pour le test (figure&nbsp;1). Chaque bloc appartient à une seule partition.</p>
+  <figure>
+    <div class="panel">
+      <svg viewBox="0 0 640 92" width="100%" role="img" aria-label="Partition des 575 061 blocs">
+        <rect x="0" y="10" width="446" height="50" fill="#2F5F80"/>
+        <rect x="450" y="10" width="93" height="50" fill="#4F7A57"/>
+        <rect x="547" y="10" width="93" height="50" fill="#7D4E6E"/>
+        <text x="14" y="32" fill="#fff" font-size="15" font-weight="700">Entraînement · 70 %</text>
+        <text x="14" y="51" fill="#fff" font-size="12.5">402 542 blocs</text>
+        <text x="460" y="32" fill="#fff" font-size="13" font-weight="700">Validation</text>
+        <text x="460" y="51" fill="#fff" font-size="11.5">86 259 blocs</text>
+        <text x="557" y="32" fill="#fff" font-size="13" font-weight="700">Test réservé</text>
+        <text x="557" y="51" fill="#fff" font-size="11.5">86 260 blocs</text>
+        <text x="0" y="84" fill="#5E534B" font-size="11.5">Réglages, seuils et choix de modèles : validation uniquement.</text>
+        <text x="640" y="84" fill="#C4593A" font-size="11.5" text-anchor="end">Test ouvert une seule fois par volet.</text>
+      </svg>
+    </div>
+    <figcaption><b>Figure 1.</b> Partition commune aux deux volets, stratifiée selon l’étiquette (graine 42).</figcaption>
+  </figure>
+  <p>Une partition par bloc n’empêche pas qu’une même séquence apparaisse à la fois dans l’entraînement et dans le test, puisque la plupart des séquences sont partagées par de nombreux blocs. Un modèle peut donc obtenir un excellent score global en reconnaissant des séquences déjà vues. Pour mesurer la généralisation, nous isolons dans le test les <b>1&nbsp;962 blocs dont la séquence n’apparaît jamais à l’entraînement</b> et rapportons leurs résultats séparément.</p>
+
+  <h2><span class="n">2.3</span>Règles d’évaluation</h2>
+  <p>Trois règles ont été fixées avant toute mesure et respectées dans les deux volets&nbsp;:</p>
+  <ul>
+    <li><b>Le test est réservé.</b> Il ne sert ni à choisir un hyperparamètre, ni à fixer un seuil, ni à préparer des exemples publics. Les exemples proposés sur le site viennent de la validation.</li>
+    <li><b>Le test n’est ouvert qu’une fois.</b> Pour chaque volet, les configurations à comparer sont figées avant l’ouverture, et aucun réglage n’est modifié après lecture des résultats.</li>
+    <li><b>Tous les cas restent au dénominateur.</b> Une réponse en échec ou hors format compte comme un échec et n’est pas retirée des statistiques.</li>
+  </ul>
+  <p>Chaque campagne conserve les prédictions brutes, les paramètres, les versions des logiciels et les empreintes des fichiers d’entrée, ce qui permet de vérifier qu’un résultat a bien été obtenu sur les données annoncées.</p>
+</section>
