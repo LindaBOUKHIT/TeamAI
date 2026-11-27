@@ -8,7 +8,7 @@
   <p>Le modèle est exécuté par <b>llama.cpp</b> <span class="ref">[17]</span>, un moteur d’inférence en C++ optimisé pour les modèles quantifiés, avec la réflexion interne désactivée, un contexte de 4&nbsp;096 tokens, au plus 800 tokens de réponse, une température nulle et une graine fixe. Sur le poste cible (RTX 3050 Laptop, 6&nbsp;Go), le modèle occupe environ <b>3,7&nbsp;Gio</b> de mémoire graphique et génère environ <b>27 tokens par seconde</b>, adaptateur compris.</p>
 
   <h2><span class="n">4.2</span>Encadrer le modèle par le code</h2>
-  <p>Un petit modèle laissé libre recopie les journaux, invente des identifiants ou affirme des causes. Notre choix de conception a été de <b>ne confier au modèle que la rédaction</b> et de laisser au code tout ce qui peut être calculé ou vérifié (figure&nbsp;4).</p>
+  <p>Un petit modèle laissé libre recopie les journaux, invente des identifiants ou affirme des causes. Notre choix de conception a été de <b>ne confier au modèle que la rédaction</b> et de laisser au code tout ce qui peut être calculé ou vérifié (figure&nbsp;5).</p>
   <figure>
     <div class="flow">
       <span class="node">Lignes<br>du bloc</span><span class="link">→</span>
@@ -17,7 +17,7 @@
       <span class="node">Contrôles<small>une correction</small></span><span class="link">→</span>
       <span class="node accent">Réponse<br>vérifiée</span>
     </div>
-    <figcaption><b>Figure 4.</b> Chaîne du volet&nbsp;B en mode un agent. Le modèle rédige&nbsp;; le code calcule les faits avant et vérifie la réponse après.</figcaption>
+    <figcaption><b>Figure 5.</b> Chaîne du volet&nbsp;B en mode un agent. Le modèle rédige&nbsp;; le code calcule les faits avant et vérifie la réponse après.</figcaption>
   </figure>
   <ul>
     <li><b>Avant la génération.</b> Le code extrait des lignes les faits vérifiables (types d’événements, nombre d’occurrences, chronologie) et les numérote. Le glossaire transmis au modèle se limite aux événements présents dans le bloc. La consigne, figée après seize versions mises au point sur la validation, ne change plus ensuite.</li>
@@ -43,7 +43,7 @@
   <div class="keypoint"><span class="t">Le format ne garantit pas le fond</span><p>Une réponse peut respecter le schéma, recopier tous les faits et passer les contrôles, tout en inversant une chronologie ou en affirmant une causalité que la trace ne montre pas. C’est pourquoi l’évaluation finale du chapitre&nbsp;5 repose aussi sur une notation humaine.</p></div>
 
   <h2><span class="n">4.3</span>Un jeu d’adaptation rédigé et relu par l’équipe</h2>
-  <p>Adapter le modèle demande des exemples de réponses justes. Aucun n’existe pour HDFS&nbsp;: nous les avons rédigés. Nous avons tiré <b>240 blocs</b> de l’entraînement et de la validation, stratifiés et jamais utilisés auparavant, répartis en quatre lots de 60 (50 pour l’entraînement, 10 pour la validation), un par membre. Pour chaque bloc, un brouillon produit par la chaîne de la figure&nbsp;4 a été vérifié automatiquement, puis corrigé à la main en revenant aux lignes brutes. <b>104 réponses sur 240 (43&nbsp;%) ont été modifiées</b>&nbsp;; selon les lots, la proportion varie de 17 à 100&nbsp;%. Les corrections portent surtout sur des destinataires multiples présentés au singulier, des présupposés glissés dans les questions et des événements attribués au mauvais côté d’un échange entre nœuds.</p>
+  <p>Adapter le modèle demande des exemples de réponses justes. Aucun n’existe pour HDFS&nbsp;: nous les avons rédigés. Nous avons tiré <b>240 blocs</b> de l’entraînement et de la validation, stratifiés et jamais utilisés auparavant, répartis en quatre lots de 60 (50 pour l’entraînement, 10 pour la validation), un par membre. Pour chaque bloc, un brouillon produit par la chaîne de la figure&nbsp;5 a été vérifié automatiquement, puis corrigé à la main en revenant aux lignes brutes. <b>104 réponses sur 240 (43&nbsp;%) ont été modifiées</b>&nbsp;; selon les lots, la proportion varie de 17 à 100&nbsp;%. Les corrections portent surtout sur des destinataires multiples présentés au singulier, des présupposés glissés dans les questions et des événements attribués au mauvais côté d’un échange entre nœuds.</p>
   <p>Deux lots ont ensuite fait l’objet d’une relecture croisée par un second membre, qui a apporté 13 corrections sur l’un et 19 sur l’autre. Ces 19 dernières ont été intégrées après l’entraînement&nbsp;: l’adaptateur évalué au chapitre&nbsp;5 a été entraîné sur la version précédente du jeu, qui reste identifiable. Le jeu final compte <b>200 exemples d’entraînement et 40 de validation</b>&nbsp;; un script le reconstitue à l’identique et refuse tout doublon et tout bloc du test.</p>
 
   <h2><span class="n">4.4</span>Adaptation par LoRA</h2>

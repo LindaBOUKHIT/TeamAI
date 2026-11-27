@@ -1,0 +1,149 @@
+<svg viewBox="0 0 640 884" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Architecture d’ensemble du projet TeamAI">
+  <defs>
+    <marker id="ar-ink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5E534B"/></marker>
+    <marker id="ar-ocean" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2F5F80"/></marker>
+    <marker id="ar-terra" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#C4593A"/></marker>
+    <marker id="ar-plum" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#7D4E6E"/></marker>
+  </defs>
+  <style>
+    .ar-band { font: 700 11.5px Figtree, sans-serif; letter-spacing: .06em; }
+    .ar-sub { font: 400 8.6px Figtree, sans-serif; fill: #5E534B; }
+    .ar-grp { font: 700 9.2px Figtree, sans-serif; letter-spacing: .04em; }
+    .ar-t { font: 700 10px Figtree, sans-serif; fill: #2B2522; }
+    .ar-x { font: 400 8.8px Figtree, sans-serif; fill: #4A403A; }
+    .ar-lab { font: 400 8.4px Figtree, sans-serif; }
+  </style>
+
+  <!-- Utilisateur -->
+  <rect x="452" y="2" width="168" height="24" rx="12" fill="#FDFAF4" stroke="#2B2522" stroke-width="1.1"/>
+  <text x="536" y="18" text-anchor="middle" class="ar-t">Utilisateur · navigateur public</text>
+  <text x="444" y="18" text-anchor="end" class="ar-lab" fill="#2F5F80">ouvre le site et y analyse ses journaux</text>
+
+  <!-- ===== Volet A ===== -->
+  <rect x="0" y="36" width="640" height="222" rx="6" fill="#EAF0F4" stroke="#2F5F80" stroke-width="1"/>
+  <text x="12" y="54" class="ar-band" fill="#2F5F80">VOLET A · DÉTECTION EN LIGNE</text>
+  <text x="12" y="66" class="ar-sub">modèle entraîné par l’équipe, calcul chez l’utilisateur</text>
+
+  <path d="M536 26 V70" stroke="#2F5F80" stroke-width="1.4" fill="none" marker-end="url(#ar-ocean)"/>
+  <rect x="10" y="74" width="206" height="176" rx="4" fill="#FDFAF4" stroke="#2F5F80" stroke-width="1.2"/>
+  <text x="20" y="88" class="ar-grp" fill="#2F5F80">ENTRAÎNEMENT · PYTHON, PROCESSEUR</text>
+  <g>
+    <rect x="20" y="94" width="186" height="32" rx="3" fill="#DCE6EE"/>
+    <text x="28" y="107" class="ar-t">Régression logistique</text><text x="28" y="119" class="ar-x">référence : comptes d’événements</text>
+    <rect x="20" y="132" width="186" height="32" rx="3" fill="#DCE6EE"/>
+    <text x="28" y="145" class="ar-t">BiLSTM · PyTorch</text><text x="28" y="157" class="ar-x">plongement 16, 2 × 32 unités, 5 époques</text>
+    <rect x="20" y="170" width="186" height="32" rx="3" fill="#DCE6EE"/>
+    <text x="28" y="183" class="ar-t">Seuil figé : 0,4081</text><text x="28" y="195" class="ar-x">choisi sur la validation, orienté rappel</text>
+    <rect x="20" y="208" width="186" height="32" rx="3" fill="#DCE6EE"/>
+    <text x="28" y="221" class="ar-t">Export ONNX · 57 ko</text><text x="28" y="233" class="ar-x">mêmes décisions en Python et en ONNX</text>
+    <path d="M113 126 V131" stroke="#2F5F80" stroke-width="1.2" marker-end="url(#ar-ocean)"/>
+    <path d="M113 164 V169" stroke="#2F5F80" stroke-width="1.2" marker-end="url(#ar-ocean)"/>
+    <path d="M113 202 V207" stroke="#2F5F80" stroke-width="1.2" marker-end="url(#ar-ocean)"/>
+  </g>
+
+  <rect x="232" y="94" width="152" height="44" rx="4" fill="#FDFAF4" stroke="#8A7E73" stroke-width="1"/>
+  <text x="242" y="110" class="ar-t">Exemples publics</text><text x="242" y="124" class="ar-x">tirés de la validation, jamais</text><text x="242" y="134" class="ar-x">du test réservé</text>
+  <path d="M384 116 H398" stroke="#2F5F80" stroke-width="1.2" marker-end="url(#ar-ocean)"/>
+
+  <rect x="232" y="192" width="152" height="58" rx="4" fill="#FDFAF4" stroke="#8A7E73" stroke-width="1"/>
+  <text x="242" y="208" class="ar-t">Publication automatique</text><text x="242" y="222" class="ar-x">tests puis mise en ligne sur</text><text x="242" y="233" class="ar-x">GitHub Pages à chaque version,</text><text x="242" y="244" class="ar-x">sans serveur d’inférence</text>
+  <path d="M216 224 H230" stroke="#2F5F80" stroke-width="1.2" marker-end="url(#ar-ocean)"/>
+  <path d="M384 224 H398" stroke="#2F5F80" stroke-width="1.2" marker-end="url(#ar-ocean)"/>
+
+  <rect x="400" y="74" width="230" height="176" rx="4" fill="#FDFAF4" stroke="#2F5F80" stroke-width="1.2"/>
+  <text x="410" y="88" class="ar-grp" fill="#2F5F80">SITE STATIQUE · NAVIGATEUR</text>
+  <g>
+    <rect x="410" y="94" width="210" height="32" rx="3" fill="#DCE6EE"/>
+    <text x="418" y="107" class="ar-t">Saisie des journaux</text><text x="418" y="119" class="ar-x">collage, fichier de 10 Mo au plus, exemples</text>
+    <rect x="410" y="132" width="210" height="32" rx="3" fill="#DCE6EE"/>
+    <text x="418" y="145" class="ar-t">Prétraitement JavaScript</text><text x="418" y="157" class="ar-x">codes E1–E29, 50 premiers événements</text>
+    <rect x="410" y="170" width="210" height="32" rx="3" fill="#DCE6EE"/>
+    <text x="418" y="183" class="ar-t">ONNX Runtime Web</text><text x="418" y="195" class="ar-x">WebAssembly, Web Worker, lots de 64</text>
+    <rect x="410" y="208" width="210" height="32" rx="3" fill="#DCE6EE"/>
+    <text x="418" y="221" class="ar-t">Résultats par bloc</text><text x="418" y="233" class="ar-x">classe, score, filtre, export CSV</text>
+    <path d="M515 126 V131" stroke="#2F5F80" stroke-width="1.2" marker-end="url(#ar-ocean)"/>
+    <path d="M515 164 V169" stroke="#2F5F80" stroke-width="1.2" marker-end="url(#ar-ocean)"/>
+    <path d="M515 202 V207" stroke="#2F5F80" stroke-width="1.2" marker-end="url(#ar-ocean)"/>
+  </g>
+
+  <!-- ===== Données ===== -->
+  <path d="M113 274 V252" stroke="#5E534B" stroke-width="1.3" marker-end="url(#ar-ink)"/>
+  <text x="120" y="268" class="ar-lab" fill="#5E534B">entraînement, validation</text>
+  <rect x="0" y="274" width="640" height="122" rx="6" fill="#F1ECE4" stroke="#8A7E73" stroke-width="1"/>
+  <text x="12" y="292" class="ar-band" fill="#5E534B">SOCLE COMMUN · DONNÉES HDFS</text>
+  <rect x="10" y="302" width="138" height="82" rx="4" fill="#FDFAF4" stroke="#8A7E73"/>
+  <text x="20" y="318" class="ar-t">HDFS_v1 · Loghub</text><text x="20" y="333" class="ar-x">journaux d’un cluster</text><text x="20" y="345" class="ar-x">Hadoop, 11 millions</text><text x="20" y="357" class="ar-x">de lignes</text><text x="20" y="372" class="ar-x">hors dépôt</text>
+  <path d="M148 343 H162" stroke="#5E534B" stroke-width="1.2" marker-end="url(#ar-ink)"/>
+  <rect x="164" y="302" width="236" height="82" rx="4" fill="#FDFAF4" stroke="#8A7E73"/>
+  <text x="174" y="318" class="ar-t">Préparation reproductible</text><text x="174" y="333" class="ar-x">téléchargement vérifié par empreinte</text><text x="174" y="345" class="ar-x">regroupement par bloc, 29 types d’événements</text><text x="174" y="357" class="ar-x">partition par bloc, stratifiée, graine 42</text><text x="174" y="372" class="ar-x">mêmes fonctions de lecture pour tous</text>
+  <path d="M400 343 H414" stroke="#5E534B" stroke-width="1.2" marker-end="url(#ar-ink)"/>
+  <rect x="416" y="302" width="214" height="82" rx="4" fill="#FDFAF4" stroke="#8A7E73"/>
+  <text x="426" y="318" class="ar-t">Corpus et partitions</text><text x="426" y="333" class="ar-x">575 061 blocs, 18 373 séquences</text><text x="426" y="345" class="ar-x">entraînement 70 %, validation 15 %</text><text x="426" y="357" class="ar-x">test réservé 15 % : ni réglage, ni</text><text x="426" y="369" class="ar-x">exemple public, ouvert une seule fois</text>
+  <path d="M282 396 V414" stroke="#5E534B" stroke-width="1.3" marker-end="url(#ar-ink)"/>
+  <text x="289" y="409" class="ar-lab" fill="#5E534B">lignes brutes ; blocs du test refusés par l’interface</text>
+
+  <!-- ===== Volet B ===== -->
+  <rect x="0" y="416" width="640" height="274" rx="6" fill="#FBEEE8" stroke="#C4593A" stroke-width="1"/>
+  <text x="12" y="434" class="ar-band" fill="#C4593A">VOLET B · EXPLICATION LOCALE</text>
+  <text x="12" y="446" class="ar-sub">modèle emprunté, adapté, encadré par le code</text>
+
+  <rect x="10" y="456" width="152" height="94" rx="4" fill="#FDFAF4" stroke="#C4593A" stroke-width="1.2"/>
+  <text x="20" y="472" class="ar-t">Interface locale · Gradio</text><text x="20" y="487" class="ar-x">accessible depuis le poste seul</text><text x="20" y="499" class="ar-x">modèle de base ou adapté</text><text x="20" y="511" class="ar-x">un ou trois agents</text><text x="20" y="523" class="ar-x">cinq blocs au plus</text><text x="20" y="535" class="ar-x">bloc du test réservé refusé</text>
+  <rect x="10" y="574" width="152" height="106" rx="4" fill="#F8E3D8" stroke="#C4593A" stroke-width="1"/>
+  <text x="20" y="590" class="ar-t">Réponse vérifiée</text><text x="20" y="605" class="ar-x">résumé des événements</text><text x="20" y="617" class="ar-x">faits observés</text><text x="20" y="629" class="ar-x">hypothèses (catalogue fermé)</text><text x="20" y="641" class="ar-x">informations manquantes</text><text x="20" y="653" class="ar-x">sources · abstention</text><text x="20" y="670" class="ar-lab" fill="#5E534B">sinon : sortie brute et erreurs</text>
+  <path d="M86 574 V552" stroke="#C4593A" stroke-width="1.2" marker-end="url(#ar-terra)"/>
+  <text x="92" y="566" class="ar-lab" fill="#C4593A">affichage</text>
+
+  <rect x="178" y="456" width="226" height="224" rx="4" fill="#FDFAF4" stroke="#C4593A" stroke-width="1.2"/>
+  <text x="188" y="470" class="ar-grp" fill="#C4593A">CHAÎNE D’EXPLICATION</text>
+  <g>
+    <rect x="188" y="476" width="206" height="32" rx="3" fill="#F8E3D8"/>
+    <text x="196" y="489" class="ar-t">Faits calculés par le code</text><text x="196" y="501" class="ar-x">comptes, chronologie, consigne figée</text>
+    <rect x="188" y="516" width="206" height="32" rx="3" fill="#F8E3D8"/>
+    <text x="196" y="529" class="ar-t">Recherche documentaire</text><text x="196" y="541" class="ar-x">trois passages, en mode trois agents</text>
+    <rect x="188" y="556" width="206" height="32" rx="3" fill="#F8E3D8"/>
+    <text x="196" y="569" class="ar-t">Agents (option)</text><text x="196" y="581" class="ar-x">recherche → rédaction → contrôle</text>
+    <rect x="188" y="596" width="206" height="32" rx="3" fill="#F8E3D8"/>
+    <text x="196" y="609" class="ar-t">Génération</text><text x="196" y="621" class="ar-x">modèle de base ou avec adaptateur</text>
+    <rect x="188" y="636" width="206" height="36" rx="3" fill="#F8E3D8"/>
+    <text x="196" y="650" class="ar-t">Contrôles</text><text x="196" y="663" class="ar-x">format, faits, références ; une correction</text>
+    <path d="M291 508 V515" stroke="#C4593A" stroke-width="1.2" marker-end="url(#ar-terra)"/>
+    <path d="M291 548 V555" stroke="#C4593A" stroke-width="1.2" marker-end="url(#ar-terra)"/>
+    <path d="M291 588 V595" stroke="#C4593A" stroke-width="1.2" marker-end="url(#ar-terra)"/>
+    <path d="M291 628 V635" stroke="#C4593A" stroke-width="1.2" marker-end="url(#ar-terra)"/>
+  </g>
+  <path d="M162 492 H176" stroke="#C4593A" stroke-width="1.2" marker-end="url(#ar-terra)"/>
+  <path d="M178 654 H164" stroke="#C4593A" stroke-width="1.2" marker-end="url(#ar-terra)"/>
+
+  <rect x="420" y="456" width="210" height="92" rx="4" fill="#FDFAF4" stroke="#C4593A" stroke-width="1.2"/>
+  <text x="430" y="470" class="ar-grp" fill="#C4593A">BASE DOCUMENTAIRE</text>
+  <text x="430" y="486" class="ar-t">51 passages de la documentation</text><text x="430" y="500" class="ar-x">officielle de HDFS, découpés par section</text><text x="430" y="514" class="ar-x">index dense (BGE, FAISS) et lexical (BM25)</text><text x="430" y="526" class="ar-x">fusion par rang réciproque</text><text x="430" y="540" class="ar-x">décrit le fonctionnement, pas les pannes</text>
+  <path d="M420 532 H396" stroke="#C4593A" stroke-width="1.2" marker-end="url(#ar-terra)"/>
+
+  <rect x="420" y="564" width="210" height="116" rx="4" fill="#FDFAF4" stroke="#C4593A" stroke-width="1.2"/>
+  <text x="430" y="578" class="ar-grp" fill="#C4593A">MOTEUR LOCAL · LLAMA.CPP</text>
+  <text x="430" y="594" class="ar-t">Gemma 4 E4B · QAT, 4 bits</text><text x="430" y="608" class="ar-x">révision figée, réflexion désactivée</text><text x="430" y="620" class="ar-x">contexte 4 096, température 0</text><text x="430" y="632" class="ar-x">+ adaptateur LoRA chargé sans fusion</text><text x="430" y="647" class="ar-t">Poste cible</text><text x="430" y="660" class="ar-x">RTX 3050 Laptop 6 Go : 3,7 Gio,</text><text x="430" y="672" class="ar-x">environ 27 tokens par seconde</text>
+  <path d="M396 612 H418" stroke="#C4593A" stroke-width="1.2" marker-start="url(#ar-terra)" marker-end="url(#ar-terra)"/>
+
+  <!-- ===== Adaptation ===== -->
+  <path d="M525 728 V682" stroke="#7D4E6E" stroke-width="1.4" marker-end="url(#ar-plum)"/>
+  <text x="532" y="702" class="ar-lab" fill="#7D4E6E">adaptateur GGUF</text>
+  <rect x="0" y="708" width="640" height="104" rx="6" fill="#F2EAF0" stroke="#7D4E6E" stroke-width="1"/>
+  <text x="12" y="726" class="ar-band" fill="#7D4E6E">ADAPTATION · GPU T4 DISTANT (KAGGLE)</text>
+  <rect x="10" y="736" width="186" height="66" rx="4" fill="#FDFAF4" stroke="#7D4E6E"/>
+  <text x="20" y="752" class="ar-t">Jeu d’adaptation annoté</text><text x="20" y="766" class="ar-x">240 blocs, brouillons corrigés</text><text x="20" y="778" class="ar-x">à la main : 200 entraînement,</text><text x="20" y="790" class="ar-x">40 validation, aucun du test</text>
+  <path d="M196 769 H210" stroke="#7D4E6E" stroke-width="1.2" marker-end="url(#ar-plum)"/>
+  <rect x="212" y="736" width="208" height="66" rx="4" fill="#FDFAF4" stroke="#7D4E6E" stroke-width="1.4"/>
+  <text x="222" y="752" class="ar-t">Entraînement QLoRA</text><text x="222" y="766" class="ar-x">modèle de base en 4 bits (NF4)</text><text x="222" y="778" class="ar-x">deux réglages de 400 pas</text><text x="222" y="790" class="ar-x">choix sur la validation seule</text>
+  <path d="M420 769 H434" stroke="#7D4E6E" stroke-width="1.2" marker-end="url(#ar-plum)"/>
+  <rect x="436" y="736" width="194" height="66" rx="4" fill="#FDFAF4" stroke="#7D4E6E"/>
+  <text x="446" y="752" class="ar-t">Adaptateur GGUF · 4,5 Mo</text><text x="446" y="766" class="ar-x">rang 8, projections requête</text><text x="446" y="778" class="ar-x">et valeur ; effet vérifié</text><text x="446" y="790" class="ar-x">avant toute mesure</text>
+
+  <!-- ===== Évaluation ===== -->
+  <rect x="0" y="826" width="640" height="56" rx="6" fill="#EAF0E7" stroke="#4F7A57" stroke-width="1"/>
+  <text x="12" y="844" class="ar-band" fill="#4F7A57">ÉVALUATION · TEST RÉSERVÉ, OUVERT UNE SEULE FOIS</text>
+  <text x="12" y="860" class="ar-x"><tspan font-weight="700">Volet A</tspan> : 86 260 blocs, référence contre BiLSTM,</text>
+  <text x="12" y="872" class="ar-x">séquences inédites, parité Python et navigateur.</text>
+  <text x="330" y="860" class="ar-x"><tspan font-weight="700">Volet B</tspan> : 80 cas, 4 configurations, mesures</text>
+  <text x="330" y="872" class="ar-x">automatiques et notation humaine à l’aveugle.</text>
+</svg>

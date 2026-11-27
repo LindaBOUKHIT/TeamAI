@@ -62,6 +62,7 @@ def toc_html(entries: list[dict], pages: list[int] | None) -> str:
 def assemble(entries, pages) -> str:
     parts = [p.read_text(encoding='utf-8') for p in sorted((HERE / 'sections').glob('*.html'))]
     body = '\n'.join(parts).replace('<!--TOC-->', toc_html(entries, pages))
+    body = re.sub(r'<!--SVG:([\w.-]+)-->', lambda m: (HERE / m.group(1)).read_text(encoding='utf-8'), body)
     return HEAD + body + '\n</body></html>\n'
 
 

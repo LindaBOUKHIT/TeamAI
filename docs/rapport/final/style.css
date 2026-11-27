@@ -133,3 +133,7 @@ ol.biblio li { counter-increment: ref; position: relative; padding-left: 9mm; fo
 ol.biblio li::before { content: "[" counter(ref) "]"; position: absolute; left: 0; color: var(--terracotta); font-weight: 700; }
 .annex table { font-size: 8.4pt; }
 .annex code { font-size: 8.2pt; word-break: break-all; }
+
+/* Architecture d’ensemble : une page à elle seule */
+figure.arch .panel { padding: 3mm 3mm 2.5mm; }
+figure.arch svg { display: block; max-height: 178mm; margin: 0 auto; }

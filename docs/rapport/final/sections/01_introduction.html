@@ -48,6 +48,13 @@
     </table>
   </figure>
 
-  <h2><span class="n">1.5</span>Organisation du document</h2>
+  <h2 class="arch-title"><span class="n">1.5</span>Architecture d’ensemble</h2>
+  <p>La figure&nbsp;1 situe les deux volets l’un par rapport à l’autre. Ils partagent un même socle&nbsp;: le corpus HDFS_v1, préparé une seule fois de façon reproductible, et une partition dont le test réservé n’est ouvert qu’à l’évaluation finale. Le volet&nbsp;A entraîne un détecteur en Python puis le publie dans un site statique où tout le calcul se fait dans le navigateur. Le volet&nbsp;B exécute en local un modèle de langage emprunté, adapté sur un GPU distant puis encadré par du code qui calcule les faits et contrôle chaque réponse.</p>
+  <figure class="arch">
+    <div class="panel"><!--SVG:architecture.svg--></div>
+    <figcaption><b>Figure 1.</b> Architecture d’ensemble du projet. En bleu le volet&nbsp;A, en terre cuite le volet&nbsp;B, en violet l’adaptation sur GPU distant, en vert l’évaluation sur le test réservé.</figcaption>
+  </figure>
+
+  <h2><span class="n">1.6</span>Organisation du document</h2>
   <p>Le chapitre&nbsp;2 décrit les données et le protocole commun. Les chapitres&nbsp;3 et&nbsp;4 présentent les deux solutions, et le chapitre&nbsp;5 l’évaluation du volet&nbsp;B sur son test réservé. Le chapitre&nbsp;6 compare les deux volets. Les chapitres&nbsp;7 et&nbsp;8 portent sur la conduite du projet, collectivement puis individuellement, et le chapitre&nbsp;9 sur les cinq outils que nous avons découverts. L’annexe&nbsp;A rassemble les éléments nécessaires pour reproduire les résultats.</p>
 </section>

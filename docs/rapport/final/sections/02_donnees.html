@@ -8,7 +8,7 @@
   <div class="keypoint"><span class="t">Une étiquette n’est pas une cause</span><p>L’étiquette indique qu’un bloc s’est mal terminé, pas pourquoi. Elle permet d’évaluer une détection, mais ni une cause racine ni une explication. Cette limite des données structure tout le volet&nbsp;B.</p></div>
 
   <h2><span class="n">2.2</span>Partition et séquences inédites</h2>
-  <p>Les deux volets partagent une partition unique, stratifiée selon l’étiquette avec une graine fixée&nbsp;: 70&nbsp;% des blocs pour l’entraînement, 15&nbsp;% pour la validation et 15&nbsp;% pour le test (figure&nbsp;1). Chaque bloc appartient à une seule partition.</p>
+  <p>Les deux volets partagent une partition unique, stratifiée selon l’étiquette avec une graine fixée&nbsp;: 70&nbsp;% des blocs pour l’entraînement, 15&nbsp;% pour la validation et 15&nbsp;% pour le test (figure&nbsp;2). Chaque bloc appartient à une seule partition.</p>
   <figure>
     <div class="panel">
       <svg viewBox="0 0 640 92" width="100%" role="img" aria-label="Partition des 575 061 blocs">
@@ -25,7 +25,7 @@
         <text x="640" y="84" fill="#C4593A" font-size="11.5" text-anchor="end">Test ouvert une seule fois par volet.</text>
       </svg>
     </div>
-    <figcaption><b>Figure 1.</b> Partition commune aux deux volets, stratifiée selon l’étiquette (graine 42).</figcaption>
+    <figcaption><b>Figure 2.</b> Partition commune aux deux volets, stratifiée selon l’étiquette (graine 42).</figcaption>
   </figure>
   <p>Une partition par bloc n’empêche pas qu’une même séquence apparaisse à la fois dans l’entraînement et dans le test, puisque la plupart des séquences sont partagées par de nombreux blocs. Un modèle peut donc obtenir un excellent score global en reconnaissant des séquences déjà vues. Pour mesurer la généralisation, nous isolons dans le test les <b>1&nbsp;962 blocs dont la séquence n’apparaît jamais à l’entraînement</b> et rapportons leurs résultats séparément.</p>
 

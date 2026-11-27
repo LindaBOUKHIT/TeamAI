@@ -3,7 +3,7 @@
   <h1><span class="n">3</span>Volet A&nbsp;: un détecteur dans le navigateur</h1>
 
   <h2><span class="n">3.1</span>Chaîne de traitement</h2>
-  <p>Le volet&nbsp;A suit une chaîne courte, entièrement maîtrisée par l’équipe (figure&nbsp;2). Les lignes de journaux sont regroupées par bloc, chaque ligne est convertie en code d’événement, puis le modèle lit la séquence et renvoie un score d’anomalie entre 0 et 1.</p>
+  <p>Le volet&nbsp;A suit une chaîne courte, entièrement maîtrisée par l’équipe (figure&nbsp;3). Les lignes de journaux sont regroupées par bloc, chaque ligne est convertie en code d’événement, puis le modèle lit la séquence et renvoie un score d’anomalie entre 0 et 1.</p>
   <figure>
     <div class="flow">
       <span class="node">Journaux HDFS<small>collés ou importés</small></span><span class="link">→</span>
@@ -12,7 +12,7 @@
       <span class="node ocean">BiLSTM<small>ONNX, 57 ko</small></span><span class="link">→</span>
       <span class="node accent">Score et classe<small>dans le navigateur</small></span>
     </div>
-    <figcaption><b>Figure 2.</b> Chaîne du volet&nbsp;A. Le même prétraitement est écrit en Python pour l’entraînement et en JavaScript pour le site.</figcaption>
+    <figcaption><b>Figure 3.</b> Chaîne du volet&nbsp;A. Le même prétraitement est écrit en Python pour l’entraînement et en JavaScript pour le site.</figcaption>
   </figure>
   <p>Le vocabulaire compte 31 entrées&nbsp;: les 29 événements, un code de remplissage et un code «&nbsp;événement inconnu&nbsp;». Le modèle lit les <b>50 premiers événements</b> d’un bloc&nbsp;; au-delà, la séquence est tronquée et le site le signale. Comme le prétraitement existe en deux langages, des cas de parité vérifient qu’il produit exactement les mêmes codes des deux côtés.</p>
 
@@ -64,7 +64,7 @@
         <text x="548" y="170" font-size="17" fill="#2F5F80" font-family="Young Serif, serif">0,999</text>
       </svg>
     </div>
-    <figcaption><b>Figure 3.</b> Matrice de confusion du BiLSTM sur les 86&nbsp;260 blocs du test réservé (2&nbsp;526 anomalies).</figcaption>
+    <figcaption><b>Figure 4.</b> Matrice de confusion du BiLSTM sur les 86&nbsp;260 blocs du test réservé (2&nbsp;526 anomalies).</figcaption>
   </figure>
   <p>Le BiLSTM <b>divise par deux les fausses alertes</b> de la référence (58 contre 116) pour une anomalie manquée de plus (3 contre 2). L’écart se maintient sur les séquences inédites, où les deux modèles perdent en précision&nbsp;: c’est là que le score global surestimait le plus la capacité de généralisation. Les trois anomalies manquées ont toutes une séquence inédite. Une version quantifiée en entiers 8 bits prend exactement les mêmes décisions sur le test pour un fichier de 22&nbsp;570 octets&nbsp;; le site sert néanmoins la version en virgule flottante, la seule dont la parité avec Python a été vérifiée sur tout le test (section&nbsp;3.5).</p>
 
