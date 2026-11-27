@@ -31,6 +31,6 @@ docs/
 └── soutenance/
     ├── J3_revue.pdf            Support de la revue J3                               SCRUM-32
     ├── scenario_demo.md        Scénario + liens des vidéos de secours               SCRUM-51
-    ├── pitch.pdf               Pitch 4 min                                          SCRUM-52
-    └── presentation.pdf        Présentation 8 min                                   SCRUM-52
+    ├── pitch.pdf               Pitch                                                SCRUM-52
+    └── presentation.pdf        Présentation                                         SCRUM-52
 ```

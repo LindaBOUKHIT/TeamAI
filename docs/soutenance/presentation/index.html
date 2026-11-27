@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- SCRUM-52 — Présentation, 8 minutes. Sources des chiffres (arrondis à l'affichage) :
+<!-- SCRUM-52 — Présentation. Sources des chiffres (arrondis à l'affichage) :
  eval/results/volet_a.md : test complet 86 260, macro-F1 0,993846 → 0,994 ; inédit 1 962,
  0,957585 → 0,958 et 0,971354 → 0,971 ; FP 116/58 ; FN 2/3 ; parité 0 divergence ;
  seuil 0,40814146399497986 → 0,408 ; 6 198,58 → 6 199 blocs/s Chrome WASM.
@@ -22,13 +22,12 @@
  le précédent est déclaré sans usage pour le réglage actuel. Campagne finale unique.
  Style, navigation et logos : ../avancement/ (repris sans changement).
  eval/volet_b/double_annotation/depouillement.json : notes à l’aveugle (SCRUM-45), totaux 7,03 / 6,52 / 7,87 / 7,18,
- notes indépendantes 6,38 / 5,97 / 7,87 / 6,95, kappa pondéré indépendant 0,17 à 0,49.
- Les durées ci-dessous sont des repères de prise de parole, pas des mesures. -->
+ notes indépendantes 6,38 / 5,97 / 7,87 / 6,95, kappa pondéré indépendant 0,17 à 0,49. -->
 <html lang="fr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>TeamAI — Présentation · 8 min</title>
+<title>TeamAI — Présentation</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:ital,wght@0,400;0,500;0,700;1,400&family=Kalam:wght@400;700&family=Courier+Prime&display=block" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
@@ -37,7 +36,6 @@
 <svg width="0" height="0" style="position:absolute">
   <filter id="rough"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="7"/><feDisplacementMap in="SourceGraphic" scale="5"/></filter>
 </svg>
-<!-- Repère oral : 20 s. -->
 <section class="slide cover">
   <div class="logos">
     <img src="logo_fges.png" alt="Faculté de Gestion, Économie et Sciences — Université Catholique de Lille">
@@ -66,28 +64,24 @@
     <p class="hand note-err">là, ça casse.<br>mais pourquoi&nbsp;?</p>
   </div>
 </section>
-<!-- Repère oral : 40 s. -->
 <section class="slide method">
 <p class="hand kicker">Architecture A</p>
 <h2>Des logs au score, dans le navigateur</h2>
 <div class="flow"><span class="node">Logs HDFS</span><span class="link">→</span><span class="node">Parser · E1–E29</span><span class="link">→</span><span class="node">BiLSTM</span><span class="link">→</span><span class="node">ONNX</span><span class="link">→</span><span class="node accent">Navigateur</span></div><div class="method-notes"><div class="sticky sage"><p class="hand">Appris par l’équipe</p><p class="small">Des séquences d’événements, une classe et un score.</p></div><div class="sticky mustard"><p class="hand">Même préparation</p><p class="small">Python à l’entraînement, JavaScript sur le site.</p></div><div class="sticky blush"><p class="hand">Sans serveur</p><p class="small">Site public statique. Les logs sont traités côté client.</p></div></div>
-<footer><span>TeamAI · Présentation · 8 min</span><span class="folio">2</span></footer>
+<footer><span>TeamAI · Présentation</span><span class="folio">2</span></footer>
 </section>
-<!-- Repère oral : 45 s. -->
 <section class="slide twoways">
 <p class="hand kicker">Architecture B</p>
 <h2>Des preuves à une explication locale</h2>
 <div class="spread"><article class="page-card left"><h3>Préparer et rechercher</h3><ul><li>Logs → faits calculés v16.</li><li>RAG hybride : BGE + BM25.</li><li>Agent recherche → passages HDFS.</li></ul></article><div class="spine"><span class="hand">recherche<br>rédaction<br>contrôle</span></div><article class="page-card right"><h3>Rédiger et contrôler</h3><ul><li>Gemma 4 E4B QAT · GGUF / llama.cpp.</li><li>Agent rédaction → agent contrôle.</li><li>Restitution dans la démo Gradio locale.</li></ul></article></div><p class="foot-line">La validation v16 seule n’inclut ni RAG ni LoRA. La chaîne complète est une variante distincte.</p>
-<footer><span>TeamAI · Présentation · 8 min</span><span class="folio">3</span></footer>
+<footer><span>TeamAI · Présentation</span><span class="folio">3</span></footer>
 </section>
-<!-- Repère oral : 35 s. -->
 <section class="slide twoways">
 <p class="hand kicker">Les garde-fous</p>
 <h2>Une réponse structurée reste à vérifier</h2>
 <div class="spread"><article class="page-card left"><h3>Avant de générer</h3><ul><li>Faits calculés par le code.</li><li>Glossaire limité aux événements présents.</li><li>Prompt v16 figé et causes autorisées.</li></ul></article><div class="spine"><span class="hand">faits<br>≠<br>hypothèses</span></div><article class="page-card right"><h3>Après la génération</h3><ul><li>Contrat et références vérifiés.</li><li>Correction bornée et traces conservées.</li><li>Ajouté après v16 : garde anti-boucle.</li></ul></article></div><p class="foot-line">Le garde anti-boucle est postérieur à la mesure v16 : aucun gain rétroactif annoncé.</p>
-<footer><span>TeamAI · Présentation · 8 min</span><span class="folio">4</span></footer>
+<footer><span>TeamAI · Présentation</span><span class="folio">4</span></footer>
 </section>
-<!-- Repère oral : 60 s. -->
 <section class="slide volet-a">
   <p class="hand kicker">Volet A · test officiel</p>
   <h2>Le BiLSTM divise par deux<br>les fausses alertes</h2>
@@ -127,23 +121,20 @@
   </div>
   <p class="foot-line">Campagne finale unique, aucun réglage après lecture. Un résultat antérieur de la référence sur le test est déclaré, sans usage pour le réglage.</p>
   
-<footer><span>TeamAI · Présentation · 8 min</span><span class="folio">5</span></footer>
+<footer><span>TeamAI · Présentation</span><span class="folio">5</span></footer>
 </section>
-<!-- Repère oral : 50 s. -->
 <section class="slide twoways">
 <p class="hand kicker">Résultats B · validation</p>
 <h2>Bon format, fond encore fragile</h2>
 <div class="spread"><article class="page-card left"><h3>Contrôles automatiques</h3><ul><li><b>40/40</b> contrats et copies de faits conformes.</li><li><b>39/40</b> passent les contrôles factuels.</li><li><b>30,6 s/bloc</b>, correction incluse, deux T4.</li></ul></article><div class="spine"><span class="hand">40 blocs<br>val inédits</span></div><article class="page-card right"><h3>Relecture humaine</h3><ul><li><b>2/40</b> chronologies fausses.</li><li><b>3/40</b> causalités non démontrées.</li><li><b>3/40</b> pseudo-références ; <b>1/40</b> résumé inutilisable.</li></ul></article></div><p class="foot-line">Sans RAG ni LoRA, sur la validation. Les défauts se recoupent.</p>
-<footer><span>TeamAI · Présentation · 8 min</span><span class="folio">6</span></footer>
+<footer><span>TeamAI · Présentation</span><span class="folio">6</span></footer>
 </section>
-<!-- Repère oral : 50 s. -->
 <section class="slide twoways">
 <p class="hand kicker">Résultats B · test réservé · mesures automatiques</p>
 <h2>Le LoRA change d’abord<br>la forme des réponses</h2>
 <div class="spread"><article class="page-card left"><h3>1 agent · base → LoRA</h3><ul><li><b>79/80</b> réponses acceptées dans les deux cas.</li><li>Ordres affirmés entre événements : <b>35/80 → 1/80</b>.</li><li>Latence moyenne : <b>27,8 s → 24,6 s</b> par cas, T4.</li></ul></article><div class="spine"><span class="hand">80 cas<br>gelés</span></div><article class="page-card right"><h3>3 agents · base → LoRA</h3><ul><li>Acceptées par le contrôleur : <b>9/80 → 25/80</b>.</li><li>Environ <b>4,7 appels</b> et <b>74 à 84 s</b> en moyenne par cas.</li><li>Pic mémoire GPU : <b>4,2 Gio</b> ; LoRA &lt; 10 Mio de plus.</li></ul></article></div><p class="foot-line">Mesures de forme : « acceptée » ne veut pas dire « juste ». La justesse est notée à l’aveugle, diapositive suivante.</p>
-<footer><span>TeamAI · Présentation · 8 min</span><span class="folio">7</span></footer>
+<footer><span>TeamAI · Présentation</span><span class="folio">7</span></footer>
 </section>
-<!-- Repère oral : 35 s. -->
 <section class="slide volet-a">
   <p class="hand kicker">Résultats B · test réservé · notation à l’aveugle</p>
   <h2>Le LoRA améliore aussi le fond</h2>
@@ -180,42 +171,37 @@
     </aside>
   </div>
   <p class="foot-line">30 cas × 4 configurations, deux annotateurs, configurations masquées. Note sur 8 : faits, sources, abstention, utilité. Échantillon réduit.</p>
-<footer><span>TeamAI · Présentation · 8 min</span><span class="folio">8</span></footer>
+<footer><span>TeamAI · Présentation</span><span class="folio">8</span></footer>
 </section>
-<!-- Repère oral : 50 s. -->
 <section class="slide twoways">
 <p class="hand kicker">Résultats B · retrieval et piste écartée</p>
 <h2>Documenter aussi les limites</h2>
 <div class="spread"><article class="page-card left"><h3>Recherche documentaire</h3><ul><li>Hybride, requêtes par description, <b>k = 3</b>.</li><li><b>306 traces val</b> ; rappel <b>0,6644</b>.</li><li>Templates trouvés : <b>6/10</b>.</li></ul></article><div class="spine"><span class="hand">preuves<br>séparées</span></div><article class="page-card right"><h3>Laya</h3><ul><li>Validation unique : <b>AUC 0,47</b>.</li><li>Ne sépare pas Fail et Success dans cet essai.</li><li>Porte non intégrée : aucun bénéfice observé.</li></ul></article></div><p class="foot-line">Le rappel documentaire ne mesure pas la justesse des explications. Sur le test, la recherche ne renvoie que 4 passages distincts sur 80 cas.</p>
-<footer><span>TeamAI · Présentation · 8 min</span><span class="folio">9</span></footer>
+<footer><span>TeamAI · Présentation</span><span class="folio">9</span></footer>
 </section>
-<!-- Repère oral : 40 s. -->
 <section class="slide twoways">
 <p class="hand kicker">Comparaison par axes</p>
 <h2>Deux tâches, des compromis différents</h2>
 <div class="spread"><article class="page-card left"><h3>A · Détecter</h3><ul><li><b>Qualité :</b> métriques sur le test.</li><li><b>Latence :</b> débit élevé dans Chrome.</li><li><b>Contrôle :</b> poids entraînés par l’équipe.</li><li><b>Explicabilité :</b> classe et score.</li><li><b>Dépendances :</b> ONNX Runtime Web.</li></ul></article><div class="spine"><span class="hand"></span></div><article class="page-card right"><h3>B · Expliquer</h3><ul><li><b>Qualité :</b> 7,87/8 à l’aveugle avec le LoRA, 7,03 sans.</li><li><b>Latence :</b> 25 à 84 s par cas sur T4.</li><li><b>Contrôle :</b> poids empruntés, prompt encadré.</li><li><b>Explicabilité :</b> faits et hypothèses à vérifier.</li><li><b>Dépendances :</b> Gemma, llama.cpp, BGE.</li></ul></article></div><p class="foot-line">Coût financier et temps humain : à mesurer. Machines et tâches différentes.</p>
-<footer><span>TeamAI · Présentation · 8 min</span><span class="folio">10</span></footer>
+<footer><span>TeamAI · Présentation</span><span class="folio">10</span></footer>
 </section>
-<!-- Repère oral : 40 s. -->
 <section class="slide next">
 <p class="hand kicker">Défauts et feuille de route</p>
 <h2>Consolider avant de promettre un gain</h2>
 <div class="spread"><article class="page-card left"><h3>Défauts observés</h3><ul><li>A : fausses alertes et anomalies manquées.</li><li>B : chronologie et causalité fragiles.</li><li>Contrôleur parfois hors contrat.</li><li>Apport documentaire encore peu visible.</li></ul></article><div class="spine"><span class="hand"></span></div><article class="page-card right"><h3>Priorités proposées</h3><ul><li>Aligner rédaction, contrôle et contrat sur val.</li><li>Mieux afficher l’incertitude et les preuves.</li><li>Mesurer le coût complet sur la cible locale.</li><li>Élargir la recherche documentaire.</li></ul></article></div><p class="foot-line">Aucun réglage sur le test. Gain LoRA mesuré sur la forme et sur la justesse notée à l’aveugle (30 cas).</p>
-<footer><span>TeamAI · Présentation · 8 min</span><span class="folio">11</span></footer>
+<footer><span>TeamAI · Présentation</span><span class="folio">11</span></footer>
 </section>
-<!-- Repère oral : 35 s. -->
 <section class="slide method">
 <p class="hand kicker">Organisation et arbitrages</p>
 <h2>Un ticket = une PR relue</h2>
 <div class="flow"><span class="node">Jira</span><span class="link">→</span><span class="node">Branche</span><span class="link">→</span><span class="node">PR</span><span class="link">→</span><span class="node accent">Relecture croisée</span><span class="link">→</span><span class="node">Intégration</span></div><div class="method-notes"><div class="sticky sage"><p class="hand">Contrats C1–C7</p><p class="small">Des formats communs pour données, modèles, explications et évaluations.</p></div><div class="sticky mustard"><p class="hand">Journal IA</p><p class="small">Commandes, décisions, limites et usages des assistants conservés.</p></div><div class="sticky blush"><p class="hand">Test ouvert une seule fois</p><p class="small">Règle de campagne finale : réglages sur validation, puis gel. Précédent du volet A déclaré.</p></div></div>
-<footer><span>TeamAI · Présentation · 8 min</span><span class="folio">12</span></footer>
+<footer><span>TeamAI · Présentation</span><span class="folio">12</span></footer>
 </section>
-<!-- Repère oral : 30 s. -->
 <section class="slide next">
 <p class="hand kicker">Conclusion</p>
 <h2>Détecter est livré.<br>Expliquer exige des preuves.</h2>
 <div class="spread"><article class="page-card left"><h3>Ce que nous livrons</h3><ul><li>Un site public de détection dans le navigateur.</li><li>Une chaîne locale pour lire les faits et proposer une explication.</li></ul></article><div class="spine"><span class="hand">merci !</span></div><article class="page-card right"><h3>Ce que nous retenons</h3><ul><li>Un format valide ne garantit pas une réponse juste.</li><li>Une hypothèse doit rester reliée à ses preuves.</li><li>Avec 200 exemples relus, le LoRA améliore la forme et le fond.</li></ul></article></div>
-<footer><span>TeamAI · Présentation · 8 min</span><span class="folio">13</span></footer>
+<footer><span>TeamAI · Présentation</span><span class="folio">13</span></footer>
 </section>
 <script src="deck.js"></script>
 </body>
