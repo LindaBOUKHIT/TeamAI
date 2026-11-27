@@ -54,7 +54,7 @@ Capture reprise du support J3 (SCRUM-32). Board : https://lindaboukhit04.atlassi
 
 ## Soutenance du lundi 30 novembre 2026 · SCRUM-54
 
-État du dossier le vendredi 27 novembre. Le lot de remise comprend le pitch, la présentation de la PR #86, le rapport V1 et la vidéo de démonstration du volet A réalisée par Bachar. La présentation reste soumise à la revue de la PR.
+État du dossier le vendredi 27 novembre. Le lot de remise comprend le pitch, la présentation de la PR #86 et le rapport V1. La présentation reste soumise à la revue de la PR.
 
 | Élément | Version ou preuve vérifiée | Reste pour la remise |
 |---|---|---|
@@ -62,7 +62,6 @@ Capture reprise du support J3 (SCRUM-32). Board : https://lindaboukhit04.atlassi
 | Pitch | [PDF de 6 pages](https://github.com/LindaBOUKHIT/TeamAI/blob/dc9d9d93e112862593649c463e99e847ce5e4eb1/docs/soutenance/pitch.pdf) | Joindre au courriel. |
 | Présentation | [PDF de 12 pages](https://github.com/LindaBOUKHIT/TeamAI/blob/0c225475c2e9a142d2a8b9717993a3b9240c68e6/docs/soutenance/presentation.pdf) de la [PR #86](https://github.com/LindaBOUKHIT/TeamAI/pull/86). La diapo 7 présente les mesures automatiques sur 80 cas. Aucun résultat de justesse issu de l’arbitrage humain n’y est publié. | Faire relire et intégrer cette version, puis envoyer le PDF correspondant. |
 | Rapport V1 | [PDF de 32 pages](https://github.com/LindaBOUKHIT/TeamAI/blob/dc9d9d93e112862593649c463e99e847ce5e4eb1/docs/rapport/TeamAI_Rapport_V1.pdf) disponible avant J4 | L’envoi antérieur au professeur reste à confirmer. |
-| Vidéo du volet A | `volet_A.mp4` (30 s, 1900 × 1068), réalisée par Bachar (SCRUM-51) : le site public analyse l’exemple « Plusieurs blocs » et signale 1 bloc suspect sur 3. SHA-256 `e6452a4c3a7fc7761fdff5943d046784ba358429177d33875a67e488aff49062`. | Fichier hors Git à joindre au courriel. |
 | Dépôt et version de soutenance | [Dépôt accessible en lecture publique](https://github.com/LindaBOUKHIT/TeamAI). La [PR #81 de dev vers main](https://github.com/LindaBOUKHIT/TeamAI/pull/81) est ouverte. Seul le tag de mi-parcours est publié au 27/11. | Après intégration des livrables, revue d’Alain et fusion de la PR finale, poser `v1.1-soutenance` sur le commit de fusion. |
 | Suivi | [Board Jira](https://lindaboukhit04.atlassian.net/jira/software/projects/SCRUM/boards/1), [capture datée du jalon J3](../soutenance/j3/board.png), [classeur](https://docs.google.com/spreadsheets/d/1W8IjMS2L9-SxDK-FGQvjVIdG9NSwmwVBR8dpT5AitLg/edit?gid=1148275204#gid=1148275204) et [journal du projet](https://github.com/LindaBOUKHIT/TeamAI/blob/dc9d9d93e112862593649c463e99e847ce5e4eb1/docs/projet/journal.md). L’export anonyme du classeur a répondu HTTP 401. | Vérifier que le compte du destinataire peut consulter le classeur et le board, ou fournir une capture actuelle du board. |
 
