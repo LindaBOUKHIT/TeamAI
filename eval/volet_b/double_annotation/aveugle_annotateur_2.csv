@@ -1,4 +1,4 @@
-﻿"id","etiquette","trace","preuves","reponse","F","S","A","U","commentaire"
+"id","etiquette","trace","preuves","reponse","F","S","A","U","commentaire"
 "test-0004","A","1: 081111 060149 21326 INFO dfs.DataNode$DataXceiver: Receiving block blk_1422210367847367358 src: /10.251.107.227:54654 dest: /10.251.107.227:50010
 2: 081111 060149 21589 INFO dfs.DataNode$DataXceiver: Receiving block blk_1422210367847367358 src: /10.251.107.227:45795 dest: /10.251.107.227:50010
 3: 081111 060149 21661 INFO dfs.DataNode$DataXceiver: Receiving block blk_1422210367847367358 src: /10.251.194.147:59623 dest: /10.251.194.147:50010
@@ -171,7 +171,7 @@ Informations manquantes : aucune
 
 Sources documentaires : aucune
 
-Abstention : non","1","2","2","1","Les preuves confirment les éléments mentionnés : l'allocation E22, les débuts d'écriture E5 (3) et les réceptions de réplicas E9 (3). En revanche, le résumé dit « le processus a débuté par l’allocation » alors que E5 et E22 sont tous deux à 06:01:49 : leur ordre est indéterminé [F10]."
+Abstention : non","2","2","2","2","Les preuves confirment les éléments mentionnés : l'allocation E22, les débuts d'écriture E5 (3) et les réceptions de réplicas E9 (3). En revanche, le résumé dit « le processus a débuté par l’allocation » alors que E5 et E22 sont tous deux à 06:01:49 : leur ordre est indéterminé [F10]. | Révision après confrontation : F=2 : L'allocation et les débuts d'écriture partagent 06:01:49 (lignes 1–4, [F10]) ; « par l'allocation […] et l'initiation » les regroupe sans affirmer que l'une précède l'autre. ; U=2 : Le résumé couvre écritures, réceptions et blockMap (lignes 1–13), puis les faits distinguent demande et suppression locale ([F08], [F06]) ; l'explication reste claire et utile."
 "test-0004","D","1: 081111 060149 21326 INFO dfs.DataNode$DataXceiver: Receiving block blk_1422210367847367358 src: /10.251.107.227:54654 dest: /10.251.107.227:50010
 2: 081111 060149 21589 INFO dfs.DataNode$DataXceiver: Receiving block blk_1422210367847367358 src: /10.251.107.227:45795 dest: /10.251.107.227:50010
 3: 081111 060149 21661 INFO dfs.DataNode$DataXceiver: Receiving block blk_1422210367847367358 src: /10.251.194.147:59623 dest: /10.251.194.147:50010
@@ -471,7 +471,7 @@ Informations manquantes : aucune
 
 Sources documentaires : aucune
 
-Abstention : non","1","2","2","1","Les événements cités correspondent aux repères temporels de la trace. En revanche, l'expression « initialement alloué » suggère un ordre entre E22 et E5 non prouvé à 03:31:45 [F10] ; les faits existent néanmoins."
+Abstention : non","2","2","2","2","Les événements cités correspondent aux repères temporels de la trace. En revanche, l'expression « initialement alloué » suggère un ordre entre E22 et E5 non prouvé à 03:31:45 [F10] ; les faits existent néanmoins. | Révision après confrontation : F=2 : L'allocation est bien dans la première seconde (ligne 2, [T02]) avec un début d'écriture (ligne 1, [T01]) ; « initialement […] et » n'affirme pas une antériorité entre eux. ; U=2 : Les repères [T01]–[T13] rendent lisible la séquence et [F06]/[F08] explicitent la portée limitée des suppressions ; aucun manque important ne rend ce résumé incomplet."
 "test-0010","A","1: 081111 045515 31 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/rand5/_temporary/_task_200811101024_0011_m_000072_0/part-00072. blk_-2575947670106144473
 2: 081111 045516 20348 INFO dfs.DataNode$DataXceiver: Receiving block blk_-2575947670106144473 src: /10.251.193.224:39823 dest: /10.251.193.224:50010
 3: 081111 045516 20481 INFO dfs.DataNode$DataXceiver: Receiving block blk_-2575947670106144473 src: /10.251.193.224:48677 dest: /10.251.193.224:50010
@@ -1304,7 +1304,7 @@ Informations manquantes : aucune
 
 Sources documentaires : aucune
 
-Abstention : non","1","2","2","1","Les événements principaux concordent avec la trace : les débuts d'écriture E5 (3), les réceptions de réplicas E9 (3) et les mises à jour de blockMap E26 (3). En revanche, l'allocation donnée comme commencement certain alors qu’au moins un E5 est observé à la même seconde ; ordre interne non établi. Les références aux faits suffisent ici, sans documentation externe."
+Abstention : non","2","2","2","2","Les événements principaux concordent avec la trace : les débuts d'écriture E5 (3), les réceptions de réplicas E9 (3) et les mises à jour de blockMap E26 (3). En revanche, l'allocation donnée comme commencement certain alors qu’au moins un E5 est observé à la même seconde ; ordre interne non établi. Les références aux faits suffisent ici, sans documentation externe. | Révision après confrontation : F=2 : La phrase groupe allocation et écriture dans le début du processus, toutes à 06:04:56 (lignes 1–4, [F10]), sans connecteur imposant leur ordre interne. ; U=2 : Les réceptions et blockMap ([F04], [F09]) complètent les écritures, et les faits précisent les limites des suppressions ([F06], [F08]) ; l'ensemble est exploitable."
 "test-0022","C","1: 081111 060456 21280 INFO dfs.DataNode$DataXceiver: Receiving block blk_2284131606093448390 src: /10.251.107.242:47891 dest: /10.251.107.242:50010
 2: 081111 060456 21410 INFO dfs.DataNode$DataXceiver: Receiving block blk_2284131606093448390 src: /10.250.6.4:33905 dest: /10.250.6.4:50010
 3: 081111 060456 21707 INFO dfs.DataNode$DataXceiver: Receiving block blk_2284131606093448390 src: /10.251.107.242:43536 dest: /10.251.107.242:50010
@@ -2258,7 +2258,7 @@ Informations manquantes : aucune
 
 Sources documentaires : aucune
 
-Abstention : non","1","2","2","1","Les événements cités correspondent aux repères temporels de la trace. En revanche, l'expression « initialement alloué » : E22 [T02] et E5 [T01] sont dans la même seconde ; ordre non établi."
+Abstention : non","2","2","2","2","Les événements cités correspondent aux repères temporels de la trace. En revanche, l'expression « initialement alloué » : E22 [T02] et E5 [T01] sont dans la même seconde ; ordre non établi. | Révision après confrontation : F=2 : [T02] place bien l'allocation dans la première seconde avec [T01] ; la coordination « et » n'impose pas de priorité entre les deux, et les autres étapes sont attestées. ; U=2 : Le résumé couvre les étapes [T01]–[T13], et [F08]/[F06] distinguent demande et journalisation locale ; sa lecture reste claire sans extrapoler l'achèvement."
 "test-0028","D","1: 081111 072341 22621 INFO dfs.DataNode$DataXceiver: Receiving block blk_-7022782725882588627 src: /10.251.193.224:58991 dest: /10.251.193.224:50010
 2: 081111 072341 23110 INFO dfs.DataNode$DataXceiver: Receiving block blk_-7022782725882588627 src: /10.251.193.224:39426 dest: /10.251.193.224:50010
 3: 081111 072341 29 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/rand6/_temporary/_task_200811101024_0013_m_000847_0/part-00847. blk_-7022782725882588627
@@ -2439,7 +2439,7 @@ Informations manquantes : aucune
 
 Sources documentaires : aucune
 
-Abstention : non","1","2","2","1","Les événements cités correspondent aux repères temporels de la trace. En revanche, « le processus a débuté par l’allocation » [T03] alors que E5 [T01/T02] partage l’horodatage initial ; ordre non démontré."
+Abstention : non","1","2","2","2","Les événements cités correspondent aux repères temporels de la trace. En revanche, « le processus a débuté par l’allocation » [T03] alors que E5 [T01/T02] partage l’horodatage initial ; ordre non démontré. | Révision après confrontation : U=2 : Les faits réintroduisent les débuts d'écriture [F03] et les demandes [F08] ; avec les réceptions, blockMap et la réserve [F06], le résumé reste utile malgré l'imprécision initiale notée en F."
 "test-0033","C","1: 081111 024943 17979 INFO dfs.DataNode$DataXceiver: Receiving block blk_-5197282817719548999 src: /10.251.65.237:52547 dest: /10.251.65.237:50010
 2: 081111 024943 18004 INFO dfs.DataNode$DataXceiver: Receiving block blk_-5197282817719548999 src: /10.251.193.175:40974 dest: /10.251.193.175:50010
 3: 081111 024943 18128 INFO dfs.DataNode$DataXceiver: Receiving block blk_-5197282817719548999 src: /10.251.193.175:53791 dest: /10.251.193.175:50010
@@ -2639,7 +2639,7 @@ Informations manquantes :
 
 Sources documentaires : aucune
 
-Abstention : non","2","2","2","2","La réponse s'appuie sur ces événements attestés : les lectures E3 (6), les réceptions de réplicas E9 (3) et les demandes d'invalidation E23 (3). Les 3 exceptions d'envoi E4 sont reconnues ; la réponse évite d'en déduire une cause non attestée."
+Abstention : non","0","2","2","1","La réponse s'appuie sur ces événements attestés : les lectures E3 (6), les réceptions de réplicas E9 (3) et les demandes d'invalidation E23 (3). Les 3 exceptions d'envoi E4 sont reconnues ; la réponse évite d'en déduire une cause non attestée. | Révision après confrontation : F=0 : À 08:26:11 la ligne 22 ([T13]) indique Served, pas une exception ; la deuxième exception est à 07:17:46 (ligne 18, [L02]), donc la chronologie centrale des incidents est contredite. ; U=1 : La demande d'informations cible à tort une exception à 08:26:11 (ligne 22, Served) et omet celle de 07:17:46 ([L02]) ; cela détourne concrètement l'investigation malgré un résumé compréhensible."
 "test-0034","B","1: 081110 014321 27 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/randtxt/_temporary/_task_200811092030_0003_m_001515_0/part-01515. blk_7304855330352525404
 2: 081110 014321 5685 INFO dfs.DataNode$DataXceiver: Receiving block blk_7304855330352525404 src: /10.251.111.228:33284 dest: /10.251.111.228:50010
 3: 081110 014321 5918 INFO dfs.DataNode$DataXceiver: Receiving block blk_7304855330352525404 src: /10.251.123.20:59388 dest: /10.251.123.20:50010
@@ -2719,7 +2719,7 @@ Informations manquantes :
 
 Sources documentaires : aucune
 
-Abstention : non","1","2","1","1","Les événements principaux concordent avec la trace : les réceptions de réplicas E9 (3), les demandes d'invalidation E23 (3) et les messages de suppression locale E21 (3). En revanche, le résumé annonce « trois lectures servies » ; [F03] en compte six (E3). Les exceptions ont bien été identifiées et leur cause non établie. Les références aux faits suffisent ici, sans documentation externe."
+Abstention : non","1","2","2","1","Les événements principaux concordent avec la trace : les réceptions de réplicas E9 (3), les demandes d'invalidation E23 (3) et les messages de suppression locale E21 (3). En revanche, le résumé annonce « trois lectures servies » ; [F03] en compte six (E3). Les exceptions ont bien été identifiées et leur cause non établie. Les références aux faits suffisent ici, sans documentation externe. | Révision après confrontation : A=2 : Les exceptions [L01]–[L03] sont décrites comme de cause indéterminée et leurs détails sont demandés ; une description limitée est possible sans abstention malgré le compte erroné des lectures."
 "test-0034","C","1: 081110 014321 27 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/randtxt/_temporary/_task_200811092030_0003_m_001515_0/part-01515. blk_7304855330352525404
 2: 081110 014321 5685 INFO dfs.DataNode$DataXceiver: Receiving block blk_7304855330352525404 src: /10.251.111.228:33284 dest: /10.251.111.228:50010
 3: 081110 014321 5918 INFO dfs.DataNode$DataXceiver: Receiving block blk_7304855330352525404 src: /10.251.123.20:59388 dest: /10.251.123.20:50010
@@ -2799,7 +2799,7 @@ Informations manquantes :
 
 Sources documentaires : aucune
 
-Abstention : non","2","2","1","1","Les faits cités sont vérifiables : l'allocation E22, les débuts d'écriture E5 (3) et les lectures E3 (6). Les événements et les trois exceptions sont observables ; le résumé omet la limite « cause indéterminée » et rend « dans son ensemble » plus affirmatif que [F10]."
+Abstention : non","1","2","1","1","Les faits cités sont vérifiables : l'allocation E22, les débuts d'écriture E5 (3) et les lectures E3 (6). Les événements et les trois exceptions sont observables ; le résumé omet la limite « cause indéterminée » et rend « dans son ensemble » plus affirmatif que [F10]. | Révision après confrontation : F=1 : Les lignes 23–25 ([F10]) attestent trois demandes adressées à des nœuds, sans établir la portée exhaustive « dans son ensemble » ; la réponse réserve cependant explicitement l'état final des copies."
 "test-0034","D","1: 081110 014321 27 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/randtxt/_temporary/_task_200811092030_0003_m_001515_0/part-01515. blk_7304855330352525404
 2: 081110 014321 5685 INFO dfs.DataNode$DataXceiver: Receiving block blk_7304855330352525404 src: /10.251.111.228:33284 dest: /10.251.111.228:50010
 3: 081110 014321 5918 INFO dfs.DataNode$DataXceiver: Receiving block blk_7304855330352525404 src: /10.251.123.20:59388 dest: /10.251.123.20:50010
@@ -3058,7 +3058,7 @@ Informations manquantes : aucune
 
 Sources documentaires : aucune
 
-Abstention : non","1","2","2","1","Les événements cités correspondent aux repères temporels de la trace. En revanche, l'expression « initialement alloué » [T02] ne peut être distingué de E5 [T01] au même instant [F10]."
+Abstention : non","2","2","2","2","Les événements cités correspondent aux repères temporels de la trace. En revanche, l'expression « initialement alloué » [T02] ne peut être distingué de E5 [T01] au même instant [F10]. | Révision après confrontation : F=2 : L'allocation [T02] est dans la première seconde avec [T01] ; « initialement […] et » ne dit pas qu'elle précède l'écriture, et les demandes puis messages locaux sont fidèlement décrits. ; U=2 : Les étapes [T01]–[T13] et les limites [F06]/[F08] donnent un résumé clair et suffisamment complet pour comprendre la trace."
 "test-0036","D","1: 081111 024621 17916 INFO dfs.DataNode$DataXceiver: Receiving block blk_5005786149836572537 src: /10.251.43.115:42255 dest: /10.251.43.115:50010
 2: 081111 024621 29 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/rand4/_temporary/_task_200811101024_0009_m_000205_0/part-00205. blk_5005786149836572537
 3: 081111 024622 17733 INFO dfs.DataNode$DataXceiver: Receiving block blk_5005786149836572537 src: /10.251.126.227:42843 dest: /10.251.126.227:50010
@@ -3119,7 +3119,7 @@ Informations manquantes : aucune
 
 Sources documentaires : aucune
 
-Abstention : non","2","2","2","1","Les compteurs des logs corroborent : les mises à jour de blockMap E26 (3), les demandes d'invalidation E23 (3) et les messages de suppression locale E21 (3). Fait exact mais utilité réduite : la réponse discute ce que E5 ne prouve pas sur la réception, alors que E9 fournit directement 3 messages « Received ». Les références aux faits suffisent ici, sans documentation externe."
+Abstention : non","2","2","2","2","Les compteurs des logs corroborent : les mises à jour de blockMap E26 (3), les demandes d'invalidation E23 (3) et les messages de suppression locale E21 (3). Fait exact mais utilité réduite : la réponse discute ce que E5 ne prouve pas sur la réception, alors que E9 fournit directement 3 messages « Received ». Les références aux faits suffisent ici, sans documentation externe. | Révision après confrontation : U=2 : La réserve sur Receiving [F03] est immédiatement complétée par les trois Received [F04] dans les faits ; allocation, blockMap et suppression sont également décrits avec leurs limites."
 "test-0038","A","1: 081109 213231 2293 INFO dfs.DataNode$DataXceiver: Receiving block blk_-3126046394980374282 src: /10.251.30.101:54465 dest: /10.251.30.101:50010
 2: 081109 213231 2308 INFO dfs.DataNode$DataXceiver: Receiving block blk_-3126046394980374282 src: /10.251.91.229:58937 dest: /10.251.91.229:50010
 3: 081109 213231 2335 INFO dfs.DataNode$DataXceiver: Receiving block blk_-3126046394980374282 src: /10.251.30.101:52283 dest: /10.251.30.101:50010
@@ -3721,7 +3721,7 @@ Informations manquantes :
 
 Sources documentaires : aucune
 
-Abstention : non","2","2","2","2","Les événements cités correspondent aux repères temporels de la trace. Les 3 exceptions d'envoi E4 sont reconnues ; la réponse évite d'en déduire une cause non attestée."
+Abstention : non","2","2","2","1","Les événements cités correspondent aux repères temporels de la trace. Les 3 exceptions d'envoi E4 sont reconnues ; la réponse évite d'en déduire une cause non attestée. | Révision après confrontation : U=1 : Le résumé focalisé sur les tentatives et exceptions omet les six Served [F03], trois Received [F06] et trois Deleting [F09] ; cette absence masque les opérations réussies et la suite locale des demandes."
 "test-0041","C","1: 081110 014325 30 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/randtxt/_temporary/_task_200811092030_0003_m_001440_0/part-01440. blk_8778690542254370358
 2: 081110 014326 5796 INFO dfs.DataNode$DataXceiver: Receiving block blk_8778690542254370358 src: /10.251.195.70:54247 dest: /10.251.195.70:50010
 3: 081110 014326 5817 INFO dfs.DataNode$DataXceiver: Receiving block blk_8778690542254370358 src: /10.251.42.16:39544 dest: /10.251.42.16:50010
@@ -3937,7 +3937,7 @@ data to its local repository. Thus, a DataNode can be receiving data from the pr
 and at the same time forwarding data to the next one in the pipeline. Thus, the data is pipelined from
 one DataNode to the next.
 
-Abstention : non","2","1","2","2","Les événements cités sont observables : l'allocation E22, les débuts d'écriture E5 (2) et l'exception d'écriture E7. L'erreur « Could not read from stream » est bien rapportée, sans identifier arbitrairement sa cause. Le passage documentaire « hdfs-architecture-1.2.1#replication-pipelining#1 » est cité : sa pertinence exacte doit être contrôlée dans le corpus C6."
+Abstention : non","1","1","2","2","Les événements cités sont observables : l'allocation E22, les débuts d'écriture E5 (2) et l'exception d'écriture E7. L'erreur « Could not read from stream » est bien rapportée, sans identifier arbitrairement sa cause. Le passage documentaire « hdfs-architecture-1.2.1#replication-pipelining#1 » est cité : sa pertinence exacte doit être contrôlée dans le corpus C6. | Révision après confrontation : F=1 : Les lignes 1–3 montrent un seul bloc alloué et deux Receiving vers la même adresse 10.251.195.70 ; les pluriels « blocs » et « DataNodes » sont imprécis, mais l'exception [L01] est fidèlement décrite."
 "test-0047","B","1: 081110 211412 14321 INFO dfs.DataNode$DataXceiver: Receiving block blk_4284099996556810257 src: /10.251.195.70:58350 dest: /10.251.195.70:50010
 2: 081110 211412 14770 INFO dfs.DataNode$DataXceiver: Receiving block blk_4284099996556810257 src: /10.251.195.70:56735 dest: /10.251.195.70:50010
 3: 081110 211412 30 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/rand3/_temporary/_task_200811101024_0005_m_000125_0/part-00125. blk_4284099996556810257
@@ -4072,7 +4072,7 @@ Informations manquantes : aucune
 
 Sources documentaires : aucune
 
-Abstention : non","2","2","2","2","La réponse s'appuie sur ces événements attestés : l'allocation E22 et les débuts d'écriture E5. Aucun WARN ni incident n'est signalé ; il faut garder indéterminé l'ordre des événements de même seconde."
+Abstention : non","2","2","1","1","La réponse s'appuie sur ces événements attestés : l'allocation E22 et les débuts d'écriture E5. Aucun WARN ni incident n'est signalé ; il faut garder indéterminé l'ordre des événements de même seconde. | Révision après confrontation : A=1 : La trace s'arrête après Receiving (ligne 2, [F03]) sans Received ni issue ; une description sans abstention est défendable, mais « informations manquantes : aucune » n'explicite pas cette limite. ; U=1 : Les deux événements sont clairement décrits ([F03], [F04]), mais l'absence de toute indication sur l'issue inconnue après la ligne 2 rend l'explication incomplète."
 "test-0051","B","1: 081110 014037 26 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/randtxt/_temporary/_task_200811092030_0003_m_001434_0/part-01434. blk_2415622095534006294
 2: 081110 014037 5660 INFO dfs.DataNode$DataXceiver: Receiving block blk_2415622095534006294 src: /10.251.91.32:47335 dest: /10.251.91.32:50010","COMPTEURS ET DEFINITIONS (faits calculés) :
 [F01] 2 lignes du bloc ; intervalle 2008-11-10 01:40:37 à 2008-11-10 01:40:37 ; durée 0 h 00 min 00 s (0 secondes).
@@ -4100,7 +4100,7 @@ Informations manquantes : aucune
 
 Sources documentaires : aucune
 
-Abstention : non","1","2","2","1","Les événements cités correspondent aux repères temporels de la trace. En revanche, la formule « aucun événement » est inexacte : E22 et E5 existent ; il fallait préciser « aucun événement atypique ». Citation non normalisée. Les références aux faits suffisent ici, sans documentation externe."
+Abstention : non","1","2","1","1","Les événements cités correspondent aux repères temporels de la trace. En revanche, la formule « aucun événement » est inexacte : E22 et E5 existent ; il fallait préciser « aucun événement atypique ». Citation non normalisée. Les références aux faits suffisent ici, sans documentation externe. | Révision après confrontation : A=1 : Les seules lignes 1–2 ([T01], [T02]) permettent une description limitée, mais ne montrent aucune issue de l'écriture ; la non-abstention reste insuffisamment expliquée avec des informations manquantes vides."
 "test-0051","C","1: 081110 014037 26 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/randtxt/_temporary/_task_200811092030_0003_m_001434_0/part-01434. blk_2415622095534006294
 2: 081110 014037 5660 INFO dfs.DataNode$DataXceiver: Receiving block blk_2415622095534006294 src: /10.251.91.32:47335 dest: /10.251.91.32:50010","COMPTEURS ET DEFINITIONS (faits calculés) :
 [F01] 2 lignes du bloc ; intervalle 2008-11-10 01:40:37 à 2008-11-10 01:40:37 ; durée 0 h 00 min 00 s (0 secondes).
@@ -4250,7 +4250,7 @@ Informations manquantes :
 
 Sources documentaires : aucune
 
-Abstention : non","1","2","1","1","Les événements cités correspondent aux repères temporels de la trace. En revanche, l'allocation [T02] et début E5 [T01] partagent la même seconde [F11] : le commencement par l’allocation n’est pas prouvé. Les références aux faits suffisent ici, sans documentation externe."
+Abstention : non","1","2","2","1","Les événements cités correspondent aux repères temporels de la trace. En revanche, l'allocation [T02] et début E5 [T01] partagent la même seconde [F11] : le commencement par l’allocation n’est pas prouvé. Les références aux faits suffisent ici, sans documentation externe. | Révision après confrontation : A=2 : L'erreur [L01] est reconnue dans les faits et l'hypothèse reste prudente ; les questions demandent sa raison précise et l'état final, ce qui justifie une explication limitée sans abstention."
 "test-0052","B","1: 081111 073448 23633 INFO dfs.DataNode$DataXceiver: Receiving block blk_8968730668433643962 src: /10.251.199.86:47550 dest: /10.251.199.86:50010
 2: 081111 073448 29 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/rand6/_temporary/_task_200811101024_0013_m_001197_0/part-01197. blk_8968730668433643962
 3: 081111 073452 23120 INFO dfs.DataNode$DataXceiver: Receiving block blk_8968730668433643962 src: /10.251.66.192:51710 dest: /10.251.66.192:50010
@@ -4314,7 +4314,7 @@ Informations manquantes :
 
 Sources documentaires : aucune
 
-Abstention : non","1","2","1","1","Le résumé reprend bien : les réceptions de réplicas E9 (3), le WARN de suppression E20 et les messages de suppression locale E21 (3). En revanche, la réponse parle de « demandes de suppression de répliques introuvables » au pluriel, alors que [F06] ne montre qu’une occurrence E20."
+Abstention : non","1","2","2","1","Le résumé reprend bien : les réceptions de réplicas E9 (3), le WARN de suppression E20 et les messages de suppression locale E21 (3). En revanche, la réponse parle de « demandes de suppression de répliques introuvables » au pluriel, alors que [F06] ne montre qu’une occurrence E20. | Révision après confrontation : A=2 : La réponse demande explicitement les circonstances de [L01] et le statut final après [F09], sans inventer de cause ; les faits permettent donc une réponse limitée sans abstention."
 "test-0052","C","1: 081111 073448 23633 INFO dfs.DataNode$DataXceiver: Receiving block blk_8968730668433643962 src: /10.251.199.86:47550 dest: /10.251.199.86:50010
 2: 081111 073448 29 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/rand6/_temporary/_task_200811101024_0013_m_001197_0/part-01197. blk_8968730668433643962
 3: 081111 073452 23120 INFO dfs.DataNode$DataXceiver: Receiving block blk_8968730668433643962 src: /10.251.66.192:51710 dest: /10.251.66.192:50010
@@ -4572,7 +4572,7 @@ Informations manquantes :
 
 Sources documentaires : aucune
 
-Abstention : non","2","2","1","1","Les événements principaux concordent avec la trace : les débuts d'écriture E5 (3), les réceptions de réplicas E9 (3) et les messages de suppression locale E21 (3). Description juste mais « suivis de » est potentiellement ambigu pour les événements simultanés ; distinguer la demande redondante de sa cause inconnue."
+Abstention : non","1","2","2","1","Les événements principaux concordent avec la trace : les débuts d'écriture E5 (3), les réceptions de réplicas E9 (3) et les messages de suppression locale E21 (3). Description juste mais « suivis de » est potentiellement ambigu pour les événements simultanés ; distinguer la demande redondante de sa cause inconnue. | Révision après confrontation : F=1 : La trace concerne un seul identifiant et une seule allocation (ligne 4, [F07]), pas plusieurs blocs ; les opérations restent réelles, et Received précède bien Deleting contrairement au doute du commentaire 2. ; A=2 : Le WARN de redondance [L01] est reconnu sans cause inventée ; les questions ciblent sa raison et l'issue des suppressions [F08], ce qui justifie la non-abstention."
 "test-0056","C","1: 081110 214729 15383 INFO dfs.DataNode$DataXceiver: Receiving block blk_-2705986310204860977 src: /10.251.38.53:50134 dest: /10.251.38.53:50010
 2: 081110 214729 15385 INFO dfs.DataNode$DataXceiver: Receiving block blk_-2705986310204860977 src: /10.251.71.97:36842 dest: /10.251.71.97:50010
 3: 081110 214729 15518 INFO dfs.DataNode$DataXceiver: Receiving block blk_-2705986310204860977 src: /10.251.38.53:45915 dest: /10.251.38.53:50010
@@ -4700,7 +4700,7 @@ Informations manquantes :
 
 Sources documentaires : aucune
 
-Abstention : non","1","2","1","1","On retrouve bien dans les logs : les débuts d'écriture E5 (3), les fins de PacketResponder E11 et le WARN de demande redondante E27. En revanche, la réponse parle de « demandes d’ajout de blocs » avec [F03], qui correspond en réalité au début d’écriture E5. Le WARN E27 est bien attesté."
+Abstention : non","1","2","2","1","On retrouve bien dans les logs : les débuts d'écriture E5 (3), les fins de PacketResponder E11 et le WARN de demande redondante E27. En revanche, la réponse parle de « demandes d’ajout de blocs » avec [F03], qui correspond en réalité au début d’écriture E5. Le WARN E27 est bien attesté. | Révision après confrontation : A=2 : La réponse réserve explicitement le contexte de [L01] et les raisons des messages [T13]/[T14] ; elle peut décrire ces faits sans s'abstenir de toute explication."
 "test-0062","A","1: 081110 014726 26 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/randtxt/_temporary/_task_200811092030_0003_m_001360_0/part-01360. blk_-3646517331515187756
 2: 081110 014726 6026 INFO dfs.DataNode$DataXceiver: Receiving block blk_-3646517331515187756 src: /10.250.5.237:55563 dest: /10.250.5.237:50010
 3: 081110 014727 5845 INFO dfs.DataNode$DataXceiver: Receiving block blk_-3646517331515187756 src: /10.250.5.237:36726 dest: /10.250.5.237:50010
@@ -4791,7 +4791,7 @@ Informations manquantes :
 
 Sources documentaires : aucune
 
-Abstention : non","2","2","1","1","Les événements cités correspondent aux repères temporels de la trace. Lectures et 3 exceptions d’envoi correctement relevées ; résumé très incomplet : néglige transfert E16/E18, nouvelle copie E25 et suppressions E23/E21."
+Abstention : non","1","2","2","1","Les événements cités correspondent aux repères temporels de la trace. Lectures et 3 exceptions d’envoi correctement relevées ; résumé très incomplet : néglige transfert E16/E18, nouvelle copie E25 et suppressions E23/E21. | Révision après confrontation : F=1 : Une seule allocation existe (ligne 1, [T01]) ; surtout, la réponse omet entièrement la copie demandée et le transfert des lignes 13–19 ([F14], [F10], [F09]), une étape importante du bloc. ; A=2 : Les raisons des exceptions [L01]–[L03] et l'issue des demandes [T19]/[T20] sont explicitement laissées ouvertes ; les omissions factuelles ne rendent pas la non-abstention hasardeuse."
 "test-0062","B","1: 081110 014726 26 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/randtxt/_temporary/_task_200811092030_0003_m_001360_0/part-01360. blk_-3646517331515187756
 2: 081110 014726 6026 INFO dfs.DataNode$DataXceiver: Receiving block blk_-3646517331515187756 src: /10.250.5.237:55563 dest: /10.250.5.237:50010
 3: 081110 014727 5845 INFO dfs.DataNode$DataXceiver: Receiving block blk_-3646517331515187756 src: /10.250.5.237:36726 dest: /10.250.5.237:50010
@@ -5069,7 +5069,7 @@ Informations manquantes :
 
 Sources documentaires : aucune
 
-Abstention : non","2","2","1","1","Les compteurs des logs corroborent : la copie reçue E6, le transfert de réplica E16 et la demande de nouvelle copie E25. Faits principaux présents, mais les heures d’exceptions ne sont pas présentées dans l’ordre ; cause exacte inconnue."
+Abstention : non","2","2","2","2","Les compteurs des logs corroborent : la copie reçue E6, le transfert de réplica E16 et la demande de nouvelle copie E25. Faits principaux présents, mais les heures d’exceptions ne sont pas présentées dans l’ordre ; cause exacte inconnue. | Révision après confrontation : A=2 : La cause des trois exceptions [L01]–[L03] est explicitement indéterminée et l'achèvement des suppressions [F13]/[F11] est laissé ouvert ; la non-abstention est adaptée. ; U=2 : Les comptes [F03], [F06], [F09], [F11], [F13], [F14] et les trois heures exactes couvrent les opérations majeures ; l'énumération non triée des exceptions ne gêne pas substantiellement cette explication."
 "test-0064","A","1: 081110 112651 10000 INFO dfs.DataNode$DataXceiver: Receiving block blk_6456148978944478207 src: /10.251.67.4:43618 dest: /10.251.67.4:50010
 2: 081110 112651 28 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/rand/_temporary/_task_200811101024_0001_m_001618_0/part-01618. blk_6456148978944478207","COMPTEURS ET DEFINITIONS (faits calculés) :
 [F01] 2 lignes du bloc ; intervalle 2008-11-10 11:26:51 à 2008-11-10 11:26:51 ; durée 0 h 00 min 00 s (0 secondes).
@@ -5114,7 +5114,7 @@ e.g. AFS, have used client side caching to
 improve performance. A POSIX requirement has been relaxed to achieve higher performance of
 data uploads.
 
-Abstention : non","1","1","2","1","La réponse s'appuie sur ces événements attestés : l'allocation E22 et les débuts d'écriture E5. En revanche, le log E5 prouve le début d’écriture sur DataNode, pas explicitement « le client démarre » cette écriture. Source documentaire citée, non vérifiée dans C6. Le passage documentaire « hdfs-architecture-1.2.1#staging#1 » est cité : sa pertinence exacte doit être contrôlée dans le corpus C6."
+Abstention : non","1","1","1","1","La réponse s'appuie sur ces événements attestés : l'allocation E22 et les débuts d'écriture E5. En revanche, le log E5 prouve le début d’écriture sur DataNode, pas explicitement « le client démarre » cette écriture. Source documentaire citée, non vérifiée dans C6. Le passage documentaire « hdfs-architecture-1.2.1#staging#1 » est cité : sa pertinence exacte doit être contrôlée dans le corpus C6. | Révision après confrontation : A=1 : La trace s'arrête au début d'écriture [F03] sans issue ; la réserve sur l'ordre [F05] est utile, mais « informations manquantes : aucune » laisse la limite principale inexpliquée."
 "test-0064","B","1: 081110 112651 10000 INFO dfs.DataNode$DataXceiver: Receiving block blk_6456148978944478207 src: /10.251.67.4:43618 dest: /10.251.67.4:50010
 2: 081110 112651 28 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/rand/_temporary/_task_200811101024_0001_m_001618_0/part-01618. blk_6456148978944478207","COMPTEURS ET DEFINITIONS (faits calculés) :
 [F01] 2 lignes du bloc ; intervalle 2008-11-10 11:26:51 à 2008-11-10 11:26:51 ; durée 0 h 00 min 00 s (0 secondes).
@@ -5143,7 +5143,7 @@ Informations manquantes : aucune
 
 Sources documentaires : aucune
 
-Abstention : non","2","2","2","2","Les opérations décrites correspondent globalement aux messages visibles dans la trace. Aucun WARN ni incident n'est signalé ; il faut garder indéterminé l'ordre des événements de même seconde."
+Abstention : non","2","2","1","1","Les opérations décrites correspondent globalement aux messages visibles dans la trace. Aucun WARN ni incident n'est signalé ; il faut garder indéterminé l'ordre des événements de même seconde. | Révision après confrontation : A=1 : Les deux lignes ne montrent ni Received ni état final après [F03] ; la description est possible, mais la non-abstention n'explicite pas cette limite et annonce aucune information manquante. ; U=1 : Le résumé rend les deux événements lisibles ([F03], [F04]), mais ne signale pas que l'issue de l'écriture est absente de cet extrait minimal."
 "test-0064","C","1: 081110 112651 10000 INFO dfs.DataNode$DataXceiver: Receiving block blk_6456148978944478207 src: /10.251.67.4:43618 dest: /10.251.67.4:50010
 2: 081110 112651 28 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/rand/_temporary/_task_200811101024_0001_m_001618_0/part-01618. blk_6456148978944478207","COMPTEURS ET DEFINITIONS (faits calculés) :
 [F01] 2 lignes du bloc ; intervalle 2008-11-10 11:26:51 à 2008-11-10 11:26:51 ; durée 0 h 00 min 00 s (0 secondes).
@@ -5201,7 +5201,7 @@ Informations manquantes : aucune
 
 Sources documentaires : aucune
 
-Abstention : non","1","2","2","1","Les événements cités correspondent aux repères temporels de la trace. En revanche, la réponse annonce « aucun événement » malgré E5 et E22 ; seule l’absence d’événement atypique est établie. Les références aux faits suffisent ici, sans documentation externe."
+Abstention : non","1","2","1","1","Les événements cités correspondent aux repères temporels de la trace. En revanche, la réponse annonce « aucun événement » malgré E5 et E22 ; seule l’absence d’événement atypique est établie. Les références aux faits suffisent ici, sans documentation externe. | Révision après confrontation : A=1 : L'extrait contient uniquement Receiving et allocation ([T01], [T02]) ; la décision de décrire ces faits est défendable, mais aucune limite sur l'issue inconnue n'est expliquée."
 "test-0072","A","1: 081111 105734 30 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/randtxt9/_temporary/_task_200811101024_0016_m_001805_0/part-01805. blk_1836315969441717271
 2: 081111 105735 27364 INFO dfs.DataNode$DataXceiver: Receiving block blk_1836315969441717271 src: /10.251.126.83:43200 dest: /10.251.126.83:50010
 3: 081111 105735 27542 INFO dfs.DataNode$DataXceiver: Receiving block blk_1836315969441717271 src: /10.251.126.83:39024 dest: /10.251.126.83:50010
@@ -5238,7 +5238,7 @@ Informations manquantes :
 
 Sources documentaires : aucune
 
-Abstention : non","1","2","1","1","Les événements cités correspondent aux repères temporels de la trace. En revanche, l’exception E7 est réelle, mais « lors de la réception du bloc » peut suggérer une réception confirmée, non établie par « Could not read from stream » [L01]."
+Abstention : non","2","2","2","1","Les événements cités correspondent aux repères temporels de la trace. En revanche, l’exception E7 est réelle, mais « lors de la réception du bloc » peut suggérer une réception confirmée, non établie par « Could not read from stream » [L01]. | Révision après confrontation : F=2 : Les lignes 2–3 montrent une réception en cours sur le même DataNode et la ligne 4 ([L01]) une exception de lecture du flux ; « lors de la réception » n'affirme pas une réception achevée. ; A=2 : L'hypothèse reprend prudemment « Could not read from stream » ([L01]) et l'état après l'exception est explicitement demandé ; une explication limitée sans abstention est justifiée."
 "test-0072","B","1: 081111 105734 30 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/randtxt9/_temporary/_task_200811101024_0016_m_001805_0/part-01805. blk_1836315969441717271
 2: 081111 105735 27364 INFO dfs.DataNode$DataXceiver: Receiving block blk_1836315969441717271 src: /10.251.126.83:43200 dest: /10.251.126.83:50010
 3: 081111 105735 27542 INFO dfs.DataNode$DataXceiver: Receiving block blk_1836315969441717271 src: /10.251.126.83:39024 dest: /10.251.126.83:50010
@@ -5357,7 +5357,7 @@ data to its local repository. Thus, a DataNode can be receiving data from the pr
 and at the same time forwarding data to the next one in the pipeline. Thus, the data is pipelined from
 one DataNode to the next.
 
-Abstention : non","2","1","2","2","Les événements cités correspondent aux repères temporels de la trace. L'erreur « Could not read from stream » est bien rapportée, sans identifier arbitrairement sa cause. Le passage documentaire « hdfs-architecture-1.2.1#replication-pipelining#1 » est cité : sa pertinence exacte doit être contrôlée dans le corpus C6."
+Abstention : non","1","1","2","2","Les événements cités correspondent aux repères temporels de la trace. L'erreur « Could not read from stream » est bien rapportée, sans identifier arbitrairement sa cause. Le passage documentaire « hdfs-architecture-1.2.1#replication-pipelining#1 » est cité : sa pertinence exacte doit être contrôlée dans le corpus C6. | Révision après confrontation : F=1 : Les deux Receiving des lignes 2–3 visent la même adresse 10.251.126.83 ; « sur des DataNodes » extrapole leur nombre, mais l'ordre allocation puis écriture puis exception ([T01]–[T04]) est correct."
 "test-0073","A","1: 081109 211549 35 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/rand/_temporary/_task_200811092030_0001_m_001540_0/part-01540. blk_8817374089832812292
 2: 081109 211550 1690 INFO dfs.DataNode$DataXceiver: Receiving block blk_8817374089832812292 src: /10.251.39.209:35101 dest: /10.251.39.209:50010
 3: 081109 211551 1676 INFO dfs.DataNode$DataXceiver: Receiving block blk_8817374089832812292 src: /10.251.39.209:50754 dest: /10.251.39.209:50010
@@ -5711,7 +5711,7 @@ data to its local repository. Thus, a DataNode can be receiving data from the pr
 and at the same time forwarding data to the next one in the pipeline. Thus, the data is pipelined from
 one DataNode to the next.
 
-Abstention : non","2","1","2","2","Les événements cités sont observables : l'allocation E22, les débuts d'écriture E5 (2) et l'exception d'écriture E7. L'erreur « Could not read from stream » est bien rapportée, sans identifier arbitrairement sa cause. Le passage documentaire « hdfs-architecture-1.2.1#replication-pipelining#1 » est cité : sa pertinence exacte doit être contrôlée dans le corpus C6."
+Abstention : non","1","1","2","2","Les événements cités sont observables : l'allocation E22, les débuts d'écriture E5 (2) et l'exception d'écriture E7. L'erreur « Could not read from stream » est bien rapportée, sans identifier arbitrairement sa cause. Le passage documentaire « hdfs-architecture-1.2.1#replication-pipelining#1 » est cité : sa pertinence exacte doit être contrôlée dans le corpus C6. | Révision après confrontation : F=1 : La ligne 3 ([F05]) donne une seule allocation et les lignes 1–2 une seule adresse de destination 10.251.125.193 ; les pluriels du résumé sont imprécis, sans invalider l'exception [L01]."
 "test-0074","B","1: 081111 081157 23933 INFO dfs.DataNode$DataXceiver: Receiving block blk_-7264616954252932491 src: /10.251.125.193:48788 dest: /10.251.125.193:50010
 2: 081111 081157 23993 INFO dfs.DataNode$DataXceiver: Receiving block blk_-7264616954252932491 src: /10.251.125.193:42422 dest: /10.251.125.193:50010
 3: 081111 081157 32 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/rand7/_temporary/_task_200811101024_0014_m_000780_0/part-00780. blk_-7264616954252932491
@@ -5874,7 +5874,7 @@ Informations manquantes : aucune
 
 Sources documentaires : aucune
 
-Abstention : non","1","2","2","1","Les événements cités correspondent aux repères temporels de la trace. En revanche, la réponse annonce « aucun événement » alors que E22 et E5 sont présents à la même seconde ; l’absence d’anomalie reconnue aurait été correcte."
+Abstention : non","1","2","1","1","Les événements cités correspondent aux repères temporels de la trace. En revanche, la réponse annonce « aucun événement » alors que E22 et E5 sont présents à la même seconde ; l’absence d’anomalie reconnue aurait été correcte. | Révision après confrontation : A=1 : Les lignes 1–2 ([F03], [F04]) ne montrent que le commencement de l'écriture ; décrire ces faits est défendable, mais l'issue inconnue n'est pas explicitée dans les limites."
 "test-0076","C","1: 081109 235209 32 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/sortrand/_temporary/_task_200811092030_0002_r_000096_0/part-00096. blk_-3817638410645019494
 2: 081109 235209 4362 INFO dfs.DataNode$DataXceiver: Receiving block blk_-3817638410645019494 src: /10.251.39.209:39653 dest: /10.251.39.209:50010","COMPTEURS ET DEFINITIONS (faits calculés) :
 [F01] 2 lignes du bloc ; intervalle 2008-11-09 23:52:09 à 2008-11-09 23:52:09 ; durée 0 h 00 min 00 s (0 secondes).
@@ -5948,7 +5948,7 @@ Informations manquantes : aucune
 
 Sources documentaires : aucune
 
-Abstention : non","2","2","2","2","Les opérations décrites correspondent globalement aux messages visibles dans la trace. Aucun WARN ni incident n'est signalé ; il faut garder indéterminé l'ordre des événements de même seconde."
+Abstention : non","2","2","1","1","Les opérations décrites correspondent globalement aux messages visibles dans la trace. Aucun WARN ni incident n'est signalé ; il faut garder indéterminé l'ordre des événements de même seconde. | Révision après confrontation : A=1 : Après Receiving (ligne 2, [F03]), aucune issue n'apparaît ; l'absence d'informations manquantes rend la non-abstention insuffisamment expliquée, sans imposer d'inventer un incident. ; U=1 : Les opérations initiales [F03]/[F04] sont claires, mais le lecteur n'est pas averti que cet extrait de deux lignes ne permet pas de connaître l'issue de l'écriture."
 "test-0077","A","1: 081110 121850 33 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/randtxt2/_temporary/_task_200811101024_0002_m_001300_0/part-01300. blk_-4346736380428326495
 2: 081110 121851 11050 INFO dfs.DataNode$DataXceiver: Receiving block blk_-4346736380428326495 src: /10.251.39.179:50728 dest: /10.251.39.179:50010","COMPTEURS ET DEFINITIONS (faits calculés) :
 [F01] 2 lignes du bloc ; intervalle 2008-11-10 12:18:50 à 2008-11-10 12:18:51 ; durée 0 h 00 min 01 s (1 secondes).
@@ -5976,7 +5976,7 @@ Informations manquantes : aucune
 
 Sources documentaires : aucune
 
-Abstention : non","2","2","2","2","Les événements cités correspondent aux repères temporels de la trace. La réponse ne prétend pas identifier une panne absente des logs."
+Abstention : non","2","2","1","2","Les événements cités correspondent aux repères temporels de la trace. La réponse ne prétend pas identifier une panne absente des logs. | Révision après confrontation : A=1 : La trace s'arrête après le début d'écriture (ligne 2, [T02]) ; décrire ces deux opérations est défendable, mais leur issue inconnue n'est pas signalée dans les limites."
 "test-0077","B","1: 081110 121850 33 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/randtxt2/_temporary/_task_200811101024_0002_m_001300_0/part-01300. blk_-4346736380428326495
 2: 081110 121851 11050 INFO dfs.DataNode$DataXceiver: Receiving block blk_-4346736380428326495 src: /10.251.39.179:50728 dest: /10.251.39.179:50010","COMPTEURS ET DEFINITIONS (faits calculés) :
 [F01] 2 lignes du bloc ; intervalle 2008-11-10 12:18:50 à 2008-11-10 12:18:51 ; durée 0 h 00 min 01 s (1 secondes).
@@ -6004,7 +6004,7 @@ Informations manquantes : aucune
 
 Sources documentaires : aucune
 
-Abstention : non","2","2","2","2","Le résumé reprend bien : l'allocation E22 et les débuts d'écriture E5. La réponse ne prétend pas identifier une panne absente des logs. Les références aux faits suffisent ici, sans documentation externe."
+Abstention : non","2","2","1","2","Le résumé reprend bien : l'allocation E22 et les débuts d'écriture E5. La réponse ne prétend pas identifier une panne absente des logs. Les références aux faits suffisent ici, sans documentation externe. | Révision après confrontation : A=1 : L'intervalle d'une seconde [F01] ne contient que l'allocation et Receiving ([F04], [F03]) ; la réponse n'explicite pas que la réussite de l'écriture reste inconnue."
 "test-0077","C","1: 081110 121850 33 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/randtxt2/_temporary/_task_200811101024_0002_m_001300_0/part-01300. blk_-4346736380428326495
 2: 081110 121851 11050 INFO dfs.DataNode$DataXceiver: Receiving block blk_-4346736380428326495 src: /10.251.39.179:50728 dest: /10.251.39.179:50010","COMPTEURS ET DEFINITIONS (faits calculés) :
 [F01] 2 lignes du bloc ; intervalle 2008-11-10 12:18:50 à 2008-11-10 12:18:51 ; durée 0 h 00 min 01 s (1 secondes).
@@ -6060,7 +6060,7 @@ data to its local repository. Thus, a DataNode can be receiving data from the pr
 and at the same time forwarding data to the next one in the pipeline. Thus, the data is pipelined from
 one DataNode to the next.
 
-Abstention : non","0","0","2","1","Les preuves confirment les éléments mentionnés : l'allocation E22 et les débuts d'écriture E5. En revanche, la réponse invente un contact du client avec le NameNode pour obtenir une liste de DataNodes, non présent dans les 2 lignes ; [T01] ne prouve pas cette action, même si l’architecture générale la prévoit. La citation « hdfs-architecture-1.2.1#staging#1 » ne suffit pas à prouver une action non présente dans les logs."
+Abstention : non","0","0","0","1","Les preuves confirment les éléments mentionnés : l'allocation E22 et les débuts d'écriture E5. En revanche, la réponse invente un contact du client avec le NameNode pour obtenir une liste de DataNodes, non présent dans les 2 lignes ; [T01] ne prouve pas cette action, même si l’architecture générale la prévoit. La citation « hdfs-architecture-1.2.1#staging#1 » ne suffit pas à prouver une action non présente dans les logs. | Révision après confrontation : A=0 : Les deux lignes [T01]/[T02] ne montrent ni contact client pour obtenir une liste ni écriture achevée ; les affirmer sans réserve malgré ce manque majeur constitue une interprétation hasardeuse au sens du critère A."
 "test-0077","D","1: 081110 121850 33 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/randtxt2/_temporary/_task_200811101024_0002_m_001300_0/part-01300. blk_-4346736380428326495
 2: 081110 121851 11050 INFO dfs.DataNode$DataXceiver: Receiving block blk_-4346736380428326495 src: /10.251.39.179:50728 dest: /10.251.39.179:50010","COMPTEURS ET DEFINITIONS (faits calculés) :
 [F01] 2 lignes du bloc ; intervalle 2008-11-10 12:18:50 à 2008-11-10 12:18:51 ; durée 0 h 00 min 01 s (1 secondes).
@@ -6088,7 +6088,7 @@ Informations manquantes : aucune
 
 Sources documentaires : aucune
 
-Abstention : non","2","2","2","2","Les événements cités correspondent aux repères temporels de la trace. La réponse ne prétend pas identifier une panne absente des logs."
+Abstention : non","2","2","1","2","Les événements cités correspondent aux repères temporels de la trace. La réponse ne prétend pas identifier une panne absente des logs. | Révision après confrontation : A=1 : La précision des heures [T01]/[T02] n'apporte aucune issue après Receiving ; la non-abstention descriptive reste défendable, mais cette limite manque explicitement."
 "test-0078","A","1: 081110 001030 31 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/sortrand/_temporary/_task_200811092030_0002_r_000093_0/part-00093. blk_-5216731224772621734
 2: 081110 001030 4249 INFO dfs.DataNode$DataXceiver: Receiving block blk_-5216731224772621734 src: /10.251.31.5:60118 dest: /10.251.31.5:50010
 3: 081110 001030 4684 INFO dfs.DataNode$DataXceiver: Receiving block blk_-5216731224772621734 src: /10.251.106.10:42258 dest: /10.251.106.10:50010
@@ -6223,7 +6223,7 @@ Informations manquantes :
 
 Sources documentaires : aucune
 
-Abstention : non","1","2","1","1","Les événements principaux concordent avec la trace : les mises à jour de blockMap E26 (4), les messages de suppression locale E21 (3) et les demandes d'invalidation E23 (3). En revanche, les références [F12]-[F15] concernent des jalons/temps, pas directement les types d’événements cités ; corriger les appuis, et noter la cause inconnue de E28."
+Abstention : non","1","2","2","1","Les événements principaux concordent avec la trace : les mises à jour de blockMap E26 (4), les messages de suppression locale E21 (3) et les demandes d'invalidation E23 (3). En revanche, les références [F12]-[F15] concernent des jalons/temps, pas directement les types d’événements cités ; corriger les appuis, et noter la cause inconnue de E28. | Révision après confrontation : A=2 : Le fait [F11] précise que la cause du bloc sans fichier n'est pas donnée, et les questions demandent cette raison ainsi que l'issue de [F09] ; la description limitée est justifiée."
 "test-0078","C","1: 081110 001030 31 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/sortrand/_temporary/_task_200811092030_0002_r_000093_0/part-00093. blk_-5216731224772621734
 2: 081110 001030 4249 INFO dfs.DataNode$DataXceiver: Receiving block blk_-5216731224772621734 src: /10.251.31.5:60118 dest: /10.251.31.5:50010
 3: 081110 001030 4684 INFO dfs.DataNode$DataXceiver: Receiving block blk_-5216731224772621734 src: /10.251.106.10:42258 dest: /10.251.106.10:50010
@@ -6358,7 +6358,7 @@ Informations manquantes :
 
 Sources documentaires : aucune
 
-Abstention : non","1","2","1","1","On retrouve bien dans les logs : les débuts d'écriture E5 (3), les réceptions de réplicas E9 (3) et les messages de suppression locale E21 (3). En revanche, elle considère le message ordinaire E21 « Deleting block file » comme un événement atypique sans justification ; le vrai indice particulier est E28 [F11]. Les références aux faits suffisent ici, sans documentation externe."
+Abstention : non","1","2","2","1","On retrouve bien dans les logs : les débuts d'écriture E5 (3), les réceptions de réplicas E9 (3) et les messages de suppression locale E21 (3). En revanche, elle considère le message ordinaire E21 « Deleting block file » comme un événement atypique sans justification ; le vrai indice particulier est E28 [F11]. Les références aux faits suffisent ici, sans documentation externe. | Révision après confrontation : A=2 : La cause de l'événement [L01] et les conditions de [F07] sont explicitement demandées sans hypothèse inventée ; qualifier à tort Deleting d'atypique relève de F, pas automatiquement d'A."
 "test-0079","A","1: 081111 045612 18723 INFO dfs.DataNode$DataXceiver: Receiving block blk_-7356422865929660798 src: /10.250.15.67:38398 dest: /10.250.15.67:50010
 2: 081111 045612 20057 INFO dfs.DataNode$DataXceiver: Receiving block blk_-7356422865929660798 src: /10.250.15.67:50376 dest: /10.250.15.67:50010
 3: 081111 045612 31 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/rand5/_temporary/_task_200811101024_0011_m_000519_0/part-00519. blk_-7356422865929660798
@@ -6441,7 +6441,7 @@ Informations manquantes :
 
 Sources documentaires : aucune
 
-Abstention : non","1","2","1","1","Les événements cités sont observables : les débuts d'écriture E5 (4), les réceptions de réplicas E9 (3) et les fins de PacketResponder E11. En revanche, la réponse présente la suppression locale E21 comme « atypique » alors qu’elle ne l’est pas à elle seule ; le WARN E20 est l’indice notable."
+Abstention : non","1","2","2","1","Les événements cités sont observables : les débuts d'écriture E5 (4), les réceptions de réplicas E9 (3) et les fins de PacketResponder E11. En revanche, la réponse présente la suppression locale E21 comme « atypique » alors qu’elle ne l’est pas à elle seule ; le WARN E20 est l’indice notable. | Révision après confrontation : A=2 : L'hypothèse issue de [L01] est prudente et l'état final après [F10] reste explicitement ouvert ; la qualification erronée de Deleting ne rend pas, à elle seule, la non-abstention injustifiée."
 "test-0079","B","1: 081111 045612 18723 INFO dfs.DataNode$DataXceiver: Receiving block blk_-7356422865929660798 src: /10.250.15.67:38398 dest: /10.250.15.67:50010
 2: 081111 045612 20057 INFO dfs.DataNode$DataXceiver: Receiving block blk_-7356422865929660798 src: /10.250.15.67:50376 dest: /10.250.15.67:50010
 3: 081111 045612 31 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/rand5/_temporary/_task_200811101024_0011_m_000519_0/part-00519. blk_-7356422865929660798
@@ -6841,4 +6841,4 @@ data to its local repository. Thus, a DataNode can be receiving data from the pr
 and at the same time forwarding data to the next one in the pipeline. Thus, the data is pipelined from
 one DataNode to the next.
 
-Abstention : non","2","1","2","2","On retrouve bien dans les logs : l'allocation E22, les débuts d'écriture E5 (2) et l'exception d'écriture E7. L'erreur « Could not read from stream » est bien rapportée, sans identifier arbitrairement sa cause. Le passage documentaire « hdfs-architecture-1.2.1#replication-pipelining#1 » est cité : sa pertinence exacte doit être contrôlée dans le corpus C6."
+Abstention : non","1","1","2","2","On retrouve bien dans les logs : l'allocation E22, les débuts d'écriture E5 (2) et l'exception d'écriture E7. L'erreur « Could not read from stream » est bien rapportée, sans identifier arbitrairement sa cause. Le passage documentaire « hdfs-architecture-1.2.1#replication-pipelining#1 » est cité : sa pertinence exacte doit être contrôlée dans le corpus C6. | Révision après confrontation : F=1 : La ligne 3 ([F05]) montre une seule allocation et les lignes 1–2 la même destination 10.251.39.192 ; les pluriels du résumé sont imprécis, tandis que l'exception [L01] est correctement décrite."
