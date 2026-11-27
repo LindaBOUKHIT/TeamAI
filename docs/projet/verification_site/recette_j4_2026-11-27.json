@@ -1,0 +1,128 @@
+[
+  {
+    "id": "edge-desktop",
+    "errors": [],
+    "failed": [],
+    "version": "chromium 158.0.4370.33",
+    "load_ms": 445,
+    "ready_ms": 2314,
+    "status": "Modèle prêt",
+    "model_info": "Modèle bilstm v1 · seuil 0,41 · source : réseau · SHA-256 ab98e8c45ef3…",
+    "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.0.0 Safari/537.36 Edg/158.0.0.0",
+    "examples": [
+      {
+        "name": "Bloc normal",
+        "msg": "Analyse terminée : aucun bloc suspect sur 1.",
+        "blocs": "1",
+        "anomalies": "0",
+        "lignes": "27",
+        "ignorees": "0",
+        "inference": "36,50 ms"
+      },
+      {
+        "name": "Bloc avec anomalie",
+        "msg": "Analyse terminée : 1 bloc suspect sur 1.",
+        "blocs": "1",
+        "anomalies": "1",
+        "lignes": "4",
+        "ignorees": "0",
+        "inference": "16,80 ms"
+      },
+      {
+        "name": "Plusieurs blocs",
+        "msg": "Analyse terminée : 1 bloc suspect sur 3.",
+        "blocs": "3",
+        "anomalies": "1",
+        "lignes": "60",
+        "ignorees": "0",
+        "inference": "16,90 ms"
+      },
+      {
+        "name": "Bloc incomplet",
+        "msg": "Analyse terminée : aucun bloc suspect sur 1.",
+        "blocs": "1",
+        "anomalies": "0",
+        "lignes": "13",
+        "ignorees": "0",
+        "inference": "17,00 ms"
+      },
+      {
+        "name": "Lignes invalides",
+        "msg": "Analyse terminée : 1 bloc suspect sur 1. 2 lignes ignorées.",
+        "blocs": "1",
+        "anomalies": "1",
+        "lignes": "3",
+        "ignorees": "2",
+        "inference": "16,60 ms"
+      }
+    ],
+    "layout": {
+      "viewport": 1366,
+      "scrollWidth": 1366,
+      "overflow": 0
+    }
+  },
+  {
+    "id": "chromium-desktop",
+    "errors": [],
+    "failed": [],
+    "version": "chromium 159.0.8154.6",
+    "load_ms": 3162,
+    "ready_ms": 4042,
+    "status": "Modèle prêt",
+    "model_info": "Modèle bilstm v1 · seuil 0,41 · source : réseau · SHA-256 ab98e8c45ef3…",
+    "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/159.0.8154.6 Safari/537.36",
+    "examples": [
+      {
+        "name": "Bloc normal",
+        "msg": "Analyse terminée : aucun bloc suspect sur 1.",
+        "blocs": "1",
+        "anomalies": "0",
+        "lignes": "27",
+        "ignorees": "0",
+        "inference": "34,40 ms"
+      },
+      {
+        "name": "Bloc avec anomalie",
+        "msg": "Analyse terminée : 1 bloc suspect sur 1.",
+        "blocs": "1",
+        "anomalies": "1",
+        "lignes": "4",
+        "ignorees": "0",
+        "inference": "12,50 ms"
+      },
+      {
+        "name": "Plusieurs blocs",
+        "msg": "Analyse terminée : 1 bloc suspect sur 3.",
+        "blocs": "3",
+        "anomalies": "1",
+        "lignes": "60",
+        "ignorees": "0",
+        "inference": "12,30 ms"
+      },
+      {
+        "name": "Bloc incomplet",
+        "msg": "Analyse terminée : aucun bloc suspect sur 1.",
+        "blocs": "1",
+        "anomalies": "0",
+        "lignes": "13",
+        "ignorees": "0",
+        "inference": "13,70 ms"
+      },
+      {
+        "name": "Lignes invalides",
+        "msg": "Analyse terminée : 1 bloc suspect sur 1. 2 lignes ignorées.",
+        "blocs": "1",
+        "anomalies": "1",
+        "lignes": "3",
+        "ignorees": "2",
+        "inference": "15,80 ms"
+      }
+    ],
+    "layout": {
+      "viewport": 1366,
+      "scrollWidth": 1366,
+      "overflow": 0
+    }
+  }
+]
