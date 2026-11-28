@@ -1,0 +1,60 @@
+<section class="chapter">
+  <p class="chapter-kicker">chapitre 9</p>
+  <h1><span class="n">9</span>Cinq outils novateurs</h1>
+  <p>Nous présentons cinq outils que l’équipe n’avait jamais utilisés avant le projet&nbsp;: deux modèles ou bibliothèques de modélisation, un moteur d’inférence, une plateforme de calcul et une application de pilotage. Pour chacun, nous décrivons sa nature, l’usage que nous en avons fait, ses qualités, ses défauts, ce que sa documentation ne dit pas, et notre verdict. L’un d’eux a été abandonné&nbsp;; nous expliquons pourquoi.</p>
+
+  <div class="tool">
+    <h2><span class="n">9.1</span>Laya, un encodeur de décision calibrée <span class="verdict drop">abandonné</span></h2>
+    <p><b>Nature et usage.</b> Laya est un modèle ouvert (licence Apache&nbsp;2.0) fondé sur l’encodeur ModernBERT <span class="ref">[15]</span>, qui répond à des questions typées par des probabilités présentées comme calibrées. Nous l’avons essayé comme «&nbsp;garde-fou&nbsp;» à côté du modèle de langage&nbsp;: forcer l’abstention quand l’anomalie est ambiguë et écarter les hypothèses peu appuyées. Le protocole était strict&nbsp;: la formulation de la question a été choisie sur 40 blocs de validation, puis appliquée une seule fois à 40 autres, sans ajustement après lecture.</p>
+    <div class="tool-grid">
+      <div><h3>Qualités</h3><ul><li>Installation en une commande et API très courte.</li><li>Coût raisonnable sur processeur&nbsp;: environ 2,3&nbsp;s par bloc et 2,7&nbsp;Gio de mémoire.</li></ul></div>
+      <div><h3>Défauts constatés</h3><ul><li>Sans adaptation, la probabilité d’anomalie ne sépare pas les blocs en échec des blocs normaux&nbsp;: aire sous la courbe ROC de 0,47, le niveau du hasard.</li><li>Les abstentions ajoutées (8 sur 40) ne suivent donc pas l’étiquette.</li><li>La révision du modèle effectivement chargée n’est pas vérifiable depuis l’API.</li></ul></div>
+    </div>
+    <p><b>Ce que la documentation omet.</b> Son comportement sur des entrées techniques non rédigées, comme une suite d’événements HDFS&nbsp;: tous les exemples portent sur des décisions en langue naturelle.</p>
+    <p><b>Verdict.</b> Abandonné après une journée d’essai. Une adaptation supervisée par les étiquettes d’anomalie en ferait un second détecteur binaire, rôle déjà tenu par le volet&nbsp;A&nbsp;; une adaptation sur nos explications demanderait un jeu relu plus grand. Sans Laya, l’abstention repose sur les contrôles déterministes de la chaîne, qui ne coûtent rien. Le code reste testé pour une reprise éventuelle.</p>
+  </div>
+
+  <div class="tool">
+    <h2><span class="n">9.2</span>Notebooks Kaggle sur GPU T4 <span class="verdict keep">conservé</span></h2>
+    <p><b>Nature et usage.</b> Kaggle met à disposition des GPU NVIDIA T4 gratuits dans des notebooks distants, dans la limite d’un quota hebdomadaire. Nous l’avons utilisé pour tout ce qui demandait un GPU&nbsp;: comparaison des modèles de langage, essais d’adaptation, entraînement final, essais à trois agents et évaluation du test réservé du volet&nbsp;B. Plutôt que de passer par l’interface web, nous lançons les notebooks par l’API depuis le poste de travail, ce qui permet de boucler «&nbsp;corriger, relancer, lire le journal&nbsp;» sans copier-coller.</p>
+    <div class="tool-grid">
+      <div><h3>Qualités</h3><ul><li>Un GPU de 15&nbsp;Gio sans coût, accessible à toute l’équipe.</li><li>Journal d’exécution complet et téléchargement des sorties (adaptateur, métriques, journaux).</li><li>Les deux premiers échecs ont pu être diagnostiqués depuis le seul journal.</li></ul></div>
+      <div><h3>Défauts constatés</h3><ul><li>L’outil en ligne de commande répondait par un refus d’accès sur un poste, d’où le passage par l’API.</li><li>Joindre le code au notebook sous forme d’archive était trop lourd&nbsp;: le notebook télécharge maintenant les fichiers depuis GitHub, à une version figée, et vérifie l’empreinte de chacun.</li><li>Ces empreintes ne concordaient pas tant que les fichiers venaient d’une copie Windows à fins de ligne CRLF.</li><li>L’image logicielle évolue sans prévenir, et les liens vers les fichiers de sortie expirent.</li></ul></div>
+    </div>
+    <p><b>Ce que la documentation omet.</b> Le format exact du nom de notebook (le propriétaire doit y figurer), l’absence de moyen simple de joindre plusieurs fichiers à un script, l’expiration des liens de sortie et la taille du journal renvoyé.</p>
+    <p><b>Comparaison et verdict.</b> Avant, un membre lançait les essais à la main et nous transmettait les erreurs par message. Le lancement scripté rend chaque exécution traçable et sa relance immédiate. Nous gardons Kaggle pour les essais GPU courts, avec une limite&nbsp;: la méthode suppose un dépôt public.</p>
+  </div>
+
+  <div class="tool">
+    <h2><span class="n">9.3</span>llama.cpp et le format GGUF <span class="verdict keep">conservé</span></h2>
+    <p><b>Nature et usage.</b> llama.cpp est un moteur d’inférence libre écrit en C++, conçu pour exécuter des modèles de langage quantifiés sur du matériel modeste&nbsp;; GGUF est son format de fichier. Nous l’utilisons, via sa liaison Python, pour toute l’inférence du volet&nbsp;B, pour contraindre la sortie par un schéma JSON et pour convertir l’adaptateur LoRA.</p>
+    <div class="tool-grid">
+      <div><h3>Qualités</h3><ul><li>Sur un portable sans GPU, à bloc et paramètres égaux, face à la bibliothèque Transformers en précision complète&nbsp;: 0,98&nbsp;Go sur disque au lieu de 3,4, chargement en 2,9&nbsp;s au lieu de 24, pic mémoire de 2,8&nbsp;Go au lieu de 16,1 et débit triplé.</li><li>La contrainte par schéma JSON garantit une réponse au format attendu par nos contrôles.</li><li>Un adaptateur LoRA s’applique au moment du chargement, sans fusion, et son poids se règle.</li></ul></div>
+      <div><h3>Défauts constatés</h3><ul><li>Avec les journaux placés avant la consigne, le modèle recopiait les journaux au lieu de les résumer&nbsp;: l’ordre de la consigne compte.</li><li>Les débits sont instables&nbsp;: relancé sur une machine chargée, le même calcul tombe de 1,9 à 0,71 token par seconde.</li><li>La sortie contrainte garantit la forme, pas le fond.</li></ul></div>
+    </div>
+    <p><b>Ce que la documentation omet.</b> La version installée par défaut est compilée pour le processeur&nbsp;: le GPU demande une installation à part, et le nombre de couches déportées sur le GPU vaut zéro par défaut, si bien que tout tourne sur le processeur sans avertissement. Le coût dominant vient du traitement de la consigne (environ 2&nbsp;200 tokens), non de la génération.</p>
+    <p><b>Verdict.</b> Conservé comme moteur du volet&nbsp;B&nbsp;: sans lui, évaluer quatre configurations sur 80 cas aurait pris plusieurs dizaines d’heures. Le fonctionnement sur le poste cible a été vérifié, avec et sans adaptateur&nbsp;: 3,7&nbsp;Gio de mémoire graphique et environ 27 tokens par seconde.</p>
+  </div>
+
+  <div class="tool">
+    <h2><span class="n">9.4</span>Jira Cloud, ses automatisations et son lien avec GitHub <span class="verdict keep">conservé</span></h2>
+    <p><b>Nature et usage.</b> Jira est une application de gestion de tickets. Nous l’avons utilisée pour tout le pilotage&nbsp;: épopées, sprints, tickets avec responsable, relecteur, critère de fin et dépendances. Elle était reliée à GitHub, de sorte qu’un ticket affiche les branches et demandes de fusion qui portent sa clé, et dotée d’automatisations qui font avancer le ticket à l’ouverture puis à la fusion.</p>
+    <div class="tool-grid">
+      <div><h3>Qualités</h3><ul><li>Le board complet (7 épopées, 5 sprints, une cinquantaine de tickets liés) a été créé en une séance.</li><li>La convention de nommage des branches relie automatiquement chaque contribution à son ticket.</li><li>Les transitions automatiques évitent les oublis de mise à jour.</li></ul></div>
+      <div><h3>Défauts constatés</h3><ul><li>Un nouveau ticket arrive dans un statut de revue au lieu de «&nbsp;À faire&nbsp;» et doit être déplacé à la main.</li><li>La première version des automatisations rouvrait des tickets terminés et agissait sur des tickets seulement cités.</li><li>Une fusion ne prouve pas qu’un critère de fin est rempli&nbsp;: deux tickets ont dû être rouverts.</li></ul></div>
+    </div>
+    <p><b>Ce que la documentation omet.</b> Sans condition sur la branche source, l’automatisation «&nbsp;demande fusionnée → terminé&nbsp;» s’applique à tout ticket mentionné dans la demande, et pas seulement au sien.</p>
+    <p><b>Comparaison et verdict.</b> Au jalon J2, nous n’avions ni board ni classeur partagé. Le gain tient à la création des tickets en lot et au lien automatique avec le code. Nous conservons Jira, avec trois garde-fous&nbsp;: des automatisations limitées au ticket de la branche, un commentaire par changement réel, et une vérification du critère de fin avant toute clôture.</p>
+  </div>
+
+  <div class="tool">
+    <h2><span class="n">9.5</span>PEFT et QLoRA&nbsp;: une critique argumentée <span class="verdict keep">conservé</span></h2>
+    <p><b>Nature et usage.</b> PEFT est la bibliothèque de Hugging Face qui implémente les adaptations économes en paramètres, dont LoRA&nbsp;; QLoRA y ajoute un modèle de base chargé en 4 bits. Nous l’avons utilisée pour adapter Gemma&nbsp;4 E4B sur T4&nbsp;: d’abord un essai court de 30 pas sur 20 exemples, puis deux entraînements de 400 pas sur 199 exemples.</p>
+    <div class="tool-grid">
+      <div><h3>Ce qui a marché</h3><ul><li>Une chaîne complète sur T4&nbsp;: entraînement stable, environ 2,3 millions de paramètres entraînables pour le rang 8, pic de 10 à 11&nbsp;Gio.</li><li>Un adaptateur de 4,5&nbsp;Mo, converti pour llama.cpp, qui agit bien sur le modèle quantifié et améliore la note humaine sur le test.</li></ul></div>
+      <div><h3>Ce qui a échoué</h3><ul><li>Saturation mémoire&nbsp;: la perte intégrée calcule les scores de toutes les positions sur un vocabulaire de 262&nbsp;144 tokens, puis les convertit en 32 bits (environ 2&nbsp;Gio pour 2&nbsp;000 tokens).</li><li>Gradients non finis en demi-précision, faute de bf16 sur T4.</li><li>Incompatibilités de versions entre PyTorch et ses bibliothèques compagnes.</li><li>Sur processeur, un pas prenait jusqu’à 784&nbsp;s.</li></ul></div>
+    </div>
+    <p><b>Ce que la documentation omet.</b> Le coût mémoire de la perte intégrée quand le vocabulaire est grand, qui dépasse le gain de QLoRA sur une carte de 15&nbsp;Gio&nbsp;; le fait qu’un pas sauté par le mécanisme de mise à l’échelle des gradients est normal en demi-précision et ne doit pas interrompre l’entraînement&nbsp;; et le cas des architectures à cache clé-valeur partagé, où certaines couches ciblées n’existent pas&nbsp;: la projection «&nbsp;valeur&nbsp;» n’est alors adaptée que sur 24 couches sur 42, sans avertissement.</p>
+    <p><b>Temps d’appropriation et verdict.</b> Environ quatre semaines calendaires ont séparé le premier essai du premier entraînement abouti. Nous conservons QLoRA, mais avec une réserve de méthode&nbsp;: on entraîne sur une base en NF4 et l’on infère sur une base en Q4_0, deux quantifications différentes. Rien ne garantissait a priori que l’adaptateur transférerait. Nous l’avons vérifié avant d’en mesurer l’effet&nbsp;: sortie identique à la base avec un poids nul, sortie différente avec un poids de 1, puis gain mesuré sur le test réservé.</p>
+  </div>
+</section>

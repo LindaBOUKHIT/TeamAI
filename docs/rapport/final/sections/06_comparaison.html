@@ -1,0 +1,40 @@
+<section class="chapter">
+  <p class="chapter-kicker">chapitre 6</p>
+  <h1><span class="n">6</span>Analyse technique comparative</h1>
+
+  <h2><span class="n">6.1</span>Deux tâches, une grille commune</h2>
+  <p>Les deux volets ne résolvent pas la même tâche&nbsp;: le volet&nbsp;A détecte, le volet&nbsp;B explique. Une macro-F1 et une note d’explication ne se comparent pas directement. Nous les comparons donc sur les axes demandés par le sujet, en rappelant pour chacun ce qui a été mesuré et ce qui ne l’a pas été. Les deux volets ont été mesurés sur leur propre test réservé, mais avec une portée différente&nbsp;: 86&nbsp;260 blocs étiquetés pour A, 80 réponses, dont 30 notées à la main, pour B.</p>
+  <figure class="table">
+    <figcaption><b>Tableau 9.</b> Comparaison des deux volets. Les latences proviennent de machines différentes&nbsp;: elles donnent des ordres de grandeur, pas une comparaison contrôlée.</figcaption>
+    <table>
+      <thead><tr><th style="width:15%">Axe</th><th style="width:42%">Volet A · BiLSTM dans le navigateur</th><th>Volet B · Gemma 4 E4B en local</th></tr></thead>
+      <tbody>
+        <tr><td><b>Qualité</b></td><td>Macro-F1 0,9938 sur 86&nbsp;260 blocs&nbsp;; 58 fausses alertes, 3 anomalies manquées. 0,9714 sur les séquences inédites.</td><td>Configuration retenue (LoRA, 1 agent)&nbsp;: 79 réponses acceptées sur 80, note humaine de 7,87/8 contre 7,03 sans adaptation. Aucune hypothèse sur un bloc sain.</td></tr>
+        <tr><td><b>Latence</b></td><td>Environ 6&nbsp;200 blocs par seconde dans Chrome, sans GPU.</td><td>24,6&nbsp;s par bloc sur T4 (1 agent), 74 à 84&nbsp;s à 3 agents. Sur la RTX 3050 cible&nbsp;: environ 27 tokens par seconde, soit une dizaine de secondes de génération pour une réponse courte.</td></tr>
+        <tr><td><b>Mémoire</b></td><td>Modèle de 57&nbsp;ko.</td><td>3,7&nbsp;Gio de mémoire graphique sur la RTX 3050&nbsp;; adaptateur de 4,5&nbsp;Mo. Entraînement&nbsp;: 11&nbsp;Go, hors de portée du poste cible.</td></tr>
+        <tr><td><b>Coût</b></td><td>Nul&nbsp;: entraînement de six minutes sur un portable, hébergement statique gratuit, calcul chez l’utilisateur.</td><td>Nul en argent, grâce aux quotas gratuits de Kaggle, mais élevé en calcul&nbsp;: environ 1&nbsp;h&nbsp;30 de GPU pour les deux entraînements finaux et environ 4&nbsp;h&nbsp;40 pour évaluer les quatre configurations sur le test (valeurs calculées à partir des temps mesurés).</td></tr>
+        <tr><td><b>Contrôle</b></td><td>Total&nbsp;: architecture, données, seuil et export sont choisis par l’équipe et vérifiables.</td><td>Partiel&nbsp;: les poids et les données d’entraînement du modèle sont inconnus. Le contrôle passe par le code qui l’entoure (faits calculés, schéma fermé, contrôles) et par l’adaptateur entraîné sur nos exemples.</td></tr>
+        <tr><td><b>Explicabilité</b></td><td>Une classe et un score, sans raison. La séquence du bloc est affichée, mais l’interprétation revient à l’utilisateur.</td><td>Résumé, faits sourcés, hypothèses et informations manquantes, ou abstention. Une réponse bien structurée n’est pas pour autant juste (chapitre&nbsp;5).</td></tr>
+        <tr><td><b>Dépendance</b></td><td>Faible&nbsp;: format ONNX ouvert et moteur d’exécution libre, dans n’importe quel navigateur récent.</td><td>Plus forte&nbsp;: poids publiés par Google à une révision figée, llama.cpp, modèle de plongements pour la recherche, et GPU distant pour l’entraînement.</td></tr>
+        <tr><td><b>Reproductibilité</b></td><td>Empreintes du modèle et des partitions conservées, seuil figé, parité vérifiée sur tout le test.</td><td>Empreintes de la consigne, du schéma, des entrées de test et de l’adaptateur conservées. Les poids du modèle, trop volumineux, restent hors du dépôt et se téléchargent à une révision figée.</td></tr>
+      </tbody>
+    </table>
+  </figure>
+
+  <h2><span class="n">6.2</span>Lecture</h2>
+  <p>Le volet&nbsp;A est rapide, léger, gratuit et précis pour détecter, et chacune de ses décisions peut être retracée. Il ne dit cependant rien de ce qui s’est passé dans le bloc. Le volet&nbsp;B produit une lecture structurée et généralement fidèle de la trace, mais à un coût de calcul supérieur de plusieurs ordres de grandeur et avec des erreurs de fond que la conformité au format ne révèle pas. L’opposition annoncée par le sujet se vérifie&nbsp;: le modèle maîtrisé offre le contrôle, le modèle emprunté offre la langue. Elle se nuance toutefois sur deux points.</p>
+  <p>D’abord, le contrôle du volet&nbsp;B n’est pas nul&nbsp;: il se déplace du modèle vers le code qui l’entoure. Ce sont les faits calculés, le schéma fermé et la vérification des références qui rendent ses réponses vérifiables, plus que le modèle lui-même. Ensuite, l’adaptation par LoRA, avec seulement 200 exemples rédigés par l’équipe, suffit à modifier visiblement le comportement du modèle emprunté&nbsp;: elle rapproche le volet&nbsp;B d’un modèle «&nbsp;maîtrisé&nbsp;» sur la forme de ses réponses, sans lui donner accès à une information que les données ne contiennent pas.</p>
+  <p>Nous avons aussi essayé d’ajouter au volet&nbsp;B un second modèle, un encodeur spécialisé dans les décisions calibrées, pour décider quand s’abstenir. Utilisé sans adaptation, il ne distinguait pas les blocs en échec des blocs normaux (aire sous la courbe ROC de 0,47 sur la validation, soit le niveau du hasard) et n’a pas été retenu (section&nbsp;9.1).</p>
+
+  <h2><span class="n">6.3</span>Perspective&nbsp;: enchaîner les deux volets</h2>
+  <p>Les deux volets ont été construits et évalués séparément&nbsp;: aucune partie du volet&nbsp;B ne lit le score du volet&nbsp;A. Leur enchaînement serait pourtant l’usage naturel&nbsp;: A trie tous les blocs, B n’explique que ceux que A signale. Sur le test, A signale 2&nbsp;581 blocs, soit 3&nbsp;% des 86&nbsp;260. Au rythme mesuré pour B, expliquer tout le test demanderait environ <b>590 heures</b> de GPU, contre environ <b>18 heures</b> pour les seuls blocs signalés. Ces ordres de grandeur sont calculés, non mesurés. Deux précautions s’imposeraient&nbsp;: ne pas transmettre le verdict de A à B, pour que B lise la trace au lieu de justifier une décision, et évaluer la chaîne combinée comme un troisième système.</p>
+
+  <h2><span class="n">6.4</span>Limites</h2>
+  <ul>
+    <li><b>Le volet&nbsp;B ne peut pas établir la cause d’une panne.</b> HDFS_v1 ne fournit qu’une étiquette par bloc, jamais la cause, et la documentation officielle décrit le fonctionnement normal. Une cause proposée ne serait donc pas vérifiable&nbsp;: c’est pourquoi nous avons fermé le catalogue des hypothèses. Dans le jeu d’adaptation, 61&nbsp;% des anomalies d’entraînement n’ont aucune hypothèse. Apprendre des causes demanderait un jeu de journaux avec des pannes injectées et connues.</li>
+    <li><b>Les exemples d’adaptation ne citent aucune source</b>, puisque la configuration à un agent n’utilise pas la recherche documentaire. L’adaptateur n’a donc jamais appris à citer un passage&nbsp;: les cinq réponses sourcées obtenues avec lui à trois agents ne résultent pas d’un apprentissage de la citation.</li>
+    <li><b>L’évaluation humaine est restreinte</b>&nbsp;: 30 cas, deux annotateurs de l’équipe, un accord indépendant faible à modéré avant confrontation.</li>
+    <li><b>La sélection de l’adaptateur</b> résulte d’un départage par l’ordre de la configuration, les deux réglages étant à égalité sur la validation.</li>
+    <li><b>Les mesures de latence et de mémoire</b> de B ont été faites sur T4&nbsp;; sur la RTX 3050 cible, nous n’avons mesuré qu’une consigne, avec et sans adaptateur. La mémoire du navigateur n’a pas été mesurée pour A.</li>
+  </ul>
+</section>

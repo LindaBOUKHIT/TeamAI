@@ -1,0 +1,52 @@
+<section class="chapter annex">
+  <p class="chapter-kicker">annexe A</p>
+  <h1>Annexe A · Reproductibilité</h1>
+  <p>Cette annexe rassemble les identifiants techniques nécessaires pour retrouver et reproduire les résultats. Le dépôt contient, pour chaque expérience, une fiche de résultats rangée avec les prédictions brutes, les paramètres et les empreintes des fichiers d’entrée.</p>
+  <figure class="table">
+    <figcaption><b>Tableau A1.</b> Ressources du projet.</figcaption>
+    <table>
+      <tbody>
+        <tr><td style="width:30%"><b>Dépôt de code</b></td><td><code>github.com/LindaBOUKHIT/TeamAI</code> (branche <code>main</code>)</td></tr>
+        <tr><td><b>Site du volet A</b></td><td><code>lindaboukhit.github.io/TeamAI/</code></td></tr>
+        <tr><td><b>Jeu de données</b></td><td>HDFS_v1, collection Loghub <span class="ref">[1]</span>&nbsp;; téléchargé par le script du dépôt, non versionné.</td></tr>
+        <tr><td><b>Partition</b></td><td>Stratifiée par étiquette, graine 42&nbsp;; empreintes des fichiers de partition conservées avec leurs métadonnées.</td></tr>
+        <tr><td><b>Modèle du volet B</b></td><td><code>google/gemma-4-E4B-it-qat-q4_0-gguf</code>, révision <code>4b4a2c1d584be7264f87aac328a1bc739ce81b6c</code></td></tr>
+        <tr><td><b>Base d’entraînement LoRA</b></td><td><code>google/gemma-4-E4B-it-qat-q4_0-unquantized</code>, révision <code>476025a01dbf99361c062bbeca3d6a76bb4c4566</code></td></tr>
+        <tr><td><b>Adaptateur retenu (r8 q/v)</b></td><td>GGUF de 4,5&nbsp;Mo, SHA-256 <code>52ff1ba7ca6833846b2148dba4c86dc0d5a646a6d582eaa8b2d0d6444559db7b</code></td></tr>
+        <tr><td><b>Mesures du test du volet B</b></td><td>Quatre configurations exécutées le 25 novembre 2026 sur GPU T4, version du code <code>faabb47</code>, entrées figées par empreinte SHA-256.</td></tr>
+        <tr><td><b>Paramètres de génération</b></td><td>Contexte 4&nbsp;096 tokens, 800 tokens de réponse au plus, température 0, graine 42, réflexion désactivée.</td></tr>
+      </tbody>
+    </table>
+  </figure>
+  <figure class="table">
+    <figcaption><b>Tableau A2.</b> Principales commandes, depuis la racine du dépôt. Les fichiers README de chaque dossier détaillent les options.</figcaption>
+    <table>
+      <tbody>
+        <tr><td style="width:42%">Télécharger le corpus HDFS_v1</td><td><code>python -m data.download_hdfs</code></td></tr>
+        <tr><td>Vérifier le corpus chargé</td><td><code>python -m teamai.data.loader</code></td></tr>
+        <tr><td>Reconstruire le jeu d’adaptation et le contrôler</td><td><code>python -m volet_b.slm.merge_lots --check</code></td></tr>
+        <tr><td>Dépouiller la double annotation à l’aveugle</td><td><code>python -m eval.volet_b.blind_scores --dir eval/volet_b/double_annotation</code></td></tr>
+        <tr><td>Lancer les tests Python</td><td><code>pytest -q</code></td></tr>
+        <tr><td>Lancer les tests du site</td><td><code>npm test</code> dans le dossier du site</td></tr>
+      </tbody>
+    </table>
+  </figure>
+</section>
+
+<section class="chapter annex">
+  <p class="chapter-kicker">annexe B</p>
+  <h1>Annexe B · Grille de notation humaine</h1>
+  <p>Chaque réponse est notée de 0 à 2 sur quatre critères, soit un total sur 8. Les annotateurs notent à l’aveugle, sans connaître la configuration qui a produit la réponse, en revenant aux lignes brutes de la trace.</p>
+  <figure class="table">
+    <figcaption><b>Tableau B1.</b> Grille de notation des explications du volet&nbsp;B.</figcaption>
+    <table>
+      <thead><tr><th style="width:16%">Critère</th><th>0</th><th>1</th><th>2</th></tr></thead>
+      <tbody>
+        <tr><td><b>F · exactitude des faits</b></td><td>Un fait central est inventé ou contredit par la trace.</td><td>Les faits principaux sont justes, avec une imprécision ou une omission importante.</td><td>Tous les faits sont traçables et formulés sans extrapolation.</td></tr>
+        <tr><td><b>S · appui sur les sources</b></td><td>Une source citée est invalide ou contredit l’affirmation, ou une explication documentaire importante n’est pas étayée.</td><td>Une source pertinente soutient une partie de l’explication, mais l’appui reste incomplet.</td><td>Chaque affirmation documentaire est soutenue par un passage pertinent&nbsp;; une liste vide est correcte si la réponse n’en fait aucune.</td></tr>
+        <tr><td><b>A · abstention justifiée</b></td><td>Décision clairement inadaptée&nbsp;: affirmation hasardeuse malgré un manque majeur, ou abstention malgré des éléments suffisants.</td><td>Cas limite&nbsp;: décision défendable mais insuffisamment expliquée.</td><td>La décision correspond aux preuves disponibles et ses limites sont explicites.</td></tr>
+        <tr><td><b>U · utilité</b></td><td>Réponse confuse, non pertinente ou inutilisable.</td><td>Réponse compréhensible mais trop vague ou incomplète.</td><td>Résumé clair, limites précises, explication utile pour comprendre la trace.</td></tr>
+      </tbody>
+    </table>
+  </figure>
+</section>

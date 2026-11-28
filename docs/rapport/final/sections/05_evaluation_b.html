@@ -1,0 +1,108 @@
+<section class="chapter">
+  <p class="chapter-kicker">chapitre 5</p>
+  <h1><span class="n">5</span>Évaluation du volet B avant et après adaptation</h1>
+
+  <h2><span class="n">5.1</span>Protocole</h2>
+  <p>Le test réservé du volet&nbsp;B compte <b>80 cas</b> tirés du test commun&nbsp;: 35 blocs présentant un indice d’incident et 45 blocs sans incident. Leurs entrées ont été figées par une empreinte avant toute mesure. Quatre configurations ont été comparées&nbsp;: le modèle de base ou adapté, en mode un agent ou trois agents. Toutes ont été exécutées le même jour, sur le même GPU T4, à partir de la même version du code et avec les mêmes paramètres de génération. Aucune consigne ni aucun seuil n’a été modifié après ces mesures. L’évaluation comporte deux niveaux&nbsp;: des mesures automatiques sur les 80 cas, puis une notation humaine à l’aveugle sur 30 d’entre eux.</p>
+
+  <h2><span class="n">5.2</span>Mesures automatiques</h2>
+  <figure class="table">
+    <figcaption><b>Tableau 6.</b> Mesures automatiques sur les 80 cas du test réservé. «&nbsp;Acceptée&nbsp;» signifie que la réponse passe tous les contrôles, pas qu’elle est juste.</figcaption>
+    <table>
+      <thead><tr><th>Configuration</th><th class="r">Réponses acceptées</th><th class="r">Hypothèses (35 blocs avec incident)</th><th class="r">Résumés affirmant un ordre</th><th class="r">Appels au modèle</th><th class="r">Latence moyenne</th><th class="r">Pic mémoire GPU</th></tr></thead>
+      <tbody>
+        <tr><td>Base, 1 agent</td><td class="r">79/80</td><td class="r">22</td><td class="r"><span class="lo">35/80</span></td><td class="r">1,01</td><td class="r">27,8 s</td><td class="r">4&nbsp;314 Mio</td></tr>
+        <tr class="best"><td><b>LoRA, 1 agent</b></td><td class="r">79/80</td><td class="r">22</td><td class="r"><span class="hi">1/80</span></td><td class="r">1,00</td><td class="r">24,6 s</td><td class="r">4&nbsp;322 Mio</td></tr>
+        <tr><td>Base, 3 agents</td><td class="r"><span class="lo">9/80</span></td><td class="r">0</td><td class="r">—</td><td class="r">4,70</td><td class="r">84,3 s</td><td class="r">4&nbsp;322 Mio</td></tr>
+        <tr><td>LoRA, 3 agents</td><td class="r">25/80</td><td class="r">9</td><td class="r">—</td><td class="r">4,61</td><td class="r">73,8 s</td><td class="r">4&nbsp;330 Mio</td></tr>
+      </tbody>
+    </table>
+  </figure>
+  <p>Quatre constats ressortent de ces mesures.</p>
+  <ul>
+    <li><b>Aucune hypothèse sur un bloc sain.</b> Dans aucune configuration le modèle ne propose d’hypothèse sur les 45 blocs sans incident, et aucune réponse ne cite une référence inexistante. Un seul cas échoue partout, avant même la génération&nbsp;: sa trace dépasse la longueur de consigne autorisée.</li>
+    <li><b>À un agent, l’adaptation change la forme.</b> Elle ne modifie ni le taux d’acceptation ni le nombre d’hypothèses, mais les résumés qui affirment un ordre entre événements («&nbsp;débuté par&nbsp;», «&nbsp;suivi de&nbsp;») passent de <b>35 sur 80 à 1 sur 80</b>, et la latence baisse de 27,8 à 24,6&nbsp;s. Or ces affirmations sont souvent fausses, parce que de nombreux événements d’un bloc sont enregistrés dans la même seconde, et les contrôles automatiques ne les repèrent pas.</li>
+    <li><b>À trois agents, le contrôleur est le goulot.</b> Avec le modèle de base, il demande une correction dans 137 de ses 146 passages et n’accepte que 9 réponses. L’adaptation porte ce nombre à 25, dont 12 sur des blocs avec incident, et fait apparaître des hypothèses et des citations documentaires (5 réponses) qui étaient absentes. Sur les 48 refus motivés par l’ordre des événements, 33 sont justifiés&nbsp;; la plupart des autres opposent deux formulations équivalentes ou exigent des détails que le contrat ne demande pas.</li>
+    <li><b>La recherche apporte peu sur ces blocs</b>&nbsp;: elle ne renvoie que 4 passages distincts sur les 80 cas, ce qui confirme la faible couverture de la documentation (section&nbsp;4.5). L’adaptateur, lui, n’ajoute que quelques mégaoctets de mémoire graphique.</li>
+  </ul>
+
+  <h2><span class="n">5.3</span>Évaluation humaine à l’aveugle</h2>
+  <p>Les mesures automatiques portent sur la forme. Pour juger le fond, deux membres de l’équipe ont noté indépendamment <b>120 réponses</b>&nbsp;: les quatre configurations sur 30 cas tirés des 80. Les réponses étaient présentées dans un ordre aléatoire, sans indication de la configuration qui les avait produites&nbsp;; la correspondance n’a été révélée qu’après le dépôt des deux fiches. Chaque réponse reçoit une note de 0 à 2 sur quatre critères, soit un total sur 8 (annexe&nbsp;B)&nbsp;: l’<b>exactitude des faits</b> (F), l’<b>appui sur les sources</b> (S), la <b>justesse de la décision d’abstention</b> (A) et l’<b>utilité</b> pour comprendre la trace (U).</p>
+
+  <h3>Accord entre annotateurs</h3>
+  <p>Nous mesurons l’accord par le kappa de Cohen à pondération quadratique <span class="ref">[13]</span>, adapté à des notes ordonnées. Avant toute concertation, l’accord est <b>faible à modéré</b> selon l’échelle usuelle <span class="ref">[14]</span> (tableau&nbsp;7). Les désaccords portaient surtout sur la sévérité&nbsp;: une imprécision devait-elle coûter un point d’exactitude ou un point d’utilité&nbsp;? Les deux annotateurs ont ensuite confronté leurs fiches cas par cas en revenant aux lignes brutes&nbsp;: le premier a révisé sa fiche, le second a accepté 49 corrections et en a contesté 2. Ces deux notes d’utilité restent en désaccord dans la version finale.</p>
+  <figure class="table">
+    <figcaption><b>Tableau 7.</b> Accord entre les deux annotateurs sur les 120 réponses, avant et après confrontation.</figcaption>
+    <table>
+      <thead><tr><th>Critère</th><th class="r">Kappa pondéré, notes indépendantes</th><th class="r">Accord exact, notes indépendantes</th><th class="r">Accord exact après confrontation</th></tr></thead>
+      <tbody>
+        <tr><td>F · exactitude des faits</td><td class="r">0,35</td><td class="r">66&nbsp;%</td><td class="r">100&nbsp;%</td></tr>
+        <tr><td>S · appui sur les sources</td><td class="r">0,22</td><td class="r">68&nbsp;%</td><td class="r">100&nbsp;%</td></tr>
+        <tr><td>A · abstention justifiée</td><td class="r">0,17</td><td class="r">78&nbsp;%</td><td class="r">100&nbsp;%</td></tr>
+        <tr><td>U · utilité</td><td class="r">0,49</td><td class="r">77&nbsp;%</td><td class="r">98&nbsp;%</td></tr>
+      </tbody>
+    </table>
+  </figure>
+  <p>L’accord final ne mesure donc plus l’indépendance des jugements, mais l’aboutissement d’un consensus. C’est pourquoi nous donnons aussi les totaux obtenus avec les notes indépendantes&nbsp;: le classement des configurations doit rester le même dans les deux cas.</p>
+
+  <h3>Résultats</h3>
+  <figure>
+    <div class="panel">
+      <svg viewBox="0 0 640 250" width="100%" role="img" aria-label="Notes moyennes par critère et par configuration">
+        <g font-size="11" fill="#5E534B">
+          <line x1="46" y1="200" x2="630" y2="200" stroke="#2B2522" stroke-width="1.4"/>
+          <line x1="46" y1="110" x2="630" y2="110" stroke="#D8CCBA" stroke-dasharray="3 3"/>
+          <line x1="46" y1="20" x2="630" y2="20" stroke="#D8CCBA" stroke-dasharray="3 3"/>
+          <text x="38" y="204" text-anchor="end">0</text><text x="38" y="114" text-anchor="end">1</text><text x="38" y="24" text-anchor="end">2</text>
+        </g>
+        <!-- échelle : 90 px par point ; groupes de 146 px -->
+        <g>
+          <!-- F -->
+          <rect x="62"  y="53"  width="26" height="147" fill="#CFC3B2"/>
+          <rect x="91"  y="74"  width="26" height="126" fill="#E9B7A3"/>
+          <rect x="120" y="26"  width="26" height="174" fill="#2F5F80"/>
+          <rect x="149" y="44"  width="26" height="156" fill="#C4593A"/>
+          <!-- S -->
+          <rect x="208" y="20"  width="26" height="180" fill="#CFC3B2"/>
+          <rect x="237" y="32"  width="26" height="168" fill="#E9B7A3"/>
+          <rect x="266" y="20"  width="26" height="180" fill="#2F5F80"/>
+          <rect x="295" y="35"  width="26" height="165" fill="#C4593A"/>
+          <!-- A -->
+          <rect x="354" y="32"  width="26" height="168" fill="#CFC3B2"/>
+          <rect x="383" y="41"  width="26" height="159" fill="#E9B7A3"/>
+          <rect x="412" y="23"  width="26" height="177" fill="#2F5F80"/>
+          <rect x="441" y="35"  width="26" height="165" fill="#C4593A"/>
+          <!-- U -->
+          <rect x="500" y="62"  width="26" height="138" fill="#CFC3B2"/>
+          <rect x="529" y="67"  width="26" height="133" fill="#E9B7A3"/>
+          <rect x="558" y="23"  width="26" height="177" fill="#2F5F80"/>
+          <rect x="587" y="40"  width="26" height="160" fill="#C4593A"/>
+        </g>
+        <g font-size="12" font-weight="700" fill="#2B2522" text-anchor="middle">
+          <text x="118" y="218">F · faits</text><text x="264" y="218">S · sources</text><text x="410" y="218">A · abstention</text><text x="556" y="218">U · utilité</text>
+        </g>
+        <g font-size="11" fill="#2B2522">
+          <rect x="70" y="232" width="11" height="11" fill="#CFC3B2"/><text x="86" y="242">Base, 1 agent</text>
+          <rect x="190" y="232" width="11" height="11" fill="#E9B7A3"/><text x="206" y="242">Base, 3 agents</text>
+          <rect x="318" y="232" width="11" height="11" fill="#2F5F80"/><text x="334" y="242">LoRA, 1 agent</text>
+          <rect x="446" y="232" width="11" height="11" fill="#C4593A"/><text x="462" y="242">LoRA, 3 agents</text>
+        </g>
+      </svg>
+    </div>
+    <figcaption><b>Figure 6.</b> Notes moyennes par critère (sur 2) après confrontation, 30 réponses par configuration.</figcaption>
+  </figure>
+  <figure class="table">
+    <figcaption><b>Tableau 8.</b> Notes moyennes sur les 30 cas notés à l’aveugle. Les quatre premières colonnes et le total final sont calculés après confrontation&nbsp;; la dernière colonne reprend les notes indépendantes des deux annotateurs.</figcaption>
+    <table>
+      <thead><tr><th>Configuration</th><th class="r">F</th><th class="r">S</th><th class="r">A</th><th class="r">U</th><th class="r">Total / 8</th><th class="r">Total / 8, notes indépendantes</th></tr></thead>
+      <tbody>
+        <tr><td>Base, 1 agent</td><td class="r">1,63</td><td class="r">2,00</td><td class="r">1,87</td><td class="r">1,53</td><td class="r">7,03</td><td class="r">6,38</td></tr>
+        <tr class="best"><td><b>LoRA, 1 agent</b></td><td class="r"><b>1,93</b></td><td class="r"><b>2,00</b></td><td class="r"><b>1,97</b></td><td class="r"><b>1,97</b></td><td class="r"><b>7,87</b></td><td class="r"><b>7,87</b></td></tr>
+        <tr><td>Base, 3 agents</td><td class="r">1,40</td><td class="r">1,87</td><td class="r">1,77</td><td class="r">1,48</td><td class="r">6,52</td><td class="r">5,97</td></tr>
+        <tr><td>LoRA, 3 agents</td><td class="r">1,73</td><td class="r">1,83</td><td class="r">1,83</td><td class="r">1,78</td><td class="r">7,18</td><td class="r">6,95</td></tr>
+      </tbody>
+    </table>
+  </figure>
+  <p>Le classement est identique avec les notes indépendantes et avec les notes finales. <b>L’adaptation LoRA améliore les deux modes</b>&nbsp;: +0,84 point à un agent et +0,66 à trois agents. Le gain porte surtout sur l’exactitude des faits (de 1,63 à 1,93 à un agent) et sur l’utilité (de 1,53 à 1,97), ce qui concorde avec la disparition des chronologies affirmées sans preuve observée au tableau&nbsp;6. <b>Le mode trois agents est moins bon que le mode un agent</b>, avec ou sans adaptation, pour une latence trois fois plus élevée. Nous n’avons pas isolé la cause de cet écart&nbsp;; la piste la plus probable est que les corrections exigées par le contrôleur, souvent injustifiées (section&nbsp;5.2), font perdre à la réponse des éléments justes.</p>
+  <div class="keypoint"><span class="t">Ce que l’on peut conclure, et ce que l’on ne peut pas</span><p>Sur ce test, la configuration adaptée à un agent est la meilleure sur les quatre critères, et c’est celle que nous retenons pour l’application. L’échantillon reste petit&nbsp;: 30 cas, deux annotateurs membres de l’équipe, aucun test de significativité. Les écarts sont cohérents entre les mesures automatiques et humaines, mais leur ampleur exacte serait à confirmer sur un échantillon plus large, noté par des annotateurs extérieurs au projet.</p></div>
+</section>

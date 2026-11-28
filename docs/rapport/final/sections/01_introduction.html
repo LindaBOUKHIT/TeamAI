@@ -1,0 +1,60 @@
+<section class="chapter">
+  <p class="chapter-kicker">chapitre 1</p>
+  <h1><span class="n">1</span>Introduction et cadrage</h1>
+
+  <h2><span class="n">1.1</span>Contexte</h2>
+  <p>Un système distribué comme HDFS, le système de fichiers de Hadoop, écrit en permanence des journaux d’événements&nbsp;: allocation d’un bloc par le NameNode, réception d’une réplique par un DataNode, fin d’écriture, suppression. Quand une opération échoue, la trace de l’incident est presque toujours là, mais noyée parmi des millions de lignes ordinaires. Les approches classiques de détection reposent soit sur des règles écrites à la main, soit sur des modèles statistiques appris sur les séquences d’événements <span class="ref">[2, 3]</span>. Les modèles de langage récents ouvrent une troisième voie&nbsp;: produire, à partir des lignes brutes, une explication lisible par un opérateur.</p>
+  <p>Le sujet du module impose de confronter deux régimes techniques sur un même cas d’usage. Le <b>volet&nbsp;A</b> fournit un modèle de faible capacité, long à mettre au point mais entièrement maîtrisé, déployé en ligne à coût nul. Le <b>volet&nbsp;B</b> fournit un modèle performant, immédiatement disponible, dont la composition n’est pas connue, qu’il faut adapter et exécuter en local. Nous avons choisi les journaux HDFS parce qu’ils se prêtent aux deux&nbsp;: la détection d’un bloc anormal est une tâche de classification bien posée, et l’explication de ce qui s’est passé dans ce bloc est une tâche de langage.</p>
+
+  <h2><span class="n">1.2</span>Problématique et objectifs</h2>
+  <p>La question qui guide le projet est la suivante&nbsp;: <em>comment repérer les blocs HDFS anormaux et en proposer une lecture exploitable, et que gagne-t-on ou perd-on en passant d’un modèle maîtrisé de bout en bout à un modèle emprunté et adapté&nbsp;?</em> Elle se décline en cinq objectifs&nbsp;:</p>
+  <ol>
+    <li>préparer un corpus HDFS reproductible, avec des partitions qui ne surestiment pas les performances&nbsp;;</li>
+    <li>entraîner un classifieur normal/anomalie, le comparer à une référence simple et le servir dans un site public sans serveur d’inférence&nbsp;;</li>
+    <li>faire tourner un petit modèle de langage en local, l’adapter par LoRA, l’enrichir d’une recherche documentaire et l’organiser en agents spécialisés&nbsp;;</li>
+    <li>mesurer le volet&nbsp;B avant et après adaptation sur un jeu de test réservé, y compris par une évaluation humaine&nbsp;;</li>
+    <li>comparer les deux volets sur le coût, la latence, la qualité, le degré de contrôle, l’explicabilité et la dépendance à un fournisseur.</li>
+  </ol>
+
+  <h2><span class="n">1.3</span>Périmètre</h2>
+  <figure class="table">
+    <figcaption><b>Tableau 1.</b> Périmètre des deux volets.</figcaption>
+    <table>
+      <thead><tr><th style="width:18%"></th><th>Volet A · application en ligne</th><th>Volet B · application locale</th></tr></thead>
+      <tbody>
+        <tr><td><b>Tâche</b></td><td>Classer chaque bloc comme normal ou anormal.</td><td>Résumer les événements d’un bloc, distinguer faits, hypothèses et informations manquantes, ou s’abstenir.</td></tr>
+        <tr><td><b>Modèle</b></td><td>BiLSTM entraîné par l’équipe, export ONNX.</td><td>Gemma 4 E4B quantifié, adapté par LoRA, avec recherche documentaire et trois agents en option.</td></tr>
+        <tr><td><b>Exécution</b></td><td>Navigateur de l’utilisateur, site statique public.</td><td>Poste local équipé d’un GPU de 6 Go.</td></tr>
+        <tr><td><b>Entrée</b></td><td>Journaux HDFS collés ou importés.</td><td>Journaux d’un à cinq blocs.</td></tr>
+        <tr><td><b>Sortie</b></td><td>Classe, score, export CSV.</td><td>Réponse structurée et vérifiée.</td></tr>
+      </tbody>
+    </table>
+  </figure>
+  <p>Sont hors périmètre&nbsp;: la supervision en temps réel, la collecte sur une infrastructure de production, les autres formats de journaux, la correction automatique d’incidents et le diagnostic causal garanti. Ce dernier point est essentiel pour lire la suite&nbsp;: le jeu HDFS_v1 indique si un bloc est anormal, jamais pourquoi. Un système qui proposerait une cause ne pourrait donc pas être vérifié sur ces données (section&nbsp;6.4).</p>
+
+  <h2><span class="n">1.4</span>Contraintes et risques</h2>
+  <p>Le volet&nbsp;A devait respecter un budget d’hébergement nul, d’où le choix d’une inférence côté client. Le volet&nbsp;B dépend du matériel&nbsp;: un seul membre de l’équipe dispose d’une carte graphique NVIDIA (RTX 3050 Laptop, 6 Go), insuffisante pour entraîner le modèle, ce qui nous a conduits à entraîner sur les GPU T4 gratuits de Kaggle. Le tableau&nbsp;2 résume les risques identifiés au cadrage et la manière dont ils ont été traités.</p>
+  <figure class="table">
+    <figcaption><b>Tableau 2.</b> Risques identifiés au cadrage et réponses apportées.</figcaption>
+    <table>
+      <thead><tr><th style="width:30%">Risque</th><th>Réponse</th></tr></thead>
+      <tbody>
+        <tr><td>Performances surestimées par fuite de données</td><td>Partition par bloc, test réservé ouvert une seule fois, résultats séparés sur les séquences jamais vues à l’entraînement.</td></tr>
+        <tr><td>Écart entre Python et le navigateur</td><td>Même prétraitement écrit dans les deux langages, comparaison des 86&nbsp;260 scores du test.</td></tr>
+        <tr><td>Modèle de langage trop lent ou trop gourmand</td><td>Quantification 4 bits, exécution par llama.cpp, entraînement déporté sur GPU distant.</td></tr>
+        <tr><td>Explications non fiables</td><td>Faits calculés par le code, schéma fermé, contrôles, abstention autorisée, évaluation humaine à l’aveugle.</td></tr>
+        <tr><td>Retards et dépendances entre tâches</td><td>Tickets avec responsable, relecteur et critère de fin&nbsp;; contrats de format entre les modules.</td></tr>
+      </tbody>
+    </table>
+  </figure>
+
+  <h2 class="arch-title"><span class="n">1.5</span>Architecture d’ensemble</h2>
+  <p>La figure&nbsp;1 situe les deux volets l’un par rapport à l’autre. Ils partagent un même socle&nbsp;: le corpus HDFS_v1, préparé une seule fois de façon reproductible, et une partition dont le test réservé n’est ouvert qu’à l’évaluation finale. Le volet&nbsp;A entraîne un détecteur en Python puis le publie dans un site statique où tout le calcul se fait dans le navigateur. Le volet&nbsp;B exécute en local un modèle de langage emprunté, adapté sur un GPU distant puis encadré par du code qui calcule les faits et contrôle chaque réponse.</p>
+  <figure class="arch">
+    <div class="panel"><!--SVG:architecture.svg--></div>
+    <figcaption><b>Figure 1.</b> Architecture d’ensemble du projet. En bleu le volet&nbsp;A, en terre cuite le volet&nbsp;B, en violet l’adaptation sur GPU distant, en vert l’évaluation sur le test réservé.</figcaption>
+  </figure>
+
+  <h2><span class="n">1.6</span>Organisation du document</h2>
+  <p>Le chapitre&nbsp;2 décrit les données et le protocole commun. Les chapitres&nbsp;3 et&nbsp;4 présentent les deux solutions, et le chapitre&nbsp;5 l’évaluation du volet&nbsp;B sur son test réservé. Le chapitre&nbsp;6 compare les deux volets. Les chapitres&nbsp;7 et&nbsp;8 portent sur la conduite du projet, collectivement puis individuellement, et le chapitre&nbsp;9 sur les cinq outils que nous avons découverts. L’annexe&nbsp;A rassemble les éléments nécessaires pour reproduire les résultats.</p>
+</section>

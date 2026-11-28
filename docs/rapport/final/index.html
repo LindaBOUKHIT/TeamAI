@@ -1,0 +1,982 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8">
+<title>TeamAI — Rapport de projet NLP 2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:ital,wght@0,400;0,500;0,700;1,400&family=Kalam:wght@400;700&family=Courier+Prime&display=block" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head><body>
+<section class="cover">
+  <div class="logos">
+    <img src="logo_fges.png" alt="Faculté de Gestion, Économie et Sciences — Université Catholique de Lille">
+    <span class="logo-sep"></span>
+    <img src="logo_edn.png" alt="EDN — École du Numérique">
+  </div>
+  <p class="kicker">Rapport de projet · NLP 2 · Master 2 Data &amp; IA</p>
+  <h1 data-toc="no">Détecter et expliquer<br>les anomalies des<br>journaux <span class="hl">HDFS</span></h1>
+  <p class="lead">Un classifieur entraîné par l’équipe et servi dans le navigateur, face à un petit modèle de langage emprunté, adapté et exécuté en local.</p>
+  <div class="printout">
+    <span class="tape"></span>
+    <p class="printout-title">HDFS.log — un bloc, quatre lignes</p>
+    <ol class="log">
+      <li><span class="ln">1</span><span>081110 010451 33 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/randtxt/_temporary/…/part-00269. blk_-1013481023655112960</span></li>
+      <li><span class="ln">2</span><span>081110 010451 5105 INFO dfs.DataNode$DataXceiver: Receiving block blk_-1013481023655112960 src: /10.251.74.134:45275 dest: /10.251.74.134:50010</span></li>
+      <li><span class="ln">3</span><span>081110 010451 5109 INFO dfs.DataNode$DataXceiver: Receiving block blk_-1013481023655112960 src: /10.251.74.134:48604 dest: /10.251.74.134:50010</span></li>
+      <li class="err"><span class="ln">4</span><span>081110 010454 5105 INFO dfs.DataNode$DataXceiver: writeBlock blk_-1013481023655112960 <mark>received exception java.io.IOException: Could not read from stream</mark></span></li>
+    </ol>
+    <p class="note-err">là, ça casse.<br>mais pourquoi&nbsp;?</p>
+  </div>
+  <div class="byline">
+    <div>
+      <span class="team-mark">TeamAI</span>
+      <span class="names">Alain Evina · Nassim Mezzai · Bachar Ben Slama · Linda Boukhit</span>
+      <span class="meta">Enseignant&nbsp;: <b>Adrian Rosari</b><br>Faculté de Gestion, Économie et Sciences · Université Catholique de Lille · EDN</span>
+    </div>
+    <div class="doc-type"><b>Rapport final</b>Année 2026-2027<br>27 novembre 2026</div>
+  </div>
+</section>
+
+<section class="front abstract">
+  <p class="chapter-kicker">en bref</p>
+  <h1 data-toc="no">Résumé</h1>
+  <p>Les journaux d’un système distribué enregistrent son fonctionnement ligne à ligne, mais ils sont trop volumineux pour être lus en entier. Ce projet étudie deux manières d’aider un opérateur face aux journaux du système de fichiers Hadoop (HDFS), à partir du jeu public HDFS_v1, qui compte 575&nbsp;061 blocs étiquetés normaux ou anormaux.</p>
+  <p>Le premier volet est un <b>classifieur de séquences</b> entièrement maîtrisé par l’équipe&nbsp;: un réseau récurrent bidirectionnel (BiLSTM) de 57&nbsp;ko, entraîné sur les séquences d’événements, exporté au format ONNX et exécuté dans le navigateur d’un site public, sans serveur. Sur les 86&nbsp;260 blocs du test réservé, il atteint une macro-F1 de 0,9938, avec 58 fausses alertes et 3 anomalies manquées, et divise par deux les fausses alertes d’une régression logistique de référence.</p>
+  <p>Le second volet est une <b>application locale d’explication</b> fondée sur un petit modèle de langage emprunté, Gemma&nbsp;4 E4B quantifié, encadré par des faits calculés par le code, un schéma de réponse fermé et des contrôles automatiques. Nous l’avons adapté par LoRA sur 200 exemples rédigés et relus par l’équipe, puis comparé avec et sans adaptation, en mode un agent et en mode trois agents (recherche documentaire, rédaction, contrôle). Sur un test réservé noté à l’aveugle par deux annotateurs, la configuration adaptée à un agent obtient la meilleure note, 7,87 sur 8 contre 7,03 pour le modèle de base, et l’adaptation fait presque disparaître les chronologies affirmées sans preuve (de 35 à 1 sur 80 réponses).</p>
+  <p>L’analyse comparative montre deux outils complémentaires&nbsp;: le premier trie des milliers de blocs par seconde sans rien expliquer, le second explique un bloc en une vingtaine de secondes sur GPU, sans pouvoir établir la cause d’une panne que les données ne contiennent pas. Le rapport présente aussi notre retour d’expérience sur la conduite du projet et cinq outils que nous avons découverts en l’utilisant.</p>
+  <p class="keywords"><b>Mots-clés&nbsp;:</b> détection d’anomalies, journaux système, HDFS, BiLSTM, ONNX Runtime Web, petit modèle de langage, LoRA, QLoRA, génération augmentée par la recherche, systèmes multi-agents, évaluation humaine à l’aveugle.</p>
+</section>
+
+<section class="front">
+  <p class="chapter-kicker">plan</p>
+  <h1 data-toc="no">Sommaire</h1>
+  <ol class="toc"><li class="l1"><span class="n">1</span><span>Introduction et cadrage</span><span class="dots"></span><span class="p">5</span></li>
+<li class="l2"><span class="n">1.1</span><span>Contexte</span><span class="dots"></span><span class="p">5</span></li>
+<li class="l2"><span class="n">1.2</span><span>Problématique et objectifs</span><span class="dots"></span><span class="p">5</span></li>
+<li class="l2"><span class="n">1.3</span><span>Périmètre</span><span class="dots"></span><span class="p">6</span></li>
+<li class="l2"><span class="n">1.4</span><span>Contraintes et risques</span><span class="dots"></span><span class="p">6</span></li>
+<li class="l2"><span class="n">1.5</span><span>Architecture d’ensemble</span><span class="dots"></span><span class="p">7</span></li>
+<li class="l2"><span class="n">1.6</span><span>Organisation du document</span><span class="dots"></span><span class="p">8</span></li>
+<li class="l1"><span class="n">2</span><span>Données et protocole commun</span><span class="dots"></span><span class="p">9</span></li>
+<li class="l2"><span class="n">2.1</span><span>Le jeu HDFS_v1</span><span class="dots"></span><span class="p">9</span></li>
+<li class="l2"><span class="n">2.2</span><span>Partition et séquences inédites</span><span class="dots"></span><span class="p">9</span></li>
+<li class="l2"><span class="n">2.3</span><span>Règles d’évaluation</span><span class="dots"></span><span class="p">10</span></li>
+<li class="l1"><span class="n">3</span><span>Volet A : un détecteur dans le navigateur</span><span class="dots"></span><span class="p">11</span></li>
+<li class="l2"><span class="n">3.1</span><span>Chaîne de traitement</span><span class="dots"></span><span class="p">11</span></li>
+<li class="l2"><span class="n">3.2</span><span>Modèle et entraînement</span><span class="dots"></span><span class="p">11</span></li>
+<li class="l2"><span class="n">3.3</span><span>Choix du seuil de décision</span><span class="dots"></span><span class="p">11</span></li>
+<li class="l2"><span class="n">3.4</span><span>Résultats sur le test réservé</span><span class="dots"></span><span class="p">12</span></li>
+<li class="l2"><span class="n">3.5</span><span>Application web</span><span class="dots"></span><span class="p">12</span></li>
+<li class="l2"><span class="n">3.6</span><span>Limites</span><span class="dots"></span><span class="p">13</span></li>
+<li class="l1"><span class="n">4</span><span>Volet B : expliquer un bloc en local</span><span class="dots"></span><span class="p">14</span></li>
+<li class="l2"><span class="n">4.1</span><span>Choix du modèle</span><span class="dots"></span><span class="p">14</span></li>
+<li class="l2"><span class="n">4.2</span><span>Encadrer le modèle par le code</span><span class="dots"></span><span class="p">14</span></li>
+<li class="l2"><span class="n">4.3</span><span>Un jeu d’adaptation rédigé et relu par l’équipe</span><span class="dots"></span><span class="p">15</span></li>
+<li class="l2"><span class="n">4.4</span><span>Adaptation par LoRA</span><span class="dots"></span><span class="p">16</span></li>
+<li class="l2"><span class="n">4.5</span><span>Recherche documentaire</span><span class="dots"></span><span class="p">17</span></li>
+<li class="l2"><span class="n">4.6</span><span>Organisation en trois agents</span><span class="dots"></span><span class="p">17</span></li>
+<li class="l2"><span class="n">4.7</span><span>Interface locale</span><span class="dots"></span><span class="p">17</span></li>
+<li class="l1"><span class="n">5</span><span>Évaluation du volet B avant et après adaptation</span><span class="dots"></span><span class="p">18</span></li>
+<li class="l2"><span class="n">5.1</span><span>Protocole</span><span class="dots"></span><span class="p">18</span></li>
+<li class="l2"><span class="n">5.2</span><span>Mesures automatiques</span><span class="dots"></span><span class="p">18</span></li>
+<li class="l2"><span class="n">5.3</span><span>Évaluation humaine à l’aveugle</span><span class="dots"></span><span class="p">19</span></li>
+<li class="l1"><span class="n">6</span><span>Analyse technique comparative</span><span class="dots"></span><span class="p">21</span></li>
+<li class="l2"><span class="n">6.1</span><span>Deux tâches, une grille commune</span><span class="dots"></span><span class="p">21</span></li>
+<li class="l2"><span class="n">6.2</span><span>Lecture</span><span class="dots"></span><span class="p">22</span></li>
+<li class="l2"><span class="n">6.3</span><span>Perspective : enchaîner les deux volets</span><span class="dots"></span><span class="p">23</span></li>
+<li class="l2"><span class="n">6.4</span><span>Limites</span><span class="dots"></span><span class="p">23</span></li>
+<li class="l1"><span class="n">7</span><span>Retour d’expérience collectif</span><span class="dots"></span><span class="p">24</span></li>
+<li class="l2"><span class="n">7.1</span><span>Méthodologie</span><span class="dots"></span><span class="p">24</span></li>
+<li class="l2"><span class="n">7.2</span><span>Outillage</span><span class="dots"></span><span class="p">25</span></li>
+<li class="l2"><span class="n">7.3</span><span>Difficultés</span><span class="dots"></span><span class="p">25</span></li>
+<li class="l2"><span class="n">7.4</span><span>Enseignements</span><span class="dots"></span><span class="p">26</span></li>
+<li class="l2"><span class="n">7.5</span><span>Axes de progression</span><span class="dots"></span><span class="p">26</span></li>
+<li class="l1"><span class="n">8</span><span>Retours d’expérience individuels</span><span class="dots"></span><span class="p">27</span></li>
+<li class="l2"><span class="n">8.1</span><span>Alain Evina</span><span class="dots"></span><span class="p">27</span></li>
+<li class="l2"><span class="n">8.2</span><span>Bachar Ben Slama</span><span class="dots"></span><span class="p">28</span></li>
+<li class="l2"><span class="n">8.3</span><span>Linda Boukhit</span><span class="dots"></span><span class="p">29</span></li>
+<li class="l2"><span class="n">8.4</span><span>Nassim Mezzai</span><span class="dots"></span><span class="p">30</span></li>
+<li class="l1"><span class="n">9</span><span>Cinq outils novateurs</span><span class="dots"></span><span class="p">32</span></li>
+<li class="l2"><span class="n">9.1</span><span>Laya, un encodeur de décision calibrée</span><span class="dots"></span><span class="p">32</span></li>
+<li class="l2"><span class="n">9.2</span><span>Notebooks Kaggle sur GPU T4</span><span class="dots"></span><span class="p">32</span></li>
+<li class="l2"><span class="n">9.3</span><span>llama.cpp et le format GGUF</span><span class="dots"></span><span class="p">33</span></li>
+<li class="l2"><span class="n">9.4</span><span>Jira Cloud, ses automatisations et son lien avec GitHub</span><span class="dots"></span><span class="p">34</span></li>
+<li class="l2"><span class="n">9.5</span><span>PEFT et QLoRA : une critique argumentée</span><span class="dots"></span><span class="p">34</span></li>
+<li class="l1"><span class="n">10</span><span>Conclusion et perspectives</span><span class="dots"></span><span class="p">36</span></li>
+<li class="l2"><span class="n">10.1</span><span>Perspectives</span><span class="dots"></span><span class="p">36</span></li>
+<li class="l1"><span class="n"></span><span>Références</span><span class="dots"></span><span class="p">37</span></li>
+<li class="l1"><span class="n"></span><span>Annexe A · Reproductibilité</span><span class="dots"></span><span class="p">38</span></li>
+<li class="l1"><span class="n"></span><span>Annexe B · Grille de notation humaine</span><span class="dots"></span><span class="p">39</span></li></ol>
+</section>
+
+<section class="chapter">
+  <p class="chapter-kicker">chapitre 1</p>
+  <h1><span class="n">1</span>Introduction et cadrage</h1>
+
+  <h2><span class="n">1.1</span>Contexte</h2>
+  <p>Un système distribué comme HDFS, le système de fichiers de Hadoop, écrit en permanence des journaux d’événements&nbsp;: allocation d’un bloc par le NameNode, réception d’une réplique par un DataNode, fin d’écriture, suppression. Quand une opération échoue, la trace de l’incident est presque toujours là, mais noyée parmi des millions de lignes ordinaires. Les approches classiques de détection reposent soit sur des règles écrites à la main, soit sur des modèles statistiques appris sur les séquences d’événements <span class="ref">[2, 3]</span>. Les modèles de langage récents ouvrent une troisième voie&nbsp;: produire, à partir des lignes brutes, une explication lisible par un opérateur.</p>
+  <p>Le sujet du module impose de confronter deux régimes techniques sur un même cas d’usage. Le <b>volet&nbsp;A</b> fournit un modèle de faible capacité, long à mettre au point mais entièrement maîtrisé, déployé en ligne à coût nul. Le <b>volet&nbsp;B</b> fournit un modèle performant, immédiatement disponible, dont la composition n’est pas connue, qu’il faut adapter et exécuter en local. Nous avons choisi les journaux HDFS parce qu’ils se prêtent aux deux&nbsp;: la détection d’un bloc anormal est une tâche de classification bien posée, et l’explication de ce qui s’est passé dans ce bloc est une tâche de langage.</p>
+
+  <h2><span class="n">1.2</span>Problématique et objectifs</h2>
+  <p>La question qui guide le projet est la suivante&nbsp;: <em>comment repérer les blocs HDFS anormaux et en proposer une lecture exploitable, et que gagne-t-on ou perd-on en passant d’un modèle maîtrisé de bout en bout à un modèle emprunté et adapté&nbsp;?</em> Elle se décline en cinq objectifs&nbsp;:</p>
+  <ol>
+    <li>préparer un corpus HDFS reproductible, avec des partitions qui ne surestiment pas les performances&nbsp;;</li>
+    <li>entraîner un classifieur normal/anomalie, le comparer à une référence simple et le servir dans un site public sans serveur d’inférence&nbsp;;</li>
+    <li>faire tourner un petit modèle de langage en local, l’adapter par LoRA, l’enrichir d’une recherche documentaire et l’organiser en agents spécialisés&nbsp;;</li>
+    <li>mesurer le volet&nbsp;B avant et après adaptation sur un jeu de test réservé, y compris par une évaluation humaine&nbsp;;</li>
+    <li>comparer les deux volets sur le coût, la latence, la qualité, le degré de contrôle, l’explicabilité et la dépendance à un fournisseur.</li>
+  </ol>
+
+  <h2><span class="n">1.3</span>Périmètre</h2>
+  <figure class="table">
+    <figcaption><b>Tableau 1.</b> Périmètre des deux volets.</figcaption>
+    <table>
+      <thead><tr><th style="width:18%"></th><th>Volet A · application en ligne</th><th>Volet B · application locale</th></tr></thead>
+      <tbody>
+        <tr><td><b>Tâche</b></td><td>Classer chaque bloc comme normal ou anormal.</td><td>Résumer les événements d’un bloc, distinguer faits, hypothèses et informations manquantes, ou s’abstenir.</td></tr>
+        <tr><td><b>Modèle</b></td><td>BiLSTM entraîné par l’équipe, export ONNX.</td><td>Gemma 4 E4B quantifié, adapté par LoRA, avec recherche documentaire et trois agents en option.</td></tr>
+        <tr><td><b>Exécution</b></td><td>Navigateur de l’utilisateur, site statique public.</td><td>Poste local équipé d’un GPU de 6 Go.</td></tr>
+        <tr><td><b>Entrée</b></td><td>Journaux HDFS collés ou importés.</td><td>Journaux d’un à cinq blocs.</td></tr>
+        <tr><td><b>Sortie</b></td><td>Classe, score, export CSV.</td><td>Réponse structurée et vérifiée.</td></tr>
+      </tbody>
+    </table>
+  </figure>
+  <p>Sont hors périmètre&nbsp;: la supervision en temps réel, la collecte sur une infrastructure de production, les autres formats de journaux, la correction automatique d’incidents et le diagnostic causal garanti. Ce dernier point est essentiel pour lire la suite&nbsp;: le jeu HDFS_v1 indique si un bloc est anormal, jamais pourquoi. Un système qui proposerait une cause ne pourrait donc pas être vérifié sur ces données (section&nbsp;6.4).</p>
+
+  <h2><span class="n">1.4</span>Contraintes et risques</h2>
+  <p>Le volet&nbsp;A devait respecter un budget d’hébergement nul, d’où le choix d’une inférence côté client. Le volet&nbsp;B dépend du matériel&nbsp;: un seul membre de l’équipe dispose d’une carte graphique NVIDIA (RTX 3050 Laptop, 6 Go), insuffisante pour entraîner le modèle, ce qui nous a conduits à entraîner sur les GPU T4 gratuits de Kaggle. Le tableau&nbsp;2 résume les risques identifiés au cadrage et la manière dont ils ont été traités.</p>
+  <figure class="table">
+    <figcaption><b>Tableau 2.</b> Risques identifiés au cadrage et réponses apportées.</figcaption>
+    <table>
+      <thead><tr><th style="width:30%">Risque</th><th>Réponse</th></tr></thead>
+      <tbody>
+        <tr><td>Performances surestimées par fuite de données</td><td>Partition par bloc, test réservé ouvert une seule fois, résultats séparés sur les séquences jamais vues à l’entraînement.</td></tr>
+        <tr><td>Écart entre Python et le navigateur</td><td>Même prétraitement écrit dans les deux langages, comparaison des 86&nbsp;260 scores du test.</td></tr>
+        <tr><td>Modèle de langage trop lent ou trop gourmand</td><td>Quantification 4 bits, exécution par llama.cpp, entraînement déporté sur GPU distant.</td></tr>
+        <tr><td>Explications non fiables</td><td>Faits calculés par le code, schéma fermé, contrôles, abstention autorisée, évaluation humaine à l’aveugle.</td></tr>
+        <tr><td>Retards et dépendances entre tâches</td><td>Tickets avec responsable, relecteur et critère de fin&nbsp;; contrats de format entre les modules.</td></tr>
+      </tbody>
+    </table>
+  </figure>
+
+  <h2 class="arch-title"><span class="n">1.5</span>Architecture d’ensemble</h2>
+  <p>La figure&nbsp;1 situe les deux volets l’un par rapport à l’autre. Ils partagent un même socle&nbsp;: le corpus HDFS_v1, préparé une seule fois de façon reproductible, et une partition dont le test réservé n’est ouvert qu’à l’évaluation finale. Le volet&nbsp;A entraîne un détecteur en Python puis le publie dans un site statique où tout le calcul se fait dans le navigateur. Le volet&nbsp;B exécute en local un modèle de langage emprunté, adapté sur un GPU distant puis encadré par du code qui calcule les faits et contrôle chaque réponse.</p>
+  <figure class="arch">
+    <div class="panel"><svg viewBox="0 0 640 884" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Architecture d’ensemble du projet TeamAI">
+  <defs>
+    <marker id="ar-ink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5E534B"/></marker>
+    <marker id="ar-ocean" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2F5F80"/></marker>
+    <marker id="ar-terra" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#C4593A"/></marker>
+    <marker id="ar-plum" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#7D4E6E"/></marker>
+  </defs>
+  <style>
+    .ar-band { font: 700 11.5px Figtree, sans-serif; letter-spacing: .06em; }
+    .ar-sub { font: 400 8.6px Figtree, sans-serif; fill: #5E534B; }
+    .ar-grp { font: 700 9.2px Figtree, sans-serif; letter-spacing: .04em; }
+    .ar-t { font: 700 10px Figtree, sans-serif; fill: #2B2522; }
+    .ar-x { font: 400 8.8px Figtree, sans-serif; fill: #4A403A; }
+    .ar-lab { font: 400 8.4px Figtree, sans-serif; }
+  </style>
+
+  <!-- Utilisateur -->
+  <rect x="452" y="2" width="168" height="24" rx="12" fill="#FDFAF4" stroke="#2B2522" stroke-width="1.1"/>
+  <text x="536" y="18" text-anchor="middle" class="ar-t">Utilisateur · navigateur public</text>
+  <text x="444" y="18" text-anchor="end" class="ar-lab" fill="#2F5F80">ouvre le site et y analyse ses journaux</text>
+
+  <!-- ===== Volet A ===== -->
+  <rect x="0" y="36" width="640" height="222" rx="6" fill="#EAF0F4" stroke="#2F5F80" stroke-width="1"/>
+  <text x="12" y="54" class="ar-band" fill="#2F5F80">VOLET A · DÉTECTION EN LIGNE</text>
+  <text x="12" y="66" class="ar-sub">modèle entraîné par l’équipe, calcul chez l’utilisateur</text>
+
+  <path d="M536 26 V70" stroke="#2F5F80" stroke-width="1.4" fill="none" marker-end="url(#ar-ocean)"/>
+  <rect x="10" y="74" width="206" height="176" rx="4" fill="#FDFAF4" stroke="#2F5F80" stroke-width="1.2"/>
+  <text x="20" y="88" class="ar-grp" fill="#2F5F80">ENTRAÎNEMENT · PYTHON, PROCESSEUR</text>
+  <g>
+    <rect x="20" y="94" width="186" height="32" rx="3" fill="#DCE6EE"/>
+    <text x="28" y="107" class="ar-t">Régression logistique</text><text x="28" y="119" class="ar-x">référence : comptes d’événements</text>
+    <rect x="20" y="132" width="186" height="32" rx="3" fill="#DCE6EE"/>
+    <text x="28" y="145" class="ar-t">BiLSTM · PyTorch</text><text x="28" y="157" class="ar-x">plongement 16, 2 × 32 unités, 5 époques</text>
+    <rect x="20" y="170" width="186" height="32" rx="3" fill="#DCE6EE"/>
+    <text x="28" y="183" class="ar-t">Seuil figé : 0,4081</text><text x="28" y="195" class="ar-x">choisi sur la validation, orienté rappel</text>
+    <rect x="20" y="208" width="186" height="32" rx="3" fill="#DCE6EE"/>
+    <text x="28" y="221" class="ar-t">Export ONNX · 57 ko</text><text x="28" y="233" class="ar-x">mêmes décisions en Python et en ONNX</text>
+    <path d="M113 126 V131" stroke="#2F5F80" stroke-width="1.2" marker-end="url(#ar-ocean)"/>
+    <path d="M113 164 V169" stroke="#2F5F80" stroke-width="1.2" marker-end="url(#ar-ocean)"/>
+    <path d="M113 202 V207" stroke="#2F5F80" stroke-width="1.2" marker-end="url(#ar-ocean)"/>
+  </g>
+
+  <rect x="232" y="94" width="152" height="44" rx="4" fill="#FDFAF4" stroke="#8A7E73" stroke-width="1"/>
+  <text x="242" y="110" class="ar-t">Exemples publics</text><text x="242" y="124" class="ar-x">tirés de la validation, jamais</text><text x="242" y="134" class="ar-x">du test réservé</text>
+  <path d="M384 116 H398" stroke="#2F5F80" stroke-width="1.2" marker-end="url(#ar-ocean)"/>
+
+  <rect x="232" y="192" width="152" height="58" rx="4" fill="#FDFAF4" stroke="#8A7E73" stroke-width="1"/>
+  <text x="242" y="208" class="ar-t">Publication automatique</text><text x="242" y="222" class="ar-x">tests puis mise en ligne sur</text><text x="242" y="233" class="ar-x">GitHub Pages à chaque version,</text><text x="242" y="244" class="ar-x">sans serveur d’inférence</text>
+  <path d="M216 224 H230" stroke="#2F5F80" stroke-width="1.2" marker-end="url(#ar-ocean)"/>
+  <path d="M384 224 H398" stroke="#2F5F80" stroke-width="1.2" marker-end="url(#ar-ocean)"/>
+
+  <rect x="400" y="74" width="230" height="176" rx="4" fill="#FDFAF4" stroke="#2F5F80" stroke-width="1.2"/>
+  <text x="410" y="88" class="ar-grp" fill="#2F5F80">SITE STATIQUE · NAVIGATEUR</text>
+  <g>
+    <rect x="410" y="94" width="210" height="32" rx="3" fill="#DCE6EE"/>
+    <text x="418" y="107" class="ar-t">Saisie des journaux</text><text x="418" y="119" class="ar-x">collage, fichier de 10 Mo au plus, exemples</text>
+    <rect x="410" y="132" width="210" height="32" rx="3" fill="#DCE6EE"/>
+    <text x="418" y="145" class="ar-t">Prétraitement JavaScript</text><text x="418" y="157" class="ar-x">codes E1–E29, 50 premiers événements</text>
+    <rect x="410" y="170" width="210" height="32" rx="3" fill="#DCE6EE"/>
+    <text x="418" y="183" class="ar-t">ONNX Runtime Web</text><text x="418" y="195" class="ar-x">WebAssembly, Web Worker, lots de 64</text>
+    <rect x="410" y="208" width="210" height="32" rx="3" fill="#DCE6EE"/>
+    <text x="418" y="221" class="ar-t">Résultats par bloc</text><text x="418" y="233" class="ar-x">classe, score, filtre, export CSV</text>
+    <path d="M515 126 V131" stroke="#2F5F80" stroke-width="1.2" marker-end="url(#ar-ocean)"/>
+    <path d="M515 164 V169" stroke="#2F5F80" stroke-width="1.2" marker-end="url(#ar-ocean)"/>
+    <path d="M515 202 V207" stroke="#2F5F80" stroke-width="1.2" marker-end="url(#ar-ocean)"/>
+  </g>
+
+  <!-- ===== Données ===== -->
+  <path d="M113 274 V252" stroke="#5E534B" stroke-width="1.3" marker-end="url(#ar-ink)"/>
+  <text x="120" y="268" class="ar-lab" fill="#5E534B">entraînement, validation</text>
+  <rect x="0" y="274" width="640" height="122" rx="6" fill="#F1ECE4" stroke="#8A7E73" stroke-width="1"/>
+  <text x="12" y="292" class="ar-band" fill="#5E534B">SOCLE COMMUN · DONNÉES HDFS</text>
+  <rect x="10" y="302" width="138" height="82" rx="4" fill="#FDFAF4" stroke="#8A7E73"/>
+  <text x="20" y="318" class="ar-t">HDFS_v1 · Loghub</text><text x="20" y="333" class="ar-x">journaux d’un cluster</text><text x="20" y="345" class="ar-x">Hadoop, 11 millions</text><text x="20" y="357" class="ar-x">de lignes</text><text x="20" y="372" class="ar-x">hors dépôt</text>
+  <path d="M148 343 H162" stroke="#5E534B" stroke-width="1.2" marker-end="url(#ar-ink)"/>
+  <rect x="164" y="302" width="236" height="82" rx="4" fill="#FDFAF4" stroke="#8A7E73"/>
+  <text x="174" y="318" class="ar-t">Préparation reproductible</text><text x="174" y="333" class="ar-x">téléchargement vérifié par empreinte</text><text x="174" y="345" class="ar-x">regroupement par bloc, 29 types d’événements</text><text x="174" y="357" class="ar-x">partition par bloc, stratifiée, graine 42</text><text x="174" y="372" class="ar-x">mêmes fonctions de lecture pour tous</text>
+  <path d="M400 343 H414" stroke="#5E534B" stroke-width="1.2" marker-end="url(#ar-ink)"/>
+  <rect x="416" y="302" width="214" height="82" rx="4" fill="#FDFAF4" stroke="#8A7E73"/>
+  <text x="426" y="318" class="ar-t">Corpus et partitions</text><text x="426" y="333" class="ar-x">575 061 blocs, 18 373 séquences</text><text x="426" y="345" class="ar-x">entraînement 70 %, validation 15 %</text><text x="426" y="357" class="ar-x">test réservé 15 % : ni réglage, ni</text><text x="426" y="369" class="ar-x">exemple public, ouvert une seule fois</text>
+  <path d="M282 396 V414" stroke="#5E534B" stroke-width="1.3" marker-end="url(#ar-ink)"/>
+  <text x="289" y="409" class="ar-lab" fill="#5E534B">lignes brutes ; blocs du test refusés par l’interface</text>
+
+  <!-- ===== Volet B ===== -->
+  <rect x="0" y="416" width="640" height="274" rx="6" fill="#FBEEE8" stroke="#C4593A" stroke-width="1"/>
+  <text x="12" y="434" class="ar-band" fill="#C4593A">VOLET B · EXPLICATION LOCALE</text>
+  <text x="12" y="446" class="ar-sub">modèle emprunté, adapté, encadré par le code</text>
+
+  <rect x="10" y="456" width="152" height="94" rx="4" fill="#FDFAF4" stroke="#C4593A" stroke-width="1.2"/>
+  <text x="20" y="472" class="ar-t">Interface locale · Gradio</text><text x="20" y="487" class="ar-x">accessible depuis le poste seul</text><text x="20" y="499" class="ar-x">modèle de base ou adapté</text><text x="20" y="511" class="ar-x">un ou trois agents</text><text x="20" y="523" class="ar-x">cinq blocs au plus</text><text x="20" y="535" class="ar-x">bloc du test réservé refusé</text>
+  <rect x="10" y="574" width="152" height="106" rx="4" fill="#F8E3D8" stroke="#C4593A" stroke-width="1"/>
+  <text x="20" y="590" class="ar-t">Réponse vérifiée</text><text x="20" y="605" class="ar-x">résumé des événements</text><text x="20" y="617" class="ar-x">faits observés</text><text x="20" y="629" class="ar-x">hypothèses (catalogue fermé)</text><text x="20" y="641" class="ar-x">informations manquantes</text><text x="20" y="653" class="ar-x">sources · abstention</text><text x="20" y="670" class="ar-lab" fill="#5E534B">sinon : sortie brute et erreurs</text>
+  <path d="M86 574 V552" stroke="#C4593A" stroke-width="1.2" marker-end="url(#ar-terra)"/>
+  <text x="92" y="566" class="ar-lab" fill="#C4593A">affichage</text>
+
+  <rect x="178" y="456" width="226" height="224" rx="4" fill="#FDFAF4" stroke="#C4593A" stroke-width="1.2"/>
+  <text x="188" y="470" class="ar-grp" fill="#C4593A">CHAÎNE D’EXPLICATION</text>
+  <g>
+    <rect x="188" y="476" width="206" height="32" rx="3" fill="#F8E3D8"/>
+    <text x="196" y="489" class="ar-t">Faits calculés par le code</text><text x="196" y="501" class="ar-x">comptes, chronologie, consigne figée</text>
+    <rect x="188" y="516" width="206" height="32" rx="3" fill="#F8E3D8"/>
+    <text x="196" y="529" class="ar-t">Recherche documentaire</text><text x="196" y="541" class="ar-x">trois passages, en mode trois agents</text>
+    <rect x="188" y="556" width="206" height="32" rx="3" fill="#F8E3D8"/>
+    <text x="196" y="569" class="ar-t">Agents (option)</text><text x="196" y="581" class="ar-x">recherche → rédaction → contrôle</text>
+    <rect x="188" y="596" width="206" height="32" rx="3" fill="#F8E3D8"/>
+    <text x="196" y="609" class="ar-t">Génération</text><text x="196" y="621" class="ar-x">modèle de base ou avec adaptateur</text>
+    <rect x="188" y="636" width="206" height="36" rx="3" fill="#F8E3D8"/>
+    <text x="196" y="650" class="ar-t">Contrôles</text><text x="196" y="663" class="ar-x">format, faits, références ; une correction</text>
+    <path d="M291 508 V515" stroke="#C4593A" stroke-width="1.2" marker-end="url(#ar-terra)"/>
+    <path d="M291 548 V555" stroke="#C4593A" stroke-width="1.2" marker-end="url(#ar-terra)"/>
+    <path d="M291 588 V595" stroke="#C4593A" stroke-width="1.2" marker-end="url(#ar-terra)"/>
+    <path d="M291 628 V635" stroke="#C4593A" stroke-width="1.2" marker-end="url(#ar-terra)"/>
+  </g>
+  <path d="M162 492 H176" stroke="#C4593A" stroke-width="1.2" marker-end="url(#ar-terra)"/>
+  <path d="M178 654 H164" stroke="#C4593A" stroke-width="1.2" marker-end="url(#ar-terra)"/>
+
+  <rect x="420" y="456" width="210" height="92" rx="4" fill="#FDFAF4" stroke="#C4593A" stroke-width="1.2"/>
+  <text x="430" y="470" class="ar-grp" fill="#C4593A">BASE DOCUMENTAIRE</text>
+  <text x="430" y="486" class="ar-t">51 passages de la documentation</text><text x="430" y="500" class="ar-x">officielle de HDFS, découpés par section</text><text x="430" y="514" class="ar-x">index dense (BGE, FAISS) et lexical (BM25)</text><text x="430" y="526" class="ar-x">fusion par rang réciproque</text><text x="430" y="540" class="ar-x">décrit le fonctionnement, pas les pannes</text>
+  <path d="M420 532 H396" stroke="#C4593A" stroke-width="1.2" marker-end="url(#ar-terra)"/>
+
+  <rect x="420" y="564" width="210" height="116" rx="4" fill="#FDFAF4" stroke="#C4593A" stroke-width="1.2"/>
+  <text x="430" y="578" class="ar-grp" fill="#C4593A">MOTEUR LOCAL · LLAMA.CPP</text>
+  <text x="430" y="594" class="ar-t">Gemma 4 E4B · QAT, 4 bits</text><text x="430" y="608" class="ar-x">révision figée, réflexion désactivée</text><text x="430" y="620" class="ar-x">contexte 4 096, température 0</text><text x="430" y="632" class="ar-x">+ adaptateur LoRA chargé sans fusion</text><text x="430" y="647" class="ar-t">Poste cible</text><text x="430" y="660" class="ar-x">RTX 3050 Laptop 6 Go : 3,7 Gio,</text><text x="430" y="672" class="ar-x">environ 27 tokens par seconde</text>
+  <path d="M396 612 H418" stroke="#C4593A" stroke-width="1.2" marker-start="url(#ar-terra)" marker-end="url(#ar-terra)"/>
+
+  <!-- ===== Adaptation ===== -->
+  <path d="M525 728 V682" stroke="#7D4E6E" stroke-width="1.4" marker-end="url(#ar-plum)"/>
+  <text x="532" y="702" class="ar-lab" fill="#7D4E6E">adaptateur GGUF</text>
+  <rect x="0" y="708" width="640" height="104" rx="6" fill="#F2EAF0" stroke="#7D4E6E" stroke-width="1"/>
+  <text x="12" y="726" class="ar-band" fill="#7D4E6E">ADAPTATION · GPU T4 DISTANT (KAGGLE)</text>
+  <rect x="10" y="736" width="186" height="66" rx="4" fill="#FDFAF4" stroke="#7D4E6E"/>
+  <text x="20" y="752" class="ar-t">Jeu d’adaptation annoté</text><text x="20" y="766" class="ar-x">240 blocs, brouillons corrigés</text><text x="20" y="778" class="ar-x">à la main : 200 entraînement,</text><text x="20" y="790" class="ar-x">40 validation, aucun du test</text>
+  <path d="M196 769 H210" stroke="#7D4E6E" stroke-width="1.2" marker-end="url(#ar-plum)"/>
+  <rect x="212" y="736" width="208" height="66" rx="4" fill="#FDFAF4" stroke="#7D4E6E" stroke-width="1.4"/>
+  <text x="222" y="752" class="ar-t">Entraînement QLoRA</text><text x="222" y="766" class="ar-x">modèle de base en 4 bits (NF4)</text><text x="222" y="778" class="ar-x">deux réglages de 400 pas</text><text x="222" y="790" class="ar-x">choix sur la validation seule</text>
+  <path d="M420 769 H434" stroke="#7D4E6E" stroke-width="1.2" marker-end="url(#ar-plum)"/>
+  <rect x="436" y="736" width="194" height="66" rx="4" fill="#FDFAF4" stroke="#7D4E6E"/>
+  <text x="446" y="752" class="ar-t">Adaptateur GGUF · 4,5 Mo</text><text x="446" y="766" class="ar-x">rang 8, projections requête</text><text x="446" y="778" class="ar-x">et valeur ; effet vérifié</text><text x="446" y="790" class="ar-x">avant toute mesure</text>
+
+  <!-- ===== Évaluation ===== -->
+  <rect x="0" y="826" width="640" height="56" rx="6" fill="#EAF0E7" stroke="#4F7A57" stroke-width="1"/>
+  <text x="12" y="844" class="ar-band" fill="#4F7A57">ÉVALUATION · TEST RÉSERVÉ, OUVERT UNE SEULE FOIS</text>
+  <text x="12" y="860" class="ar-x"><tspan font-weight="700">Volet A</tspan> : 86 260 blocs, référence contre BiLSTM,</text>
+  <text x="12" y="872" class="ar-x">séquences inédites, parité Python et navigateur.</text>
+  <text x="330" y="860" class="ar-x"><tspan font-weight="700">Volet B</tspan> : 80 cas, 4 configurations, mesures</text>
+  <text x="330" y="872" class="ar-x">automatiques et notation humaine à l’aveugle.</text>
+</svg>
+</div>
+    <figcaption><b>Figure 1.</b> Architecture d’ensemble du projet. En bleu le volet&nbsp;A, en terre cuite le volet&nbsp;B, en violet l’adaptation sur GPU distant, en vert l’évaluation sur le test réservé.</figcaption>
+  </figure>
+
+  <h2><span class="n">1.6</span>Organisation du document</h2>
+  <p>Le chapitre&nbsp;2 décrit les données et le protocole commun. Les chapitres&nbsp;3 et&nbsp;4 présentent les deux solutions, et le chapitre&nbsp;5 l’évaluation du volet&nbsp;B sur son test réservé. Le chapitre&nbsp;6 compare les deux volets. Les chapitres&nbsp;7 et&nbsp;8 portent sur la conduite du projet, collectivement puis individuellement, et le chapitre&nbsp;9 sur les cinq outils que nous avons découverts. L’annexe&nbsp;A rassemble les éléments nécessaires pour reproduire les résultats.</p>
+</section>
+
+<section class="chapter">
+  <p class="chapter-kicker">chapitre 2</p>
+  <h1><span class="n">2</span>Données et protocole commun</h1>
+
+  <h2><span class="n">2.1</span>Le jeu HDFS_v1</h2>
+  <p>Nous utilisons HDFS_v1, distribué par la collection Loghub <span class="ref">[1]</span> et issu des travaux de Xu et&nbsp;al. <span class="ref">[2]</span>. Il rassemble les journaux d’un cluster Hadoop de plus de deux cents nœuds. Chaque ligne mentionne un identifiant de bloc&nbsp;; regrouper les lignes par bloc donne l’unité d’observation du projet. Chaque bloc porte une étiquette binaire, normal ou anormal, établie par les auteurs du jeu.</p>
+  <p>Chaque ligne correspond à l’un des <b>29 types d’événements</b> du jeu, notés E1 à E29 (par exemple E22, allocation d’un bloc par le NameNode, ou E7, exception d’écriture «&nbsp;Could not read from stream&nbsp;»). Un bloc devient ainsi une séquence ordonnée d’événements. Le corpus compte <b>575&nbsp;061 blocs</b>, dont <b>16&nbsp;838 anomalies</b> (2,9&nbsp;%). Il ne contient pourtant que <b>18&nbsp;373 séquences distinctes</b>&nbsp;: la plupart des blocs répètent exactement le déroulé d’autres blocs.</p>
+  <div class="keypoint"><span class="t">Une étiquette n’est pas une cause</span><p>L’étiquette indique qu’un bloc s’est mal terminé, pas pourquoi. Elle permet d’évaluer une détection, mais ni une cause racine ni une explication. Cette limite des données structure tout le volet&nbsp;B.</p></div>
+
+  <h2><span class="n">2.2</span>Partition et séquences inédites</h2>
+  <p>Les deux volets partagent une partition unique, stratifiée selon l’étiquette avec une graine fixée&nbsp;: 70&nbsp;% des blocs pour l’entraînement, 15&nbsp;% pour la validation et 15&nbsp;% pour le test (figure&nbsp;2). Chaque bloc appartient à une seule partition.</p>
+  <figure>
+    <div class="panel">
+      <svg viewBox="0 0 640 92" width="100%" role="img" aria-label="Partition des 575 061 blocs">
+        <rect x="0" y="10" width="446" height="50" fill="#2F5F80"/>
+        <rect x="450" y="10" width="93" height="50" fill="#4F7A57"/>
+        <rect x="547" y="10" width="93" height="50" fill="#7D4E6E"/>
+        <text x="14" y="32" fill="#fff" font-size="15" font-weight="700">Entraînement · 70 %</text>
+        <text x="14" y="51" fill="#fff" font-size="12.5">402 542 blocs</text>
+        <text x="460" y="32" fill="#fff" font-size="13" font-weight="700">Validation</text>
+        <text x="460" y="51" fill="#fff" font-size="11.5">86 259 blocs</text>
+        <text x="557" y="32" fill="#fff" font-size="13" font-weight="700">Test réservé</text>
+        <text x="557" y="51" fill="#fff" font-size="11.5">86 260 blocs</text>
+        <text x="0" y="84" fill="#5E534B" font-size="11.5">Réglages, seuils et choix de modèles : validation uniquement.</text>
+        <text x="640" y="84" fill="#C4593A" font-size="11.5" text-anchor="end">Test ouvert une seule fois par volet.</text>
+      </svg>
+    </div>
+    <figcaption><b>Figure 2.</b> Partition commune aux deux volets, stratifiée selon l’étiquette (graine 42).</figcaption>
+  </figure>
+  <p>Une partition par bloc n’empêche pas qu’une même séquence apparaisse à la fois dans l’entraînement et dans le test, puisque la plupart des séquences sont partagées par de nombreux blocs. Un modèle peut donc obtenir un excellent score global en reconnaissant des séquences déjà vues. Pour mesurer la généralisation, nous isolons dans le test les <b>1&nbsp;962 blocs dont la séquence n’apparaît jamais à l’entraînement</b> et rapportons leurs résultats séparément.</p>
+
+  <h2><span class="n">2.3</span>Règles d’évaluation</h2>
+  <p>Trois règles ont été fixées avant toute mesure et respectées dans les deux volets&nbsp;:</p>
+  <ul>
+    <li><b>Le test est réservé.</b> Il ne sert ni à choisir un hyperparamètre, ni à fixer un seuil, ni à préparer des exemples publics. Les exemples proposés sur le site viennent de la validation.</li>
+    <li><b>Le test n’est ouvert qu’une fois.</b> Pour chaque volet, les configurations à comparer sont figées avant l’ouverture, et aucun réglage n’est modifié après lecture des résultats.</li>
+    <li><b>Tous les cas restent au dénominateur.</b> Une réponse en échec ou hors format compte comme un échec et n’est pas retirée des statistiques.</li>
+  </ul>
+  <p>Chaque campagne conserve les prédictions brutes, les paramètres, les versions des logiciels et les empreintes des fichiers d’entrée, ce qui permet de vérifier qu’un résultat a bien été obtenu sur les données annoncées.</p>
+</section>
+
+<section class="chapter">
+  <p class="chapter-kicker">chapitre 3</p>
+  <h1><span class="n">3</span>Volet A&nbsp;: un détecteur dans le navigateur</h1>
+
+  <h2><span class="n">3.1</span>Chaîne de traitement</h2>
+  <p>Le volet&nbsp;A suit une chaîne courte, entièrement maîtrisée par l’équipe (figure&nbsp;3). Les lignes de journaux sont regroupées par bloc, chaque ligne est convertie en code d’événement, puis le modèle lit la séquence et renvoie un score d’anomalie entre 0 et 1.</p>
+  <figure>
+    <div class="flow">
+      <span class="node">Journaux HDFS<small>collés ou importés</small></span><span class="link">→</span>
+      <span class="node">Regroupement<small>par bloc</small></span><span class="link">→</span>
+      <span class="node">Codes E1–E29<small>50 premiers événements</small></span><span class="link">→</span>
+      <span class="node ocean">BiLSTM<small>ONNX, 57 ko</small></span><span class="link">→</span>
+      <span class="node accent">Score et classe<small>dans le navigateur</small></span>
+    </div>
+    <figcaption><b>Figure 3.</b> Chaîne du volet&nbsp;A. Le même prétraitement est écrit en Python pour l’entraînement et en JavaScript pour le site.</figcaption>
+  </figure>
+  <p>Le vocabulaire compte 31 entrées&nbsp;: les 29 événements, un code de remplissage et un code «&nbsp;événement inconnu&nbsp;». Le modèle lit les <b>50 premiers événements</b> d’un bloc&nbsp;; au-delà, la séquence est tronquée et le site le signale. Comme le prétraitement existe en deux langages, des cas de parité vérifient qu’il produit exactement les mêmes codes des deux côtés.</p>
+
+  <h2><span class="n">3.2</span>Modèle et entraînement</h2>
+  <p>Le modèle est volontairement petit. Une couche de plongement de dimension 16 alimente un LSTM bidirectionnel <span class="ref">[4, 5]</span> de 32 unités par sens. Les sorties sont moyennées sur les seules positions réelles, sans le remplissage, puis une couche linéaire suivie d’une sigmoïde donne le score. L’entraînement dure 5 époques (lots de 512, taux d’apprentissage 0,001) et prend environ six minutes sur un processeur de portable, validation comprise. Exporté au format ONNX, le modèle pèse <b>56&nbsp;806 octets</b>.</p>
+  <p>La référence est une <b>régression logistique</b> sur le nombre d’occurrences de chaque événement. Elle ignore l’ordre des événements&nbsp;: la comparer au BiLSTM mesure donc ce qu’apporte la lecture séquentielle.</p>
+
+  <h2><span class="n">3.3</span>Choix du seuil de décision</h2>
+  <p>Avec un seuil de 0,99, le BiLSTM obtenait sur la validation une macro-F1 de 0,9955, mais manquait 21 anomalies. Dans un usage de surveillance, une anomalie manquée coûte plus cher qu’une fausse alerte. Sans modifier les poids, nous avons donc cherché sur la validation le seuil qui ne manque presque aucune anomalie. Le seuil retenu, <b>0,4081</b>, ramène les anomalies manquées de 21 à 1, au prix de 59 fausses alertes au lieu de 23 (macro-F1 0,9939). Il a été figé avant l’ouverture du test et appliqué tel quel.</p>
+
+  <h2><span class="n">3.4</span>Résultats sur le test réservé</h2>
+  <p>Le tableau&nbsp;3 donne les résultats des deux modèles sur les 86&nbsp;260 blocs du test, puis sur les 1&nbsp;962 blocs à séquence inédite.</p>
+  <figure class="table">
+    <figcaption><b>Tableau 3.</b> Volet A sur le test réservé, seuil figé sur la validation.</figcaption>
+    <table>
+      <thead><tr><th>Modèle</th><th>Population</th><th class="r">Macro-F1</th><th class="r">Fausses alertes</th><th class="r">Anomalies manquées</th></tr></thead>
+      <tbody>
+        <tr><td>Régression logistique</td><td>Test complet (86&nbsp;260)</td><td class="r">0,9882</td><td class="r">116</td><td class="r">2</td></tr>
+        <tr class="best"><td><b>BiLSTM</b></td><td>Test complet (86&nbsp;260)</td><td class="r"><b>0,9938</b></td><td class="r"><b>58</b></td><td class="r">3</td></tr>
+        <tr><td>Régression logistique</td><td>Séquences inédites (1&nbsp;962)</td><td class="r">0,9576</td><td class="r">67</td><td class="r">2</td></tr>
+        <tr class="best"><td><b>BiLSTM</b></td><td>Séquences inédites (1&nbsp;962)</td><td class="r"><b>0,9714</b></td><td class="r"><b>43</b></td><td class="r">3</td></tr>
+      </tbody>
+    </table>
+  </figure>
+  <figure>
+    <div class="panel">
+      <svg viewBox="0 0 640 210" width="100%" role="img" aria-label="Matrice de confusion du BiLSTM sur le test">
+        <text x="330" y="16" font-size="12" fill="#5E534B" text-anchor="middle">Classe prédite</text>
+        <text x="230" y="38" font-size="12.5" font-weight="700" fill="#2B2522" text-anchor="middle">Normal</text>
+        <text x="430" y="38" font-size="12.5" font-weight="700" fill="#2B2522" text-anchor="middle">Anomalie</text>
+        <text x="40" y="128" font-size="12" fill="#5E534B" text-anchor="middle" transform="rotate(-90 40 128)">Classe réelle</text>
+        <text x="120" y="88" font-size="12.5" font-weight="700" fill="#2B2522" text-anchor="end">Normal</text>
+        <text x="120" y="170" font-size="12.5" font-weight="700" fill="#2B2522" text-anchor="end">Anomalie</text>
+        <rect x="132" y="48" width="196" height="76" fill="#2F5F80"/>
+        <rect x="332" y="48" width="196" height="76" fill="#F1C6B3"/>
+        <rect x="132" y="128" width="196" height="76" fill="#F1C6B3"/>
+        <rect x="332" y="128" width="196" height="76" fill="#4F7A57"/>
+        <text x="230" y="88" font-size="22" fill="#fff" text-anchor="middle" font-family="Young Serif, serif">83 676</text>
+        <text x="230" y="108" font-size="11" fill="#fff" text-anchor="middle">vrais négatifs</text>
+        <text x="430" y="88" font-size="22" fill="#2B2522" text-anchor="middle" font-family="Young Serif, serif">58</text>
+        <text x="430" y="108" font-size="11" fill="#2B2522" text-anchor="middle">fausses alertes</text>
+        <text x="230" y="168" font-size="22" fill="#2B2522" text-anchor="middle" font-family="Young Serif, serif">3</text>
+        <text x="230" y="188" font-size="11" fill="#2B2522" text-anchor="middle">anomalies manquées</text>
+        <text x="430" y="168" font-size="22" fill="#fff" text-anchor="middle" font-family="Young Serif, serif">2 523</text>
+        <text x="430" y="188" font-size="11" fill="#fff" text-anchor="middle">anomalies détectées</text>
+        <text x="548" y="80" font-size="11.5" fill="#5E534B">Précision anomalie</text>
+        <text x="548" y="98" font-size="17" fill="#2F5F80" font-family="Young Serif, serif">0,978</text>
+        <text x="548" y="152" font-size="11.5" fill="#5E534B">Rappel anomalie</text>
+        <text x="548" y="170" font-size="17" fill="#2F5F80" font-family="Young Serif, serif">0,999</text>
+      </svg>
+    </div>
+    <figcaption><b>Figure 4.</b> Matrice de confusion du BiLSTM sur les 86&nbsp;260 blocs du test réservé (2&nbsp;526 anomalies).</figcaption>
+  </figure>
+  <p>Le BiLSTM <b>divise par deux les fausses alertes</b> de la référence (58 contre 116) pour une anomalie manquée de plus (3 contre 2). L’écart se maintient sur les séquences inédites, où les deux modèles perdent en précision&nbsp;: c’est là que le score global surestimait le plus la capacité de généralisation. Les trois anomalies manquées ont toutes une séquence inédite. Une version quantifiée en entiers 8 bits prend exactement les mêmes décisions sur le test pour un fichier de 22&nbsp;570 octets&nbsp;; le site sert néanmoins la version en virgule flottante, la seule dont la parité avec Python a été vérifiée sur tout le test (section&nbsp;3.5).</p>
+
+  <h2><span class="n">3.5</span>Application web</h2>
+  <p>Le site est une application statique construite avec Vite et publiée sur GitHub Pages. Tout le calcul se fait dans le navigateur grâce à ONNX Runtime Web <span class="ref">[18]</span> compilé en WebAssembly&nbsp;: <b>les journaux ne quittent jamais le poste de l’utilisateur</b>. L’inférence tourne dans un processus séparé (Web Worker), par lots de 64 blocs, pour que la page reste réactive.</p>
+  <p>Le parcours tient en trois étapes. L’utilisateur colle des journaux, importe un fichier de 10&nbsp;Mo au plus ou choisit un exemple tiré de la validation. Le site affiche ensuite un bilan du lot et, pour chaque bloc, la classe, le score comparé au seuil, le nombre d’événements, les troncatures et les événements inconnus. La séquence de chaque bloc se déplie, et un filtre isole les anomalies. Enfin, un export CSV reprend le seuil et l’empreinte du modèle. L’interface s’adapte au mobile et propose un thème clair et un thème sombre. Deux avertissements sont affichés en permanence&nbsp;: un extrait de journal ne garantit pas qu’un bloc est complet, et le score n’est pas une probabilité calibrée.</p>
+  <p>Pour vérifier que le navigateur reproduit fidèlement le modèle entraîné, nous avons recalculé sous Chrome les 86&nbsp;260 scores du test et les avons comparés aux scores Python, sans rien ajuster&nbsp;: <b>aucune décision ne diverge</b> et l’écart maximal entre scores est de 2,4&nbsp;×&nbsp;10<sup>−7</sup>. Le débit mesuré est d’environ <b>6&nbsp;200 blocs par seconde</b>, boucle JavaScript comprise.</p>
+
+  <h2><span class="n">3.6</span>Limites</h2>
+  <p>Le détecteur ne reconnaît que des journaux au format HDFS attendu et ne lit que les 50 premiers événements d’un bloc. Il ne dit rien de ce qui s’est passé&nbsp;: il signale un bloc suspect sans l’expliquer, ce qui est précisément le rôle du volet&nbsp;B. Enfin, avant l’ouverture officielle du test, un fichier de résultats de la régression logistique contenait déjà des mesures sur ce test. Ce fichier n’a servi à aucun réglage, mais nous le signalons par transparence.</p>
+</section>
+
+<section class="chapter">
+  <p class="chapter-kicker">chapitre 4</p>
+  <h1><span class="n">4</span>Volet B&nbsp;: expliquer un bloc en local</h1>
+  <p>Le volet&nbsp;B ne remplace pas le détecteur&nbsp;: il aide à lire un bloc. À partir des lignes brutes, il doit produire un résumé des événements, les faits observés, d’éventuelles hypothèses, les informations qui manquent pour conclure, les passages de documentation utilisés, ou s’abstenir quand la trace ne permet pas d’explication fiable. Le chapitre décrit le modèle retenu, la manière dont nous l’encadrons, puis les trois extensions évaluées&nbsp;: l’adaptation LoRA, la recherche documentaire et l’organisation en agents.</p>
+
+  <h2><span class="n">4.1</span>Choix du modèle</h2>
+  <p>Le premier modèle essayé, SmolLM2-1.7B-Instruct, a permis une première inférence locale, mais s’est révélé inadapté, d’abord par sa qualité&nbsp;: il ignorait les lignes d’avertissement et inventait des informations absentes de la trace. En pleine précision sur un processeur de portable, il produisait 0,64 token par seconde pour un pic mémoire de 16&nbsp;Go&nbsp;; en 4 bits avec llama.cpp, 1,9 token par seconde pour 2,8&nbsp;Go. Nous avons alors comparé plusieurs petits modèles ouverts sur 40 blocs de validation, sur GPU distant. <b>Gemma&nbsp;4 E4B</b> <span class="ref">[16]</span>, dans sa version entraînée en tenant compte de la quantification (QAT) et distribuée en 4 bits au format GGUF, a été retenu&nbsp;: il respectait le format sur les 40 blocs, proposait des hypothèses sur les blocs anormaux et n’en proposait pas sur les blocs sains. Les autres candidats (Granite, Qwen, SmolLM3) ont été écartés.</p>
+  <p>Le modèle est exécuté par <b>llama.cpp</b> <span class="ref">[17]</span>, un moteur d’inférence en C++ optimisé pour les modèles quantifiés, avec la réflexion interne désactivée, un contexte de 4&nbsp;096 tokens, au plus 800 tokens de réponse, une température nulle et une graine fixe. Sur le poste cible (RTX 3050 Laptop, 6&nbsp;Go), le modèle occupe environ <b>3,7&nbsp;Gio</b> de mémoire graphique et génère environ <b>27 tokens par seconde</b>, adaptateur compris.</p>
+
+  <h2><span class="n">4.2</span>Encadrer le modèle par le code</h2>
+  <p>Un petit modèle laissé libre recopie les journaux, invente des identifiants ou affirme des causes. Notre choix de conception a été de <b>ne confier au modèle que la rédaction</b> et de laisser au code tout ce qui peut être calculé ou vérifié (figure&nbsp;5).</p>
+  <figure>
+    <div class="flow">
+      <span class="node">Lignes<br>du bloc</span><span class="link">→</span>
+      <span class="node">Faits calculés<small>comptes, chronologie</small></span><span class="link">→</span>
+      <span class="node ocean">Gemma 4 E4B<small>consigne figée<br>JSON imposé</small></span><span class="link">→</span>
+      <span class="node">Contrôles<small>une correction</small></span><span class="link">→</span>
+      <span class="node accent">Réponse<br>vérifiée</span>
+    </div>
+    <figcaption><b>Figure 5.</b> Chaîne du volet&nbsp;B en mode un agent. Le modèle rédige&nbsp;; le code calcule les faits avant et vérifie la réponse après.</figcaption>
+  </figure>
+  <ul>
+    <li><b>Avant la génération.</b> Le code extrait des lignes les faits vérifiables (types d’événements, nombre d’occurrences, chronologie) et les numérote. Le glossaire transmis au modèle se limite aux événements présents dans le bloc. La consigne, figée après seize versions mises au point sur la validation, ne change plus ensuite.</li>
+    <li><b>Pendant la génération.</b> La réponse est contrainte par un schéma JSON fermé à six champs&nbsp;: résumé, faits observés, hypothèses, informations manquantes, sources et abstention. Les hypothèses sont facultatives et limitées à un catalogue fermé&nbsp;: seuls deux événements d’erreur (E7, échec de lecture du flux, et E20, bloc introuvable sur le DataNode) en autorisent une.</li>
+    <li><b>Après la génération.</b> Des contrôles vérifient le format, la recopie exacte des faits et l’existence de chaque référence citée. En cas d’échec, le modèle dispose d’une seule correction, et les deux réponses brutes sont conservées. Une garde rejette aussi les réponses qui bouclent.</li>
+  </ul>
+  <p>Ces contrôles garantissent la forme et l’ancrage des références, pas la justesse de toute la prose. Le tableau&nbsp;4 montre ce que la relecture humaine a trouvé sur 40 blocs de validation jamais utilisés pour la mise au point.</p>
+  <figure class="table">
+    <figcaption><b>Tableau 4.</b> Défauts relevés par relecture humaine sur 40 blocs de validation (consigne figée, sans adaptation ni recherche documentaire). Un même bloc peut cumuler plusieurs défauts.</figcaption>
+    <table>
+      <thead><tr><th>Constat</th><th class="r">Blocs</th></tr></thead>
+      <tbody>
+        <tr><td>Réponse au format et faits recopiés exactement</td><td class="r">40/40</td></tr>
+        <tr><td>Réponse passant tous les contrôles automatiques</td><td class="r">39/40</td></tr>
+        <tr><td>Chronologie fausse</td><td class="r">2/40</td></tr>
+        <tr><td>Lien de causalité affirmé sans preuve</td><td class="r">3/40</td></tr>
+        <tr><td>Pseudo-référence (référence au bon format mais sans appui réel)</td><td class="r">3/40</td></tr>
+        <tr><td>Cause indéterminée non signalée dans le résumé</td><td class="r">16/40</td></tr>
+        <tr><td>Résumé inutilisable par répétition</td><td class="r">1/40</td></tr>
+      </tbody>
+    </table>
+  </figure>
+  <div class="keypoint"><span class="t">Le format ne garantit pas le fond</span><p>Une réponse peut respecter le schéma, recopier tous les faits et passer les contrôles, tout en inversant une chronologie ou en affirmant une causalité que la trace ne montre pas. C’est pourquoi l’évaluation finale du chapitre&nbsp;5 repose aussi sur une notation humaine.</p></div>
+
+  <h2><span class="n">4.3</span>Un jeu d’adaptation rédigé et relu par l’équipe</h2>
+  <p>Adapter le modèle demande des exemples de réponses justes. Aucun n’existe pour HDFS&nbsp;: nous les avons rédigés. Nous avons tiré <b>240 blocs</b> de l’entraînement et de la validation, stratifiés et jamais utilisés auparavant, répartis en quatre lots de 60 (50 pour l’entraînement, 10 pour la validation), un par membre. Pour chaque bloc, un brouillon produit par la chaîne de la figure&nbsp;5 a été vérifié automatiquement, puis corrigé à la main en revenant aux lignes brutes. <b>104 réponses sur 240 (43&nbsp;%) ont été modifiées</b>&nbsp;; selon les lots, la proportion varie de 17 à 100&nbsp;%. Les corrections portent surtout sur des destinataires multiples présentés au singulier, des présupposés glissés dans les questions et des événements attribués au mauvais côté d’un échange entre nœuds.</p>
+  <p>Deux lots ont ensuite fait l’objet d’une relecture croisée par un second membre, qui a apporté 13 corrections sur l’un et 19 sur l’autre. Ces 19 dernières ont été intégrées après l’entraînement&nbsp;: l’adaptateur évalué au chapitre&nbsp;5 a été entraîné sur la version précédente du jeu, qui reste identifiable. Le jeu final compte <b>200 exemples d’entraînement et 40 de validation</b>&nbsp;; un script le reconstitue à l’identique et refuse tout doublon et tout bloc du test.</p>
+
+  <h2><span class="n">4.4</span>Adaptation par LoRA</h2>
+  <p>LoRA <span class="ref">[6]</span> fige les poids du modèle et n’entraîne que de petites matrices de rang faible ajoutées à certaines couches. QLoRA <span class="ref">[7]</span> va plus loin en chargeant le modèle de base en 4 bits (format NF4) pendant l’entraînement. Même ainsi, Gemma&nbsp;4 E4B ne tient pas dans les 6&nbsp;Go de la carte cible&nbsp;: ses seules tables de plongement pèsent environ 6,5&nbsp;Gio. Nous avons donc entraîné sur un GPU T4 de 15&nbsp;Gio (Kaggle), puis appliqué l’adaptateur au modèle quantifié utilisé en inférence.</p>
+  <p>La mise au point a été longue. Le premier essai saturait la mémoire, parce que la perte était calculée sur toutes les positions d’un vocabulaire de 262&nbsp;144 tokens&nbsp;; nous ne la calculons plus que sur la partie de réponse à apprendre. Le calcul en demi-précision produisait ensuite des gradients non finis, la T4 ne disposant pas du format bf16&nbsp;; un facteur d’échelle initial plus bas et un écrêtage des gradients ont stabilisé l’entraînement. Un essai court de 30 pas a validé la chaîne complète avant l’entraînement final.</p>
+  <p>Pour l’entraînement final, deux réglages fixés à l’avance ont été entraînés pendant 400 pas chacun sur 199 des 200 exemples, le dernier, trop long (5&nbsp;778 tokens), ayant été écarté plutôt que tronqué&nbsp;:</p>
+  <figure class="table">
+    <figcaption><b>Tableau 5.</b> Réglages LoRA entraînés et sélection sur la validation (40 exemples).</figcaption>
+    <table>
+      <thead><tr><th>Réglage</th><th>Couches adaptées</th><th class="r">Rang</th><th class="r">Taux d’appr.</th><th class="r">Perte (début → fin)</th><th class="r">Acceptées (val)</th><th class="r">Hypothèses (val)</th></tr></thead>
+      <tbody>
+        <tr><td>Modèle de base</td><td>—</td><td class="r">—</td><td class="r">—</td><td class="r">—</td><td class="r">—</td><td class="r">11</td></tr>
+        <tr class="best"><td><b>r8 q/v</b> (retenu)</td><td>requête, valeur</td><td class="r">8</td><td class="r">2·10<sup>−4</sup></td><td class="r">0,880 → 0,151</td><td class="r">39/40</td><td class="r">12</td></tr>
+        <tr><td>r16 q/k/v/o</td><td>requête, clé, valeur, sortie</td><td class="r">16</td><td class="r">1·10<sup>−4</sup></td><td class="r">0,827 → 0,140</td><td class="r">39/40</td><td class="r">12</td></tr>
+      </tbody>
+    </table>
+  </figure>
+  <p>Chaque entraînement a demandé environ 6,5&nbsp;s par pas et un pic de 11&nbsp;Go de mémoire graphique. La règle de sélection, fixée avant l’entraînement, met les deux réglages à <b>égalité parfaite</b> sur la validation. Elle ne prévoyait pas de départage&nbsp;: c’est l’ordre de la configuration qui a retenu le plus petit adaptateur, r8 q/v. Nous le signalons comme un départage constaté, non décidé à l’avance. Sur la validation, l’effet de l’adaptation est donc faible&nbsp;; son effet sur le test est mesuré au chapitre&nbsp;5.</p>
+  <p>L’adaptateur retenu, converti au format GGUF par llama.cpp, pèse <b>4,5&nbsp;Mo</b>. Il est appliqué au modèle quantifié au moment de l’inférence, sans fusion ni requantification. Deux vérifications l’accompagnent. Appliqué avec un poids nul, il donne une sortie identique, caractère pour caractère, à celle du modèle de base&nbsp;; avec un poids de 1, la sortie change&nbsp;: l’adaptateur agit donc bien malgré le passage du format NF4 de l’entraînement au format Q4_0 de l’inférence. Sur la RTX 3050 du poste cible, il ajoute moins de 10&nbsp;Mio de mémoire. Enfin, la conversion a révélé une particularité de Gemma&nbsp;4&nbsp;: les 18 dernières couches partagent leur cache clé-valeur et n’ont pas de projection «&nbsp;valeur&nbsp;» propre, si bien que celle-ci n’est adaptée que sur 24 couches sur 42.</p>
+
+  <h2><span class="n">4.5</span>Recherche documentaire</h2>
+  <p>La génération augmentée par la recherche <span class="ref">[8]</span> fournit au modèle des passages de documentation en rapport avec la trace. Notre corpus compte <b>51 passages</b> tirés de la documentation officielle de HDFS, découpés par section. La recherche combine un index dense (plongements BGE <span class="ref">[9]</span>, index FAISS <span class="ref">[10]</span>) et un index lexical BM25 <span class="ref">[11]</span>, fusionnés par rang réciproque <span class="ref">[12]</span>. Les événements du bloc sont reformulés en anglais pour interroger la documentation.</p>
+  <p>Sur 306 traces de validation, avec trois passages renvoyés, la recherche hybride retrouve le passage attendu dans <b>66&nbsp;%</b> des cas, contre 69&nbsp;% pour BM25 seul et 35&nbsp;% pour la recherche dense seule. Nous avions prévu un seuil de pertinence minimal&nbsp;; les mesures ont montré qu’il retirerait autant de bons passages que de mauvais, et nous l’avons abandonné. La limite principale tient au corpus lui-même&nbsp;: la documentation décrit le fonctionnement normal de HDFS, pas ses pannes. <b>19 des 29 types d’événements</b> n’y ont aucun passage utile, et un seul des quatorze événements traités comme indices d’incident en a un.</p>
+
+  <h2><span class="n">4.6</span>Organisation en trois agents</h2>
+  <p>La seconde configuration répartit le travail entre trois agents qui utilisent le même modèle&nbsp;: un agent de <b>recherche</b> choisit les passages documentaires, un agent de <b>rédaction</b> produit la réponse et un agent de <b>contrôle</b> l’accepte ou demande une correction, dans une limite fixée d’appels. L’hypothèse était qu’un contrôle par le modèle lui-même repérerait des erreurs que les contrôles automatiques ne voient pas, comme une chronologie inversée.</p>
+  <p>Les premiers essais sur la validation ont été décevants&nbsp;: une réponse acceptée sur 5, puis aucune sur 10 après correction du contrôleur. Ils nous ont appris qu’un agent de contrôle doit recevoir exactement le même contrat que l’agent qu’il contrôle&nbsp;; sinon, il rejette de bonnes réponses au nom de règles qu’il invente. La mesure complète sur le test figure au chapitre&nbsp;5.</p>
+
+  <h2><span class="n">4.7</span>Interface locale</h2>
+  <p>Une interface Gradio, accessible uniquement depuis le poste (adresse locale, sans partage public), permet de coller des journaux ou d’importer un fichier texte, de choisir le modèle de base ou adapté et le mode un ou trois agents. Elle affiche le résumé, les faits, les hypothèses, les informations manquantes, les sources, le journal des étapes et le temps d’exécution. La réponse structurée n’est affichée que si elle passe les contrôles&nbsp;; sinon, la sortie brute et les erreurs restent visibles. Une analyse porte sur cinq blocs au plus, et tout bloc du test réservé est refusé avant tout appel au modèle. Un second onglet, «&nbsp;Demander à la doc&nbsp;», répond aux questions sur le fonctionnement de HDFS à partir du corpus documentaire et s’abstient quand aucun passage ne couvre la question&nbsp;; sa qualité n’a pas été mesurée.</p>
+</section>
+
+<section class="chapter">
+  <p class="chapter-kicker">chapitre 5</p>
+  <h1><span class="n">5</span>Évaluation du volet B avant et après adaptation</h1>
+
+  <h2><span class="n">5.1</span>Protocole</h2>
+  <p>Le test réservé du volet&nbsp;B compte <b>80 cas</b> tirés du test commun&nbsp;: 35 blocs présentant un indice d’incident et 45 blocs sans incident. Leurs entrées ont été figées par une empreinte avant toute mesure. Quatre configurations ont été comparées&nbsp;: le modèle de base ou adapté, en mode un agent ou trois agents. Toutes ont été exécutées le même jour, sur le même GPU T4, à partir de la même version du code et avec les mêmes paramètres de génération. Aucune consigne ni aucun seuil n’a été modifié après ces mesures. L’évaluation comporte deux niveaux&nbsp;: des mesures automatiques sur les 80 cas, puis une notation humaine à l’aveugle sur 30 d’entre eux.</p>
+
+  <h2><span class="n">5.2</span>Mesures automatiques</h2>
+  <figure class="table">
+    <figcaption><b>Tableau 6.</b> Mesures automatiques sur les 80 cas du test réservé. «&nbsp;Acceptée&nbsp;» signifie que la réponse passe tous les contrôles, pas qu’elle est juste.</figcaption>
+    <table>
+      <thead><tr><th>Configuration</th><th class="r">Réponses acceptées</th><th class="r">Hypothèses (35 blocs avec incident)</th><th class="r">Résumés affirmant un ordre</th><th class="r">Appels au modèle</th><th class="r">Latence moyenne</th><th class="r">Pic mémoire GPU</th></tr></thead>
+      <tbody>
+        <tr><td>Base, 1 agent</td><td class="r">79/80</td><td class="r">22</td><td class="r"><span class="lo">35/80</span></td><td class="r">1,01</td><td class="r">27,8 s</td><td class="r">4&nbsp;314 Mio</td></tr>
+        <tr class="best"><td><b>LoRA, 1 agent</b></td><td class="r">79/80</td><td class="r">22</td><td class="r"><span class="hi">1/80</span></td><td class="r">1,00</td><td class="r">24,6 s</td><td class="r">4&nbsp;322 Mio</td></tr>
+        <tr><td>Base, 3 agents</td><td class="r"><span class="lo">9/80</span></td><td class="r">0</td><td class="r">—</td><td class="r">4,70</td><td class="r">84,3 s</td><td class="r">4&nbsp;322 Mio</td></tr>
+        <tr><td>LoRA, 3 agents</td><td class="r">25/80</td><td class="r">9</td><td class="r">—</td><td class="r">4,61</td><td class="r">73,8 s</td><td class="r">4&nbsp;330 Mio</td></tr>
+      </tbody>
+    </table>
+  </figure>
+  <p>Quatre constats ressortent de ces mesures.</p>
+  <ul>
+    <li><b>Aucune hypothèse sur un bloc sain.</b> Dans aucune configuration le modèle ne propose d’hypothèse sur les 45 blocs sans incident, et aucune réponse ne cite une référence inexistante. Un seul cas échoue partout, avant même la génération&nbsp;: sa trace dépasse la longueur de consigne autorisée.</li>
+    <li><b>À un agent, l’adaptation change la forme.</b> Elle ne modifie ni le taux d’acceptation ni le nombre d’hypothèses, mais les résumés qui affirment un ordre entre événements («&nbsp;débuté par&nbsp;», «&nbsp;suivi de&nbsp;») passent de <b>35 sur 80 à 1 sur 80</b>, et la latence baisse de 27,8 à 24,6&nbsp;s. Or ces affirmations sont souvent fausses, parce que de nombreux événements d’un bloc sont enregistrés dans la même seconde, et les contrôles automatiques ne les repèrent pas.</li>
+    <li><b>À trois agents, le contrôleur est le goulot.</b> Avec le modèle de base, il demande une correction dans 137 de ses 146 passages et n’accepte que 9 réponses. L’adaptation porte ce nombre à 25, dont 12 sur des blocs avec incident, et fait apparaître des hypothèses et des citations documentaires (5 réponses) qui étaient absentes. Sur les 48 refus motivés par l’ordre des événements, 33 sont justifiés&nbsp;; la plupart des autres opposent deux formulations équivalentes ou exigent des détails que le contrat ne demande pas.</li>
+    <li><b>La recherche apporte peu sur ces blocs</b>&nbsp;: elle ne renvoie que 4 passages distincts sur les 80 cas, ce qui confirme la faible couverture de la documentation (section&nbsp;4.5). L’adaptateur, lui, n’ajoute que quelques mégaoctets de mémoire graphique.</li>
+  </ul>
+
+  <h2><span class="n">5.3</span>Évaluation humaine à l’aveugle</h2>
+  <p>Les mesures automatiques portent sur la forme. Pour juger le fond, deux membres de l’équipe ont noté indépendamment <b>120 réponses</b>&nbsp;: les quatre configurations sur 30 cas tirés des 80. Les réponses étaient présentées dans un ordre aléatoire, sans indication de la configuration qui les avait produites&nbsp;; la correspondance n’a été révélée qu’après le dépôt des deux fiches. Chaque réponse reçoit une note de 0 à 2 sur quatre critères, soit un total sur 8 (annexe&nbsp;B)&nbsp;: l’<b>exactitude des faits</b> (F), l’<b>appui sur les sources</b> (S), la <b>justesse de la décision d’abstention</b> (A) et l’<b>utilité</b> pour comprendre la trace (U).</p>
+
+  <h3>Accord entre annotateurs</h3>
+  <p>Nous mesurons l’accord par le kappa de Cohen à pondération quadratique <span class="ref">[13]</span>, adapté à des notes ordonnées. Avant toute concertation, l’accord est <b>faible à modéré</b> selon l’échelle usuelle <span class="ref">[14]</span> (tableau&nbsp;7). Les désaccords portaient surtout sur la sévérité&nbsp;: une imprécision devait-elle coûter un point d’exactitude ou un point d’utilité&nbsp;? Les deux annotateurs ont ensuite confronté leurs fiches cas par cas en revenant aux lignes brutes&nbsp;: le premier a révisé sa fiche, le second a accepté 49 corrections et en a contesté 2. Ces deux notes d’utilité restent en désaccord dans la version finale.</p>
+  <figure class="table">
+    <figcaption><b>Tableau 7.</b> Accord entre les deux annotateurs sur les 120 réponses, avant et après confrontation.</figcaption>
+    <table>
+      <thead><tr><th>Critère</th><th class="r">Kappa pondéré, notes indépendantes</th><th class="r">Accord exact, notes indépendantes</th><th class="r">Accord exact après confrontation</th></tr></thead>
+      <tbody>
+        <tr><td>F · exactitude des faits</td><td class="r">0,35</td><td class="r">66&nbsp;%</td><td class="r">100&nbsp;%</td></tr>
+        <tr><td>S · appui sur les sources</td><td class="r">0,22</td><td class="r">68&nbsp;%</td><td class="r">100&nbsp;%</td></tr>
+        <tr><td>A · abstention justifiée</td><td class="r">0,17</td><td class="r">78&nbsp;%</td><td class="r">100&nbsp;%</td></tr>
+        <tr><td>U · utilité</td><td class="r">0,49</td><td class="r">77&nbsp;%</td><td class="r">98&nbsp;%</td></tr>
+      </tbody>
+    </table>
+  </figure>
+  <p>L’accord final ne mesure donc plus l’indépendance des jugements, mais l’aboutissement d’un consensus. C’est pourquoi nous donnons aussi les totaux obtenus avec les notes indépendantes&nbsp;: le classement des configurations doit rester le même dans les deux cas.</p>
+
+  <h3>Résultats</h3>
+  <figure>
+    <div class="panel">
+      <svg viewBox="0 0 640 250" width="100%" role="img" aria-label="Notes moyennes par critère et par configuration">
+        <g font-size="11" fill="#5E534B">
+          <line x1="46" y1="200" x2="630" y2="200" stroke="#2B2522" stroke-width="1.4"/>
+          <line x1="46" y1="110" x2="630" y2="110" stroke="#D8CCBA" stroke-dasharray="3 3"/>
+          <line x1="46" y1="20" x2="630" y2="20" stroke="#D8CCBA" stroke-dasharray="3 3"/>
+          <text x="38" y="204" text-anchor="end">0</text><text x="38" y="114" text-anchor="end">1</text><text x="38" y="24" text-anchor="end">2</text>
+        </g>
+        <!-- échelle : 90 px par point ; groupes de 146 px -->
+        <g>
+          <!-- F -->
+          <rect x="62"  y="53"  width="26" height="147" fill="#CFC3B2"/>
+          <rect x="91"  y="74"  width="26" height="126" fill="#E9B7A3"/>
+          <rect x="120" y="26"  width="26" height="174" fill="#2F5F80"/>
+          <rect x="149" y="44"  width="26" height="156" fill="#C4593A"/>
+          <!-- S -->
+          <rect x="208" y="20"  width="26" height="180" fill="#CFC3B2"/>
+          <rect x="237" y="32"  width="26" height="168" fill="#E9B7A3"/>
+          <rect x="266" y="20"  width="26" height="180" fill="#2F5F80"/>
+          <rect x="295" y="35"  width="26" height="165" fill="#C4593A"/>
+          <!-- A -->
+          <rect x="354" y="32"  width="26" height="168" fill="#CFC3B2"/>
+          <rect x="383" y="41"  width="26" height="159" fill="#E9B7A3"/>
+          <rect x="412" y="23"  width="26" height="177" fill="#2F5F80"/>
+          <rect x="441" y="35"  width="26" height="165" fill="#C4593A"/>
+          <!-- U -->
+          <rect x="500" y="62"  width="26" height="138" fill="#CFC3B2"/>
+          <rect x="529" y="67"  width="26" height="133" fill="#E9B7A3"/>
+          <rect x="558" y="23"  width="26" height="177" fill="#2F5F80"/>
+          <rect x="587" y="40"  width="26" height="160" fill="#C4593A"/>
+        </g>
+        <g font-size="12" font-weight="700" fill="#2B2522" text-anchor="middle">
+          <text x="118" y="218">F · faits</text><text x="264" y="218">S · sources</text><text x="410" y="218">A · abstention</text><text x="556" y="218">U · utilité</text>
+        </g>
+        <g font-size="11" fill="#2B2522">
+          <rect x="70" y="232" width="11" height="11" fill="#CFC3B2"/><text x="86" y="242">Base, 1 agent</text>
+          <rect x="190" y="232" width="11" height="11" fill="#E9B7A3"/><text x="206" y="242">Base, 3 agents</text>
+          <rect x="318" y="232" width="11" height="11" fill="#2F5F80"/><text x="334" y="242">LoRA, 1 agent</text>
+          <rect x="446" y="232" width="11" height="11" fill="#C4593A"/><text x="462" y="242">LoRA, 3 agents</text>
+        </g>
+      </svg>
+    </div>
+    <figcaption><b>Figure 6.</b> Notes moyennes par critère (sur 2) après confrontation, 30 réponses par configuration.</figcaption>
+  </figure>
+  <figure class="table">
+    <figcaption><b>Tableau 8.</b> Notes moyennes sur les 30 cas notés à l’aveugle. Les quatre premières colonnes et le total final sont calculés après confrontation&nbsp;; la dernière colonne reprend les notes indépendantes des deux annotateurs.</figcaption>
+    <table>
+      <thead><tr><th>Configuration</th><th class="r">F</th><th class="r">S</th><th class="r">A</th><th class="r">U</th><th class="r">Total / 8</th><th class="r">Total / 8, notes indépendantes</th></tr></thead>
+      <tbody>
+        <tr><td>Base, 1 agent</td><td class="r">1,63</td><td class="r">2,00</td><td class="r">1,87</td><td class="r">1,53</td><td class="r">7,03</td><td class="r">6,38</td></tr>
+        <tr class="best"><td><b>LoRA, 1 agent</b></td><td class="r"><b>1,93</b></td><td class="r"><b>2,00</b></td><td class="r"><b>1,97</b></td><td class="r"><b>1,97</b></td><td class="r"><b>7,87</b></td><td class="r"><b>7,87</b></td></tr>
+        <tr><td>Base, 3 agents</td><td class="r">1,40</td><td class="r">1,87</td><td class="r">1,77</td><td class="r">1,48</td><td class="r">6,52</td><td class="r">5,97</td></tr>
+        <tr><td>LoRA, 3 agents</td><td class="r">1,73</td><td class="r">1,83</td><td class="r">1,83</td><td class="r">1,78</td><td class="r">7,18</td><td class="r">6,95</td></tr>
+      </tbody>
+    </table>
+  </figure>
+  <p>Le classement est identique avec les notes indépendantes et avec les notes finales. <b>L’adaptation LoRA améliore les deux modes</b>&nbsp;: +0,84 point à un agent et +0,66 à trois agents. Le gain porte surtout sur l’exactitude des faits (de 1,63 à 1,93 à un agent) et sur l’utilité (de 1,53 à 1,97), ce qui concorde avec la disparition des chronologies affirmées sans preuve observée au tableau&nbsp;6. <b>Le mode trois agents est moins bon que le mode un agent</b>, avec ou sans adaptation, pour une latence trois fois plus élevée. Nous n’avons pas isolé la cause de cet écart&nbsp;; la piste la plus probable est que les corrections exigées par le contrôleur, souvent injustifiées (section&nbsp;5.2), font perdre à la réponse des éléments justes.</p>
+  <div class="keypoint"><span class="t">Ce que l’on peut conclure, et ce que l’on ne peut pas</span><p>Sur ce test, la configuration adaptée à un agent est la meilleure sur les quatre critères, et c’est celle que nous retenons pour l’application. L’échantillon reste petit&nbsp;: 30 cas, deux annotateurs membres de l’équipe, aucun test de significativité. Les écarts sont cohérents entre les mesures automatiques et humaines, mais leur ampleur exacte serait à confirmer sur un échantillon plus large, noté par des annotateurs extérieurs au projet.</p></div>
+</section>
+
+<section class="chapter">
+  <p class="chapter-kicker">chapitre 6</p>
+  <h1><span class="n">6</span>Analyse technique comparative</h1>
+
+  <h2><span class="n">6.1</span>Deux tâches, une grille commune</h2>
+  <p>Les deux volets ne résolvent pas la même tâche&nbsp;: le volet&nbsp;A détecte, le volet&nbsp;B explique. Une macro-F1 et une note d’explication ne se comparent pas directement. Nous les comparons donc sur les axes demandés par le sujet, en rappelant pour chacun ce qui a été mesuré et ce qui ne l’a pas été. Les deux volets ont été mesurés sur leur propre test réservé, mais avec une portée différente&nbsp;: 86&nbsp;260 blocs étiquetés pour A, 80 réponses, dont 30 notées à la main, pour B.</p>
+  <figure class="table">
+    <figcaption><b>Tableau 9.</b> Comparaison des deux volets. Les latences proviennent de machines différentes&nbsp;: elles donnent des ordres de grandeur, pas une comparaison contrôlée.</figcaption>
+    <table>
+      <thead><tr><th style="width:15%">Axe</th><th style="width:42%">Volet A · BiLSTM dans le navigateur</th><th>Volet B · Gemma 4 E4B en local</th></tr></thead>
+      <tbody>
+        <tr><td><b>Qualité</b></td><td>Macro-F1 0,9938 sur 86&nbsp;260 blocs&nbsp;; 58 fausses alertes, 3 anomalies manquées. 0,9714 sur les séquences inédites.</td><td>Configuration retenue (LoRA, 1 agent)&nbsp;: 79 réponses acceptées sur 80, note humaine de 7,87/8 contre 7,03 sans adaptation. Aucune hypothèse sur un bloc sain.</td></tr>
+        <tr><td><b>Latence</b></td><td>Environ 6&nbsp;200 blocs par seconde dans Chrome, sans GPU.</td><td>24,6&nbsp;s par bloc sur T4 (1 agent), 74 à 84&nbsp;s à 3 agents. Sur la RTX 3050 cible&nbsp;: environ 27 tokens par seconde, soit une dizaine de secondes de génération pour une réponse courte.</td></tr>
+        <tr><td><b>Mémoire</b></td><td>Modèle de 57&nbsp;ko.</td><td>3,7&nbsp;Gio de mémoire graphique sur la RTX 3050&nbsp;; adaptateur de 4,5&nbsp;Mo. Entraînement&nbsp;: 11&nbsp;Go, hors de portée du poste cible.</td></tr>
+        <tr><td><b>Coût</b></td><td>Nul&nbsp;: entraînement de six minutes sur un portable, hébergement statique gratuit, calcul chez l’utilisateur.</td><td>Nul en argent, grâce aux quotas gratuits de Kaggle, mais élevé en calcul&nbsp;: environ 1&nbsp;h&nbsp;30 de GPU pour les deux entraînements finaux et environ 4&nbsp;h&nbsp;40 pour évaluer les quatre configurations sur le test (valeurs calculées à partir des temps mesurés).</td></tr>
+        <tr><td><b>Contrôle</b></td><td>Total&nbsp;: architecture, données, seuil et export sont choisis par l’équipe et vérifiables.</td><td>Partiel&nbsp;: les poids et les données d’entraînement du modèle sont inconnus. Le contrôle passe par le code qui l’entoure (faits calculés, schéma fermé, contrôles) et par l’adaptateur entraîné sur nos exemples.</td></tr>
+        <tr><td><b>Explicabilité</b></td><td>Une classe et un score, sans raison. La séquence du bloc est affichée, mais l’interprétation revient à l’utilisateur.</td><td>Résumé, faits sourcés, hypothèses et informations manquantes, ou abstention. Une réponse bien structurée n’est pas pour autant juste (chapitre&nbsp;5).</td></tr>
+        <tr><td><b>Dépendance</b></td><td>Faible&nbsp;: format ONNX ouvert et moteur d’exécution libre, dans n’importe quel navigateur récent.</td><td>Plus forte&nbsp;: poids publiés par Google à une révision figée, llama.cpp, modèle de plongements pour la recherche, et GPU distant pour l’entraînement.</td></tr>
+        <tr><td><b>Reproductibilité</b></td><td>Empreintes du modèle et des partitions conservées, seuil figé, parité vérifiée sur tout le test.</td><td>Empreintes de la consigne, du schéma, des entrées de test et de l’adaptateur conservées. Les poids du modèle, trop volumineux, restent hors du dépôt et se téléchargent à une révision figée.</td></tr>
+      </tbody>
+    </table>
+  </figure>
+
+  <h2><span class="n">6.2</span>Lecture</h2>
+  <p>Le volet&nbsp;A est rapide, léger, gratuit et précis pour détecter, et chacune de ses décisions peut être retracée. Il ne dit cependant rien de ce qui s’est passé dans le bloc. Le volet&nbsp;B produit une lecture structurée et généralement fidèle de la trace, mais à un coût de calcul supérieur de plusieurs ordres de grandeur et avec des erreurs de fond que la conformité au format ne révèle pas. L’opposition annoncée par le sujet se vérifie&nbsp;: le modèle maîtrisé offre le contrôle, le modèle emprunté offre la langue. Elle se nuance toutefois sur deux points.</p>
+  <p>D’abord, le contrôle du volet&nbsp;B n’est pas nul&nbsp;: il se déplace du modèle vers le code qui l’entoure. Ce sont les faits calculés, le schéma fermé et la vérification des références qui rendent ses réponses vérifiables, plus que le modèle lui-même. Ensuite, l’adaptation par LoRA, avec seulement 200 exemples rédigés par l’équipe, suffit à modifier visiblement le comportement du modèle emprunté&nbsp;: elle rapproche le volet&nbsp;B d’un modèle «&nbsp;maîtrisé&nbsp;» sur la forme de ses réponses, sans lui donner accès à une information que les données ne contiennent pas.</p>
+  <p>Nous avons aussi essayé d’ajouter au volet&nbsp;B un second modèle, un encodeur spécialisé dans les décisions calibrées, pour décider quand s’abstenir. Utilisé sans adaptation, il ne distinguait pas les blocs en échec des blocs normaux (aire sous la courbe ROC de 0,47 sur la validation, soit le niveau du hasard) et n’a pas été retenu (section&nbsp;9.1).</p>
+
+  <h2><span class="n">6.3</span>Perspective&nbsp;: enchaîner les deux volets</h2>
+  <p>Les deux volets ont été construits et évalués séparément&nbsp;: aucune partie du volet&nbsp;B ne lit le score du volet&nbsp;A. Leur enchaînement serait pourtant l’usage naturel&nbsp;: A trie tous les blocs, B n’explique que ceux que A signale. Sur le test, A signale 2&nbsp;581 blocs, soit 3&nbsp;% des 86&nbsp;260. Au rythme mesuré pour B, expliquer tout le test demanderait environ <b>590 heures</b> de GPU, contre environ <b>18 heures</b> pour les seuls blocs signalés. Ces ordres de grandeur sont calculés, non mesurés. Deux précautions s’imposeraient&nbsp;: ne pas transmettre le verdict de A à B, pour que B lise la trace au lieu de justifier une décision, et évaluer la chaîne combinée comme un troisième système.</p>
+
+  <h2><span class="n">6.4</span>Limites</h2>
+  <ul>
+    <li><b>Le volet&nbsp;B ne peut pas établir la cause d’une panne.</b> HDFS_v1 ne fournit qu’une étiquette par bloc, jamais la cause, et la documentation officielle décrit le fonctionnement normal. Une cause proposée ne serait donc pas vérifiable&nbsp;: c’est pourquoi nous avons fermé le catalogue des hypothèses. Dans le jeu d’adaptation, 61&nbsp;% des anomalies d’entraînement n’ont aucune hypothèse. Apprendre des causes demanderait un jeu de journaux avec des pannes injectées et connues.</li>
+    <li><b>Les exemples d’adaptation ne citent aucune source</b>, puisque la configuration à un agent n’utilise pas la recherche documentaire. L’adaptateur n’a donc jamais appris à citer un passage&nbsp;: les cinq réponses sourcées obtenues avec lui à trois agents ne résultent pas d’un apprentissage de la citation.</li>
+    <li><b>L’évaluation humaine est restreinte</b>&nbsp;: 30 cas, deux annotateurs de l’équipe, un accord indépendant faible à modéré avant confrontation.</li>
+    <li><b>La sélection de l’adaptateur</b> résulte d’un départage par l’ordre de la configuration, les deux réglages étant à égalité sur la validation.</li>
+    <li><b>Les mesures de latence et de mémoire</b> de B ont été faites sur T4&nbsp;; sur la RTX 3050 cible, nous n’avons mesuré qu’une consigne, avec et sans adaptateur. La mémoire du navigateur n’a pas été mesurée pour A.</li>
+  </ul>
+</section>
+
+<section class="chapter">
+  <p class="chapter-kicker">chapitre 7</p>
+  <h1><span class="n">7</span>Retour d’expérience collectif</h1>
+  <p>Ce chapitre porte sur la conduite du projet, non sur le produit livré. Nous nous en tenons à ce que les traces du projet permettent d’établir&nbsp;: tickets, historique du dépôt, journal des décisions et revues de code.</p>
+
+  <h2><span class="n">7.1</span>Méthodologie</h2>
+  <h3>Organisation et répartition</h3>
+  <p>L’équipe compte quatre membres. Les responsabilités ont été réparties au cadrage selon les volets, chaque domaine ayant un responsable et un relecteur désigné (tableau&nbsp;10). Linda Boukhit a assuré le pilotage&nbsp;: tenue du board, échéances et relances.</p>
+  <figure class="table">
+    <figcaption><b>Tableau 10.</b> Répartition des responsabilités telle qu’elle s’est effectivement exercée.</figcaption>
+    <table>
+      <thead><tr><th style="width:20%">Membre</th><th>Responsabilités principales</th></tr></thead>
+      <tbody>
+        <tr><td><b>Linda Boukhit</b></td><td>Pilotage du projet&nbsp;; corpus documentaire, recherche documentaire, organisation en trois agents et interface locale du volet&nbsp;B&nbsp;; prétraitement JavaScript du site.</td></tr>
+        <tr><td><b>Alain Evina</b></td><td>Socle commun du dépôt (structure, contrats de format, tests et intégration continue)&nbsp;; modèle de langage, consigne, adaptation LoRA et banc d’évaluation du volet&nbsp;B&nbsp;; rapport.</td></tr>
+        <tr><td><b>Bachar Ben Slama</b></td><td>Volet&nbsp;A&nbsp;: entraînement et export du BiLSTM, choix du seuil, site web et inférence dans le navigateur.</td></tr>
+        <tr><td><b>Nassim Mezzai</b></td><td>Audit et préparation du corpus, partitions, régression logistique de référence, évaluation finale du volet&nbsp;A&nbsp;; essais d’adaptation et mesures sur le poste cible du volet&nbsp;B.</td></tr>
+      </tbody>
+    </table>
+  </figure>
+  <h3>Décisions et réunions</h3>
+  <p>Les décisions importantes ont été consignées, avec leur justification, dans un journal des décisions tenu dans le dépôt&nbsp;: choix du jeu HDFS, stratégie de branches, abandon de SmolLM2 au profit de Gemma&nbsp;4, entraînement déporté sur Kaggle, règles du test réservé. Les échanges courants se sont faits par messagerie instantanée et dans les revues de code. Nous n’avons pas tenu de réunions planifiées avec un compte rendu écrit&nbsp;: le journal des décisions en a tenu lieu. C’est un point que nous changerions (section&nbsp;7.4).</p>
+  <h3>Supports de documentation</h3>
+  <p>Trois supports se sont révélés utiles. Les <b>contrats de format</b>, qui décrivent sept formats d’échange entre les modules (journaux, séquences, modèle exporté, partitions, exemples annotés, passages documentaires, résultats d’expérience), ont permis à chacun d’avancer sans attendre le code des autres. Le <b>journal des décisions</b> a évité de rediscuter des choix déjà faits. Les <b>fiches de résultats</b>, rangées avec les données brutes de chaque expérience, ont rendu chaque chiffre de ce rapport vérifiable. Le classeur de suivi partagé a surtout servi aux jalons.</p>
+
+  <h2><span class="n">7.2</span>Outillage</h2>
+  <h3>Dépôt Git</h3>
+  <p>Le dépôt suit une stratégie à deux branches&nbsp;: <b>main</b> ne contient que des versions publiées, puisque le site se déploie depuis elle, et <b>dev</b> sert à l’intégration. Chaque tâche est développée sur une branche nommée d’après son ticket, puis proposée par une demande de fusion vers dev. Une fusion exige l’approbation d’un autre membre, l’auteur ne pouvant pas approuver son propre travail, et la réussite des tests automatiques, soit environ 380 tests Python et les tests du site. Au total, 87 demandes de fusion ont été intégrées. Les messages de commit commencent par la clé du ticket, ce qui relie chaque modification à sa tâche.</p>
+  <h3>Board de tickets</h3>
+  <p>Le board Jira a été construit le 6 octobre, avant l’essentiel du travail&nbsp;: 7 épopées, 5 sprints alignés sur les jalons, et des tickets dotés d’un responsable, d’un relecteur, d’un critère de fin et de leurs dépendances. Il a servi au pilotage réel, et non à un renseignement après coup. Des automatisations font avancer un ticket à l’ouverture puis à la fusion de sa demande de fusion. Deux défauts sont apparus&nbsp;: la première version des automatisations fermait aussi des tickets seulement cités dans une demande de fusion, et une fusion ne prouve pas qu’un critère de fin est atteint (un ticket de mesures a été fermé à la fusion de son script alors que les mesures restaient à faire, puis rouvert). Les sprints, enfin, n’ont pas toujours été tenus à jour.</p>
+  <h3>Relecture par un tiers</h3>
+  <p>Toute modification a été relue par un autre membre avant intégration&nbsp;; la pilote a relu à elle seule une trentaine de demandes de fusion. Les annotations du volet&nbsp;B ont fait l’objet d’une relecture croisée, et la notation à l’aveugle d’une double annotation suivie d’une confrontation.</p>
+
+  <h2><span class="n">7.3</span>Difficultés</h2>
+  <ul>
+    <li><b>Un jalon manqué.</b> Au jalon de mi-parcours du 1<sup>er</sup> octobre, rien n’était livrable. Le 6 octobre, nous avons construit le board et planifié un sprint de rattrapage, qui a produit les données préparées, un premier site, un premier modèle entraîné et une première inférence locale. Les points de ce jalon sont perdus.</li>
+    <li><b>Le matériel.</b> Un seul membre dispose d’un GPU NVIDIA, de 6&nbsp;Go, insuffisant pour entraîner le modèle. Sur un portable sans GPU, la première inférence produisait moins d’un token par seconde. La solution, un entraînement sur Kaggle et une inférence sur le poste équipé, a ajouté une étape de transfert et de vérification.</li>
+    <li><b>Un changement de modèle en cours de route.</b> L’abandon de SmolLM2 pour Gemma&nbsp;4, décidé le 27 octobre, a décalé toutes les tâches qui en dépendaient. L’organisation en agents et l’interface, prévues pour les 9 et 13 novembre, ont été intégrées le 24 novembre.</li>
+    <li><b>L’adaptation.</b> Quatre semaines ont séparé le premier essai LoRA sur processeur (14 octobre) du premier entraînement abouti sur GPU (8 novembre), à cause de dépassements mémoire, de gradients non finis et d’incompatibilités entre bibliothèques.</li>
+    <li><b>L’annotation.</b> Rédiger des réponses de référence a été beaucoup plus long que prévu&nbsp;: 43&nbsp;% des brouillons ont dû être corrigés, et deux annotateurs indépendants ne s’accordaient au départ que faiblement sur les notes.</li>
+    <li><b>Désaccords.</b> Les désaccords, techniques pour l’essentiel, ont été tranchés en revenant aux données&nbsp;: lignes brutes pour les annotations, mesures sur la validation pour les choix de conception. Aucun n’est resté bloquant.</li>
+  </ul>
+  <h3>Charge estimée et charge réelle</h3>
+  <p>Nous n’avons pas relevé les heures passées&nbsp;: l’écart ne peut donc s’apprécier qu’en dates. Il est important sur le volet&nbsp;B, où l’entraînement final et les mesures sur le test n’ont eu lieu que le 25 novembre. Nous voyons trois causes de sous-estimation&nbsp;: des dépendances en chaîne (le modèle conditionne la consigne, qui conditionne les exemples, qui conditionnent l’adaptation), le coût d’appropriation d’outils nouveaux, et le temps de production de données de qualité, que nous avions compté comme une tâche annexe.</p>
+
+  <h2><span class="n">7.4</span>Enseignements</h2>
+  <ul>
+    <li><b>Figer tôt ce qui conditionne la suite</b>&nbsp;: le modèle, le jeu de test réservé et la grille d’évaluation, pour que l’adaptation et les mesures avant et après ne se jouent pas dans les dernières semaines.</li>
+    <li><b>Planifier l’annotation comme une tâche à part entière</b>, avec une calibration commune des annotateurs avant la notation, ce qui aurait relevé l’accord initial.</li>
+    <li><b>Tenir des points d’équipe courts mais réguliers, avec un compte rendu</b>, et relever le temps passé pour pouvoir comparer estimation et réalité.</li>
+    <li><b>Vérifier un critère de fin avant de fermer un ticket</b>, même quand une automatisation le propose.</li>
+  </ul>
+  <p>Plusieurs acquis sont directement transposables en entreprise&nbsp;: un ticket, une branche, une relecture&nbsp;; des contrats de format entre les modules&nbsp;; la séparation stricte entre réglage et évaluation&nbsp;; et l’habitude de documenter un résultat négatif comme un résultat.</p>
+
+  <h2><span class="n">7.5</span>Axes de progression</h2>
+  <p><b>Techniques.</b> L’évaluation des modèles de langage reste notre principale lacune&nbsp;: juger qu’une explication est juste demande une relecture humaine coûteuse, et nous voulons maîtriser des méthodes plus solides (grilles calibrées, échantillons plus larges, tests de significativité). Les différences numériques entre moteurs d’inférence et le transfert d’un adaptateur entre formats de quantification méritent aussi d’être approfondis.</p>
+  <p><b>Collectifs.</b> Nous devons relancer plus tôt quand une tâche bloque les autres, réajuster le planning au lieu de laisser les échéances dépasser, et oser dire plus tôt qu’on ne comprend pas le travail d’un autre volet. La délégation a bien fonctionné lorsqu’elle s’accompagnait d’une vérification&nbsp;; elle a moins bien fonctionné lorsqu’une tâche dépendait d’un choix encore ouvert.</p>
+</section>
+
+<section class="chapter">
+  <p class="chapter-kicker">chapitre 8</p>
+  <h1><span class="n">8</span>Retours d’expérience individuels</h1>
+  <p>Le sujet recommande une rédaction individuelle de cette partie. Chaque membre a rédigé la sienne&nbsp;; nous n’en avons harmonisé que la forme.</p>
+
+  <div class="person">
+    <div class="person-head"><h2><span class="n">8.1</span>Alain Evina</h2><span class="role">socle du dépôt, modèle de langage, évaluation</span></div>
+    <h3>Mon rôle</h3>
+    <p>J’ai mis en place le socle commun du dépôt&nbsp;: arborescence, contrats d’échange entre les modules, règles de contribution, tests automatisés et intégration continue, structure en paquets et chemins centralisés. J’ai construit le board Jira et préparé les supports de la revue J3. Ce travail se voit peu dans les résultats, mais il a permis à chacun de brancher son code sur les mêmes formats et de faire relire chaque contribution sur une intégration continue commune.</p>
+    <p>Sur le volet&nbsp;B, j’étais chargé du modèle de langage. La première inférence de SmolLM2-1.7B sur ma machine a montré qu’il ignorait les lignes d’avertissement et inventait des informations&nbsp;; sa lenteur tenait surtout à la pleine précision sur processeur. Nous avons choisi Gemma&nbsp;4 E4B QAT, exécuté avec llama.cpp. J’ai mené les itérations de la consigne jusqu’à la version figée, sur des blocs de validation uniquement, avec des faits calculés par le code et un contrat de réponse vérifié. J’ai écrit la chaîne d’adaptation LoRA, le banc d’évaluation du volet&nbsp;B, la comparaison des deux volets et ce rapport.</p>
+    <h3>Ce que j’ai appris techniquement</h3>
+    <ul>
+      <li><b>Le format ne garantit pas le fond.</b> Une réponse conforme au schéma peut inverser une chronologie ou affirmer une causalité que la trace ne montre pas. Il faut des contrôles sur le contenu, et une relecture humaine.</li>
+      <li><b>Séparer réglage et évaluation.</b> Pour l’essai de Laya, choisir la question sur une cohorte de validation puis la mesurer une seule fois sur une autre m’a évité de conclure sur un résultat favorable de mise au point&nbsp;: l’aire sous la courbe finale vaut 0,47 et l’outil n’a pas été intégré.</li>
+      <li><b>La mémoire décide de l’architecture.</b> L’entraînement LoRA de Gemma ne tient pas sur 6&nbsp;Go&nbsp;: les tables de plongement pèsent à elles seules environ 6,5&nbsp;Gio. D’où la voie retenue&nbsp;: entraînement sur T4, puis adaptateur seul converti en GGUF et appliqué au modèle quantifié.</li>
+    </ul>
+    <h3>Ce que j’ai appris en équipe</h3>
+    <ul>
+      <li><b>Un outil d’aide doit être testé comme du code.</b> Le pré-contrôle que j’avais écrit pour la relecture du test réservé produisait des faux positifs, que Bachar a dû contourner. Je l’ai corrigé après coup&nbsp;; il aurait fallu le tester sur des cas connus avant de le diffuser.</li>
+      <li><b>Un ticket fermé n’est pas un travail fini.</b> Un ticket de mesures a été fermé automatiquement à la fusion de son script alors que les mesures restaient à faire. Depuis, je vérifie le critère de fin avant chaque clôture.</li>
+    </ul>
+    <h3>Ce que je ferais autrement</h3>
+    <p>Le jalon de mi-parcours a été manqué et l’adaptation complète du volet&nbsp;B est arrivée tard. Je figerais plus tôt le modèle et le jeu de test réservé, pour que l’entraînement et les mesures avant et après ne dépendent pas des dernières semaines. Je réduirais aussi le nombre d’itérations de la consigne au profit d’un jeu d’exemples relus plus tôt.</p>
+    <h3>Bilan personnel</h3>
+    <p>Ce projet m’a appris à piloter un travail d’équipe autant qu’à développer&nbsp;: découper en tickets, faire relire, tracer les décisions. Sur le plan technique, je retiens la séparation stricte entre réglage et évaluation, et le fait qu’un résultat négatif bien documenté a autant de valeur qu’un gain.</p>
+  </div>
+
+  <div class="person">
+    <div class="person-head"><h2><span class="n">8.2</span>Bachar Ben Slama</h2><span class="role">volet A, modèle et site web</span></div>
+    <h3>Mon rôle</h3>
+    <p>J’ai principalement travaillé sur le volet&nbsp;A, la détection d’anomalies dans les journaux HDFS. J’ai réalisé le premier essai d’export ONNX et d’inférence dans le navigateur, le site initial, puis l’entraînement et l’export du BiLSTM. J’ai ensuite développé la saisie des journaux, le traitement par lot, le filtre des anomalies et l’export CSV.</p>
+    <p>J’ai également analysé le seuil de décision, comparé les versions FP32 et INT8 et intégré un Web Worker. J’ai ajouté le détail des événements par bloc et corrigé leur affichage sur mobile. Enfin, j’ai contribué aux vérifications et relectures des réponses de référence du volet&nbsp;B.</p>
+    <h3>Ce que j’ai appris techniquement</h3>
+    <ul>
+      <li><b>Entraîner et intégrer un modèle.</b> J’ai entraîné un BiLSTM depuis zéro sur HDFS_v1, puis exporté le modèle en ONNX pour l’exécuter avec ONNX Runtime Web. J’ai appris à vérifier la cohérence des scores entre Python et le navigateur.</li>
+      <li><b>Choisir un seuil de décision.</b> Une bonne macro-F1 peut masquer des anomalies manquées. En ajustant le seuil sur la validation, nous sommes passés de 21 anomalies manquées à une seule, avec une augmentation des fausses alertes de 23 à 59. J’ai mieux compris le compromis entre précision et rappel.</li>
+      <li><b>Mesurer une optimisation.</b> Le candidat INT8 était environ 62&nbsp;% plus léger. Les mesures de latence variaient selon le moteur et la taille des lots. Cela m’a appris à comparer plusieurs critères avant de choisir une version.</li>
+      <li><b>Développer une interface utilisable.</b> J’ai appris à relier le modèle au parcours utilisateur, à gérer les erreurs et à afficher les résultats. L’essai sur un écran de 390 pixels a révélé une colonne trop étroite qui coupait les codes d’événements&nbsp;; les captures avant et après montrent la correction.</li>
+    </ul>
+    <p><b>Ce que je dois encore approfondir.</b> Je souhaite mieux comprendre les différences numériques entre moteurs d’inférence et les méthodes permettant de vérifier qu’une optimisation conserve un comportement acceptable. Je dois aussi progresser dans l’organisation des tests utilisateurs.</p>
+    <h3>Ce que j’ai appris en équipe</h3>
+    <ul>
+      <li><b>Travailler avec Git et les demandes de fusion.</b> J’ai appris à créer une branche par ticket, à sauvegarder mon travail et à proposer une demande de fusion vers dev. J’ai aussi compris la différence entre une modification intégrée dans dev et une version publiée depuis main.</li>
+      <li><b>Utiliser les retours des collègues.</b> Le retour sur les anomalies manquées a conduit à revoir le seuil. Il m’a aidé à regarder les résultats au-delà d’un score global.</li>
+      <li><b>Clarifier les dépendances.</b> Les contrats de données et les échanges avec mes collègues ont permis de relier l’entraînement, le prétraitement et le site. J’ai appris à vérifier ce qui était déjà intégré avant de commencer une nouvelle tâche.</li>
+      <li><b>Utiliser les assistants avec recul.</b> Je me suis appuyé sur un assistant pour comprendre des erreurs, préparer du code et interpréter des résultats. Certains échanges ont demandé des corrections, notamment sur le pré-contrôle des annotations. Cela m’a montré l’importance de confronter les suggestions aux traces et aux résultats observés.</li>
+    </ul>
+    <h3>Ce que je ferais autrement</h3>
+    <ul>
+      <li>Prévoir plus tôt des essais avec des utilisateurs extérieurs à l’équipe.</li>
+      <li>Vérifier régulièrement le site public après les fusions pour éviter un décalage avec la version locale.</li>
+      <li>Conserver dès chaque expérience un compte rendu avec la commande, les paramètres, l’empreinte du modèle et les résultats.</li>
+      <li>Prendre davantage de temps pour comprendre chaque modification avant de l’intégrer.</li>
+    </ul>
+  </div>
+
+  <div class="person">
+    <div class="person-head"><h2><span class="n">8.3</span>Linda Boukhit</h2><span class="role">pilotage, recherche documentaire, agents</span></div>
+    <h3>Mon rôle</h3>
+    <p>J’étais la <b>pilote</b> de l’équipe&nbsp;: j’ai organisé le projet dans Jira (sprints, tickets, échéances), mis en place le classeur de suivi et le journal du projet, préparé les preuves de mi-parcours et relu environ 30 demandes de fusion de l’équipe. Côté technique, j’ai travaillé sur le <b>volet&nbsp;B</b>&nbsp;: le corpus documentaire, la recherche documentaire, l’orchestration à trois agents et l’interface de démonstration. J’ai aussi écrit le prétraitement JavaScript du site du volet&nbsp;A.</p>
+    <h3>Ce que j’ai appris techniquement</h3>
+    <ul>
+      <li><b>Le prétraitement des données.</b> Transformer des lignes de journaux en événements E1 à E29 m’a montré qu’un détail compte&nbsp;: le site devait donner exactement le même résultat que Python. Les tests de parité (2&nbsp;000 blocs sur 2&nbsp;000 identiques) m’ont appris à <b>prouver</b> que deux programmes font la même chose, au lieu de le supposer.</li>
+      <li><b>Le fonctionnement d’une recherche documentaire.</b> J’ai compris toute la chaîne&nbsp;: découper une documentation, transformer les passages en vecteurs, chercher par le sens et par les mots-clés, puis donner les passages au modèle. Surtout, j’ai appris qu’il faut <b>mesurer avant de décider</b>&nbsp;: j’avais prévu un seuil de pertinence, mais les mesures sur la validation ont montré qu’il retirerait autant de bons passages que de mauvais. Je l’ai donc abandonné et documenté.</li>
+      <li><b>Les limites de cette approche.</b> La documentation HDFS explique le fonctionnement normal, pas les pannes. Une recherche documentaire ne vaut que ce que vaut son corpus.</li>
+      <li><b>L’organisation en agents.</b> Découper le travail entre une recherche, une rédaction et un contrôle, avec une limite d’appels. La première mesure réelle a montré que le contrôleur rejetait de bonnes réponses parce qu’il ne connaissait pas les règles&nbsp;: un agent doit recevoir le même contrat que celui qu’il contrôle.</li>
+    </ul>
+    <p><b>Ce qui me manque encore.</b> Je dois approfondir l’<b>évaluation des modèles de langage</b>. Je sais construire une chaîne de recherche documentaire et mesurer la recherche, mais juger si une explication générée est vraiment juste reste difficile&nbsp;: il faut une relecture humaine, et je veux apprendre des méthodes plus solides pour le faire.</p>
+    <h3>Ce que j’ai appris en équipe</h3>
+    <ul>
+      <li><b>Organiser un projet à quatre.</b> La règle «&nbsp;un ticket, une branche, une demande de fusion, une relecture&nbsp;» nous a évité beaucoup d’erreurs, et les contrats de format ont permis à chacun d’avancer sans attendre les autres.</li>
+      <li><b>Oser dire que je n’ai pas compris.</b> Au milieu du projet, je me suis rendu compte que je ne comprenais plus bien ce que faisait l’équipe sur le volet&nbsp;B. J’ai pris le temps de tout me faire réexpliquer (le projet, les codes d’événements, la recherche documentaire) avant de continuer. Cela m’a permis de mieux piloter ensuite.</li>
+      <li><b>Les délais.</b> Plusieurs de mes tâches, l’orchestration en agents et l’interface, prévues pour le 9 et le 13 novembre, ont pris du retard parce qu’elles dépendaient du passage à Gemma. J’aurais dû <b>relancer plus tôt</b> et réajuster le planning dans Jira au lieu de laisser les échéances dépasser.</li>
+      <li><b>Déléguer.</b> J’ai appris à confier des tâches tout en gardant la responsabilité de vérifier. Par exemple, une relecture a classé un problème comme «&nbsp;bloquant&nbsp;» alors qu’il était mineur&nbsp;: il faut toujours vérifier avant de conclure.</li>
+    </ul>
+    <h3>Ce que je ferais autrement</h3>
+    <ul>
+      <li>Tenir les <b>sprints Jira à jour</b> chaque semaine&nbsp;: fermer les sprints, déplacer les tickets en retard.</li>
+      <li><b>Relancer plus tôt</b> quand une tâche bloque les autres.</li>
+      <li>Garder plus de <b>temps pour coder moi-même</b>, pas seulement organiser et vérifier.</li>
+    </ul>
+  </div>
+
+  <div class="person">
+    <div class="person-head"><h2><span class="n">8.4</span>Nassim Mezzai</h2><span class="role">données, évaluation du volet A, adaptation</span></div>
+    <p>Dans le cadre du projet TeamAI, j’ai participé à plusieurs étapes du développement d’un système d’intelligence artificielle, de la préparation des données jusqu’à l’entraînement, l’expérimentation et l’évaluation des modèles.</p>
+    <h3>Préparation et audit des données</h3>
+    <p>J’ai principalement travaillé sur le jeu de données HDFS, en participant à son audit, au découpage des journaux, à la construction des séquences d’événements et à la préparation des partitions d’entraînement, de validation et de test. Une difficulté importante a été la présence de nombreuses séquences répétées dans le jeu. Ce travail m’a permis de comprendre les risques de fuite de données et l’importance d’évaluer les modèles sur des séquences inédites, afin de mieux mesurer leur capacité de généralisation.</p>
+    <h3>Entraînement et expérimentation de modèles</h3>
+    <p>J’ai développé et entraîné une régression logistique de référence pour la détection d’anomalies HDFS. Cette première approche a servi de point de comparaison pour le modèle BiLSTM développé par l’équipe. J’ai également participé aux expérimentations d’adaptation d’un modèle de langage, notamment <b>Gemma&nbsp;4 E4B avec QLoRA</b>, en utilisant l’environnement Kaggle et ses GPU NVIDIA T4. Ces essais m’ont permis d’explorer les principales étapes de l’adaptation d’un modèle préentraîné&nbsp;: préparation des exemples, configuration des paramètres LoRA, quantification NF4, chargement du modèle et lancement de l’entraînement.</p>
+    <p>J’ai rencontré plusieurs difficultés techniques, notamment des dépassements de mémoire GPU, des incompatibilités entre bibliothèques et des gradients non finis pendant l’entraînement. Ces problèmes m’ont amené à examiner la consommation mémoire, le calcul de la fonction de perte et les contraintes de l’entraînement en précision réduite. Ils m’ont appris qu’un entraînement qui démarre correctement n’est pas nécessairement un entraînement réussi, et qu’il faut distinguer la faisabilité technique, la stabilité de l’optimisation et la qualité réelle du modèle obtenu.</p>
+    <h3>Évaluation et optimisation des modèles</h3>
+    <p>J’ai pris en charge l’évaluation comparative du volet&nbsp;A, en confrontant la référence, le BiLSTM FP32 et sa version quantifiée INT8. J’ai travaillé sur la génération des métriques de classification, les matrices de confusion, l’analyse des faux positifs et des faux négatifs, ainsi que les vérifications de parité entre ONNX Runtime en Python et ONNX Runtime Web. La quantification INT8 m’a notamment permis d’étudier les compromis entre taille du modèle, vitesse d’inférence et stabilité des prédictions. J’ai aussi réalisé des mesures de chargement et de cache directement dans Chrome.</p>
+    <h3>Travail collaboratif et outils</h3>
+    <p>Le projet m’a permis d’approfondir l’utilisation de Python, PyTorch, ONNX Runtime, Kaggle, Git, GitHub et Jira. L’organisation en branches, tickets et demandes de fusion m’a appris à mieux documenter les expérimentations et à travailler avec des procédures de relecture.</p>
+    <h3>Bilan personnel</h3>
+    <p>Ce projet m’a permis de progresser dans trois domaines complémentaires&nbsp;: la préparation de données fiables, l’entraînement et l’adaptation de modèles, et leur évaluation expérimentale. J’ai surtout compris qu’obtenir de bonnes performances ne suffit pas. Il faut aussi pouvoir expliquer comment elles ont été obtenues, vérifier la reproductibilité des expériences, identifier les limites des modèles et distinguer les résultats confirmés des hypothèses. Cette expérience m’a permis de développer une approche plus rigoureuse et plus critique de l’apprentissage automatique et des modèles de langage.</p>
+  </div>
+</section>
+
+<section class="chapter">
+  <p class="chapter-kicker">chapitre 9</p>
+  <h1><span class="n">9</span>Cinq outils novateurs</h1>
+  <p>Nous présentons cinq outils que l’équipe n’avait jamais utilisés avant le projet&nbsp;: deux modèles ou bibliothèques de modélisation, un moteur d’inférence, une plateforme de calcul et une application de pilotage. Pour chacun, nous décrivons sa nature, l’usage que nous en avons fait, ses qualités, ses défauts, ce que sa documentation ne dit pas, et notre verdict. L’un d’eux a été abandonné&nbsp;; nous expliquons pourquoi.</p>
+
+  <div class="tool">
+    <h2><span class="n">9.1</span>Laya, un encodeur de décision calibrée <span class="verdict drop">abandonné</span></h2>
+    <p><b>Nature et usage.</b> Laya est un modèle ouvert (licence Apache&nbsp;2.0) fondé sur l’encodeur ModernBERT <span class="ref">[15]</span>, qui répond à des questions typées par des probabilités présentées comme calibrées. Nous l’avons essayé comme «&nbsp;garde-fou&nbsp;» à côté du modèle de langage&nbsp;: forcer l’abstention quand l’anomalie est ambiguë et écarter les hypothèses peu appuyées. Le protocole était strict&nbsp;: la formulation de la question a été choisie sur 40 blocs de validation, puis appliquée une seule fois à 40 autres, sans ajustement après lecture.</p>
+    <div class="tool-grid">
+      <div><h3>Qualités</h3><ul><li>Installation en une commande et API très courte.</li><li>Coût raisonnable sur processeur&nbsp;: environ 2,3&nbsp;s par bloc et 2,7&nbsp;Gio de mémoire.</li></ul></div>
+      <div><h3>Défauts constatés</h3><ul><li>Sans adaptation, la probabilité d’anomalie ne sépare pas les blocs en échec des blocs normaux&nbsp;: aire sous la courbe ROC de 0,47, le niveau du hasard.</li><li>Les abstentions ajoutées (8 sur 40) ne suivent donc pas l’étiquette.</li><li>La révision du modèle effectivement chargée n’est pas vérifiable depuis l’API.</li></ul></div>
+    </div>
+    <p><b>Ce que la documentation omet.</b> Son comportement sur des entrées techniques non rédigées, comme une suite d’événements HDFS&nbsp;: tous les exemples portent sur des décisions en langue naturelle.</p>
+    <p><b>Verdict.</b> Abandonné après une journée d’essai. Une adaptation supervisée par les étiquettes d’anomalie en ferait un second détecteur binaire, rôle déjà tenu par le volet&nbsp;A&nbsp;; une adaptation sur nos explications demanderait un jeu relu plus grand. Sans Laya, l’abstention repose sur les contrôles déterministes de la chaîne, qui ne coûtent rien. Le code reste testé pour une reprise éventuelle.</p>
+  </div>
+
+  <div class="tool">
+    <h2><span class="n">9.2</span>Notebooks Kaggle sur GPU T4 <span class="verdict keep">conservé</span></h2>
+    <p><b>Nature et usage.</b> Kaggle met à disposition des GPU NVIDIA T4 gratuits dans des notebooks distants, dans la limite d’un quota hebdomadaire. Nous l’avons utilisé pour tout ce qui demandait un GPU&nbsp;: comparaison des modèles de langage, essais d’adaptation, entraînement final, essais à trois agents et évaluation du test réservé du volet&nbsp;B. Plutôt que de passer par l’interface web, nous lançons les notebooks par l’API depuis le poste de travail, ce qui permet de boucler «&nbsp;corriger, relancer, lire le journal&nbsp;» sans copier-coller.</p>
+    <div class="tool-grid">
+      <div><h3>Qualités</h3><ul><li>Un GPU de 15&nbsp;Gio sans coût, accessible à toute l’équipe.</li><li>Journal d’exécution complet et téléchargement des sorties (adaptateur, métriques, journaux).</li><li>Les deux premiers échecs ont pu être diagnostiqués depuis le seul journal.</li></ul></div>
+      <div><h3>Défauts constatés</h3><ul><li>L’outil en ligne de commande répondait par un refus d’accès sur un poste, d’où le passage par l’API.</li><li>Joindre le code au notebook sous forme d’archive était trop lourd&nbsp;: le notebook télécharge maintenant les fichiers depuis GitHub, à une version figée, et vérifie l’empreinte de chacun.</li><li>Ces empreintes ne concordaient pas tant que les fichiers venaient d’une copie Windows à fins de ligne CRLF.</li><li>L’image logicielle évolue sans prévenir, et les liens vers les fichiers de sortie expirent.</li></ul></div>
+    </div>
+    <p><b>Ce que la documentation omet.</b> Le format exact du nom de notebook (le propriétaire doit y figurer), l’absence de moyen simple de joindre plusieurs fichiers à un script, l’expiration des liens de sortie et la taille du journal renvoyé.</p>
+    <p><b>Comparaison et verdict.</b> Avant, un membre lançait les essais à la main et nous transmettait les erreurs par message. Le lancement scripté rend chaque exécution traçable et sa relance immédiate. Nous gardons Kaggle pour les essais GPU courts, avec une limite&nbsp;: la méthode suppose un dépôt public.</p>
+  </div>
+
+  <div class="tool">
+    <h2><span class="n">9.3</span>llama.cpp et le format GGUF <span class="verdict keep">conservé</span></h2>
+    <p><b>Nature et usage.</b> llama.cpp est un moteur d’inférence libre écrit en C++, conçu pour exécuter des modèles de langage quantifiés sur du matériel modeste&nbsp;; GGUF est son format de fichier. Nous l’utilisons, via sa liaison Python, pour toute l’inférence du volet&nbsp;B, pour contraindre la sortie par un schéma JSON et pour convertir l’adaptateur LoRA.</p>
+    <div class="tool-grid">
+      <div><h3>Qualités</h3><ul><li>Sur un portable sans GPU, à bloc et paramètres égaux, face à la bibliothèque Transformers en précision complète&nbsp;: 0,98&nbsp;Go sur disque au lieu de 3,4, chargement en 2,9&nbsp;s au lieu de 24, pic mémoire de 2,8&nbsp;Go au lieu de 16,1 et débit triplé.</li><li>La contrainte par schéma JSON garantit une réponse au format attendu par nos contrôles.</li><li>Un adaptateur LoRA s’applique au moment du chargement, sans fusion, et son poids se règle.</li></ul></div>
+      <div><h3>Défauts constatés</h3><ul><li>Avec les journaux placés avant la consigne, le modèle recopiait les journaux au lieu de les résumer&nbsp;: l’ordre de la consigne compte.</li><li>Les débits sont instables&nbsp;: relancé sur une machine chargée, le même calcul tombe de 1,9 à 0,71 token par seconde.</li><li>La sortie contrainte garantit la forme, pas le fond.</li></ul></div>
+    </div>
+    <p><b>Ce que la documentation omet.</b> La version installée par défaut est compilée pour le processeur&nbsp;: le GPU demande une installation à part, et le nombre de couches déportées sur le GPU vaut zéro par défaut, si bien que tout tourne sur le processeur sans avertissement. Le coût dominant vient du traitement de la consigne (environ 2&nbsp;200 tokens), non de la génération.</p>
+    <p><b>Verdict.</b> Conservé comme moteur du volet&nbsp;B&nbsp;: sans lui, évaluer quatre configurations sur 80 cas aurait pris plusieurs dizaines d’heures. Le fonctionnement sur le poste cible a été vérifié, avec et sans adaptateur&nbsp;: 3,7&nbsp;Gio de mémoire graphique et environ 27 tokens par seconde.</p>
+  </div>
+
+  <div class="tool">
+    <h2><span class="n">9.4</span>Jira Cloud, ses automatisations et son lien avec GitHub <span class="verdict keep">conservé</span></h2>
+    <p><b>Nature et usage.</b> Jira est une application de gestion de tickets. Nous l’avons utilisée pour tout le pilotage&nbsp;: épopées, sprints, tickets avec responsable, relecteur, critère de fin et dépendances. Elle était reliée à GitHub, de sorte qu’un ticket affiche les branches et demandes de fusion qui portent sa clé, et dotée d’automatisations qui font avancer le ticket à l’ouverture puis à la fusion.</p>
+    <div class="tool-grid">
+      <div><h3>Qualités</h3><ul><li>Le board complet (7 épopées, 5 sprints, une cinquantaine de tickets liés) a été créé en une séance.</li><li>La convention de nommage des branches relie automatiquement chaque contribution à son ticket.</li><li>Les transitions automatiques évitent les oublis de mise à jour.</li></ul></div>
+      <div><h3>Défauts constatés</h3><ul><li>Un nouveau ticket arrive dans un statut de revue au lieu de «&nbsp;À faire&nbsp;» et doit être déplacé à la main.</li><li>La première version des automatisations rouvrait des tickets terminés et agissait sur des tickets seulement cités.</li><li>Une fusion ne prouve pas qu’un critère de fin est rempli&nbsp;: deux tickets ont dû être rouverts.</li></ul></div>
+    </div>
+    <p><b>Ce que la documentation omet.</b> Sans condition sur la branche source, l’automatisation «&nbsp;demande fusionnée → terminé&nbsp;» s’applique à tout ticket mentionné dans la demande, et pas seulement au sien.</p>
+    <p><b>Comparaison et verdict.</b> Au jalon J2, nous n’avions ni board ni classeur partagé. Le gain tient à la création des tickets en lot et au lien automatique avec le code. Nous conservons Jira, avec trois garde-fous&nbsp;: des automatisations limitées au ticket de la branche, un commentaire par changement réel, et une vérification du critère de fin avant toute clôture.</p>
+  </div>
+
+  <div class="tool">
+    <h2><span class="n">9.5</span>PEFT et QLoRA&nbsp;: une critique argumentée <span class="verdict keep">conservé</span></h2>
+    <p><b>Nature et usage.</b> PEFT est la bibliothèque de Hugging Face qui implémente les adaptations économes en paramètres, dont LoRA&nbsp;; QLoRA y ajoute un modèle de base chargé en 4 bits. Nous l’avons utilisée pour adapter Gemma&nbsp;4 E4B sur T4&nbsp;: d’abord un essai court de 30 pas sur 20 exemples, puis deux entraînements de 400 pas sur 199 exemples.</p>
+    <div class="tool-grid">
+      <div><h3>Ce qui a marché</h3><ul><li>Une chaîne complète sur T4&nbsp;: entraînement stable, environ 2,3 millions de paramètres entraînables pour le rang 8, pic de 10 à 11&nbsp;Gio.</li><li>Un adaptateur de 4,5&nbsp;Mo, converti pour llama.cpp, qui agit bien sur le modèle quantifié et améliore la note humaine sur le test.</li></ul></div>
+      <div><h3>Ce qui a échoué</h3><ul><li>Saturation mémoire&nbsp;: la perte intégrée calcule les scores de toutes les positions sur un vocabulaire de 262&nbsp;144 tokens, puis les convertit en 32 bits (environ 2&nbsp;Gio pour 2&nbsp;000 tokens).</li><li>Gradients non finis en demi-précision, faute de bf16 sur T4.</li><li>Incompatibilités de versions entre PyTorch et ses bibliothèques compagnes.</li><li>Sur processeur, un pas prenait jusqu’à 784&nbsp;s.</li></ul></div>
+    </div>
+    <p><b>Ce que la documentation omet.</b> Le coût mémoire de la perte intégrée quand le vocabulaire est grand, qui dépasse le gain de QLoRA sur une carte de 15&nbsp;Gio&nbsp;; le fait qu’un pas sauté par le mécanisme de mise à l’échelle des gradients est normal en demi-précision et ne doit pas interrompre l’entraînement&nbsp;; et le cas des architectures à cache clé-valeur partagé, où certaines couches ciblées n’existent pas&nbsp;: la projection «&nbsp;valeur&nbsp;» n’est alors adaptée que sur 24 couches sur 42, sans avertissement.</p>
+    <p><b>Temps d’appropriation et verdict.</b> Environ quatre semaines calendaires ont séparé le premier essai du premier entraînement abouti. Nous conservons QLoRA, mais avec une réserve de méthode&nbsp;: on entraîne sur une base en NF4 et l’on infère sur une base en Q4_0, deux quantifications différentes. Rien ne garantissait a priori que l’adaptateur transférerait. Nous l’avons vérifié avant d’en mesurer l’effet&nbsp;: sortie identique à la base avec un poids nul, sortie différente avec un poids de 1, puis gain mesuré sur le test réservé.</p>
+  </div>
+</section>
+
+<section class="chapter">
+  <p class="chapter-kicker">chapitre 10</p>
+  <h1><span class="n">10</span>Conclusion et perspectives</h1>
+  <p>Ce projet a confronté deux régimes techniques sur les mêmes journaux HDFS. Le volet&nbsp;A, un BiLSTM de 57&nbsp;ko entraîné par l’équipe et exécuté dans le navigateur, détecte les blocs anormaux avec une macro-F1 de 0,9938 sur les 86&nbsp;260 blocs du test réservé, et de 0,9714 sur les séquences jamais vues, à plus de 6&nbsp;000 blocs par seconde, sans serveur et sans coût. Le volet&nbsp;B, Gemma&nbsp;4 E4B encadré par des faits calculés, un schéma fermé et des contrôles, produit des explications structurées et ancrées dans les lignes de la trace, en une vingtaine de secondes par bloc. Adapté par LoRA sur 200 exemples rédigés par l’équipe, il obtient une note humaine de 7,87 sur 8, contre 7,03 sans adaptation, et cesse presque d’affirmer des chronologies que la trace ne permet pas d’établir.</p>
+  <p>Trois enseignements dépassent ce cas d’usage. <b>D’abord, le contrôle d’un modèle emprunté se construit autour de lui.</b> Faute de connaître ses poids, nous avons déplacé la maîtrise vers le code qui prépare ses entrées et vérifie ses sorties, et vers un adaptateur entraîné sur nos propres exemples. <b>Ensuite, la séparation stricte entre réglage et évaluation protège les conclusions.</b> Le seuil du volet&nbsp;A, la consigne du volet&nbsp;B, le choix de l’adaptateur et l’abandon de Laya ont tous été décidés sur la validation, et chaque test n’a été ouvert qu’une fois. <b>Enfin, un résultat négatif documenté est un résultat.</b> L’organisation en trois agents, plus lente et moins bien notée qu’un agent unique, et la porte de décision Laya, qui n’apporte aucun signal, nous ont autant appris que les gains.</p>
+  <p>Les deux volets sont complémentaires plutôt que concurrents&nbsp;: le premier trie, le second aide à lire. Leur enchaînement ramènerait le coût du second à environ 3&nbsp;% des blocs. Une limite tient enfin aux données plutôt qu’aux modèles&nbsp;: ni les journaux, ni la documentation, ni les étiquettes ne disent pourquoi un bloc a échoué. Le volet&nbsp;B peut décrire fidèlement ce qui s’est passé et ce qu’il faudrait vérifier, mais pas établir une cause.</p>
+  <h2><span class="n">10.1</span>Perspectives</h2>
+  <ul>
+    <li><b>Consolider l’évaluation.</b> Noter un échantillon plus large, avec des annotateurs extérieurs à l’équipe calibrés au préalable, et tester la significativité des écarts entre configurations.</li>
+    <li><b>Améliorer la fidélité.</b> Renforcer les contrôles de chronologie et de causalité, et compléter le jeu d’adaptation par des exemples qui citent la documentation, afin que l’adaptateur apprenne aussi à s’appuyer sur des sources.</li>
+    <li><b>Revoir l’organisation en agents.</b> Donner au contrôleur exactement le contrat du rédacteur et limiter ses refus aux erreurs vérifiables, puis la comparer à nouveau à l’agent unique.</li>
+    <li><b>Enchaîner les volets.</b> Faire expliquer par B les seuls blocs signalés par A, et évaluer cette chaîne comme un système à part entière.</li>
+    <li><b>Apprendre des causes.</b> Constituer un jeu de journaux avec des pannes injectées et connues&nbsp;; c’est la seule voie pour qu’une hypothèse de cause devienne vérifiable.</li>
+  </ul>
+</section>
+
+<section class="chapter">
+  <p class="chapter-kicker">bibliographie</p>
+  <h1>Références</h1>
+  <ol class="biblio">
+    <li>J. Zhu, S. He, P. He, J. Liu, M. R. Lyu. <em>Loghub: A Large Collection of System Log Datasets for AI-driven Log Analytics.</em> IEEE International Symposium on Software Reliability Engineering (ISSRE), 2023.</li>
+    <li>W. Xu, L. Huang, A. Fox, D. Patterson, M. I. Jordan. <em>Detecting Large-Scale System Problems by Mining Console Logs.</em> ACM Symposium on Operating Systems Principles (SOSP), 2009.</li>
+    <li>M. Du, F. Li, G. Zheng, V. Srikumar. <em>DeepLog: Anomaly Detection and Diagnosis from System Logs through Deep Learning.</em> ACM Conference on Computer and Communications Security (CCS), 2017.</li>
+    <li>S. Hochreiter, J. Schmidhuber. <em>Long Short-Term Memory.</em> Neural Computation, 9(8), 1997.</li>
+    <li>M. Schuster, K. K. Paliwal. <em>Bidirectional Recurrent Neural Networks.</em> IEEE Transactions on Signal Processing, 45(11), 1997.</li>
+    <li>E. J. Hu, Y. Shen, P. Wallis, Z. Allen-Zhu, Y. Li, S. Wang, L. Wang, W. Chen. <em>LoRA: Low-Rank Adaptation of Large Language Models.</em> International Conference on Learning Representations (ICLR), 2022.</li>
+    <li>T. Dettmers, A. Pagnoni, A. Holtzman, L. Zettlemoyer. <em>QLoRA: Efficient Finetuning of Quantized LLMs.</em> Advances in Neural Information Processing Systems (NeurIPS), 2023.</li>
+    <li>P. Lewis, E. Perez, A. Piktus et al. <em>Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks.</em> Advances in Neural Information Processing Systems (NeurIPS), 2020.</li>
+    <li>S. Xiao, Z. Liu, P. Zhang, N. Muennighoff. <em>C-Pack: Packaged Resources to Advance General Chinese Embedding</em> (modèles BGE). arXiv:2309.07597, 2023.</li>
+    <li>J. Johnson, M. Douze, H. Jégou. <em>Billion-Scale Similarity Search with GPUs.</em> IEEE Transactions on Big Data, 7(3), 2019.</li>
+    <li>S. Robertson, H. Zaragoza. <em>The Probabilistic Relevance Framework: BM25 and Beyond.</em> Foundations and Trends in Information Retrieval, 3(4), 2009.</li>
+    <li>G. V. Cormack, C. L. A. Clarke, S. Büttcher. <em>Reciprocal Rank Fusion Outperforms Condorcet and Individual Rank Learning Methods.</em> ACM SIGIR Conference, 2009.</li>
+    <li>J. Cohen. <em>Weighted Kappa: Nominal Scale Agreement with Provision for Scaled Disagreement or Partial Credit.</em> Psychological Bulletin, 70(4), 1968.</li>
+    <li>J. R. Landis, G. G. Koch. <em>The Measurement of Observer Agreement for Categorical Data.</em> Biometrics, 33(1), 1977.</li>
+    <li>B. Warner, A. Chaffin, B. Clavié et al. <em>Smarter, Better, Faster, Longer: A Modern Bidirectional Encoder for Fast, Memory Efficient, and Long Context Finetuning and Inference</em> (ModernBERT). arXiv:2412.13663, 2024.</li>
+    <li>Google DeepMind. <em>Gemma 4</em>, fiche du modèle E4B et versions entraînées avec quantification (QAT). Hugging Face, 2026.</li>
+    <li>G. Gerganov et contributeurs. <em>llama.cpp : inférence de modèles de langage en C/C++</em>, et format GGUF. Dépôt GitHub ggml-org/llama.cpp.</li>
+    <li>Microsoft. <em>ONNX Runtime Web : exécution de modèles ONNX dans le navigateur</em> (WebAssembly). Documentation onnxruntime.ai.</li>
+  </ol>
+</section>
+
+<section class="chapter annex">
+  <p class="chapter-kicker">annexe A</p>
+  <h1>Annexe A · Reproductibilité</h1>
+  <p>Cette annexe rassemble les identifiants techniques nécessaires pour retrouver et reproduire les résultats. Le dépôt contient, pour chaque expérience, une fiche de résultats rangée avec les prédictions brutes, les paramètres et les empreintes des fichiers d’entrée.</p>
+  <figure class="table">
+    <figcaption><b>Tableau A1.</b> Ressources du projet.</figcaption>
+    <table>
+      <tbody>
+        <tr><td style="width:30%"><b>Dépôt de code</b></td><td><code>github.com/LindaBOUKHIT/TeamAI</code> (branche <code>main</code>)</td></tr>
+        <tr><td><b>Site du volet A</b></td><td><code>lindaboukhit.github.io/TeamAI/</code></td></tr>
+        <tr><td><b>Jeu de données</b></td><td>HDFS_v1, collection Loghub <span class="ref">[1]</span>&nbsp;; téléchargé par le script du dépôt, non versionné.</td></tr>
+        <tr><td><b>Partition</b></td><td>Stratifiée par étiquette, graine 42&nbsp;; empreintes des fichiers de partition conservées avec leurs métadonnées.</td></tr>
+        <tr><td><b>Modèle du volet B</b></td><td><code>google/gemma-4-E4B-it-qat-q4_0-gguf</code>, révision <code>4b4a2c1d584be7264f87aac328a1bc739ce81b6c</code></td></tr>
+        <tr><td><b>Base d’entraînement LoRA</b></td><td><code>google/gemma-4-E4B-it-qat-q4_0-unquantized</code>, révision <code>476025a01dbf99361c062bbeca3d6a76bb4c4566</code></td></tr>
+        <tr><td><b>Adaptateur retenu (r8 q/v)</b></td><td>GGUF de 4,5&nbsp;Mo, SHA-256 <code>52ff1ba7ca6833846b2148dba4c86dc0d5a646a6d582eaa8b2d0d6444559db7b</code></td></tr>
+        <tr><td><b>Mesures du test du volet B</b></td><td>Quatre configurations exécutées le 25 novembre 2026 sur GPU T4, version du code <code>faabb47</code>, entrées figées par empreinte SHA-256.</td></tr>
+        <tr><td><b>Paramètres de génération</b></td><td>Contexte 4&nbsp;096 tokens, 800 tokens de réponse au plus, température 0, graine 42, réflexion désactivée.</td></tr>
+      </tbody>
+    </table>
+  </figure>
+  <figure class="table">
+    <figcaption><b>Tableau A2.</b> Principales commandes, depuis la racine du dépôt. Les fichiers README de chaque dossier détaillent les options.</figcaption>
+    <table>
+      <tbody>
+        <tr><td style="width:42%">Télécharger le corpus HDFS_v1</td><td><code>python -m data.download_hdfs</code></td></tr>
+        <tr><td>Vérifier le corpus chargé</td><td><code>python -m teamai.data.loader</code></td></tr>
+        <tr><td>Reconstruire le jeu d’adaptation et le contrôler</td><td><code>python -m volet_b.slm.merge_lots --check</code></td></tr>
+        <tr><td>Dépouiller la double annotation à l’aveugle</td><td><code>python -m eval.volet_b.blind_scores --dir eval/volet_b/double_annotation</code></td></tr>
+        <tr><td>Lancer les tests Python</td><td><code>pytest -q</code></td></tr>
+        <tr><td>Lancer les tests du site</td><td><code>npm test</code> dans le dossier du site</td></tr>
+      </tbody>
+    </table>
+  </figure>
+</section>
+
+<section class="chapter annex">
+  <p class="chapter-kicker">annexe B</p>
+  <h1>Annexe B · Grille de notation humaine</h1>
+  <p>Chaque réponse est notée de 0 à 2 sur quatre critères, soit un total sur 8. Les annotateurs notent à l’aveugle, sans connaître la configuration qui a produit la réponse, en revenant aux lignes brutes de la trace.</p>
+  <figure class="table">
+    <figcaption><b>Tableau B1.</b> Grille de notation des explications du volet&nbsp;B.</figcaption>
+    <table>
+      <thead><tr><th style="width:16%">Critère</th><th>0</th><th>1</th><th>2</th></tr></thead>
+      <tbody>
+        <tr><td><b>F · exactitude des faits</b></td><td>Un fait central est inventé ou contredit par la trace.</td><td>Les faits principaux sont justes, avec une imprécision ou une omission importante.</td><td>Tous les faits sont traçables et formulés sans extrapolation.</td></tr>
+        <tr><td><b>S · appui sur les sources</b></td><td>Une source citée est invalide ou contredit l’affirmation, ou une explication documentaire importante n’est pas étayée.</td><td>Une source pertinente soutient une partie de l’explication, mais l’appui reste incomplet.</td><td>Chaque affirmation documentaire est soutenue par un passage pertinent&nbsp;; une liste vide est correcte si la réponse n’en fait aucune.</td></tr>
+        <tr><td><b>A · abstention justifiée</b></td><td>Décision clairement inadaptée&nbsp;: affirmation hasardeuse malgré un manque majeur, ou abstention malgré des éléments suffisants.</td><td>Cas limite&nbsp;: décision défendable mais insuffisamment expliquée.</td><td>La décision correspond aux preuves disponibles et ses limites sont explicites.</td></tr>
+        <tr><td><b>U · utilité</b></td><td>Réponse confuse, non pertinente ou inutilisable.</td><td>Réponse compréhensible mais trop vague ou incomplète.</td><td>Résumé clair, limites précises, explication utile pour comprendre la trace.</td></tr>
+      </tbody>
+    </table>
+  </figure>
+</section>
+
+</body></html>

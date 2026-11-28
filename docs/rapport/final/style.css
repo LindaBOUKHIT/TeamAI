@@ -1,0 +1,139 @@
+/* Rapport TeamAI : même thème que le support de présentation (papier, encre, terracotta). */
+:root {
+  --paper: #FBF7EF; --paper-2: #F4ECDF; --paper-3: #EDE2D0; --ink: #2B2522; --ink-soft: #5E534B; --rule: #D8CCBA;
+  --terracotta: #C4593A; --sage: #7E9C80; --sage-deep: #4F7A57; --ocean: #2F5F80; --plum: #7D4E6E;
+  --mustard: #F3C552; --mustard-soft: #F8E3A6; --blush: #F1C6B3;
+}
+
+@page {
+  size: A4; margin: 24mm 21mm 22mm 21mm; background: var(--paper);
+  @top-left { content: "TeamAI · Rapport de projet NLP 2"; font: 400 8pt "Figtree", sans-serif; color: #8A7E73; vertical-align: bottom; padding-bottom: 4mm; }
+  @top-right { content: "Détection et explication d’anomalies HDFS"; font: 400 8pt "Figtree", sans-serif; color: #8A7E73; vertical-align: bottom; padding-bottom: 4mm; }
+  @bottom-right { content: counter(page); font: 700 13pt "Kalam", cursive; color: var(--terracotta); vertical-align: top; padding-top: 3mm; }
+}
+@page cover { margin: 0; @top-left { content: none; } @top-right { content: none; } @bottom-right { content: none; } }
+@page front { @top-left { content: none; } @top-right { content: none; } }
+
+* { box-sizing: border-box; }
+html { background: var(--paper); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body { margin: 0; font-family: "Figtree", sans-serif; font-size: 10.2pt; line-height: 1.56; color: var(--ink); hyphens: auto; text-align: justify; font-variant-numeric: lining-nums; }
+
+/* ---------- page de garde ---------- */
+.cover { page: cover; break-after: page; position: relative; width: 210mm; height: 297mm; overflow: hidden; padding: 16mm 18mm 16mm;
+  background: radial-gradient(ellipse at 15% 0%, #FFFDF8, transparent 60%), radial-gradient(ellipse at 100% 100%, #EADBC4, transparent 62%), var(--paper-2);
+  display: flex; flex-direction: column; text-align: left; hyphens: manual; }
+.cover .logos { display: flex; align-items: center; gap: 9mm; }
+.cover .logos img { height: 15mm; width: auto; }
+.cover .logo-sep { width: .6mm; height: 12mm; background: rgba(94,83,75,.35); }
+.cover .kicker { font-family: "Kalam", cursive; color: var(--terracotta); font-size: 15pt; margin: 30mm 0 4mm; transform: rotate(-1deg); display: inline-block; }
+.cover h1 { font-family: "Young Serif", serif; font-weight: 400; font-size: 38pt; line-height: 1.06; letter-spacing: -.01em; margin: 0; }
+.cover .hl { background: linear-gradient(#F4ECDF 0 54%, var(--mustard) 54% 90%, #F4ECDF 90%); padding: 0 .06em; }
+.cover .lead { font-size: 14pt; line-height: 1.4; color: var(--ink-soft); margin: 7mm 0 0; max-width: 150mm; }
+.cover .printout { position: relative; margin: 14mm 0 0 18mm; width: 150mm; background: #FDFAF4; padding: 8mm 8mm 6mm; transform: rotate(1.6deg);
+  box-shadow: 2.2mm 2.8mm 0 #E0D3BF; background-image: repeating-linear-gradient(#FDFAF4 0 9.6mm, #E4E6E3 9.6mm 9.9mm); }
+.cover .tape { position: absolute; top: -4mm; left: 42%; width: 30mm; height: 8mm; background: #F1CDBD; transform: rotate(-4deg); }
+.cover .printout-title { font-family: "Kalam", cursive; color: var(--ink-soft); font-size: 11pt; margin: 0 0 3mm; }
+.cover .log { list-style: none; margin: 0; padding: 0; }
+.cover .log li { display: flex; gap: 3mm; font-family: "Courier Prime", monospace; font-size: 8.2pt; line-height: 1.45; margin-bottom: 2.4mm; word-break: break-all; }
+.cover .log .ln { color: #A3978C; }
+.cover .log li.err { font-weight: 700; }
+.cover .log mark { background: #F6D47A; padding: 0 1mm; }
+.cover .note-err { position: absolute; right: 4mm; bottom: -15mm; font-family: "Kalam", cursive; color: var(--terracotta); font-size: 17pt; line-height: 1.05; transform: rotate(-4deg); text-align: right; }
+.cover .byline { margin-top: auto; display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 6mm; border-top: .5mm dashed rgba(94,83,75,.35); padding-top: 6mm; }
+.cover .team-mark { font-family: "Young Serif", serif; font-size: 24pt; color: var(--terracotta); display: block; }
+.cover .names { font-size: 12pt; font-weight: 500; display: block; margin-top: 1mm; }
+.cover .meta { font-size: 10pt; color: var(--ink-soft); display: block; margin-top: 2mm; line-height: 1.5; }
+.cover .doc-type { text-align: right; font-size: 10pt; color: var(--ink-soft); line-height: 1.5; }
+.cover .doc-type b { display: block; font-family: "Young Serif", serif; font-weight: 400; font-size: 15pt; color: var(--ink); }
+
+/* ---------- pages liminaires ---------- */
+.front { page: front; break-after: page; }
+.front h1 { margin-top: 0; }
+.abstract p { font-size: 10.6pt; }
+.keywords { margin-top: 5mm; font-size: 9.5pt; color: var(--ink-soft); }
+.keywords b { color: var(--ink); }
+.toc { list-style: none; padding: 0; margin: 6mm 0 0; }
+.toc li { display: flex; align-items: baseline; gap: 2mm; text-align: left; hyphens: manual; }
+.toc li.l1 { font-family: "Young Serif", serif; font-size: 11.5pt; margin-top: 3.6mm; }
+.toc li.l2 { font-size: 9.8pt; padding-left: 8mm; margin-top: .9mm; color: var(--ink); }
+.toc li .n { min-width: 8mm; color: var(--terracotta); }
+.toc li.l2 .n { min-width: 10mm; color: var(--ink-soft); }
+.toc li .dots { flex: 1; border-bottom: .3mm dotted #B9AC9C; transform: translateY(-1mm); }
+.toc li .p { font-variant-numeric: tabular-nums; min-width: 7mm; text-align: right; }
+.toc li.l1 .p { font-family: "Kalam", cursive; color: var(--terracotta); font-size: 12pt; }
+
+/* ---------- titres ---------- */
+h1, h2, h3, h4 { text-align: left; hyphens: manual; break-after: avoid; }
+.chapter { break-before: page; }
+.chapter-kicker { font-family: "Kalam", cursive; color: var(--terracotta); font-size: 14pt; margin: 0 0 1mm; display: inline-block; transform: rotate(-1deg); }
+h1 { font-family: "Young Serif", serif; font-weight: 400; font-size: 25pt; line-height: 1.1; letter-spacing: -.01em; margin: 0 0 7mm; padding-bottom: 4mm; border-bottom: .5mm dashed rgba(94,83,75,.35); }
+h2 { font-family: "Young Serif", serif; font-weight: 400; font-size: 14.5pt; line-height: 1.25; margin: 8mm 0 2.5mm; }
+h1 .n { display: none; }
+h2 .n { color: var(--terracotta); margin-right: 2.5mm; }
+h3 { font-size: 10.6pt; font-weight: 700; margin: 5mm 0 1.5mm; }
+p { margin: 0 0 2.6mm; orphans: 3; widows: 3; }
+ul, ol { margin: 0 0 3mm; padding-left: 6mm; }
+li { margin-bottom: 1.2mm; }
+li::marker { color: var(--terracotta); }
+b, strong { font-weight: 700; }
+em { font-style: italic; }
+a { color: var(--ocean); text-decoration: none; }
+.ref { color: var(--ocean); font-size: .92em; white-space: nowrap; }
+code, .mono { font-family: "Courier Prime", monospace; font-size: .92em; }
+
+/* ---------- encadrés ---------- */
+.keypoint { background: var(--mustard-soft); padding: 4mm 5mm 3mm; margin: 4mm 0 5mm; border-left: 1.4mm solid var(--terracotta); break-inside: avoid; box-shadow: 1.6mm 2mm 0 #E6D9C3; }
+.keypoint .t { font-family: "Kalam", cursive; color: var(--terracotta); font-size: 13pt; display: block; margin-bottom: 1mm; text-align: left; }
+.keypoint p:last-child { margin-bottom: 0; }
+.note { font-size: 9pt; color: var(--ink-soft); }
+
+/* ---------- tableaux ---------- */
+figure { margin: 4.5mm 0 5.5mm; break-inside: avoid; }
+figcaption { font-size: 8.8pt; color: var(--ink-soft); text-align: left; hyphens: manual; margin-top: 2mm; line-height: 1.4; }
+figcaption b { color: var(--ink); font-weight: 700; }
+figure.table figcaption { margin: 0 0 2mm; }
+table { width: 100%; border-collapse: collapse; font-size: 8.9pt; line-height: 1.4; text-align: left; hyphens: manual; font-variant-numeric: tabular-nums; background: #FDFAF4; }
+thead th { font-weight: 700; color: var(--ink); background: var(--paper-3); border-bottom: .5mm solid var(--ink); padding: 1.8mm 2.2mm; vertical-align: bottom; }
+tbody td { padding: 1.6mm 2.2mm; border-bottom: .25mm solid var(--rule); vertical-align: top; }
+tbody tr:last-child td { border-bottom: .5mm solid var(--ink); }
+td.r, th.r { text-align: right; }
+td.c, th.c { text-align: center; }
+tr.best td { background: #EEF2E9; }
+td .hi { color: var(--sage-deep); font-weight: 700; }
+td .lo { color: var(--terracotta); font-weight: 700; }
+
+/* ---------- schémas ---------- */
+.flow { display: flex; align-items: center; justify-content: center; flex-wrap: nowrap; gap: 1.6mm; margin: 2mm 0; text-align: center; hyphens: manual; }
+.flow .node { font-size: 8.4pt; font-weight: 500; padding: 1.8mm 2.4mm; white-space: nowrap; background: #FDFAF4; border: .45mm solid var(--ink); border-radius: 2mm 2.6mm 1.8mm 3mm; box-shadow: .9mm 1.1mm 0 #DDD3C6; line-height: 1.25; }
+.flow .node small { display: block; font-weight: 400; font-size: 7.6pt; color: var(--ink-soft); }
+.flow .node.accent { background: #F6D47A; }
+.flow .node.ocean { border-color: var(--ocean); }
+.flow .link { font-family: "Kalam", cursive; color: var(--terracotta); font-size: 14pt; }
+.panel { background: #FDFAF4; padding: 5mm 4mm 4mm; box-shadow: 1.6mm 2mm 0 #E6D9C3; }
+svg text { font-family: "Figtree", sans-serif; }
+
+/* ---------- retours individuels ---------- */
+.person { margin-top: 6mm; }
+.person-head { display: flex; align-items: baseline; gap: 4mm; border-bottom: .3mm solid var(--rule); padding-bottom: 1.5mm; margin-bottom: 3mm; break-after: avoid; }
+.person-head h2 { margin: 0; }
+.person-head .role { font-family: "Kalam", cursive; color: var(--terracotta); font-size: 12pt; }
+
+/* ---------- outils ---------- */
+.tool { break-inside: auto; }
+.tool .verdict { display: inline-block; font-weight: 700; font-size: 8pt; letter-spacing: .06em; text-transform: uppercase; color: #fff; padding: .8mm 2.4mm; border-radius: 1mm; margin-left: 2mm; vertical-align: middle; font-family: "Figtree", sans-serif; }
+.verdict.keep { background: var(--sage-deep); } .verdict.drop { background: var(--terracotta); }
+.tool-grid { display: block; }
+.tool h2 { break-after: avoid; }
+.tool h2 .verdict { white-space: nowrap; }
+.tool-grid h3 { margin-top: 2mm; }
+
+/* ---------- références ---------- */
+ol.biblio { padding-left: 0; list-style: none; counter-reset: ref; }
+ol.biblio li { counter-increment: ref; position: relative; padding-left: 9mm; font-size: 9.2pt; line-height: 1.45; text-align: left; hyphens: manual; margin-bottom: 2.2mm; }
+ol.biblio li::before { content: "[" counter(ref) "]"; position: absolute; left: 0; color: var(--terracotta); font-weight: 700; }
+.annex table { font-size: 8.4pt; }
+.annex code { font-size: 8.2pt; word-break: break-all; }
+
+/* Architecture d’ensemble : une page à elle seule */
+figure.arch .panel { padding: 3mm 3mm 2.5mm; }
+figure.arch svg { display: block; max-height: 178mm; margin: 0 auto; }
