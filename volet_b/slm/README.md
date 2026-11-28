@@ -172,7 +172,7 @@ La [preuve du 08/10](../../eval/results/SCRUM-28/README.md) publie la synthèse,
 
 `python -m volet_b.slm.bench_gguf --backend llamacpp|transformers --offline` conserve le banc historique sur un bloc. Installation : `pip install -e ".[volet_b_gguf]" --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu`. Résultats et limites dans `docs/projet/journal.md`.
 
-`python -m volet_b.slm.verif_machine --adapter adapter.gguf --sha256 …` (SCRUM-61) relève la machine (système, Python, GPU, paquets) puis compare base, échelle 0 et échelle 1 de l'adaptateur GGUF sur le prompt de `seed-0001`, chaque lancement dans son propre processus ; résultats dans `eval/results/SCRUM-61/machine/<date>/`. Mode d'emploi pour la RTX 3050 : `docs/projet/passation_nassim.md`.
+`python -m volet_b.slm.verif_machine --adapter adapter.gguf --sha256 …` (SCRUM-61) relève la machine (système, Python, GPU, paquets) puis compare base, échelle 0 et échelle 1 de l'adaptateur GGUF sur le prompt de `seed-0001`, chaque lancement dans son propre processus ; résultats dans `eval/results/SCRUM-61/machine/<date>/`. Mode d'emploi pour la RTX 3050 : `docs/projet/archives/passation_nassim.md`.
 
 ## Backend llama.cpp et conversion LoRA → GGUF
 

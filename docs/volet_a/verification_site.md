@@ -156,7 +156,7 @@ Le correctif n'est en ligne qu'après la livraison `dev` → `main` (section 7).
    La dernière exécution de Tests doit être verte sur le dernier commit de `dev`.
 2. Ouvrir la PR de publication et la faire relire par Nassim :
    ```powershell
-   gh pr create --repo LindaBOUKHIT/TeamAI --base main --head dev --title "Release v1.0" --body "Livraison v1.0 : volet A (site, correctif SCRUM-50) et volet B. Recette : docs/projet/verification_site.md."
+   gh pr create --repo LindaBOUKHIT/TeamAI --base main --head dev --title "Release v1.0" --body "Livraison v1.0 : volet A (site, correctif SCRUM-50) et volet B. Recette : docs/volet_a/verification_site.md."
    ```
 3. Après approbation, fusionner avec un commit de fusion, comme les PR #28, #58 et #70 (pas de squash, pour garder l'historique de `dev`) :
    ```powershell

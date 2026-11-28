@@ -1,0 +1,455 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1960 2610" font-family="Segoe UI, Inter, Arial, sans-serif">
+<title>Architecture cible du projet TeamAI — détection (volet A) et explication (volet B) d'anomalies HDFS</title>
+<!-- État visé à la livraison du projet, pas l'avancement courant.
+     Grille : colonnes A 80-380 · B 440-940 · C 1000-1450 · D 1500-1880
+     Bandes : volet A 200-780 · données 820-1130 · volet B 1180-1870 · Kaggle 1910-2160 · GitHub 2200-2380 · légende 2410-2575 -->
+<defs>
+  <marker id="mb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2f5fb3"/></marker>
+  <marker id="mo" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#c2631a"/></marker>
+  <marker id="mp" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#7b4fa8"/></marker>
+  <marker id="mg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#6b7280"/></marker>
+  <style>
+    .t   { font-size: 18px; font-weight: 700; fill: #1f2a3c; }
+    .b   { font-size: 15px; fill: #1f2a3c; }
+    .b14 { font-size: 14px; fill: #1f2a3c; }
+    .s   { font-size: 13px; fill: #5b6576; }
+    .sb  { font-size: 13px; font-weight: 700; fill: #5b6576; letter-spacing: 0.4px; }
+    .hd  { font-size: 14px; font-weight: 700; fill: #2f5fb3; letter-spacing: 0.8px; }
+    .hdo { font-size: 14px; font-weight: 700; fill: #c2631a; letter-spacing: 0.8px; }
+    .hdg { font-size: 14px; font-weight: 700; fill: #4b5563; letter-spacing: 0.8px; }
+    .tag { font-size: 12px; fill: #7d8796; letter-spacing: 0.5px; }
+    .lb  { font-size: 13px; fill: #2f5fb3; }
+    .lo  { font-size: 13px; fill: #c2631a; }
+    .lp  { font-size: 13px; fill: #7b4fa8; }
+    .lg  { font-size: 13px; fill: #5b6576; }
+    .ctr  { fill: #ffffff; stroke: #2f5fb3; stroke-width: 2.5; }
+    .ctro { fill: #ffffff; stroke: #c2631a; stroke-width: 2.5; }
+    .ctrp { fill: #ffffff; stroke: #7b4fa8; stroke-width: 2.5; }
+    .ctrg { fill: #ffffff; stroke: #6b7280; stroke-width: 2; }
+    .inb { fill: #e9f0fb; stroke: #b3c6e6; }
+    .ino { fill: #fdf1e6; stroke: #e3b88f; }
+    .inp { fill: #f4eefa; stroke: #c9b5df; }
+    .ing { fill: #f2f4f7; stroke: #c3c9d3; }
+    .ext { fill: #f2f4f7; stroke: #a3abb8; stroke-width: 1.5; }
+    .res { fill: #e8f4ef; stroke: none; }
+    .rt  { font-size: 16px; font-weight: 700; fill: #1f7f63; }
+    .ab  { fill: none; stroke: #2f5fb3; stroke-width: 2; marker-end: url(#mb); }
+    .ao  { fill: none; stroke: #c2631a; stroke-width: 2; marker-end: url(#mo); }
+    .ap  { fill: none; stroke: #7b4fa8; stroke-width: 2; marker-end: url(#mp); }
+    .ag  { fill: none; stroke: #6b7280; stroke-width: 2; marker-end: url(#mg); }
+  </style>
+</defs>
+<rect width="100%" height="100%" fill="#ffffff"/>
+
+<!-- Titre -->
+<text x="40" y="52" font-size="30" font-weight="700" fill="#1f2a3c">TeamAI · architecture cible du projet</text>
+<text x="40" y="82" font-size="17" fill="#5b6576">À la livraison : le volet A détecte les anomalies HDFS dans le navigateur ; le volet B les explique en local, selon quatre configurations évaluées sur un test réservé.</text>
+
+<!-- Acteur public -->
+<rect x="1180" y="110" width="280" height="48" rx="24" class="ext"/>
+<text x="1320" y="140" text-anchor="middle" class="t" font-size="16">Utilisateur · navigateur public</text>
+
+<!-- ================= VOLET A ================= -->
+<rect x="40" y="200" width="1880" height="580" rx="14" fill="#f3f6fc" stroke="#a9bde2" stroke-width="1.5"/>
+<text x="1880" y="242" text-anchor="end" font-size="22" font-weight="700" fill="#2f5fb3">VOLET A · DÉTECTION EN LIGNE</text>
+<text x="1880" y="266" text-anchor="end" class="s">BiLSTM entraîné par l’équipe · inférence côté client</text>
+
+<!-- Entraînement -->
+<rect x="80" y="280" width="560" height="470" rx="10" class="ctr"/>
+<text x="100" y="307" class="hd">ENTRAÎNEMENT · volet_a/training</text>
+<text x="620" y="307" text-anchor="end" class="tag">Python · CPU</text>
+
+<rect x="100" y="320" width="520" height="70" rx="6" class="inb"/>
+<text x="120" y="348" class="t">Baseline · régression logistique</text>
+<text x="120" y="374" class="b">comptages des événements E1…E29 · référence simple</text>
+
+<rect x="100" y="410" width="520" height="100" rx="6" class="inb"/>
+<text x="120" y="438" class="t">BiLSTM · PyTorch</text>
+<text x="120" y="464" class="b">embedding 16 → BiLSTM 2 × 32 → moyenne masquée → sigmoïde</text>
+<text x="120" y="488" class="b">5 époques · lots de 512 · lr 0,001 · seed 42 · CPU suffisant</text>
+
+<rect x="100" y="530" width="520" height="70" rx="6" class="inb"/>
+<text x="120" y="558" class="t">Seuil figé 0,4081</text>
+<text x="120" y="584" class="b">choisi sur la validation, orienté rappel, puis jamais retouché</text>
+
+<rect x="100" y="620" width="520" height="115" rx="6" class="inb"/>
+<text x="120" y="648" class="t">Export ONNX · contrat C3</text>
+<text x="120" y="674" class="b">event_ids [n, 50] → p_anomaly [n] · FP32 ≈ 57 ko</text>
+<text x="120" y="698" class="b">check_parity.py : mêmes décisions en Python et en ONNX</text>
+<text x="120" y="720" class="s">variante INT8 évaluée ; le site sert le FP32</text>
+
+<path d="M360,510 L360,528" class="ab"/>
+<path d="M360,600 L360,618" class="ab"/>
+
+<!-- Exemples publics -->
+<rect x="690" y="300" width="260" height="110" rx="8" class="ext"/>
+<text x="710" y="330" class="t" font-size="17">Exemples publics</text>
+<text x="710" y="356" class="b14">generate_web_examples.py</text>
+<text x="710" y="378" class="b14">5 fichiers tirés de la validation,</text>
+<text x="710" y="398" class="s">jamais du test réservé</text>
+<path d="M950,355 L1028,355" class="ag"/>
+
+<!-- Déploiement -->
+<rect x="690" y="560" width="260" height="175" rx="8" class="ctrg"/>
+<text x="710" y="590" class="t" font-size="17">GitHub Actions · Pages</text>
+<text x="710" y="612" class="s">à chaque push sur main</text>
+<text x="710" y="640" class="b14">npm ci → npm test</text>
+<text x="710" y="662" class="b14">vite build → dist/</text>
+<text x="710" y="684" class="b14">déploiement GitHub Pages</text>
+<text x="710" y="712" class="s">version v1.0 taguée, sans serveur</text>
+
+<path d="M620,700 L688,700" class="ab"/>
+<text x="654" y="690" text-anchor="middle" class="lb">②</text>
+<path d="M950,620 L1008,620" class="ab"/>
+<text x="979" y="610" text-anchor="middle" class="lb">③</text>
+
+<!-- Site statique -->
+<rect x="1010" y="280" width="440" height="470" rx="10" class="ctr"/>
+<text x="1030" y="307" class="hd">SITE STATIQUE · volet_a/web</text>
+<text x="1430" y="307" text-anchor="end" class="tag">navigateur</text>
+
+<rect x="1030" y="320" width="400" height="85" rx="6" class="inb"/>
+<text x="1050" y="348" class="t">Interface · Vite + JavaScript</text>
+<text x="1050" y="372" class="b14">coller des logs · fichier de 10 Mo au plus</text>
+<text x="1050" y="393" class="b14">ou exemples tirés de la validation</text>
+
+<rect x="1030" y="430" width="400" height="85" rx="6" class="inb"/>
+<text x="1050" y="458" class="t">Prétraitement · preprocess.js</text>
+<text x="1050" y="482" class="b14">regroupement par blk_ · E1…E29 → 31 indices</text>
+<text x="1050" y="503" class="b14">50 premiers événements, troncature signalée</text>
+
+<rect x="1030" y="540" width="400" height="85" rx="6" class="inb"/>
+<text x="1050" y="568" class="t">Web Worker · ONNX Runtime Web</text>
+<text x="1050" y="592" class="b14">WASM · lots de 64 · modèle en cache</text>
+<text x="1050" y="613" class="b14">p_anomaly comparé au seuil 0,4081</text>
+
+<rect x="1030" y="650" width="400" height="85" rx="6" class="inb"/>
+<text x="1050" y="678" class="t">Résultats par bloc</text>
+<text x="1050" y="702" class="b14">classe · score · troncatures · codes inconnus</text>
+<text x="1050" y="723" class="b14">filtre anomalies · export CSV + empreinte</text>
+
+<path d="M1230,405 L1230,428" class="ab"/>
+<path d="M1230,515 L1230,538" class="ab"/>
+<path d="M1230,625 L1230,648" class="ab"/>
+
+<!-- Acteur → UI -->
+<path d="M1320,158 L1320,318" class="ab"/>
+<text x="1308" y="225" text-anchor="end" class="lb">④ ouvre le site, analyse ses logs</text>
+
+<!-- Évaluation volet A -->
+<rect x="1500" y="300" width="380" height="440" rx="8" class="res"/>
+<text x="1520" y="334" class="rt">Évaluation finale du volet A</text>
+<text x="1520" y="358" class="s">eval/volet_a/evaluate.py · test ouvert une fois</text>
+<text x="1520" y="394" class="sb">MODÈLES COMPARÉS</text>
+<text x="1520" y="416" class="b">baseline · BiLSTM FP32 · BiLSTM INT8</text>
+<text x="1520" y="450" class="sb">POPULATIONS</text>
+<text x="1520" y="472" class="b">test complet · blocs à séquence inédite</text>
+<text x="1520" y="506" class="sb">MÉTRIQUES</text>
+<text x="1520" y="528" class="b">macro-F1 · précision et rappel anomalie</text>
+<text x="1520" y="549" class="b">matrice de confusion · FA · manquées</text>
+<text x="1520" y="583" class="sb">CONTRÔLES NAVIGATEUR</text>
+<text x="1520" y="605" class="b">parité Python / WASM sur tout le test</text>
+<text x="1520" y="626" class="b">débit · taille du modèle</text>
+<text x="1520" y="660" class="sb">SORTIE</text>
+<text x="1520" y="682" class="b">eval/results/volet_a.md (C7)</text>
+<text x="1520" y="703" class="b">score non calibré, sans cause : le volet B</text>
+<text x="1520" y="724" class="b">prend le relais pour expliquer</text>
+
+<!-- Données → entraînement -->
+<path d="M560,878 L560,752" class="ag"/>
+<text x="572" y="806" class="lg">① train · validation</text>
+
+<!-- ================= DONNÉES ================= -->
+<rect x="40" y="820" width="1880" height="310" rx="14" fill="#f6f7f9" stroke="#c3c9d3" stroke-width="1.5"/>
+<text x="1880" y="862" text-anchor="end" font-size="22" font-weight="700" fill="#4b5563">SOCLE COMMUN · DONNÉES HDFS</text>
+
+<rect x="80" y="900" width="300" height="110" rx="8" class="ext"/>
+<text x="100" y="930" class="t" font-size="17">Loghub · HDFS_v1</text>
+<text x="100" y="956" class="b">Zenodo · CC-BY-4.0</text>
+<text x="100" y="978" class="b">11 M lignes · 1,5 Go</text>
+<text x="100" y="1000" class="s">hors Git · data/raw/</text>
+<path d="M380,955 L458,955" class="ag"/>
+<text x="419" y="945" text-anchor="middle" class="lg">⓪</text>
+
+<rect x="440" y="880" width="1000" height="230" rx="10" class="ctrg"/>
+<text x="460" y="907" class="hdg">PRÉPARATION · data/ et teamai/data</text>
+<text x="1420" y="907" text-anchor="end" class="tag">reproductible · vérifiée</text>
+
+<rect x="460" y="920" width="290" height="90" rx="6" class="ing"/>
+<text x="480" y="948" class="t">download_hdfs.py</text>
+<text x="480" y="973" class="b14">téléchargement + MD5</text>
+<text x="480" y="994" class="b14">reprise automatique</text>
+
+<rect x="780" y="920" width="290" height="90" rx="6" class="ing"/>
+<text x="800" y="948" class="t">parse_hdfs.py</text>
+<text x="800" y="973" class="b14">29 regex → événements E1…E29</text>
+<text x="800" y="994" class="b14">validé contre Loghub</text>
+
+<rect x="1100" y="920" width="320" height="90" rx="6" class="ing"/>
+<text x="1120" y="948" class="t">make_splits.py · contrat C4</text>
+<text x="1120" y="973" class="b14">par bloc · stratifié · seed 42</text>
+<text x="1120" y="994" class="b14">70 / 15 / 15 · drapeau unseen_seq</text>
+
+<path d="M750,965 L778,965" class="ag"/>
+<path d="M1070,965 L1098,965" class="ag"/>
+
+<rect x="460" y="1030" width="610" height="65" rx="6" class="ing"/>
+<text x="480" y="1057" class="t" font-size="16">teamai/data · loader</text>
+<text x="480" y="1082" class="b14">load_traces · load_vocab (C2, 31 indices) · load_split · seul accès aux CSV</text>
+
+<rect x="1100" y="1030" width="320" height="65" rx="6" class="ing"/>
+<text x="1120" y="1057" class="t" font-size="16">data/sample</text>
+<text x="1120" y="1082" class="b14">≈ 2 000 blocs versionnés · tests, démo</text>
+
+<rect x="1500" y="900" width="380" height="200" rx="8" fill="#eceff3"/>
+<text x="1520" y="932" class="t" font-size="16">Corpus et partitions</text>
+<text x="1520" y="958" class="b">575 061 blocs · 18 373 séquences distinctes</text>
+<text x="1520" y="988" class="sb">TRAIN · VALIDATION · TEST</text>
+<text x="1520" y="1010" class="b">402 542 · 86 259 · 86 260</text>
+<text x="1520" y="1040" class="sb">TEST RÉSERVÉ</text>
+<text x="1520" y="1062" class="b">ni réglage, ni seuil, ni exemple public</text>
+<text x="1520" y="1084" class="b">ouvert une fois, modèles et prompts figés</text>
+
+<!-- Données → volet B -->
+<path d="M700,1110 L700,1278" class="ag"/>
+<text x="712" y="1160" class="lg">⑤ lignes brutes · splits (refus des blocs du test)</text>
+
+<!-- ================= VOLET B ================= -->
+<rect x="40" y="1180" width="1880" height="690" rx="14" fill="#fdf8f3" stroke="#e3c4a5" stroke-width="1.5"/>
+<text x="1880" y="1222" text-anchor="end" font-size="22" font-weight="700" fill="#c2631a">VOLET B · EXPLICATION LOCALE</text>
+<text x="1880" y="1246" text-anchor="end" class="s">SLM préentraîné et adapté, appuyé sur des faits et des sources</text>
+
+<!-- Analyste -->
+<rect x="100" y="1212" width="260" height="46" rx="23" fill="#fdf1e6" stroke="#dba878" stroke-width="1.5"/>
+<text x="230" y="1241" text-anchor="middle" class="t" font-size="16">Analyste · poste local</text>
+<path d="M230,1258 L230,1298" class="ao"/>
+
+<!-- Gradio -->
+<rect x="80" y="1300" width="300" height="210" rx="8" class="ctro"/>
+<text x="100" y="1329" class="t">Interface · Gradio</text>
+<text x="100" y="1351" class="s">app.py · écoute 127.0.0.1:7860 seulement</text>
+<text x="100" y="1377" class="b14">coller des logs ou importer .log / .txt</text>
+<text x="100" y="1399" class="b14">configuration 1 à 4 : base ou adapté,</text>
+<text x="100" y="1421" class="b14">avec ou sans RAG, 1 ou 3 agents</text>
+<text x="100" y="1443" class="b14">mode factice signalé à l’écran</text>
+<text x="100" y="1465" class="b14">5 blocs au plus · bloc du test refusé</text>
+<text x="100" y="1487" class="b14">affiche réponse, étapes et durée</text>
+
+<!-- Sortie C5 -->
+<rect x="80" y="1580" width="300" height="220" rx="8" class="ino"/>
+<text x="100" y="1610" class="t">Réponse C5 · JSON</text>
+<text x="100" y="1638" class="b14">resume_evenements</text>
+<text x="100" y="1660" class="b14">faits_observes · hypotheses</text>
+<text x="100" y="1682" class="b14">infos_manquantes · sources</text>
+<text x="100" y="1704" class="b14">abstention</text>
+<text x="100" y="1736" class="s">structurée si validate_answer est vide,</text>
+<text x="100" y="1756" class="s">sinon sortie brute et erreurs visibles</text>
+<path d="M230,1578 L230,1512" class="ao"/>
+<text x="242" y="1550" class="lo">⑦ affichage</text>
+
+<!-- Chaîne d'explication -->
+<rect x="440" y="1280" width="500" height="560" rx="10" class="ctro"/>
+<text x="460" y="1307" class="hdo">CHAÎNE D’EXPLICATION · volet_b</text>
+<text x="920" y="1307" text-anchor="end" class="tag">faits → sources → réponse</text>
+
+<rect x="460" y="1318" width="460" height="85" rx="6" class="ino"/>
+<text x="480" y="1346" class="t">Faits calculés · slm/v16/facts.py</text>
+<text x="480" y="1370" class="b14">parse_hdfs sur les lignes · chronologie, preuves</text>
+<text x="480" y="1391" class="b14">prompt v16 figé · causes fermées et ancrées</text>
+
+<rect x="460" y="1423" width="460" height="85" rx="6" class="ino"/>
+<text x="480" y="1451" class="t">Recherche documentaire · retriever.py</text>
+<text x="480" y="1475" class="b14">configurations 2 à 4 · requête paraphrasée</text>
+<text x="480" y="1496" class="b14">passages C6 + score · liste vide → abstention</text>
+
+<rect x="460" y="1528" width="460" height="85" rx="6" class="ino"/>
+<text x="480" y="1556" class="t">Orchestration · agents/</text>
+<text x="480" y="1580" class="b14">1 agent, ou 3 : recherche → rédaction → contrôle</text>
+<text x="480" y="1601" class="b14">1 reprise au plus · 5 appels au SLM au plus</text>
+
+<rect x="460" y="1633" width="460" height="85" rx="6" class="ino"/>
+<text x="480" y="1661" class="t">generate.py · porte unique vers le SLM</text>
+<text x="480" y="1685" class="b14">modèle de base ou avec adaptateur LoRA</text>
+<text x="480" y="1706" class="b14">mode factice C5, exclu des évaluations</text>
+
+<rect x="460" y="1738" width="460" height="85" rx="6" class="ino"/>
+<text x="480" y="1766" class="t">Contrôles · runtime.py + validate.py</text>
+<text x="480" y="1790" class="b14">schéma C5 · faits copiés · sources réellement fournies</text>
+<text x="480" y="1811" class="b14">une correction au plus · rejet des boucles</text>
+
+<path d="M690,1403 L690,1421" class="ao"/>
+<path d="M690,1508 L690,1526" class="ao"/>
+<path d="M690,1613 L690,1631" class="ao"/>
+<path d="M690,1718 L690,1736" class="ao"/>
+
+<!-- Gradio → chaîne ; contrôles → sortie -->
+<path d="M380,1360 L458,1360" class="ao"/>
+<text x="419" y="1350" text-anchor="middle" class="lo">⑤</text>
+<path d="M460,1780 L382,1780" class="ao"/>
+<text x="421" y="1770" text-anchor="middle" class="lo">⑦</text>
+
+<!-- Base documentaire -->
+<rect x="1000" y="1280" width="440" height="260" rx="10" class="ctro"/>
+<text x="1020" y="1307" class="hdo">BASE DOCUMENTAIRE · volet_b/rag</text>
+
+<rect x="1020" y="1320" width="400" height="95" rx="6" class="ino"/>
+<text x="1040" y="1348" class="t">Corpus · build_corpus.py</text>
+<text x="1040" y="1373" class="b14">documentation HDFS officielle, sources tracées</text>
+<text x="1040" y="1395" class="b14">découpage par section · IDs C6 stables</text>
+
+<rect x="1020" y="1432" width="400" height="93" rx="6" class="ino"/>
+<text x="1040" y="1460" class="t">Index · build_index.py</text>
+<text x="1040" y="1485" class="b14">embeddings + FAISS dense · BM25</text>
+<text x="1040" y="1507" class="b14">fusion RRF · k = 3 passages</text>
+<path d="M1230,1415 L1230,1430" class="ao"/>
+
+<path d="M1000,1475 L922,1475" class="ao"/>
+<text x="961" y="1465" text-anchor="middle" class="lo">⑥ C6</text>
+
+<!-- Moteur local -->
+<rect x="1000" y="1580" width="440" height="240" rx="10" class="ctro"/>
+<text x="1020" y="1607" class="hdo">MOTEUR LOCAL · llama.cpp</text>
+<text x="1420" y="1607" text-anchor="end" class="tag">GPU 6 Go</text>
+<rect x="1020" y="1620" width="400" height="185" rx="6" class="ino"/>
+<text x="1040" y="1648" class="t">Gemma 4 E4B it · QAT Q4_0</text>
+<text x="1040" y="1674" class="b14">GGUF ≈ 5,2 Go · révision figée 4b4a2c1</text>
+<text x="1040" y="1698" class="b14">+ adaptateur LoRA GGUF (configurations 3 et 4)</text>
+<text x="1040" y="1722" class="b14">llama-cpp-python 0.3.36 · réflexion désactivée</text>
+<text x="1040" y="1746" class="b14">contexte 4 096 · 800 tokens · T 0 · seed 42</text>
+<text x="1040" y="1770" class="b14">cible : RTX 3050 Laptop 6 Go · 32 Go de RAM</text>
+
+<path d="M922,1675 L998,1675" class="ao" marker-start="url(#mo)"/>
+<text x="960" y="1665" text-anchor="middle" class="lo">⑥</text>
+
+<!-- Évaluation volet B -->
+<rect x="1500" y="1280" width="380" height="560" rx="8" class="res"/>
+<text x="1520" y="1314" class="rt">Évaluation finale du volet B</text>
+<text x="1520" y="1338" class="s">eval/volet_b · modèles et prompts figés</text>
+<text x="1520" y="1372" class="sb">TEST RÉSERVÉ</text>
+<text x="1520" y="1394" class="b">test.jsonl (C5) figé, empreinte SHA-256</text>
+<text x="1520" y="1415" class="b">label et attendus jamais transmis</text>
+<text x="1520" y="1449" class="sb">4 CONFIGURATIONS</text>
+<text x="1520" y="1471" class="b">1 · base sans RAG</text>
+<text x="1520" y="1492" class="b">2 · base + RAG, 1 agent</text>
+<text x="1520" y="1513" class="b">3 · adapté + RAG, 1 agent</text>
+<text x="1520" y="1534" class="b">4 · adapté + RAG, 3 agents</text>
+<text x="1520" y="1568" class="sb">MÉTRIQUES</text>
+<text x="1520" y="1590" class="b">conformité C5 · faits copiés · sources</text>
+<text x="1520" y="1611" class="b">abstention · latence · RAM et VRAM</text>
+<text x="1520" y="1632" class="b">double annotation humaine + arbitrage</text>
+<text x="1520" y="1666" class="sb">SORTIES</text>
+<text x="1520" y="1688" class="b">eval/runs (C7) · results/volet_b.md</text>
+<text x="1520" y="1709" class="b">comparaison A / B · comparaison_a_b.md</text>
+<text x="1520" y="1743" class="sb">RÈGLE</text>
+<text x="1520" y="1765" class="b">un résultat négatif est un résultat :</text>
+<text x="1520" y="1786" class="b">il est publié, pas écarté</text>
+
+<!-- Adaptateur → moteur -->
+<path d="M1220,1988 L1220,1822" class="ap"/>
+<text x="1232" y="1896" class="lp">⑨ adaptateur GGUF</text>
+
+<!-- ================= KAGGLE ================= -->
+<rect x="40" y="1910" width="1880" height="250" rx="14" fill="#f8f4fc" stroke="#c9b5df" stroke-width="1.5"/>
+<text x="1880" y="1952" text-anchor="end" font-size="22" font-weight="700" fill="#7b4fa8">ADAPTATION · KAGGLE GPU T4</text>
+<text x="1880" y="1976" text-anchor="end" class="s">entraînement déporté, code tiré du dépôt</text>
+
+<rect x="80" y="1990" width="300" height="130" rx="8" class="inp"/>
+<text x="100" y="2020" class="t" font-size="17">Jeu d’adaptation annoté</text>
+<text x="100" y="2046" class="b14">240 blocs train/val, relus</text>
+<text x="100" y="2068" class="b14">200 train · 40 val · format C5</text>
+<text x="100" y="2090" class="b14">brouillons v16 corrigés à la main</text>
+<text x="100" y="2112" class="s">aucun bloc du test</text>
+
+<rect x="440" y="1990" width="500" height="130" rx="8" class="ctrp"/>
+<text x="460" y="2020" class="t">train_lora.py · QLoRA</text>
+<text x="460" y="2046" class="b14">base Gemma 4 E4B QAT non quantifiée · NF4 · fp16</text>
+<text x="460" y="2068" class="b14">LoRA rang 8 · q_proj / v_proj · lot de 1 · checkpointing</text>
+<text x="460" y="2090" class="b14">configuration figée dans configs/lora_final.yaml</text>
+<text x="460" y="2112" class="s">entraîné sur le train, contrôlé sur la validation</text>
+
+<rect x="1000" y="1990" width="440" height="130" rx="8" class="inp"/>
+<text x="1020" y="2020" class="t">Adaptateur PEFT → GGUF F16</text>
+<text x="1020" y="2046" class="b14">convert_gguf.py · quelques Mo</text>
+<text x="1020" y="2068" class="b14">q_proj sur 42 couches</text>
+<text x="1020" y="2090" class="b14">v_proj sur les couches 0 à 23</text>
+<text x="1020" y="2112" class="s">chargé par llama.cpp avec la base Q4_0</text>
+
+<path d="M380,2055 L438,2055" class="ap"/>
+<text x="409" y="2045" text-anchor="middle" class="lp">⑧</text>
+<path d="M940,2055 L998,2055" class="ap"/>
+<text x="969" y="2045" text-anchor="middle" class="lp">⑧</text>
+
+<rect x="1500" y="1990" width="380" height="130" rx="8" fill="#f1eaf8"/>
+<text x="1520" y="2020" class="t" font-size="16" fill="#7b4fa8">Runs sur Kaggle</text>
+<text x="1520" y="2046" class="b14">notebooks GPU T4 lancés à distance</text>
+<text x="1520" y="2068" class="b14">code récupéré au commit voulu</text>
+<text x="1520" y="2090" class="b14">entraînement LoRA et essais GPU</text>
+
+<!-- GitHub → Kaggle -->
+<path d="M690,2198 L690,2122" class="ag"/>
+<text x="702" y="2186" class="lg">code d’un commit précis</text>
+
+<!-- ================= DÉPÔT GITHUB ================= -->
+<rect x="40" y="2200" width="1880" height="180" rx="12" class="ext"/>
+<text x="980" y="2232" text-anchor="middle" class="t" font-size="17">Dépôt GitHub TeamAI <tspan font-weight="400">· source unique entre l’équipe, le site et Kaggle</tspan></text>
+
+<text x="80" y="2268" class="sb">BRANCHES ET VERSIONS</text>
+<text x="80" y="2290" class="b14">main = production → GitHub Pages</text>
+<text x="80" y="2312" class="b14">dev = intégration</text>
+<text x="80" y="2334" class="b14">1 branche et 1 PR par ticket SCRUM-n</text>
+<text x="80" y="2356" class="b14">tag à chaque mise en production</text>
+
+<text x="450" y="2268" class="sb">CONTRÔLES ET PILOTAGE</text>
+<text x="450" y="2290" class="b14">GitHub Actions sur chaque PR :</text>
+<text x="450" y="2312" class="b14">pytest (Python 3.12) · npm test</text>
+<text x="450" y="2334" class="b14">Jira SCRUM : 7 epics, 5 sprints</text>
+<text x="450" y="2356" class="b14">journal des décisions et abandons</text>
+
+<text x="820" y="2268" class="sb">CONTRATS · docs/contrats.md</text>
+<text x="820" y="2290" class="b14">C1 trace · C2 vocabulaire</text>
+<text x="820" y="2312" class="b14">C3 modèle ONNX · C4 splits</text>
+<text x="820" y="2334" class="b14">C5 explication · C6 passage RAG</text>
+<text x="820" y="2356" class="b14">C7 résultat d’une exécution</text>
+
+<text x="1190" y="2268" class="sb">LIVRABLES · 30/11</text>
+<text x="1190" y="2290" class="b14">site public v1.0</text>
+<text x="1190" y="2312" class="b14">rapport PDF · docs/rapport</text>
+<text x="1190" y="2334" class="b14">pitch et présentation</text>
+<text x="1190" y="2356" class="b14">vidéos de démonstration de secours</text>
+
+<text x="1560" y="2268" class="sb">HORS GIT</text>
+<text x="1560" y="2290" class="b14">HDFS brut · splits.csv</text>
+<text x="1560" y="2312" class="b14">poids GGUF · adaptateurs</text>
+<text x="1560" y="2334" class="b14">index FAISS · eval/runs</text>
+<text x="1560" y="2356" class="b14">cache des modèles</text>
+
+<!-- ================= LÉGENDE ================= -->
+<rect x="40" y="2410" width="440" height="165" rx="8" fill="#ffffff" stroke="#d5d9e0"/>
+<text x="60" y="2442" font-size="15" font-weight="700" fill="#4b5563">Données (gris)</text>
+<text x="60" y="2470" class="b">⓪ Téléchargement, parsing en 29 événements</text>
+<text x="60" y="2492" class="b">et découpage C4 par bloc, seed 42.</text>
+<text x="60" y="2514" class="b">Le test est réservé aux deux évaluations</text>
+<text x="60" y="2536" class="b">finales, ouvert une seule fois.</text>
+
+<rect x="520" y="2410" width="440" height="165" rx="8" fill="#ffffff" stroke="#d5d9e0"/>
+<text x="540" y="2442" font-size="15" font-weight="700" fill="#2f5fb3">Volet A (bleu)</text>
+<text x="540" y="2470" class="b">① Baseline et BiLSTM entraînés sur le train ;</text>
+<text x="540" y="2492" class="b">seuil fixé sur la validation.</text>
+<text x="540" y="2514" class="b">② Export ONNX et parité ; ③ push main → Pages.</text>
+<text x="540" y="2536" class="b">④ L’utilisateur analyse ses logs : rien ne</text>
+<text x="540" y="2558" class="b">quitte son navigateur.</text>
+
+<rect x="1000" y="2410" width="440" height="165" rx="8" fill="#ffffff" stroke="#d5d9e0"/>
+<text x="1020" y="2442" font-size="15" font-weight="700" fill="#c2631a">Volet B (orange)</text>
+<text x="1020" y="2470" class="b">⑤ L’analyste choisit une configuration et</text>
+<text x="1020" y="2492" class="b">colle des logs ; blocs du test refusés.</text>
+<text x="1020" y="2514" class="b">⑥ Faits + passages C6 → agents → Gemma.</text>
+<text x="1020" y="2536" class="b">⑦ Contrôle, une correction, réponse C5.</text>
+
+<rect x="1480" y="2410" width="440" height="165" rx="8" fill="#ffffff" stroke="#d5d9e0"/>
+<text x="1500" y="2442" font-size="15" font-weight="700" fill="#7b4fa8">Adaptation (violet) <tspan fill="#1f2a3c">·</tspan> <tspan fill="#1f7f63">évaluation (vert)</tspan></text>
+<text x="1500" y="2470" class="b">⑧ Annotations → QLoRA sur T4 → GGUF.</text>
+<text x="1500" y="2492" class="b">⑨ Adaptateur chargé avec la base Gemma.</text>
+<text x="1500" y="2514" class="b">Vert : évaluations finales sur le test</text>
+<text x="1500" y="2536" class="b">réservé, puis comparaison A / B et rapport.</text>
+</svg>
